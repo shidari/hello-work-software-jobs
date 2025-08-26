@@ -13,7 +13,7 @@
     "@tanstack/react-virtual": "^3.13.12",
     "jotai": "^2.13.1",
     "neverthrow": "^8.2.0",
-    "next": "15.5.0",
+    "next": "15.5.2",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
