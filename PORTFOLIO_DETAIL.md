@@ -511,7 +511,7 @@ const result = safeTry(async function* () {
   - ルートパスから自動的にドキュメントページへリダイレクト
   - 主要エンドポイント:
     - `POST /api/v1/job` - 求人情報登録
-    - `GET /api/v1/job/:jobNumber` - 求人詳細取得
+    - `GET /api/v1/jobs/:jobNumber` - 求人詳細取得
     - `GET /api/v1/jobs` - 求人一覧取得（高度なフィルタリング対応）
     - `GET /api/v1/jobs/continue` - 継続ページネーション（JWTトークンベース）
 

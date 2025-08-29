@@ -3,6 +3,7 @@ import {
   type DecodedNextToken,
   decodedNextTokenSchema,
   insertJobRequestBodySchema,
+  jobFetchParamSchema,
   jobListContinueQuerySchema,
   jobListQuerySchema,
 } from "@sho/models";
@@ -17,6 +18,7 @@ import { createJobStoreResultBuilder } from "./clientImpl";
 import { createJobStoreDBClientAdapter } from "./clientImpl/adapter";
 import { getDb } from "./db";
 import { createEnvError, createJWTSignatureError } from "./endpoint/error";
+import { jobFetchRoute } from "./endpoint/jobFetch";
 import { jobInsertRoute } from "./endpoint/jobInsert/jobInsert";
 import { jobListRoute } from "./endpoint/jobList";
 import { jobListContinueRoute } from "./endpoint/jobList/continue";
@@ -256,8 +258,38 @@ v1Api.get(
     );
   },
 );
+
+v1Api.get(
+  "/jobs/:jobNumber",
+  jobFetchRoute,
+  vValidator("param", jobFetchParamSchema),
+  (c) => {
+    const { jobNumber } = c.req.valid("param");
+    const db = getDb(c);
+    const dbClient = createJobStoreDBClientAdapter(db);
+    const jobStore = createJobStoreResultBuilder(dbClient);
+
+    const result = safeTry(async function* () {
+      const job = yield* await jobStore.fetchJob(jobNumber);
+      return okAsync(job);
+    });
+    return result.match(
+      (job) => c.json(job),
+      (error) => {
+        console.error(error);
+
+        switch (error._tag) {
+          case "FetchJobError":
+            throw new HTTPException(404, { message: "Job not found" });
+          default:
+            throw new HTTPException(500, { message: "internal server error" });
+        }
+      },
+    );
+  },
+);
 v1Api.post(
-  "/jobs",
+  "/job",
   jobInsertRoute,
   vValidator("json", insertJobRequestBodySchema),
   (c) => {
@@ -292,11 +324,10 @@ app.get(
   openAPISpecs(v1Api, {
     documentation: {
       info: {
-        title: "Hono API",
-        version: "1.0.0",
-        description: "Greeting API",
+        title: "Job Store API",
+        version: "1.2",
+        description: "Job Store API",
       },
-      servers: [{ url: "http://localhost:3000", description: "Local Server" }],
     },
   }),
 );
