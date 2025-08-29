@@ -161,8 +161,8 @@ graph TD
   - OpenAPI仕様書自動生成 (`/api/v1/docs`, `/docs`, `/openapi`)
   - ルートパスから自動的にドキュメントページへリダイレクト
   - 主要エンドポイント:
-    - `POST /api/v1/jobs` - 求人情報登録
-    - `GET /api/v1/job/:jobNumber` - 求人詳細取得
+    - `POST /api/v1/job` - 求人情報登録
+    - `GET /api/v1/jobs/:jobNumber` - 求人詳細取得
     - `GET /api/v1/jobs` - 求人一覧取得（高度なフィルタリング対応）
       - `companyName` - 会社名フィルタ（URLエンコード対応）
       - `jobDescription` - 職務内容キーワード検索
