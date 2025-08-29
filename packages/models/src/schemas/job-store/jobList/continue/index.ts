@@ -1,27 +1,22 @@
-// https://github.com/cloudflare/chanfana/issues/167#issue-2470366210
-// queryでinternal server errorが出るので、zod-to-openapiを使う
-import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
-import z from "zod";
+import { number, object, string } from "valibot";
 import { jobListSearchFilterSchema } from "..";
 
-extendZodWithOpenApi(z);
-
-export const jobListContinueQuerySchema = z.object({
-  nextToken: z.string(),
+export const jobListContinueQuerySchema = object({
+  nextToken: string(),
 });
 
-export const decodedNextTokenSchema = z.object({
-  exp: z.number(),
-  cursor: z.object({
-    jobId: z.number(),
+export const decodedNextTokenSchema = object({
+  exp: number(),
+  cursor: object({
+    jobId: number(),
   }),
   filter: jobListSearchFilterSchema,
 });
 
-export const jobListContinueClientErrorResponseSchema = z.object({
-  message: z.string(),
+export const jobListContinueClientErrorResponseSchema = object({
+  message: string(),
 });
 
-export const jobListContinueServerErrorSchema = z.object({
-  message: z.string(),
+export const jobListContinueServerErrorSchema = object({
+  message: string(),
 });

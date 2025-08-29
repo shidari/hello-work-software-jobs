@@ -1,72 +1,36 @@
 import {
   jobFetchClientErrorResponseSchema,
-  jobFetchParamSchema,
   jobFetchServerErrorSchema,
   jobFetchSuccessResponseSchema,
 } from "@sho/models";
-import { contentJson, OpenAPIRoute } from "chanfana";
-import { HTTPException } from "hono/http-exception";
-import { okAsync, ResultAsync, safeTry } from "neverthrow";
-import type { AppContext } from "../../app";
-import { createJobStoreResultBuilder } from "../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../clientImpl/adapter";
-import { getDb } from "../../db";
-import { createFetchValidationError } from "./error";
+import { describeRoute } from "hono-openapi";
+import { resolver } from "hono-openapi/valibot";
 
-export class JobFetchEndpoint extends OpenAPIRoute {
-  schema = {
-    request: {
-      params: jobFetchParamSchema,
-    },
-    responses: {
-      "200": {
-        description: "Successful response",
-        ...contentJson(jobFetchSuccessResponseSchema),
-      },
-      "400": {
-        description: "client error response",
-        ...contentJson(jobFetchClientErrorResponseSchema),
-      },
-      "500": {
-        description: "internal server error response",
-        ...contentJson(jobFetchServerErrorSchema),
+export const jobFetchRoute = describeRoute({
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(jobFetchSuccessResponseSchema),
+        },
       },
     },
-  };
-
-  async handle(c: AppContext) {
-    const self = this;
-    // バリデーション
-    const result = safeTry(async function* () {
-      const validatedData = yield* await ResultAsync.fromPromise(
-        self.getValidatedData<typeof self.schema>(),
-        (error) =>
-          createFetchValidationError(`Validation failed: ${String(error)}`),
-      );
-      const {
-        params: { jobNumber },
-      } = validatedData;
-      const db = getDb(c);
-      const dbClient = createJobStoreDBClientAdapter(db); // DrizzleをJobStoreDBClientに変換
-      const jobStore = createJobStoreResultBuilder(dbClient);
-      const job = yield* await jobStore.fetchJob(jobNumber);
-      return okAsync(job);
-    });
-    return result.match(
-      (job) => c.json(job),
-      (error) => {
-        console.error(error);
-        switch (error._tag) {
-          case "FetchJobError":
-            throw new HTTPException(500, { message: error.message });
-          case "JobNotFoundError":
-            throw new HTTPException(404, { message: error.message });
-          case "FetchJobValidationError":
-            throw new HTTPException(400, { message: error.message });
-          default:
-            throw new HTTPException(500, { message: "internal server error" });
-        }
+    "400": {
+      description: "client error response",
+      content: {
+        "application/json": {
+          schema: resolver(jobFetchClientErrorResponseSchema),
+        },
       },
-    );
-  }
-}
+    },
+    "500": {
+      description: "internal server error response",
+      content: {
+        "application/json": {
+          schema: resolver(jobFetchServerErrorSchema),
+        },
+      },
+    },
+  },
+});

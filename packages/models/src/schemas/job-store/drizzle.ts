@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import z from "zod";
+import { nullable, number, object, string } from "valibot";
 
 export const jobs = sqliteTable("jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -24,24 +24,24 @@ export const jobs = sqliteTable("jobs", {
 });
 
 // これ、キーしか型チェック指定なので、かなりfreaky
-export const jobSelectSchema = z.object({
-  id: z.number().int(),
-  jobNumber: z.string(),
-  companyName: z.string(),
-  receivedDate: z.string(),
-  expiryDate: z.string(),
-  homePage: z.string().nullable(),
-  occupation: z.string(),
-  employmentType: z.string(),
-  wageMin: z.number().int(),
-  wageMax: z.number().int(),
-  workingStartTime: z.string().nullable(),
-  workingEndTime: z.string().nullable(),
-  employeeCount: z.number(),
-  workPlace: z.string().nullable(),
-  jobDescription: z.string().nullable(),
-  qualifications: z.string().nullable(),
-  status: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+export const jobSelectSchema = object({
+  id: number(),
+  jobNumber: string(),
+  companyName: string(),
+  receivedDate: string(),
+  expiryDate: string(),
+  homePage: nullable(string()),
+  occupation: string(),
+  employmentType: string(),
+  wageMin: number(),
+  wageMax: number(),
+  workingStartTime: nullable(string()),
+  workingEndTime: nullable(string()),
+  employeeCount: number(),
+  workPlace: nullable(string()),
+  jobDescription: nullable(string()),
+  qualifications: nullable(string()),
+  status: string(),
+  createdAt: string(),
+  updatedAt: string(),
 });

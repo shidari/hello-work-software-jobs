@@ -1,4 +1,4 @@
-import type z from "zod";
+import type { InferOutput } from "valibot";
 import type { jobSelectSchema, jobs } from "../../schemas";
 
 // 🔍 型チェック用ユーティリティ
@@ -10,8 +10,8 @@ export type KeysMustMatch<A, B> = Exclude<keyof A, keyof B> extends never
 
 type JobSelectFromDrizzle = typeof jobs.$inferSelect;
 
-type JobSelectFromZod = z.infer<typeof jobSelectSchema>;
+type JobSelectFromValibot = InferOutput<typeof jobSelectSchema>;
 
-type Check = KeysMustMatch<JobSelectFromDrizzle, JobSelectFromZod>;
+type Check = KeysMustMatch<JobSelectFromDrizzle, JobSelectFromValibot>;
 // 一旦キーだけ比較してる
-const check: Check = true;
+const _check: Check = true;

@@ -1,6 +1,6 @@
-import type z from "zod";
+import type { InferOutput } from "valibot";
 import type { decodedNextTokenSchema, JobListSchema } from "../../schemas";
 
-export type JobList = z.infer<typeof JobListSchema>;
+export type JobList = InferOutput<typeof JobListSchema>;
 
-export type DecodedNextToken = z.infer<typeof decodedNextTokenSchema>;
+export type DecodedNextToken = InferOutput<typeof decodedNextTokenSchema>;

@@ -1,4 +1,6 @@
-import type z from "zod";
+import type { InferOutput } from "valibot";
 import type { insertJobRequestBodySchema } from "../../schemas";
 
-export type InsertJobRequestBody = z.infer<typeof insertJobRequestBodySchema>;
+export type InsertJobRequestBody = InferOutput<
+  typeof insertJobRequestBodySchema
+>;

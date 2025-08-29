@@ -1,26 +1,27 @@
-// https://github.com/cloudflare/chanfana/issues/167#issue-2470366210
-// paramでinternal server errorが出るので、zod-to-openapiを使う
-import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
-import z from "zod";
-import { jobNumberSchema } from "../headless-crawler";
+import { brand, object, pipe, regex, string } from "valibot";
+
+const jobNumberSchema = pipe(
+  string(),
+  regex(/^\d{5}-\d{0,8}$/, "jobNumber format invalid."),
+  brand("jobNumber"),
+);
+
 import { jobSelectSchema } from "./drizzle";
 
-extendZodWithOpenApi(z);
-
-export const jobFetchParamSchema = z.object({
+export const jobFetchParamSchema = object({
   jobNumber: jobNumberSchema,
 });
 
-export const JobSchema = jobSelectSchema.omit({
-  id: true,
-});
+// Valibotでomitはスプレッドで除外
+const { id: _, ...jobSelectSchemaWithoutId } = jobSelectSchema.entries;
+export const JobSchema = object({ ...jobSelectSchemaWithoutId });
 
 export const jobFetchSuccessResponseSchema = JobSchema;
 
-export const jobFetchClientErrorResponseSchema = z.object({
-  message: z.string(),
+export const jobFetchClientErrorResponseSchema = object({
+  message: string(),
 });
 
-export const jobFetchServerErrorSchema = z.object({
-  message: z.string(),
+export const jobFetchServerErrorSchema = object({
+  message: string(),
 });

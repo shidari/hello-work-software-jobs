@@ -1,4 +1,4 @@
-import type z from "zod";
+import type { InferOutput } from "valibot";
 import type { JobSchema } from "../../schemas";
 
-export type Job = z.infer<typeof JobSchema>;
+export type Job = InferOutput<typeof JobSchema>;
