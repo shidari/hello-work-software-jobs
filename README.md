@@ -96,7 +96,7 @@ graph TD
 
 #### 共通
 
-- **パッケージマネージャー**: pnpm (v10.14.0)
+- **パッケージマネージャー**: pnpm (v10.15.0)
 - **言語**: TypeScript (v5.8.3)
 - **コードフォーマッター**: Biome (v2.0.6)
 - **Git Hooks**: Husky (v9.1.7) + lint-staged (v16.1.0)
@@ -156,14 +156,19 @@ graph TD
   - hono-openapi (v0.4.8) - OpenAPI拡張
 - **機能**:
   - 求人情報の保存・取得
-  - JWTベースのページネーション機能
+  - JWTベースのページネーション機能（15分有効期限）
   - RESTful API提供（求人一覧・詳細取得）
-  - OpenAPI仕様書自動生成 (`/api/v1/docs`)
+  - OpenAPI仕様書自動生成 (`/api/v1/docs`, `/docs`, `/openapi`)
   - ルートパスから自動的にドキュメントページへリダイレクト
   - 主要エンドポイント:
-    - `POST /api/v1/job` - 求人情報登録
+    - `POST /api/v1/jobs` - 求人情報登録
     - `GET /api/v1/job/:jobNumber` - 求人詳細取得
-    - `GET /api/v1/jobs` - 求人一覧取得（会社名フィルタリング対応）
+    - `GET /api/v1/jobs` - 求人一覧取得（高度なフィルタリング対応）
+      - `companyName` - 会社名フィルタ（URLエンコード対応）
+      - `jobDescription` - 職務内容キーワード検索
+      - `jobDescriptionExclude` - 除外キーワード検索
+      - `employeeCountGt` / `employeeCountLt` - 従業員数範囲フィルタ
+      - `onlyNotExpired` - 期限切れ求人の除外
     - `GET /api/v1/jobs/continue` - 継続ページネーション（JWTトークンベース）
 
 ##### `hello-work-job-searcher`
@@ -179,15 +184,18 @@ graph TD
   - Jotai (v2.13.1) - 状態管理
 - **デプロイ**: Vercel
 - **実装済み機能**:
-  - ✅ 求人一覧表示（無限スクロール対応）
-  - ✅ 求人詳細ページ
-  - ✅ 高度な検索・フィルタリング機能
-    - 会社名検索（リアルタイム）
-    - 職務内容キーワード検索
-    - 除外キーワード検索
-    - 従業員数範囲フィルタ（1-9人、10-30人、30-100人、100人以上）
-  - ✅ お気に入り機能（ブラウザに保存）
-  - ✅ お気に入り求人の一覧表示・管理
+    - ✅ 求人一覧表示（仮想化無限スクロール対応）
+    - ✅ 求人詳細ページ（動的ルーティング `/jobs/[jobNumber]`）
+    - ✅ 高度な検索・フィルタリング機能
+      - 会社名検索（リアルタイム、デバウンス機能付き）
+      - 職務内容キーワード検索
+      - 除外キーワード検索
+      - 従業員数範囲フィルタ（1-9人、10-30人、30-100人、100人以上）
+      - 期限切れ求人の除外フィルタ
+    - ✅ お気に入り機能（localStorage永続化）
+    - ✅ お気に入り求人の一覧表示・管理（専用ページ `/favorites`）
+    - ✅ サーバーサイドレンダリング（SSR）による初期データプリロード
+    - ✅ TanStack React Virtualによる仮想化とスクロール位置保持
 
 ##### `@sho/scripts`
 
@@ -371,7 +379,8 @@ pnpm start          # 本番環境での起動確認
 
 #### プロキシAPI（フロントエンド）
 
-- `GET /api/proxy/job-store/jobs?companyName={name}&jobDescription={keyword}&jobDescriptionExclude={exclude}&employeeCountGt={min}&employeeCountLt={max}` - 求人一覧取得プロキシ（高度なフィルタリング対応）
+- `GET /api/proxy/job-store/jobs` - 求人一覧取得プロキシ（高度なフィルタリング対応）
+  - クエリパラメータ: `companyName`, `jobDescription`, `jobDescriptionExclude`, `employeeCountGt`, `employeeCountLt`, `onlyNotExpired`
 - `GET /api/proxy/job-store/jobs/continue?nextToken={token}` - 継続ページネーションプロキシ
 
 ## 開発ガイドライン
