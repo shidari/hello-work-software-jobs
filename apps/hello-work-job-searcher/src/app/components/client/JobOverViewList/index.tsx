@@ -85,11 +85,11 @@ export function JobOverviewList({
         {rowVirtualizer.getVirtualItems().map((virtualItem) => {
           const wrappedItem = wrappedItems[virtualItem.index];
           const { item, JobFavoriteButton } = wrappedItem;
-          // 新着判定: 1週間以内
+          // 新着判定: 3日前以内
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-              7 * 24 * 60 * 60 * 1000;
+              3 * 24 * 60 * 60 * 1000;
           return (
             <div
               key={item.jobNumber}
