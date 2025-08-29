@@ -14,7 +14,7 @@ export default async function Page({ params }: PageProps) {
   if (!endpoint) {
     throw new Error("JOB_STORE_ENDPOINT is not defined");
   }
-  const data = await fetch(`${endpoint}/job/${jobNumber}`).then((res) =>
+  const data = await fetch(`${endpoint}/jobs/${jobNumber}`).then((res) =>
     res.json(),
   );
   const validatedData = v.parse(jobFetchSuccessResponseSchema, data);
