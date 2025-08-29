@@ -1,7 +1,13 @@
 import { jobListSuccessResponseSchema, type SearchFilter } from "@sho/models";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
-import type { JobStoreClient } from "../type";
+import {
+  createEndPointNotFoundError,
+  createFetchJobsError,
+  createParseJsonError,
+  createValidateJobsError,
+  type JobStoreClient,
+} from "../type";
 
 const j = Symbol();
 type JobEndPoint = { [j]: unknown } & string;
@@ -11,7 +17,9 @@ export const jobStoreClientOnServer: JobStoreClient = {
       const endpoint = yield* (() => {
         const envEndpoint = process.env.JOB_STORE_ENDPOINT;
         if (!envEndpoint) {
-          return err(new Error("JOB_STORE_ENDPOINT is not defined"));
+          return err(
+            createEndPointNotFoundError("JOB_STORE_ENDPOINT is not defined"),
+          );
         }
         return ok(envEndpoint as JobEndPoint);
       })();
@@ -43,19 +51,19 @@ export const jobStoreClientOnServer: JobStoreClient = {
 
       const url = `${endpoint}/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
-      const response = yield* ResultAsync.fromPromise(
-        fetch(url),
-        (error) => new Error(`Failed to fetch jobs: ${String(error)}`),
+      const response = yield* ResultAsync.fromPromise(fetch(url), () =>
+        createFetchJobsError("Failed to fetch jobs"),
       );
-      const data = yield* ResultAsync.fromPromise(
-        response.json(),
-        (error) => new Error(`Failed to parse jobs response: ${String(error)}`),
+      const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
+        createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
 
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.issues}`));
+          return err(
+            createValidateJobsError(`Invalid job data: ${result.issues}`),
+          );
         }
         return ok(result.output);
       })();
@@ -67,27 +75,29 @@ export const jobStoreClientOnServer: JobStoreClient = {
       const endpoint = yield* (() => {
         const envEndpoint = process.env.JOB_STORE_ENDPOINT;
         if (!envEndpoint) {
-          return err(new Error("JOB_STORE_ENDPOINT is not defined"));
+          return err(
+            createEndPointNotFoundError("JOB_STORE_ENDPOINT is not defined"),
+          );
         }
         return ok(envEndpoint as JobEndPoint);
       })();
 
       const url = `${endpoint}/jobs/continue?nextToken=${nextToken}`;
 
-      const response = yield* ResultAsync.fromPromise(
-        fetch(url),
-        (error) => new Error(`Failed to fetch jobs: ${String(error)}`),
+      const response = yield* ResultAsync.fromPromise(fetch(url), (error) =>
+        createFetchJobsError(`Failed to fetch jobs: ${String(error)}`),
       );
 
-      const data = yield* ResultAsync.fromPromise(
-        response.json(),
-        (error) => new Error(`Failed to parse jobs response: ${String(error)}`),
+      const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
+        createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
 
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.issues}`));
+          return err(
+            createValidateJobsError(`Invalid job data: ${result.issues}`),
+          );
         }
         return ok(result.output);
       })();

@@ -1,7 +1,12 @@
 import { jobListSuccessResponseSchema, type SearchFilter } from "@sho/models";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
-import type { JobStoreClient } from "../type";
+import {
+  createFetchJobsError,
+  createParseJsonError,
+  createValidateJobsError,
+  type JobStoreClient,
+} from "../type";
 
 export const jobStoreClientOnBrowser: JobStoreClient = {
   getInitialJobs(filter: SearchFilter = {}) {
@@ -31,17 +36,19 @@ export const jobStoreClientOnBrowser: JobStoreClient = {
         fetch(
           `/api/proxy/job-store/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
         ),
-        (error) => new Error(`Failed to fetch jobs: ${String(error)}`),
+        (error) =>
+          createFetchJobsError(`Failed to fetch jobs: ${String(error)}`),
       );
-      const data = yield* ResultAsync.fromPromise(
-        response.json(),
-        (error) => new Error(`Failed to parse jobs response: ${String(error)}`),
+      const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
+        createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
 
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.issues}`));
+          return err(
+            createValidateJobsError(`Invalid job data: ${result.issues}`),
+          );
         }
         return ok(result.output);
       })();
@@ -52,17 +59,19 @@ export const jobStoreClientOnBrowser: JobStoreClient = {
     return safeTry(async function* () {
       const response = yield* ResultAsync.fromPromise(
         fetch(`/api/proxy/job-store/jobs/continue?nextToken=${nextToken}`),
-        (error) => new Error(`Failed to fetch jobs: ${String(error)}`),
+        (error) =>
+          createFetchJobsError(`Failed to fetch jobs: ${String(error)}`),
       );
-      const data = yield* ResultAsync.fromPromise(
-        response.json(),
-        (error) => new Error(`Failed to parse jobs response: ${String(error)}`),
+      const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
+        createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
 
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.issues}`));
+          return err(
+            createValidateJobsError(`Invalid job data: ${result.issues}`),
+          );
         }
         return ok(result.output);
       })();

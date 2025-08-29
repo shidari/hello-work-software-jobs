@@ -11,7 +11,10 @@ export interface JobStoreClient {
    */
   getInitialJobs(
     filter?: SearchFilter,
-  ): ResultAsync<InferOutput<typeof jobListSuccessResponseSchema>, Error>;
+  ): ResultAsync<
+    InferOutput<typeof jobListSuccessResponseSchema>,
+    EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
+  >;
 
   /**
    * 続きの求人リスト取得
@@ -19,5 +22,56 @@ export interface JobStoreClient {
    */
   getContinuedJobs(
     nextToken: string,
-  ): ResultAsync<InferOutput<typeof jobListSuccessResponseSchema>, Error>;
+  ): ResultAsync<
+    InferOutput<typeof jobListSuccessResponseSchema>,
+    EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
+  >;
 }
+
+export type EndpointNotFoundError = {
+  readonly _tag: "EndpointNotFoundError";
+  readonly message: string;
+};
+
+export type FetchJobsError = {
+  readonly _tag: "FetchJobsError";
+  readonly message: string;
+};
+
+export type ParseJsonError = {
+  readonly _tag: "ParseJsonError";
+  readonly message: string;
+};
+
+export type ValidateJobsError = {
+  readonly _tag: "ValidateJobsError";
+  readonly message: string;
+};
+
+export const createValidateJobsError: (message: string) => ValidateJobsError = (
+  message,
+) => ({
+  _tag: "ValidateJobsError",
+  message,
+});
+
+export const createParseJsonError: (message: string) => ParseJsonError = (
+  message,
+) => ({
+  _tag: "ParseJsonError",
+  message,
+});
+
+export const createFetchJobsError: (message: string) => FetchJobsError = (
+  message,
+) => ({
+  _tag: "FetchJobsError",
+  message,
+});
+
+export const createEndPointNotFoundError: (
+  message: string,
+) => EndpointNotFoundError = (message) => ({
+  _tag: "EndpointNotFoundError",
+  message,
+});
