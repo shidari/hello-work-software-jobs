@@ -9,7 +9,13 @@ import styles from "./page.module.css";
 
 export default async function Page() {
   // 一旦対応めんどいからunsafeUnwrapを使う
-  const data = (await jobStoreClientOnServer.getInitialJobs())._unsafeUnwrap();
+  const result = await jobStoreClientOnServer.getInitialJobs();
+  if (result.isErr()) {
+    // エラーハンドリング
+    console.error(result.error);
+    return <div>求人情報の取得に失敗しました。</div>;
+  }
+  const data = result.value;
   return (
     <main className={styles.mainSection}>
       <div className={styles.layoutContainer}>
