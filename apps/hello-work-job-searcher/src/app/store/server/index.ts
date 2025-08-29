@@ -1,5 +1,6 @@
 import { jobListSuccessResponseSchema, type SearchFilter } from "@sho/models";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import * as v from "valibot";
 import type { JobStoreClient } from "../type";
 
 const j = Symbol();
@@ -52,11 +53,11 @@ export const jobStoreClientOnServer: JobStoreClient = {
       );
 
       const validatedData = yield* (() => {
-        const result = jobListSuccessResponseSchema.safeParse(data);
+        const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.error.message}`));
+          return err(new Error(`Invalid job data: ${result.issues}`));
         }
-        return ok(result.data);
+        return ok(result.output);
       })();
       return okAsync(validatedData);
     });
@@ -84,11 +85,11 @@ export const jobStoreClientOnServer: JobStoreClient = {
       );
 
       const validatedData = yield* (() => {
-        const result = jobListSuccessResponseSchema.safeParse(data);
+        const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
-          return err(new Error(`Invalid job data: ${result.error.message}`));
+          return err(new Error(`Invalid job data: ${result.issues}`));
         }
-        return ok(result.data);
+        return ok(result.output);
       })();
       return okAsync(validatedData);
     });

@@ -1,12 +1,39 @@
-import { fromHono } from "chanfana";
+import { swaggerUI } from "@hono/swagger-ui";
+import {
+  type DecodedNextToken,
+  decodedNextTokenSchema,
+  insertJobRequestBodySchema,
+  jobListContinueQuerySchema,
+  jobListQuerySchema,
+} from "@sho/models";
 import { type Context, Hono } from "hono";
-import { JobFetchEndpoint } from "./endpoint/jobFetch";
-import { JobInsertEndpoint } from "./endpoint/jobInsert/jobInsert";
-import { JobListEndpoint } from "./endpoint/jobList";
-import { JobListContinueEndpoint } from "./endpoint/jobList/continue";
+import { HTTPException } from "hono/http-exception";
+import { decode, sign } from "hono/jwt";
+import { openAPISpecs } from "hono-openapi";
+import { validator as vValidator } from "hono-openapi/valibot";
+import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import * as v from "valibot";
+import { createJobStoreResultBuilder } from "./clientImpl";
+import { createJobStoreDBClientAdapter } from "./clientImpl/adapter";
+import { getDb } from "./db";
+import { createEnvError, createJWTSignatureError } from "./endpoint/error";
+import { jobInsertRoute } from "./endpoint/jobInsert/jobInsert";
+import { jobListRoute } from "./endpoint/jobList";
+import { jobListContinueRoute } from "./endpoint/jobList/continue";
+import {
+  createDecodeJWTPayloadError,
+  createJWTDecodeError,
+  createJWTExpiredError,
+} from "./endpoint/jobList/continue/error";
 
 const j = Symbol();
 type JWTSecret = string & { [j]: unknown };
+
+const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
+
+const envSchema = v.object({
+  JWT_SECRET: v.string(), // JWTSecret の zod schemaがあればそれを使う
+});
 
 export type Env = {
   DB: D1Database;
@@ -14,9 +41,9 @@ export type Env = {
 };
 export type AppContext = Context<{ Bindings: Env }>;
 
-const app = new Hono<{ Bindings: Env }>();
-
-// シンプルなログミドルウェア
+const app = new Hono();
+const v1Api = new Hono().basePath("/api/v1"); // シンプルなログミドルウェア
+app.route("/api/v1", v1Api);
 app.use("*", async (c, next) => {
   const start = Date.now();
 
@@ -28,31 +55,251 @@ app.use("*", async (c, next) => {
   console.log(`📤 ${c.res.status} (${duration}ms)`);
 });
 
-// Initialize Chanfana for Hono
-const openapi = fromHono(app, {
-  schema: {
-    info: {
-      title: "Job Store API",
-      version: "1.0.0",
-      description: "This is the documentation for job store API.",
-    },
-    servers: [],
+v1Api.get(
+  "/jobs",
+  jobListRoute,
+  vValidator("query", jobListQuerySchema),
+  (c) => {
+    const {
+      companyName: encodedCompanyName,
+      employeeCountGt,
+      employeeCountLt,
+      jobDescription: encodedJobDescription,
+      jobDescriptionExclude: encodedJobDescriptionExclude,
+      onlyNotExpired,
+    } = c.req.valid("query");
+    const companyName = encodedCompanyName
+      ? decodeURIComponent(encodedCompanyName)
+      : undefined;
+    const jobDescription = encodedJobDescription
+      ? decodeURIComponent(encodedJobDescription)
+      : undefined;
+
+    const jobDescriptionExclude = encodedJobDescriptionExclude
+      ? decodeURIComponent(encodedJobDescriptionExclude)
+      : undefined;
+
+    const db = getDb(c);
+    const dbClient = createJobStoreDBClientAdapter(db);
+    const jobStore = createJobStoreResultBuilder(dbClient);
+
+    const limit = 20;
+
+    const result = safeTry(async function* () {
+      const { JWT_SECRET: jwtSecret } = yield* (() => {
+        const result = v.safeParse(envSchema, c.env);
+        if (!result.success)
+          return err(
+            createEnvError(
+              `Environment variable validation failed: ${String(result.issues)}`,
+            ),
+          );
+        return ok(result.output);
+      })();
+      const jobListResult = yield* await jobStore.fetchJobList({
+        cursor: { jobId: INITIAL_JOB_ID },
+        limit,
+        filter: {
+          companyName,
+          employeeCountGt,
+          employeeCountLt,
+          jobDescription,
+          jobDescriptionExclude,
+          onlyNotExpired,
+        },
+      });
+
+      const {
+        jobs,
+        cursor: { jobId },
+        meta,
+      } = jobListResult;
+
+      const { count: restJobCount } = yield* await jobStore.countJobs({
+        cursor: { jobId },
+        filter: meta.filter,
+      });
+
+      const nextToken = yield* (() => {
+        if (restJobCount <= limit) return okAsync(undefined);
+        const validPayload: DecodedNextToken = {
+          exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
+          cursor: { jobId },
+          filter: meta.filter,
+        };
+        const signResult = ResultAsync.fromPromise(
+          sign(validPayload, jwtSecret),
+          (error) =>
+            createJWTSignatureError(`JWT signing failed.\n${String(error)}`),
+        );
+        return signResult;
+      })();
+
+      return okAsync({ jobs, nextToken, meta });
+    });
+    return result.match(
+      ({ jobs, nextToken, meta }) => c.json({ jobs, nextToken, meta }),
+      (error) => {
+        console.error(error);
+        switch (error._tag) {
+          case "JWTSignatureError":
+          case "EnvError":
+            throw new HTTPException(500, { message: error.message });
+          default:
+            throw new HTTPException(500, { message: "internal server error" });
+        }
+      },
+    );
   },
-  docs_url: "/api/v1/docs",
-  openapi_url: "/api/v1/openapi.json",
-  openapiVersion: "3.1",
-});
+);
 
-app.get("/", (c) => {
-  return c.redirect("/api/v1/docs", 302);
-});
-app.get("/api/v1", (c) => {
-  return c.redirect("/api/v1/docs", 302);
-});
+v1Api.get(
+  "/jobs/continue",
+  jobListContinueRoute,
+  vValidator("query", jobListContinueQuerySchema),
+  (c) => {
+    const { nextToken } = c.req.valid("query");
+    const db = getDb(c);
+    const dbClient = createJobStoreDBClientAdapter(db); // DrizzleをJobStoreDBClientに変換
+    const jobStore = createJobStoreResultBuilder(dbClient);
 
-openapi.post("/api/v1/job", JobInsertEndpoint);
-openapi.get("/api/v1/job/:jobNumber", JobFetchEndpoint);
-openapi.get("/api/v1/jobs", JobListEndpoint);
-openapi.get("/api/v1/jobs/continue", JobListContinueEndpoint);
+    const result = safeTry(async function* () {
+      const { JWT_SECRET: jwtSecret } = yield* (() => {
+        const result = v.safeParse(envSchema, c.env);
+        if (!result.success)
+          return err(
+            createEnvError(
+              `Environment variable validation failed: ${String(result.issues)}`,
+            ),
+          );
+        return ok(result.output);
+      })();
+      const decodeResult = yield* ResultAsync.fromPromise(
+        Promise.resolve(decode(nextToken)),
+        (error) =>
+          createJWTDecodeError(`JWT decoding failed.\n${String(error)}`),
+      );
 
+      const payloadValidation = v.safeParse(
+        decodedNextTokenSchema,
+        decodeResult.payload,
+      );
+      if (!payloadValidation.success) {
+        return err(
+          createDecodeJWTPayloadError(
+            `Decoding JWT payload failed.\n${String(payloadValidation.issues)}`,
+          ),
+        );
+      }
+      const validatedPayload = payloadValidation.output;
+
+      // JWT有効期限チェック
+      const now = Math.floor(Date.now() / 1000);
+      if (validatedPayload.exp && validatedPayload.exp < now) {
+        return err(createJWTExpiredError("JWT expired"));
+      }
+      const limit = 20;
+      // ジョブリスト取得
+      const jobListResult = yield* await jobStore.fetchJobList({
+        cursor: { jobId: validatedPayload.cursor.jobId },
+        limit,
+        filter: validatedPayload.filter,
+      });
+
+      const {
+        jobs,
+        cursor: { jobId },
+        meta,
+      } = jobListResult;
+
+      const { count: restJobCount } = yield* await jobStore.countJobs({
+        cursor: { jobId },
+        filter: meta.filter,
+      });
+
+      const newNextToken = yield* (() => {
+        if (restJobCount <= limit) return okAsync(undefined);
+        const validPayload: DecodedNextToken = {
+          exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
+          cursor: { jobId },
+          filter: meta.filter,
+        };
+        const signResult = ResultAsync.fromPromise(
+          sign(validPayload, jwtSecret),
+          (error) =>
+            createJWTSignatureError(`JWT signing failed.\n${String(error)}`),
+        );
+        return signResult;
+      })();
+
+      return okAsync({ jobs, nextToken: newNextToken, meta });
+    });
+    return result.match(
+      ({ jobs, nextToken, meta }) => c.json({ jobs, nextToken, meta }),
+      (error) => {
+        console.error(error);
+
+        switch (error._tag) {
+          case "JWTDecodeError":
+            throw new HTTPException(400, { message: "invalid nextToken" });
+          case "JWTSignatureError":
+          case "EnvError":
+            throw new HTTPException(500, { message: error.message });
+          case "JWTExpiredError":
+            throw new HTTPException(401, { message: "nextToken expired" });
+          case "DecodeJWTPayloadError":
+            throw new HTTPException(400, { message: "invalid nextToken" });
+          default:
+            throw new HTTPException(500, { message: "internal server error" });
+        }
+      },
+    );
+  },
+);
+v1Api.post(
+  "/jobs",
+  jobInsertRoute,
+  vValidator("json", insertJobRequestBodySchema),
+  (c) => {
+    const body = c.req.valid("json");
+    const db = getDb(c);
+    const dbClient = createJobStoreDBClientAdapter(db);
+    const jobStore = createJobStoreResultBuilder(dbClient);
+    const result = safeTry(async function* () {
+      const job = yield* await jobStore.insertJob(body);
+      return okAsync(job);
+    });
+    return result.match(
+      (job) => c.json(job),
+      (error) => {
+        console.error(error);
+
+        switch (error._tag) {
+          case "InsertJobError":
+            throw new HTTPException(500, { message: error.message });
+          case "InsertJobDuplicationError":
+            throw new HTTPException(400, { message: error.message });
+          default:
+            throw new HTTPException(500, { message: "Unknown error occurred" });
+        }
+      },
+    );
+  },
+);
+
+app.get(
+  "/openapi",
+  openAPISpecs(v1Api, {
+    documentation: {
+      info: {
+        title: "Hono API",
+        version: "1.0.0",
+        description: "Greeting API",
+      },
+      servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+    },
+  }),
+);
+app.get("/", swaggerUI({ url: "/openapi" }));
+app.get("/docs", swaggerUI({ url: "/openapi" }));
 export { app };

@@ -10,6 +10,7 @@ import {
   transformedWorkingHoursSchema,
 } from "@sho/models";
 import { Effect, Schema } from "effect";
+import * as v from "valibot";
 import {
   GetEndPointError,
   InsertJobError,
@@ -190,7 +191,7 @@ export function buildJobStoreClient() {
 export function validateInsertJobSuccessResponse(val: unknown) {
   return Effect.try({
     try: () => {
-      insertJobSuccessResponseSchema.parse(val);
+      v.parse(insertJobSuccessResponseSchema, val);
     },
     catch: (e) =>
       new InsertJobSuccessResponseValidationError({

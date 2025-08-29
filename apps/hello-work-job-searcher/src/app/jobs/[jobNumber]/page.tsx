@@ -1,4 +1,5 @@
 import { jobFetchSuccessResponseSchema } from "@sho/models";
+import * as v from "valibot";
 import { JobDetail } from "@/app/components/Job";
 import styles from "./page.module.css";
 
@@ -16,7 +17,7 @@ export default async function Page({ params }: PageProps) {
   const data = await fetch(`${endpoint}/job/${jobNumber}`).then((res) =>
     res.json(),
   );
-  const validatedData = jobFetchSuccessResponseSchema.parse(data);
+  const validatedData = v.parse(jobFetchSuccessResponseSchema, data);
   const jobDetail = {
     ...validatedData,
     workingHours: `${validatedData.workingStartTime}〜${validatedData.workingEndTime}`,

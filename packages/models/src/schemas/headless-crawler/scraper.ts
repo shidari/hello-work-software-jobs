@@ -131,7 +131,7 @@ export const transformedEmployeeCountSchema = RawEmployeeCountSchema.transform(
   .pipe(
     z
       .number({
-        invalid_type_error: "Failed to convert to a number",
+        // invalid_type_error: "Failed to convert to a number",
       })
       .int("Must be an integer")
       .nonnegative("Must be a non-negative number"),

@@ -1,45 +1,35 @@
-// https://github.com/cloudflare/chanfana/issues/167#issue-2470366210
-// queryでinternal server errorが出るので、zod-to-openapiを使う
-import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
-import z from "zod";
+import { array, boolean, number, object, optional, string } from "valibot";
 import { jobSelectSchema } from "../drizzle";
 
-extendZodWithOpenApi(z);
-
-export const searchFilterSchema = z.object({
-  companyName: z.string().optional(),
-  employeeCountLt: z.number().optional(),
-  employeeCountGt: z.number().optional(),
-  jobDescription: z.string().optional(),
-  jobDescriptionExclude: z.string().optional(), // 除外キーワード
-  onlyNotExpired: z.boolean().optional(),
+export const searchFilterSchema = object({
+  companyName: optional(string()),
+  employeeCountLt: optional(number()),
+  employeeCountGt: optional(number()),
+  jobDescription: optional(string()),
+  jobDescriptionExclude: optional(string()), // 除外キーワード
+  onlyNotExpired: optional(boolean()),
 });
 
 export const jobListQuerySchema = searchFilterSchema;
 
 export const jobListSearchFilterSchema = searchFilterSchema;
 
-export const JobListSchema = z.array(
-  jobSelectSchema.omit({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
-    status: true,
-  }),
-);
+const { id, createdAt, updatedAt, status, ...jobSelectSchemaWithoutSome } =
+  jobSelectSchema.entries;
+export const JobListSchema = array(object({ ...jobSelectSchemaWithoutSome }));
 
-export const jobListSuccessResponseSchema = z.object({
+export const jobListSuccessResponseSchema = object({
   jobs: JobListSchema,
-  nextToken: z.string().optional(),
-  meta: z.object({
-    totalCount: z.number(),
+  nextToken: optional(string()),
+  meta: object({
+    totalCount: number(),
   }),
 });
 
-export const jobListClientErrorResponseSchema = z.object({
-  message: z.string(),
+export const jobListClientErrorResponseSchema = object({
+  message: string(),
 });
 
-export const jobListServerErrorSchema = z.object({
-  message: z.string(),
+export const jobListServerErrorSchema = object({
+  message: string(),
 });

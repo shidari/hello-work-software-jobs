@@ -1,6 +1,6 @@
 import type { jobListSuccessResponseSchema, SearchFilter } from "@sho/models";
 import type { ResultAsync } from "neverthrow";
-
+import type { InferOutput } from "valibot";
 /**
  * 求人ストアクライアントの共通インターフェース
  */
@@ -11,7 +11,7 @@ export interface JobStoreClient {
    */
   getInitialJobs(
     filter?: SearchFilter,
-  ): ResultAsync<ReturnType<typeof jobListSuccessResponseSchema.parse>, Error>;
+  ): ResultAsync<InferOutput<typeof jobListSuccessResponseSchema>, Error>;
 
   /**
    * 続きの求人リスト取得
@@ -19,5 +19,5 @@ export interface JobStoreClient {
    */
   getContinuedJobs(
     nextToken: string,
-  ): ResultAsync<ReturnType<typeof jobListSuccessResponseSchema.parse>, Error>;
+  ): ResultAsync<InferOutput<typeof jobListSuccessResponseSchema>, Error>;
 }
