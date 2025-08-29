@@ -117,17 +117,17 @@ importers:
         specifier: ~5.8.0
         version: 5.8.3
       zod:
-        specifier: ^3.25.74
-        version: 3.25.76
+        specifier: ^4.0.0
+        version: 4.1.5
 
   packages/job-store:
     dependencies:
       '@hono/zod-openapi':
         specifier: ^1.0.2
-        version: 1.1.0(hono@4.9.4)(zod@3.25.76)
+        version: 1.1.0(hono@4.9.4)(zod@4.1.5)
       '@hono/zod-validator':
         specifier: ^0.7.2
-        version: 0.7.2(hono@4.9.4)(zod@3.25.76)
+        version: 0.7.2(hono@4.9.4)(zod@4.1.5)
       '@sho/models':
         specifier: workspace:*
         version: link:../models
@@ -145,7 +145,7 @@ importers:
         version: 4.9.4
       hono-openapi:
         specifier: ^0.4.8
-        version: 0.4.8(@hono/zod-validator@0.7.2(hono@4.9.4)(zod@3.25.76))(effect@3.17.9)(hono@4.9.4)(openapi-types@12.1.3)(valibot@1.1.0(typescript@5.9.2))(zod@3.25.76)
+        version: 0.4.8(@hono/zod-validator@0.7.2(hono@4.9.4)(zod@4.1.5))(effect@3.17.9)(hono@4.9.4)(openapi-types@12.1.3)(valibot@1.1.0(typescript@5.9.2))(zod@4.1.5)
       neverthrow:
         specifier: ^8.2.0
         version: 8.2.0
@@ -153,8 +153,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.2)
       zod:
-        specifier: ~3.25.74
-        version: 3.25.76
+        specifier: ~4.1.0
+        version: 4.1.5
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.8.19
@@ -188,13 +188,13 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.2.0
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@4.1.5)
       drizzle-orm:
         specifier: ^0.44.2
         version: 0.44.5
       zod:
-        specifier: ^3.25.74
-        version: 3.25.76
+        specifier: ^4.0.0
+        version: 4.1.5
     devDependencies:
       playwright:
         specifier: ^1.53.1
@@ -3645,6 +3645,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.1.5:
+    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
+
 snapshots:
 
   '@apidevtools/json-schema-ref-parser@11.9.3':
@@ -3658,10 +3661,15 @@ snapshots:
       openapi3-ts: 4.5.0
       zod: 3.25.76
 
-  '@asteasolutions/zod-to-openapi@8.1.0(zod@3.25.76)':
+  '@asteasolutions/zod-to-openapi@7.3.4(zod@4.1.5)':
     dependencies:
       openapi3-ts: 4.5.0
-      zod: 3.25.76
+      zod: 4.1.5
+
+  '@asteasolutions/zod-to-openapi@8.1.0(zod@4.1.5)':
+    dependencies:
+      openapi3-ts: 4.5.0
+      zod: 4.1.5
 
   '@aws-cdk/asset-awscli-v1@2.2.242': {}
 
@@ -4548,18 +4556,18 @@ snapshots:
     dependencies:
       hono: 4.9.4
 
-  '@hono/zod-openapi@1.1.0(hono@4.9.4)(zod@3.25.76)':
+  '@hono/zod-openapi@1.1.0(hono@4.9.4)(zod@4.1.5)':
     dependencies:
-      '@asteasolutions/zod-to-openapi': 8.1.0(zod@3.25.76)
-      '@hono/zod-validator': 0.7.2(hono@4.9.4)(zod@3.25.76)
+      '@asteasolutions/zod-to-openapi': 8.1.0(zod@4.1.5)
+      '@hono/zod-validator': 0.7.2(hono@4.9.4)(zod@4.1.5)
       hono: 4.9.4
       openapi3-ts: 4.5.0
-      zod: 3.25.76
+      zod: 4.1.5
 
-  '@hono/zod-validator@0.7.2(hono@4.9.4)(zod@3.25.76)':
+  '@hono/zod-validator@0.7.2(hono@4.9.4)(zod@4.1.5)':
     dependencies:
       hono: 4.9.4
-      zod: 3.25.76
+      zod: 4.1.5
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -5955,16 +5963,16 @@ snapshots:
       function-bind: 1.1.2
     optional: true
 
-  hono-openapi@0.4.8(@hono/zod-validator@0.7.2(hono@4.9.4)(zod@3.25.76))(effect@3.17.9)(hono@4.9.4)(openapi-types@12.1.3)(valibot@1.1.0(typescript@5.9.2))(zod@3.25.76):
+  hono-openapi@0.4.8(@hono/zod-validator@0.7.2(hono@4.9.4)(zod@4.1.5))(effect@3.17.9)(hono@4.9.4)(openapi-types@12.1.3)(valibot@1.1.0(typescript@5.9.2))(zod@4.1.5):
     dependencies:
       json-schema-walker: 2.0.0
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/zod-validator': 0.7.2(hono@4.9.4)(zod@3.25.76)
+      '@hono/zod-validator': 0.7.2(hono@4.9.4)(zod@4.1.5)
       effect: 3.17.9
       hono: 4.9.4
       valibot: 1.1.0(typescript@5.9.2)
-      zod: 3.25.76
+      zod: 4.1.5
 
   hono@4.9.4: {}
 
@@ -6966,3 +6974,5 @@ snapshots:
   zod@3.22.3: {}
 
   zod@3.25.76: {}
+
+  zod@4.1.5: {}
