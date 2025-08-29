@@ -46,7 +46,7 @@
 | 収集データ       | 約600件の求人情報    |
 | コスト           | CF無料 + AWS大幅削減 |
 | 技術学習比重     | Effect-ts→neverthrow移行 |
-| 最新改善         | Suspense追加によるUX向上 |
+| 最新改善         | デバウンス機能実装完了・SSR対応 |
 
 ### 🔧 技術的課題と解決
 
@@ -64,7 +64,7 @@
 **技術的負債**
 
 - headless-crawler密結合（インターフェース分離予定）
-- 検索機能のdebounce実装（パフォーマンス最適化）
+- ~~検索機能のdebounce実装（パフォーマンス最適化）~~ → **実装完了**（300ms遅延、メモリリーク対策済み）
 
 **デモサイト**: https://my-hello-work-job-list-hello-work-j.vercel.app/
 
