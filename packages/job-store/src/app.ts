@@ -44,8 +44,7 @@ export type Env = {
 export type AppContext = Context<{ Bindings: Env }>;
 
 const app = new Hono();
-const v1Api = new Hono().basePath("/api/v1"); // シンプルなログミドルウェア
-app.route("/api/v1", v1Api);
+const v1Api = new Hono(); // シンプルなログミドルウェア
 app.use("*", async (c, next) => {
   const start = Date.now();
 
@@ -318,6 +317,8 @@ v1Api.post(
     );
   },
 );
+
+app.route("/api/v1", v1Api);
 
 app.get(
   "/openapi",
