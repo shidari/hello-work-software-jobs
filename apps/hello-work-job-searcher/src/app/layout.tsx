@@ -19,6 +19,9 @@ export default function RootLayout({
         <Provider>
           <div className={layoutStyles.layoutRoot}>
             <div className={layoutStyles.layoutHeader}>
+              <header className={layoutStyles.layoutTitle}>
+                ハローワーク求人情報検索
+              </header>
               <NavHeader />
             </div>
             <div className={layoutStyles.layoutMain}>{children}</div>
