@@ -5,9 +5,7 @@ import {
   number,
   object,
   optional,
-  pipe,
   string,
-  transform,
   union,
 } from "valibot";
 import { jobSelectSchema } from "../drizzle";
@@ -24,18 +22,8 @@ export const searchFilterSchema = object({
 
 export const jobListQuerySchema = object({
   ...searchFilterSchema.entries,
-  employeeCount: optional(
-    pipe(
-      string(),
-      transform((input) => (input === undefined ? undefined : Number(input))),
-    ),
-  ),
-  employeeCountGt: optional(
-    pipe(
-      string(),
-      transform((input) => (input === undefined ? undefined : Number(input))),
-    ),
-  ),
+  employeeCount: optional(string()),
+  employeeCountGt: optional(string()),
 });
 
 export const jobListSearchFilterSchema = searchFilterSchema;
