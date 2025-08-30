@@ -2,6 +2,7 @@ import type {
   CheckJobExistsCommand,
   CommandOutput,
   CountJobsCommand,
+  Cursor,
   FindJobByNumberCommand,
   FindJobsCommand,
   InsertJobCommand,
@@ -64,7 +65,7 @@ export const createJobStoreResultBuilder: JobStoreResultBuilder = (
   },
 
   fetchJobList: (params: {
-    cursor?: { jobId: number };
+    cursor?: Cursor;
     limit: number;
     filter: SearchFilter;
   }) => {
@@ -76,7 +77,7 @@ export const createJobStoreResultBuilder: JobStoreResultBuilder = (
       createFetchJobListError(`fetch job list failed.\n${String(error)}`),
     );
   },
-  countJobs: (params: { cursor?: { jobId: number }; filter: SearchFilter }) => {
+  countJobs: (params: { cursor?: Cursor; filter: SearchFilter }) => {
     const command: CountJobsCommand = {
       type: "CountJobs",
       options: params,
