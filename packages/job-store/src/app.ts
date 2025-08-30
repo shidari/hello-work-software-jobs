@@ -196,7 +196,7 @@ v1Api.get(
       if (!payloadValidation.success) {
         return err(
           createDecodeJWTPayloadError(
-            `Decoding JWT payload failed.\n${String(payloadValidation.issues)}`,
+            `Decoding JWT payload failed.\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
           ),
         );
       }
