@@ -317,21 +317,21 @@ v1Api.post(
     );
   },
 );
-
 app.route("/api/v1", v1Api);
-
 app.get(
   "/openapi",
-  openAPISpecs(v1Api, {
+  openAPISpecs(app, {
     documentation: {
       info: {
         title: "Job Store API",
-        version: "1.2",
+        version: "1.3",
         description: "Job Store API",
       },
     },
   }),
 );
 app.get("/", swaggerUI({ url: "/openapi" }));
+v1Api.get("/", swaggerUI({ url: "/openapi" }));
 app.get("/docs", swaggerUI({ url: "/openapi" }));
+
 export { app };
