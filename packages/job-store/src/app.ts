@@ -95,7 +95,10 @@ v1Api.get(
 
     const result = safeTry(async function* () {
       const employeeCountGt = yield* (() => {
-        const result = safeParse(v.number(), rawEmployeeCountGt);
+        const result = safeParse(
+          v.pipe(v.number(), v.integer()),
+          Number(rawEmployeeCountGt),
+        );
         if (!result.success)
           return err(
             createEmployeeCountGtValidationError("Invalid employeeCountGt"),
@@ -103,7 +106,10 @@ v1Api.get(
         return ok(result.output);
       })();
       const employeeCountLt = yield* (() => {
-        const result = safeParse(v.number(), rawEmployeeCountLt);
+        const result = safeParse(
+          v.pipe(v.number(), v.integer()),
+          Number(rawEmployeeCountLt),
+        );
         if (!result.success)
           return err(
             createEmployeeCountLtValidationError("Invalid employeeCountLt"),
