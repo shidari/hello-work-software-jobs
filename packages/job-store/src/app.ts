@@ -14,10 +14,16 @@ import { openAPISpecs } from "hono-openapi";
 import { validator as vValidator } from "hono-openapi/valibot";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
+import { safeParse } from "valibot";
 import { createJobStoreResultBuilder } from "./clientImpl";
 import { createJobStoreDBClientAdapter } from "./clientImpl/adapter";
 import { getDb } from "./db";
-import { createEnvError, createJWTSignatureError } from "./endpoint/error";
+import {
+  createEmployeeCountGtValidationError,
+  createEmployeeCountLtValidationError,
+  createEnvError,
+  createJWTSignatureError,
+} from "./endpoint/error";
 import { jobFetchRoute } from "./endpoint/jobFetch";
 import { jobInsertRoute } from "./endpoint/jobInsert/jobInsert";
 import { jobListRoute } from "./endpoint/jobList";
@@ -63,8 +69,8 @@ v1Api.get(
   (c) => {
     const {
       companyName: encodedCompanyName,
-      employeeCountGt,
-      employeeCountLt,
+      employeeCountGt: rawEmployeeCountGt,
+      employeeCountLt: rawEmployeeCountLt,
       jobDescription: encodedJobDescription,
       jobDescriptionExclude: encodedJobDescriptionExclude,
       onlyNotExpired,
@@ -88,6 +94,22 @@ v1Api.get(
     const limit = 20;
 
     const result = safeTry(async function* () {
+      const employeeCountGt = yield* (() => {
+        const result = safeParse(v.number(), rawEmployeeCountGt);
+        if (!result.success)
+          return err(
+            createEmployeeCountGtValidationError("Invalid employeeCountGt"),
+          );
+        return ok(result.output);
+      })();
+      const employeeCountLt = yield* (() => {
+        const result = safeParse(v.number(), rawEmployeeCountLt);
+        if (!result.success)
+          return err(
+            createEmployeeCountLtValidationError("Invalid employeeCountLt"),
+          );
+        return ok(result.output);
+      })();
       const { JWT_SECRET: jwtSecret } = yield* (() => {
         const result = v.safeParse(envSchema, c.env);
         if (!result.success)
@@ -154,6 +176,9 @@ v1Api.get(
           case "JWTSignatureError":
           case "EnvError":
             throw new HTTPException(500, { message: error.message });
+          case "EmployeeCountGtValidationError":
+          case "EmployeeCountLtValidationError":
+            throw new HTTPException(400, { message: error.message });
           default:
             throw new HTTPException(500, { message: "internal server error" });
         }
