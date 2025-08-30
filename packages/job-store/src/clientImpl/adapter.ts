@@ -8,7 +8,7 @@ import type {
   JobStoreCommand,
   JobStoreDBClient,
 } from "@sho/models";
-import { and, desc, eq, gt, like, lt, not } from "drizzle-orm";
+import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
 
@@ -51,13 +51,18 @@ async function handleFindJobs(
   drizzle: DrizzleD1Client,
   cmd: FindJobsCommand,
 ): Promise<CommandOutput<FindJobsCommand>> {
-  const { cursor, limit, filter = {} } = cmd.options;
-
+  const { cursor, limit, filter } = cmd.options;
   const cursorConditions = [];
   if (cursor) {
-    cursorConditions.push(gt(jobs.id, cursor.jobId));
+    if (
+      filter.orderByReceiveDate === undefined ||
+      filter.orderByReceiveDate === "asc"
+    ) {
+      cursorConditions.push(gt(jobs.id, cursor.jobId)); // 古→新
+    } else {
+      cursorConditions.push(lt(jobs.id, cursor.jobId)); // 新→古
+    }
   }
-
   const filterConditions = [];
   if (filter.companyName) {
     filterConditions.push(like(jobs.companyName, `%${filter.companyName}%`));
@@ -87,7 +92,13 @@ async function handleFindJobs(
   }
 
   const conditions = [...cursorConditions, ...filterConditions];
-  const query = drizzle.select().from(jobs).orderBy(desc(jobs.receivedDate));
+
+  const order =
+    filter.orderByReceiveDate === undefined ||
+    filter.orderByReceiveDate === "asc"
+      ? asc(jobs.receivedDate)
+      : desc(jobs.receivedDate);
+  const query = drizzle.select().from(jobs).orderBy(order);
 
   const jobList =
     conditions.length > 0
@@ -102,7 +113,13 @@ async function handleFindJobs(
   return {
     jobs: jobList,
     cursor: {
-      jobId: jobList.length > 0 ? jobList[jobList.length - 1].id : 1,
+      jobId:
+        jobList.length > 0
+          ? filter.orderByReceiveDate === undefined ||
+            filter.orderByReceiveDate === "asc"
+            ? jobList[jobList.length - 1].id
+            : jobList[0].id
+          : 1,
     },
     meta: {
       totalCount,
@@ -130,7 +147,14 @@ async function handleCountJobs(
   const conditions = [];
   const { cursor, filter } = cmd.options;
   if (cursor) {
-    conditions.push(gt(jobs.id, cursor.jobId));
+    if (
+      filter.orderByReceiveDate === undefined ||
+      filter.orderByReceiveDate === "asc"
+    ) {
+      conditions.push(gt(jobs.id, cursor.jobId)); // 古→新
+    } else {
+      conditions.push(lt(jobs.id, cursor.jobId)); // 新→古
+    }
   }
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));

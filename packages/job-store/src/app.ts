@@ -68,6 +68,7 @@ v1Api.get(
       jobDescription: encodedJobDescription,
       jobDescriptionExclude: encodedJobDescriptionExclude,
       onlyNotExpired,
+      orderByReceiveDate,
     } = c.req.valid("query");
     const companyName = encodedCompanyName
       ? decodeURIComponent(encodedCompanyName)
@@ -107,6 +108,7 @@ v1Api.get(
           jobDescription,
           jobDescriptionExclude,
           onlyNotExpired,
+          orderByReceiveDate,
         },
       });
 

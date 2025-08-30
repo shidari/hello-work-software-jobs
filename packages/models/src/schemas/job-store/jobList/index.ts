@@ -1,4 +1,13 @@
-import { array, boolean, number, object, optional, string } from "valibot";
+import {
+  array,
+  boolean,
+  literal,
+  number,
+  object,
+  optional,
+  string,
+  union,
+} from "valibot";
 import { jobSelectSchema } from "../drizzle";
 
 export const searchFilterSchema = object({
@@ -8,6 +17,7 @@ export const searchFilterSchema = object({
   jobDescription: optional(string()),
   jobDescriptionExclude: optional(string()), // 除外キーワード
   onlyNotExpired: optional(boolean()),
+  orderByReceiveDate: optional(union([literal("asc"), literal("desc")])),
 });
 
 export const jobListQuerySchema = searchFilterSchema;
