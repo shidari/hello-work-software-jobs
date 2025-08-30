@@ -14,7 +14,17 @@ import { jobSelectSchema } from "../drizzle";
 
 export const searchFilterSchema = object({
   companyName: optional(string()),
-  employeeCountLt: optional(
+  employeeCountLt: optional(number()),
+  employeeCountGt: optional(number()),
+  jobDescription: optional(string()),
+  jobDescriptionExclude: optional(string()), // 除外キーワード
+  onlyNotExpired: optional(boolean()),
+  orderByReceiveDate: optional(union([literal("asc"), literal("desc")])),
+});
+
+export const jobListQuerySchema = object({
+  ...searchFilterSchema.entries,
+  employeeCount: optional(
     pipe(
       string(),
       transform((input) => (input === undefined ? undefined : Number(input))),
@@ -26,13 +36,7 @@ export const searchFilterSchema = object({
       transform((input) => (input === undefined ? undefined : Number(input))),
     ),
   ),
-  jobDescription: optional(string()),
-  jobDescriptionExclude: optional(string()), // 除外キーワード
-  onlyNotExpired: optional(boolean()),
-  orderByReceiveDate: optional(union([literal("asc"), literal("desc")])),
 });
-
-export const jobListQuerySchema = searchFilterSchema;
 
 export const jobListSearchFilterSchema = searchFilterSchema;
 
