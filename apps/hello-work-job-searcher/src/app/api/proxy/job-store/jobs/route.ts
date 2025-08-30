@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
   if (jobDescriptionExclude)
     filter.jobDescriptionExclude = jobDescriptionExclude;
 
+  filter.orderByReceiveDate = "desc";
+
   const result = await jobStoreClientOnServer.getInitialJobs(filter);
 
   return result.match(
