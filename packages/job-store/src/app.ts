@@ -99,7 +99,13 @@ v1Api.get(
         return ok(result.output);
       })();
       const jobListResult = yield* await jobStore.fetchJobList({
-        cursor: { jobId: INITIAL_JOB_ID },
+        cursor: {
+          jobId: INITIAL_JOB_ID,
+          receivedDateByISOString:
+            orderByReceiveDate === "desc"
+              ? "9999-12-31T23:59:59.999Z"
+              : "0000-01-01T00:00:00.000Z",
+        },
         limit,
         filter: {
           companyName,
@@ -114,12 +120,12 @@ v1Api.get(
 
       const {
         jobs,
-        cursor: { jobId },
+        cursor: { jobId, receivedDateByISOString },
         meta,
       } = jobListResult;
 
       const { count: restJobCount } = yield* await jobStore.countJobs({
-        cursor: { jobId },
+        cursor: { jobId, receivedDateByISOString },
         filter: meta.filter,
       });
 
@@ -127,7 +133,7 @@ v1Api.get(
         if (restJobCount <= limit) return okAsync(undefined);
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
-          cursor: { jobId },
+          cursor: { jobId, receivedDateByISOString },
           filter: meta.filter,
         };
         const signResult = ResultAsync.fromPromise(
@@ -204,19 +210,23 @@ v1Api.get(
       const limit = 20;
       // ジョブリスト取得
       const jobListResult = yield* await jobStore.fetchJobList({
-        cursor: { jobId: validatedPayload.cursor.jobId },
+        cursor: {
+          jobId: validatedPayload.cursor.jobId,
+          receivedDateByISOString:
+            validatedPayload.cursor.receivedDateByISOString,
+        },
         limit,
         filter: validatedPayload.filter,
       });
 
       const {
         jobs,
-        cursor: { jobId },
+        cursor: { jobId, receivedDateByISOString },
         meta,
       } = jobListResult;
 
       const { count: restJobCount } = yield* await jobStore.countJobs({
-        cursor: { jobId },
+        cursor: { jobId, receivedDateByISOString },
         filter: meta.filter,
       });
 
@@ -224,7 +234,7 @@ v1Api.get(
         if (restJobCount <= limit) return okAsync(undefined);
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
-          cursor: { jobId },
+          cursor: { jobId, receivedDateByISOString },
           filter: meta.filter,
         };
         const signResult = ResultAsync.fromPromise(

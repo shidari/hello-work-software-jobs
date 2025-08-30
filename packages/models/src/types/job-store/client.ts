@@ -1,8 +1,9 @@
 import type { InferOutput } from "valibot";
-import type { searchFilterSchema } from "../../schemas";
+import type { cursorSchema, searchFilterSchema } from "../../schemas";
 import type { Job } from "./jobFetch";
 import type { InsertJobRequestBody } from "./jobInsert";
 
+export type Cursor = InferOutput<typeof cursorSchema>;
 // --- コマンド型 ---
 export type InsertJobCommand = {
   type: "InsertJob";
@@ -15,7 +16,7 @@ export type FindJobByNumberCommand = {
 export type FindJobsCommand = {
   type: "FindJobs";
   options: {
-    cursor?: { jobId: number };
+    cursor?: Cursor;
     limit: number;
     filter: SearchFilter;
   };
@@ -28,7 +29,7 @@ export type CheckJobExistsCommand = {
 export type CountJobsCommand = {
   type: "CountJobs";
   options: {
-    cursor?: { jobId: number };
+    cursor?: Cursor;
     filter: SearchFilter;
   };
 };
@@ -47,7 +48,7 @@ export interface CommandOutputMap {
   FindJobByNumber: { job: Job | null };
   FindJobs: {
     jobs: Job[];
-    cursor: { jobId: number };
+    cursor: Cursor;
     meta: { totalCount: number; filter: SearchFilter };
   };
   CheckJobExists: { exists: boolean };

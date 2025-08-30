@@ -8,7 +8,7 @@ import type {
   JobStoreCommand,
   JobStoreDBClient,
 } from "@sho/models";
-import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
+import { and, asc, desc, eq, gt, like, lt, not, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
 
@@ -53,14 +53,31 @@ async function handleFindJobs(
 ): Promise<CommandOutput<FindJobsCommand>> {
   const { cursor, limit, filter } = cmd.options;
   const cursorConditions = [];
+  console.log({ cursor, filter, limit });
   if (cursor) {
     if (
       filter.orderByReceiveDate === undefined ||
       filter.orderByReceiveDate === "asc"
     ) {
-      cursorConditions.push(gt(jobs.id, cursor.jobId)); // 古→新
+      cursorConditions.push(
+        or(
+          gt(jobs.receivedDate, cursor.receivedDateByISOString),
+          and(
+            eq(jobs.receivedDate, cursor.receivedDateByISOString),
+            gt(jobs.id, cursor.jobId),
+          ),
+        ),
+      );
     } else {
-      cursorConditions.push(lt(jobs.id, cursor.jobId)); // 新→古
+      cursorConditions.push(
+        or(
+          lt(jobs.receivedDate, cursor.receivedDateByISOString),
+          and(
+            eq(jobs.receivedDate, cursor.receivedDateByISOString),
+            lt(jobs.id, cursor.jobId),
+          ),
+        ),
+      );
     }
   }
   const filterConditions = [];
@@ -113,13 +130,11 @@ async function handleFindJobs(
   return {
     jobs: jobList,
     cursor: {
-      jobId:
+      jobId: jobList.length > 0 ? jobList[jobList.length - 1].id : 1,
+      receivedDateByISOString:
         jobList.length > 0
-          ? filter.orderByReceiveDate === undefined ||
-            filter.orderByReceiveDate === "asc"
-            ? jobList[jobList.length - 1].id
-            : jobList[0].id
-          : 1,
+          ? jobList[jobList.length - 1].receivedDate
+          : new Date().toISOString(),
     },
     meta: {
       totalCount,

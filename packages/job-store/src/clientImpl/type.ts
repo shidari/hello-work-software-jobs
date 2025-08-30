@@ -2,6 +2,7 @@ import type {
   CheckJobExistsCommand,
   CommandOutput,
   CountJobsCommand,
+  Cursor,
   FindJobByNumberCommand,
   FindJobsCommand,
   InsertJobCommand,
@@ -39,12 +40,12 @@ export type JobStoreResultBuilder = (client: JobStoreDBClient) => {
     InsertJobDuplicationError
   >;
   fetchJobList: (params: {
-    cursor?: { jobId: number };
+    cursor?: Cursor;
     limit: number;
     filter: SearchFilter;
   }) => ResultAsync<CommandOutput<FindJobsCommand>, FetchJobListError>;
   countJobs: (params: {
-    cursor?: { jobId: number };
+    cursor?: Cursor;
     filter: SearchFilter;
   }) => ResultAsync<CommandOutput<CountJobsCommand>, FetchJobCountError>;
 };
