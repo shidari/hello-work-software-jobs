@@ -101,7 +101,9 @@ v1Api.get(
         );
         if (!result.success)
           return err(
-            createEmployeeCountGtValidationError("Invalid employeeCountGt"),
+            createEmployeeCountGtValidationError(
+              `Invalid employeeCountGt.${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         return ok(result.output);
       })();
@@ -112,7 +114,9 @@ v1Api.get(
         );
         if (!result.success)
           return err(
-            createEmployeeCountLtValidationError("Invalid employeeCountLt"),
+            createEmployeeCountLtValidationError(
+              `Invalid employeeCountLt.${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         return ok(result.output);
       })();
