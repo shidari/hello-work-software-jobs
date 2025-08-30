@@ -5,15 +5,27 @@ import {
   number,
   object,
   optional,
+  pipe,
   string,
+  transform,
   union,
 } from "valibot";
 import { jobSelectSchema } from "../drizzle";
 
 export const searchFilterSchema = object({
   companyName: optional(string()),
-  employeeCountLt: optional(number()),
-  employeeCountGt: optional(number()),
+  employeeCountLt: optional(
+    pipe(
+      string(),
+      transform((input) => (input === undefined ? undefined : Number(input))),
+    ),
+  ),
+  employeeCountGt: optional(
+    pipe(
+      string(),
+      transform((input) => (input === undefined ? undefined : Number(input))),
+    ),
+  ),
   jobDescription: optional(string()),
   jobDescriptionExclude: optional(string()), // 除外キーワード
   onlyNotExpired: optional(boolean()),
