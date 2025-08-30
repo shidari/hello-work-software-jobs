@@ -49,6 +49,7 @@ export const jobStoreClientOnServer: JobStoreClient = {
         );
       }
 
+      searchParams.append("orderByReceiveDate", "desc");
       const url = `${endpoint}/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
       const response = yield* ResultAsync.fromPromise(fetch(url), () =>

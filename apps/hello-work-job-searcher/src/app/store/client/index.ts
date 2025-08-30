@@ -31,6 +31,8 @@ export const jobStoreClientOnBrowser: JobStoreClient = {
         filter.jobDescriptionExclude,
       );
     }
+    searchParams.append("orderByReceiveDate", "desc");
+
     return safeTry(async function* () {
       const response = yield* ResultAsync.fromPromise(
         fetch(
