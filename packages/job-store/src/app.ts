@@ -187,10 +187,12 @@ v1Api.get(
         switch (error._tag) {
           case "JWTSignatureError":
           case "EnvError":
-            throw new HTTPException(500, { message: error.message });
+            throw new HTTPException(500, { message: "internal server error" });
           case "EmployeeCountGtValidationError":
           case "EmployeeCountLtValidationError":
-            throw new HTTPException(400, { message: error.message });
+            throw new HTTPException(400, {
+              message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
+            });
           default:
             throw new HTTPException(500, { message: "internal server error" });
         }
@@ -294,7 +296,7 @@ v1Api.get(
             throw new HTTPException(400, { message: "invalid nextToken" });
           case "JWTSignatureError":
           case "EnvError":
-            throw new HTTPException(500, { message: error.message });
+            throw new HTTPException(500, { message: "internal server error" });
           case "JWTExpiredError":
             throw new HTTPException(401, { message: "nextToken expired" });
           case "DecodeJWTPayloadError":

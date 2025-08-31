@@ -1,20 +1,10 @@
-import { brand, object, pipe, regex, string } from "valibot";
-
-const jobNumberSchema = pipe(
-  string(),
-  regex(/^\d{5}-\d{0,8}$/, "jobNumber format invalid."),
-  brand("jobNumber"),
-);
-
-import { jobSelectSchema } from "./drizzle";
+import { object, string } from "valibot";
+import { JobSchema } from "./client";
+import { jobNumberSchema } from "./tmp";
 
 export const jobFetchParamSchema = object({
   jobNumber: jobNumberSchema,
 });
-
-// Valibotでomitはスプレッドで除外
-const { id: _, ...jobSelectSchemaWithoutId } = jobSelectSchema.entries;
-export const JobSchema = object({ ...jobSelectSchemaWithoutId });
 
 export const jobFetchSuccessResponseSchema = JobSchema;
 

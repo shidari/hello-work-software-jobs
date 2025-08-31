@@ -44,12 +44,13 @@ export const jobStoreClientOnBrowser: JobStoreClient = {
       const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
         createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
-
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
           return err(
-            createValidateJobsError(`Invalid job data: ${result.issues}`),
+            createValidateJobsError(
+              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         }
         return ok(result.output);
@@ -72,7 +73,9 @@ export const jobStoreClientOnBrowser: JobStoreClient = {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
           return err(
-            createValidateJobsError(`Invalid job data: ${result.issues}`),
+            createValidateJobsError(
+              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         }
         return ok(result.output);

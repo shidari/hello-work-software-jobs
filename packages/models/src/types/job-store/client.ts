@@ -1,5 +1,6 @@
 import type { InferOutput } from "valibot";
-import type { cursorSchema, searchFilterSchema } from "../../schemas";
+import type { cursorSchema } from "../../schemas";
+import type { searchFilterSchema } from "../../schemas/job-store/client";
 import type { Job } from "./jobFetch";
 import type { InsertJobRequestBody } from "./jobInsert";
 
