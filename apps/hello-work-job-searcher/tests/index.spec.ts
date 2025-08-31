@@ -34,6 +34,17 @@ test.describe("/api/proxy/job-store/jobs", () => {
     const json = await res.json();
     expect(json).toHaveProperty("error");
   });
+
+  test("should return 500 for negative employeeCountLt", async ({
+    request,
+  }) => {
+    const res = await request.get(
+      "/api/proxy/job-store/jobs?employeeCountLt=-1",
+    );
+    expect(res.status()).toBe(500);
+    const json = await res.json();
+    expect(json).toHaveProperty("error");
+  });
 });
 
 // /api/proxy/job-store/jobs/continue GET: nextToken異常系
