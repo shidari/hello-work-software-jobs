@@ -1,4 +1,8 @@
-import { jobListSuccessResponseSchema, type SearchFilter } from "@sho/models";
+import {
+  jobListQuerySchema,
+  jobListSuccessResponseSchema,
+  type SearchFilter,
+} from "@sho/models";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import {
@@ -50,6 +54,21 @@ export const jobStoreClientOnServer: JobStoreClient = {
       }
 
       searchParams.append("orderByReceiveDate", "desc");
+
+      const paramsObj = Object.fromEntries(searchParams.entries());
+
+      yield* (() => {
+        const result = v.safeParse(jobListQuerySchema, paramsObj);
+        if (!result.success) {
+          return err(
+            createValidateJobsError(
+              `Invalid job query: ${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
+          );
+        }
+        return ok();
+      })();
+
       const url = `${endpoint}/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
       const response = yield* ResultAsync.fromPromise(fetch(url), () =>
