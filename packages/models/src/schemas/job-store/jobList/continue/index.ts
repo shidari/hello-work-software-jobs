@@ -1,5 +1,5 @@
 import { number, object, string } from "valibot";
-import { jobListSearchFilterSchema } from "..";
+import { searchFilterSchema } from "../../client";
 
 export const jobListContinueQuerySchema = object({
   nextToken: string(),
@@ -13,7 +13,7 @@ export const cursorSchema = object({
 export const decodedNextTokenSchema = object({
   exp: number(),
   cursor: cursorSchema,
-  filter: jobListSearchFilterSchema,
+  filter: searchFilterSchema,
 });
 
 export const jobListContinueClientErrorResponseSchema = object({

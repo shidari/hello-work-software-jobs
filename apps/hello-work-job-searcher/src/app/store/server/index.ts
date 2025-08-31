@@ -63,7 +63,9 @@ export const jobStoreClientOnServer: JobStoreClient = {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
           return err(
-            createValidateJobsError(`Invalid job data: ${result.issues}`),
+            createValidateJobsError(
+              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         }
         return ok(result.output);
@@ -97,7 +99,9 @@ export const jobStoreClientOnServer: JobStoreClient = {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
           return err(
-            createValidateJobsError(`Invalid job data: ${result.issues}`),
+            createValidateJobsError(
+              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
           );
         }
         return ok(result.output);
