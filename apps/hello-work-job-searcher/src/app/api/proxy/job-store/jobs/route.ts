@@ -10,25 +10,14 @@ export async function GET(request: NextRequest) {
   const jobDescriptionExclude =
     searchParams.get("jobDescriptionExclude") ?? undefined;
 
-  const employeeCountGt =
-    employeeCountGtRaw !== null && employeeCountGtRaw !== ""
-      ? Number(employeeCountGtRaw)
-      : undefined;
-  const employeeCountLt =
-    employeeCountLtRaw !== null && employeeCountLtRaw !== ""
-      ? Number(employeeCountLtRaw)
-      : undefined;
-
   const filter: Record<string, unknown> = {};
   if (companyName) filter.companyName = companyName;
-  if (typeof employeeCountGt === "number" && !Number.isNaN(employeeCountGt))
-    filter.employeeCountGt = employeeCountGt;
-  if (typeof employeeCountLt === "number" && !Number.isNaN(employeeCountLt))
-    filter.employeeCountLt = employeeCountLt;
   if (jobDescription) filter.jobDescription = jobDescription;
   if (jobDescriptionExclude)
     filter.jobDescriptionExclude = jobDescriptionExclude;
 
+  filter.employeeCountGt = employeeCountGtRaw ?? undefined;
+  filter.employeeCountLt = employeeCountLtRaw ?? undefined;
   filter.orderByReceiveDate = "desc";
 
   const result = await jobStoreClientOnServer.getInitialJobs(filter);
