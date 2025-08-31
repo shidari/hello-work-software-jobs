@@ -59,6 +59,14 @@ export const jobStoreClientOnServer: JobStoreClient = {
         createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
 
+      if (!response.ok) {
+        return err(
+          createFetchJobsError(
+            `Failed to fetch jobs.\nstatus: ${response.status}\nbody: ${JSON.stringify(data, null, 2)}`,
+          ),
+        );
+      }
+
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);
         if (!result.success) {
@@ -94,6 +102,14 @@ export const jobStoreClientOnServer: JobStoreClient = {
       const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
         createParseJsonError(`Failed to parse jobs response: ${String(error)}`),
       );
+
+      if (!response.ok) {
+        return err(
+          createFetchJobsError(
+            `Failed to fetch jobs.\nstatus: ${response.status}\nbody: ${JSON.stringify(data, null, 2)}`,
+          ),
+        );
+      }
 
       const validatedData = yield* (() => {
         const result = v.safeParse(jobListSuccessResponseSchema, data);

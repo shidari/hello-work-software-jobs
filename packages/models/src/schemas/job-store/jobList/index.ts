@@ -3,7 +3,7 @@ import { JobListSchema, searchFilterSchema } from "../client";
 
 export const jobListQuerySchema = object({
   ...searchFilterSchema.entries,
-  employeeCount: optional(string()),
+  employeeCountLt: optional(string()),
   employeeCountGt: optional(string()),
 });
 
