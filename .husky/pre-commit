@@ -1,4 +1,5 @@
 pnpm --filter job-store run copy-schema
+pnpm --filter job-store run test run
 git add packages/job-store/src/db/schema.ts
 pnpm exec lint-staged
 pnpm type-check
