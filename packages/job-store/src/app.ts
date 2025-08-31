@@ -111,7 +111,7 @@ v1Api.get(
       const employeeCountLt = yield* (() => {
         if (rawEmployeeCountLt === undefined) return ok(undefined);
         const result = safeParse(
-          v.pipe(v.number(), v.integer()),
+          v.pipe(v.number(), v.integer(), v.minValue(0)),
           Number(rawEmployeeCountLt),
         );
         if (!result.success)
