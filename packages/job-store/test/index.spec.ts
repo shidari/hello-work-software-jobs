@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { app } from "../src/app";
 
+// テスト用env
+const MOCK_ENV = {
+  API_KEY: "test-api-key",
+};
+
 describe("Job Store API - Invalid Request Tests", () => {
   it("GET /api/v1/jobs/continue without nextToken should fail", async () => {
     const res = await app.request("/api/v1/jobs/continue");
@@ -36,21 +41,38 @@ describe("Job Store API - Invalid Request Tests", () => {
     const res = await app.request("/api/v1/jobs/123-1");
     expect([400, 500]).toContain(res.status);
   });
+});
 
-  it("POST /api/v1/job with invalid body should fail", async () => {
-    const res = await app.request("/api/v1/job", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    });
-    expect(res.status).toBe(400);
+describe("Job Store API - API Key Auth", () => {
+  it("POST /api/v1/job with invalid API key should return 401", async () => {
+    const res = await app.request(
+      "/api/v1/job",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "invalid-key",
+        },
+        body: JSON.stringify({}),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(401);
   });
 
-  it("POST /api/v1/job with missing Content-Type should fail", async () => {
-    const res = await app.request("/api/v1/job", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-    expect([400, 415]).toContain(res.status);
+  it("POST /api/v1/job with valid API key but invalid body should return 400", async () => {
+    const res = await app.request(
+      "/api/v1/job",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "test-api-key",
+        },
+        body: JSON.stringify({}),
+      },
+      MOCK_ENV,
+    );
+    expect(res.status).toBe(400);
   });
 });

@@ -7,6 +7,7 @@ import { describeRoute } from "hono-openapi";
 import { resolver } from "hono-openapi/valibot";
 
 export const jobInsertRoute = describeRoute({
+  security: [{ ApiKeyAuth: [] }],
   responses: {
     "200": {
       description: "Successful response",
