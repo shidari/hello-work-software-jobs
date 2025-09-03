@@ -159,7 +159,10 @@ export function buildJobStoreClient() {
               fetch(`${endpoint}/job`, {
                 method: "POST",
                 body: JSON.stringify(job),
-                headers: { "content-type": "application/json" },
+                headers: {
+                  "content-type": "application/json",
+                  "x-api-key": process.env.API_KEY ?? "",
+                },
               }),
             catch: (e) =>
               new InsertJobError({

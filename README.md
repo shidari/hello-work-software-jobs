@@ -367,8 +367,9 @@ pnpm start          # 本番環境での起動確認
 
 ### job-store API
 
-- **ベースURL**: 環境変数 `JOB_STORE_ENDPOINT` で設定
-- **OpenAPI仕様書**: `{BASE_URL}/api/v1/docs`
+- **ベースURL**: https://job-store.hello-work-searher-api.workers.dev/api/v1
+- **OpenAPI仕様書**: https://job-store.hello-work-searher-api.workers.dev/docs
+- **認証**: POST /api/v1/job エンドポイントは `x-api-key` ヘッダーによるAPIキー認証が必要
 
 #### エンドポイント
 

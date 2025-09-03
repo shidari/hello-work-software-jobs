@@ -46,6 +46,7 @@ const envSchema = v.object({
 export type Env = {
   DB: D1Database;
   JWT_SECRET: JWTSecret;
+  API_KEY: string;
 };
 export type AppContext = Context<{ Bindings: Env }>;
 
@@ -341,6 +342,15 @@ v1Api.get(
 v1Api.post(
   "/job",
   jobInsertRoute,
+  // APIキー認証ミドルウェア
+  (c: AppContext, next) => {
+    const apiKey = c.req.header("x-api-key");
+    const validApiKey = c.env.API_KEY;
+    if (!apiKey || apiKey !== validApiKey) {
+      throw new HTTPException(401, { message: "Invalid API key" });
+    }
+    return next();
+  },
   vValidator("json", insertJobRequestBodySchema),
   (c) => {
     const body = c.req.valid("json");
@@ -377,6 +387,16 @@ app.get(
         title: "Job Store API",
         version: "1.3",
         description: "Job Store API",
+      },
+      components: {
+        securitySchemes: {
+          ApiKeyAuth: {
+            type: "apiKey",
+            in: "header",
+            name: "x-api-key",
+            description: "API key required in the 'x-api-key' header.",
+          },
+        },
       },
     },
   }),

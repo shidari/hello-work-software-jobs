@@ -12,6 +12,7 @@ import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
+
 dotenv.config();
 
 export class HeadlessCrawlerStack extends cdk.Stack {
@@ -79,6 +80,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
       environment: {
         JOB_STORE_ENDPOINT: process.env.JOB_STORE_ENDPOINT || "",
+        API_KEY: process.env.API_KEY || "",
       },
     });
 
