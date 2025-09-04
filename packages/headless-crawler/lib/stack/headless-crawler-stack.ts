@@ -66,7 +66,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       memorySize: 1024,
-      timeout: Duration.seconds(15),
+      timeout: Duration.seconds(30),
       layers: [playwrightLayer],
       bundling: {
         externalModules: [
