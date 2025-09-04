@@ -36,7 +36,7 @@ jobs:
           pnpm -r --filter='!hello-work-job-searcher' --filter='!job-store' build
       # 👇 OIDCによるAssumeRole
       - name: Configure AWS CDK Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-oidc
