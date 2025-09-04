@@ -24,10 +24,6 @@ jobs:
         with:
           version: 10.15.1
 
-      # 念のためcorepack有効化（pnpm/action-setupが管理する場合は不要）
-      - name: Enable corepack
-        run: corepack enable
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
