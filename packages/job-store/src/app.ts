@@ -26,9 +26,10 @@ app.use("*", async (c, next) => {
   const duration = Date.now() - start;
   console.log(`📤 ${c.res.status} (${duration}ms)`);
 });
+// こっちを先にしないと、/apiv/v1/jobs/:jobNumberに飛んでしまう
+app.route("/api/v1/jobs/continue", jobsContinue);
 app.route("/api/v1/job", job);
 app.route("/api/v1/jobs", jobs);
-app.route("/api/v1/jobs/continue", jobsContinue);
 app.get(
   "/openapi",
   openAPISpecs(app, {
