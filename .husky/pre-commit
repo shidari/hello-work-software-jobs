@@ -4,3 +4,6 @@ pnpm --filter hello-work-job-searcher run test
 git add packages/job-store/src/db/schema.ts
 pnpm exec lint-staged
 pnpm type-check
+nix-shell -p pinact run 
+git add .github/workflows/* 
+
