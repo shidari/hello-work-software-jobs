@@ -135,7 +135,7 @@ graph TD
   - EventBridge (Cron) による定期実行（毎週月曜日午前1時）
   - CloudWatch アラーム機能付き
 
-##### `job-store`
+##### `job-store-api`
 
 - **目的**: 求人情報のデータベース管理・API提供
 - **技術**:
@@ -250,7 +250,7 @@ pnpm type-check      # 型チェック
 #### データベース・API
 
 ```bash
-cd packages/job-store
+cd apps/job-store-api
 pnpm dev      # ローカル開発サーバー
 pnpm test     # テスト実行
 pnpm build    # ビルド
@@ -279,7 +279,7 @@ pnpm run deploy     # AWS Lambda + SQSにデプロイ
 ### データベース・API (Cloudflare)
 
 ```bash
-cd packages/job-store
+cd apps/job-store-api
 pnpm deploy         # Cloudflare Workersにデプロイ
 ```
 
