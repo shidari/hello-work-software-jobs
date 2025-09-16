@@ -1,3 +1,4 @@
+import { vValidator } from "@hono/valibot-validator";
 import {
   insertJobClientErrorResponseSchema,
   insertJobRequestBodySchema,
@@ -6,8 +7,7 @@ import {
 } from "@sho/models";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { describeRoute } from "hono-openapi";
-import { resolver, validator as vValidator } from "hono-openapi/valibot";
+import { describeRoute, resolver } from "hono-openapi";
 import { okAsync, safeTry } from "neverthrow";
 import type { AppContext } from "../../app";
 import { createJobStoreResultBuilder } from "../../clientImpl";

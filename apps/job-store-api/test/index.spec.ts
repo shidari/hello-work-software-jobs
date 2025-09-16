@@ -76,3 +76,22 @@ describe("Job Store API - API Key Auth", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("/", () => {
+  // open api jsonでinternal server errorが出てないか確かめる用
+  it("GET /で302リダイレクトとlocationを確認し、/docで200を確認する", async () => {
+    const res = await app.request("/");
+    expect(res.status).toBe(302);
+    const location = res.headers.get("location");
+    expect(location).toBe("/doc");
+  });
+});
+
+describe("/api/v1", () => {
+  it("GET /api/v1で302リダイレクトとlocationを確認し、/docで200を確認する", async () => {
+    const res = await app.request("/api/v1");
+    expect(res.status).toBe(302);
+    const location = res.headers.get("location");
+    expect(location).toBe("/doc");
+  });
+});
