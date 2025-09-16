@@ -9,10 +9,9 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, resolver } from "hono-openapi";
 import { okAsync, safeTry } from "neverthrow";
-import type { AppContext } from "../../app";
-import { createJobStoreResultBuilder } from "../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../clientImpl/adapter";
-import { getDb } from "../../db";
+import { createJobStoreResultBuilder } from "../../../../clientImpl";
+import { createJobStoreDBClientAdapter } from "../../../../clientImpl/adapter";
+import { getDb } from "../../../../db";
 
 const jobInsertRoute = describeRoute({
   security: [{ ApiKeyAuth: [] }],
@@ -44,13 +43,12 @@ const jobInsertRoute = describeRoute({
   },
 });
 
-const app = new Hono();
-
+const app = new Hono<{ Bindings: Env }>();
 app.post(
   "/",
   jobInsertRoute,
   // APIキー認証ミドルウェア
-  (c: AppContext, next) => {
+  (c, next) => {
     const apiKey = c.req.header("x-api-key");
     const validApiKey = c.env.API_KEY;
     if (!apiKey || apiKey !== validApiKey) {

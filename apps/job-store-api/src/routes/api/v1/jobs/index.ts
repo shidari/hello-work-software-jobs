@@ -17,16 +17,18 @@ import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import { safeParse } from "valibot";
-import { createJobStoreResultBuilder } from "../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../clientImpl/adapter";
-import { getDb } from "../../db";
+import { createJobStoreResultBuilder } from "../../../../clientImpl";
+import { createJobStoreDBClientAdapter } from "../../../../clientImpl/adapter";
+import { getDb } from "../../../../db";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
   createEnvError,
   createJWTSignatureError,
-} from "../error";
-import { envSchema } from "../util";
+} from "../../../error";
+import { envSchema } from "../../../util";
+// continueが予約後っぽいので
+import continueRoute from "./continue";
 
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
@@ -88,7 +90,7 @@ const jobFetchRoute = describeRoute({
   },
 });
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
 app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
   const {
@@ -223,6 +225,8 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     },
   );
 });
+
+app.route("/continue", continueRoute);
 
 app.get(
   "/:jobNumber",
