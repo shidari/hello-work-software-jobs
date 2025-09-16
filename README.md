@@ -22,7 +22,7 @@ TypeScript + neverthrow + AWS Lambda + Cloudflare Workers + Next.js 15 + React 1
 
 - ✨ 型主導開発による堅牢性・neverthrowによる関数型エラーハンドリング
 - 🏗️ AWS Lambda + Cloudflare Workersのハイブリッド構成
-- 🔒 Drizzle ORM + Zod + TypeScriptによる一貫した型管理
+- 🔒 Drizzle ORM + Valibot + TypeScriptによる一貫した型管理
 - 📦 pnpm workspaceによるモノレポ管理
 - 🚀 React 19 + Next.js 15の最新技術スタック
 
@@ -69,11 +69,11 @@ TypeScript + neverthrow + AWS Lambda + Cloudflare Workers + Next.js 15 + React 1
 ```
 hello-work-software-jobs/
 ├── apps/
-│   └── hello-work-job-searcher/ # フロントエンドアプリケーション (Next.js 15)
+│   ├── hello-work-job-searcher/ # フロントエンドアプリケーション (Next.js 15)
+│   └── job-store-api/          # 求人情報データベース・API (Cloudflare Workers)
 ├── packages/
 │   ├── models/          # 共通スキーマ・型定義 (@sho/models)
 │   ├── headless-crawler/ # ハローワーククローラー (AWS Lambda)
-│   ├── job-store/       # 求人情報データベース・API (Cloudflare Workers)
 │   └── scripts/         # 共通スクリプト・ユーティリティ (@sho/scripts)
 ├── pnpm-workspace.yaml # モノレポ設定
 ├── biome.json         # コードフォーマッター設定
@@ -84,7 +84,7 @@ hello-work-software-jobs/
 
 ```mermaid
 graph TD
-  A["headless-crawler (AWS Lambda)"] -->|"求人データ"| B["job-store (Cloudflare Workers)"]
+  A["headless-crawler (AWS Lambda)"] -->|"求人データ"| B["job-store-api (Cloudflare Workers)"]
   B -->|"REST API"| C["hello-work-job-searcher (Next.js)"]
   D["ユーザー"] -->|"Webアクセス"| C
   E["@sho/models"] -->|"型定義・スキーマ"| A
@@ -96,7 +96,7 @@ graph TD
 
 #### 共通
 
-- **パッケージマネージャー**: pnpm (v10.15.0)
+- **パッケージマネージャー**: pnpm (v10.15.1)
 - **言語**: TypeScript (v5.8.3)
 - **コードフォーマッター**: Biome (v2.0.6)
 - **Git Hooks**: Husky (v9.1.7) + lint-staged (v16.1.0)
@@ -109,25 +109,25 @@ graph TD
 
 - **目的**: 共通の型定義とスキーマ（Source of Truth）
 - **技術**:
-  - Zod (v3.25.74) - スキーマバリデーション
+  - Valibot (v1.1.0) - スキーマバリデーション
+  - Zod (v4.1.5) - 追加スキーマバリデーション
   - Drizzle ORM (v0.44.2) - データベーススキーマ
   - TypeScript (v5.8.3) - 型定義
   - tsup (v8.5.0) - ビルドツール
   - Playwright (v1.53.1) - テスト用ブラウザ自動化
-  - @asteasolutions/zod-to-openapi (v7.2.0) - OpenAPI仕様生成
 
 ##### `headless-crawler`
 
 - **目的**: ハローワークサイトのクローリング・スクレイピング
 - **技術**:
   - Playwright (v1.53.1) - ブラウザ自動化
-  - AWS CDK (v2.1025.0) - インフラ管理
+  - AWS CDK (v2.1029.0) - インフラ管理
   - Effect (v3.16.5) - 関数型プログラミング（**今後neverthrowに移行予定**）
   - AWS Lambda + SQS - 実行環境
   - @sparticuz/chromium (v138.0.0) - Lambda用Chromium
   - @aws-sdk/client-sqs (v3.840.0) - SQS連携
   - esbuild (v0.25.5) - ビルドツール
-  - Zod (v3.25.74) - スキーマバリデーション
+  - Valibot (v1.1.0) + Zod (v4.1.5) - スキーマバリデーション
 - **機能**:
   - 求人検索条件に基づく求人一覧取得
   - 個別求人詳細情報のスクレイピング
@@ -135,7 +135,7 @@ graph TD
   - EventBridge (Cron) による定期実行（毎週月曜日午前1時）
   - CloudWatch アラーム機能付き
 
-##### `job-store`
+##### `job-store-api`
 
 - **目的**: 求人情報のデータベース管理・API提供
 - **技術**:
@@ -143,17 +143,15 @@ graph TD
   - Drizzle ORM (v0.44.2) - データベースORM
   - Hono (v4.8.3) - Webフレームワーク
   - D1 (SQLite) - データベース
-  - Chanfana (v2.8.1) - OpenAPI生成
-  - Vitest (v3.2.0) - テスト
-  - Zod (v3.25.74) - バリデーション
+  - Vitest (v3.2.4) - テスト
+  - Valibot (v1.1.0) - バリデーション
   - neverthrow (v8.2.0) - エラーハンドリング
-  - Wrangler (v4.26.1) - デプロイメントツール
+  - Wrangler (v4.35.0) - デプロイメントツール
   - tsup (v8.5.0) - ビルドツール
-  - @hono/zod-openapi (v1.0.2) - OpenAPI統合
-  - @hono/zod-validator (v0.7.2) - Zodバリデーション統合
-  - valibot (v1.1.0) - 追加バリデーション
-  - dotenv (v17.0.0) - 環境変数管理
+  - @hono/valibot-validator (v0.5.3) - Valibotバリデーション統合
+  - @hono/swagger-ui (v0.5.2) - Swagger UI統合
   - hono-openapi (v0.4.8) - OpenAPI拡張
+  - dotenv (v17.0.0) - 環境変数管理
 - **機能**:
   - 求人情報の保存・取得
   - JWTベースのページネーション機能（15分有効期限）
@@ -176,12 +174,14 @@ graph TD
 - **目的**: ユーザーインターフェース
 - **技術**:
   - React (v19.1.1)
-  - Next.js (v15.4.7) - App Router
+  - Next.js (v15.5.2) - App Router
   - TypeScript (v5)
   - Turbopack - 開発時高速化
   - TanStack React Virtual (v3.13.12) - 仮想化による無限スクロール
   - neverthrow (v8.2.0) - エラーハンドリング
   - Jotai (v2.13.1) - 状態管理
+  - Valibot (v1.1.0) - バリデーション
+  - Playwright (v1.55.0) - E2Eテスト
 - **デプロイ**: Vercel
 - **実装済み機能**:
     - ✅ 求人一覧表示（仮想化無限スクロール対応）
@@ -204,6 +204,8 @@ graph TD
   - TypeScript (v5.8.3)
   - neverthrow (v8.2.0) - エラーハンドリング
   - tsx (v4.20.3) - TypeScript実行環境
+  - fs-extra (v11.3.0) - ファイルシステム操作
+  - find-up (v7.0.0) - ファイル検索
 - **機能**:
   - スキーマコピー等の開発支援スクリプト (`copy-schema`)
 
@@ -212,9 +214,9 @@ graph TD
 ### 前提条件
 
 - Node.js (推奨: 最新LTS版)
-- pnpm (v10.14.0以上)
+- pnpm (v10.15.1以上)
 - AWS CLI (headless-crawler使用時)
-- Cloudflare Wrangler (job-store使用時)
+- Cloudflare Wrangler (job-store-api使用時)
 
 ### インストール
 
@@ -250,7 +252,7 @@ pnpm type-check      # 型チェック
 #### データベース・API
 
 ```bash
-cd packages/job-store
+cd apps/job-store-api
 pnpm dev      # ローカル開発サーバー
 pnpm test     # テスト実行
 pnpm build    # ビルド
@@ -279,7 +281,7 @@ pnpm run deploy     # AWS Lambda + SQSにデプロイ
 ### データベース・API (Cloudflare)
 
 ```bash
-cd packages/job-store
+cd apps/job-store-api
 pnpm deploy         # Cloudflare Workersにデプロイ
 ```
 
@@ -326,7 +328,7 @@ pnpm start          # 本番環境での起動確認
 
 - **@sho/models**をSource of Truthとした一貫した型管理
 - 全パッケージでTypeScript strict modeを有効化
-- Zodによるランタイムバリデーション
+- Valibot + Zodによるランタイムバリデーション
 - Drizzle ORMによる型安全なDB操作
 - フロントエンド〜バックエンド〜DBまでの型の一貫性
 
@@ -365,7 +367,7 @@ pnpm start          # 本番環境での起動確認
 
 ## API仕様
 
-### job-store API
+### job-store-api API
 
 - **ベースURL**: https://job-store.hello-work-searher-api.workers.dev/api/v1
 - **OpenAPI仕様書**: https://job-store.hello-work-searher-api.workers.dev/docs
