@@ -1,6 +1,6 @@
 import { swaggerUI } from "@hono/swagger-ui";
 import { type Context, Hono } from "hono";
-import { openAPISpecs } from "hono-openapi";
+import { openAPIRouteHandler } from "hono-openapi";
 import job from "./endpoint/job";
 import jobs from "./endpoint/jobs";
 import jobsContinue from "./endpoint/jobs/continue";
@@ -15,7 +15,6 @@ export type Env = {
 };
 export type AppContext = Context<{ Bindings: Env }>;
 const app = new Hono();
-const v1Api = new Hono(); // シンプルなログミドルウェア
 app.use("*", async (c, next) => {
   const start = Date.now();
 
@@ -32,11 +31,11 @@ app.route("/api/v1/job", job);
 app.route("/api/v1/jobs", jobs);
 app.get(
   "/openapi",
-  openAPISpecs(app, {
+  openAPIRouteHandler(app, {
     documentation: {
       info: {
         title: "Job Store API",
-        version: "1.3",
+        version: "1.4",
         description: "Job Store API",
       },
       components: {
@@ -52,8 +51,8 @@ app.get(
     },
   }),
 );
-app.get("/", swaggerUI({ url: "/openapi" }));
-v1Api.get("/", swaggerUI({ url: "/openapi" }));
-app.get("/docs", swaggerUI({ url: "/openapi" }));
+app.get("/", (c) => c.redirect("/doc"));
+app.get("/api/v1", (c) => c.redirect("/doc"));
+app.get("/doc", swaggerUI({ url: "/openapi" }));
 
 export { app };

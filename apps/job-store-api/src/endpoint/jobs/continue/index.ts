@@ -1,3 +1,4 @@
+import { vValidator } from "@hono/valibot-validator";
 import {
   type DecodedNextToken,
   decodedNextTokenSchema,
@@ -9,8 +10,7 @@ import {
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { decode, sign } from "hono/jwt";
-import { describeRoute } from "hono-openapi";
-import { resolver, validator as vValidator } from "hono-openapi/valibot";
+import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import { createJobStoreResultBuilder } from "../../../clientImpl";

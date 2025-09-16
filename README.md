@@ -150,7 +150,7 @@ graph TD
   - tsup (v8.5.0) - ビルドツール
   - @hono/valibot-validator (v0.5.3) - Valibotバリデーション統合
   - @hono/swagger-ui (v0.5.2) - Swagger UI統合
-  - hono-openapi (v0.4.8) - OpenAPI拡張
+  - hono-openapi (v1.0.8) - OpenAPI拡張
   - dotenv (v17.0.0) - 環境変数管理
 - **機能**:
   - 求人情報の保存・取得
