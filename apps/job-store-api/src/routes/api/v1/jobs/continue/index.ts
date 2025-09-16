@@ -13,11 +13,11 @@ import { decode, sign } from "hono/jwt";
 import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
-import { createJobStoreResultBuilder } from "../../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../../clientImpl/adapter";
-import { getDb } from "../../../db";
-import { createEnvError, createJWTSignatureError } from "../../error";
-import { envSchema } from "../../util";
+import { createJobStoreResultBuilder } from "../../../../../clientImpl";
+import { createJobStoreDBClientAdapter } from "../../../../../clientImpl/adapter";
+import { getDb } from "../../../../../db";
+import { createEnvError, createJWTSignatureError } from "../../../../error";
+import { envSchema } from "../../../../util";
 import {
   createDecodeJWTPayloadError,
   createJWTDecodeError,
@@ -53,7 +53,7 @@ export const jobListContinueRoute = describeRoute({
   },
 });
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
 app.get(
   "/",
