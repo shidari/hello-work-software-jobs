@@ -1,0 +1,119 @@
+import {
+  createExecutionContext,
+  env,
+  waitOnExecutionContext,
+} from "cloudflare:test";
+import { describe, expect, it } from "vitest";
+// Import your worker so you can unit test it
+import worker from "../src";
+
+const MOCK_ENV = {
+  ...env,
+  API_KEY: "test-api-key",
+};
+
+describe("/", () => {
+  it("GET 302リダイレクトとlocationを確認し、/docで200を確認する", async () => {
+    const request = new Request("http://localhost:8787/");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(302);
+    const location = response.headers.get("location");
+    expect(location).toBe("/doc");
+  });
+});
+describe("/api/v1", () => {
+  it("302リダイレクトとlocationを確認し、/docで200を確認する", async () => {
+    const request = new Request("http://localhost:8787/api/v1");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(302);
+    const location = response.headers.get("location");
+    expect(location).toBe("/doc");
+  });
+});
+
+describe("/api/v1/job", () => {
+  it("POST with invalid API key should return 401", async () => {
+    const request = new Request("http://localhost:8787/api/v1/job", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "invalid-key",
+      },
+      body: JSON.stringify({}),
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(401);
+  });
+
+  it("POST with valid API key but invalid body should return 400", async () => {
+    const request = new Request("http://localhost:8787/api/v1/job", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
+      body: JSON.stringify({}),
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("/api/v1/jobs", () => {
+  it("GET with invalid query should fail", async () => {
+    const request = new Request(
+      "http://localhost:8787/api/v1/jobs?employeeCountGt=notanumber",
+    );
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    // バリデーションエラー時は400
+    expect(response.status).toBe(400);
+  });
+  it("GET with negative employeeCountGt should fail", async () => {
+    const request = new Request(
+      "http://localhost:8787/api/v1/jobs?employeeCountGt=-1",
+    );
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(400);
+  });
+  it("GET with invalid orderByReceiveDate should fail", async () => {
+    const request = new Request(
+      "http://localhost:8787/api/v1/jobs?orderByReceiveDate=invalid",
+    );
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("/api/v1/jobs/continue", () => {
+  it("GET without nextToken should fail", async () => {
+    const request = new Request("http://localhost:8787/api/v1/jobs/continue");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("/api/v1/jobs/:jobNumber", () => {
+  it("GET with too short format should fail", async () => {
+    const request = new Request("http://localhost:8787/api/v1/jobs/123-1");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(400);
+  });
+});
