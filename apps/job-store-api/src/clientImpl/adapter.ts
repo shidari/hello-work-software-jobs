@@ -27,12 +27,8 @@ async function handleInsertJob(
     updatedAt: now.toISOString(),
     status: "active" as const,
   };
-  const result = await drizzle.insert(jobs).values(insertingValues);
-  const jobId =
-    (result && "lastInsertRowid" in result
-      ? Number(result.lastInsertRowid)
-      : undefined) ?? 1;
-  return { jobId };
+  await drizzle.insert(jobs).values(insertingValues).run();
+  return { jobNumber: cmd.payload.jobNumber };
 }
 
 async function handleFindJobByNumber(

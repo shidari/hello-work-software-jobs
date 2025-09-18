@@ -10,6 +10,7 @@ import {
   jobListServerErrorSchema,
   jobListSuccessResponseSchema,
 } from "@sho/models";
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "hono/jwt";
@@ -19,7 +20,6 @@ import * as v from "valibot";
 import { safeParse } from "valibot";
 import { createJobStoreResultBuilder } from "../../../../clientImpl";
 import { createJobStoreDBClientAdapter } from "../../../../clientImpl/adapter";
-import { getDb } from "../../../../db";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
@@ -113,7 +113,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     ? decodeURIComponent(encodedJobDescriptionExclude)
     : undefined;
 
-  const db = getDb(c);
+  const db = drizzle(c.env.DB);
   const dbClient = createJobStoreDBClientAdapter(db);
   const jobStore = createJobStoreResultBuilder(dbClient);
 
@@ -234,7 +234,7 @@ app.get(
   vValidator("param", jobFetchParamSchema),
   (c) => {
     const { jobNumber } = c.req.valid("param");
-    const db = getDb(c);
+    const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
     const jobStore = createJobStoreResultBuilder(dbClient);
 
