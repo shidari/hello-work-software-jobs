@@ -3,9 +3,12 @@ import {
   env,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { drizzle } from "drizzle-orm/d1";
+import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
+import { createJobStoreResultBuilder } from "../src/clientImpl";
+import { createJobStoreDBClientAdapter } from "../src/clientImpl/adapter";
 
 const MOCK_ENV = {
   ...env,
@@ -65,6 +68,37 @@ describe("/api/v1/job", () => {
     await waitOnExecutionContext(ctx);
     expect(response.status).toBe(400);
   });
+
+  it("POST データを挿入できる", async () => {
+    const request = new Request("http://localhost:8787/api/v1/job", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
+      body: JSON.stringify({
+        jobNumber: "54455-10912",
+        companyName: "Tech Corp",
+        jobDescription: "ソフトウェアエンジニアの募集です。",
+        workPlace: "東京",
+        wageMin: 50000000,
+        wageMax: 80000000,
+        employmentType: "正社員",
+        workingStartTime: "09:00",
+        workingEndTime: "18:00",
+        receivedDate: "2024-06-01T00:00:00Z",
+        expiryDate: "2024-12-31T00:00:00Z",
+        employeeCount: 200,
+        occupation: "IT",
+        homePage: "https://techcorp.example.com",
+        qualifications: " コンピュータサイエンスの学位、3年以上の経験",
+      }),
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(200);
+  });
 });
 
 describe("/api/v1/jobs", () => {
@@ -109,11 +143,47 @@ describe("/api/v1/jobs/continue", () => {
 });
 
 describe("/api/v1/jobs/:jobNumber", () => {
+  const jobNumber = "24455-10912";
+  beforeAll(async () => {
+    const db = drizzle(env.DB);
+    const dbClient = createJobStoreDBClientAdapter(db);
+    const jobStore = createJobStoreResultBuilder(dbClient);
+    const insertingJob = {
+      jobNumber,
+      companyName: "Tech Corp",
+      jobDescription: "ソフトウェアエンジニアの募集です。",
+      workPlace: "東京",
+      wageMin: 50000000,
+      wageMax: 80000000,
+      employmentType: "正社員",
+      workingStartTime: "09:00",
+      workingEndTime: "18:00",
+      receivedDate: "2024-06-01",
+      expiryDate: "2024-12-31",
+      employeeCount: 200,
+      occupation: "IT",
+      homePage: "https://techcorp.example.com",
+      qualifications: " コンピュータサイエンスの学位、3年以上の経験",
+    };
+    await jobStore.insertJob(insertingJob);
+  });
   it("GET with too short format should fail", async () => {
     const request = new Request("http://localhost:8787/api/v1/jobs/123-1");
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, MOCK_ENV, ctx);
     await waitOnExecutionContext(ctx);
     expect(response.status).toBe(400);
+  });
+  it("GET jobNumberでデータを取得できる", async () => {
+    const request = new Request(
+      `http://localhost:8787/api/v1/jobs/${jobNumber}`,
+      {
+        method: "GET",
+      },
+    );
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, MOCK_ENV, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(200);
   });
 });

@@ -12,6 +12,9 @@ CREATE TABLE `jobs` (
 	`workingStartTime` text,
 	`workingEndTime` text,
 	`employeeCount` integer NOT NULL,
+	`workPlace` text,
+	`jobDescription` text,
+	`qualifications` text,
 	`status` text DEFAULT 'active' NOT NULL,
 	`createdAt` text NOT NULL,
 	`updatedAt` text NOT NULL

@@ -5,13 +5,12 @@ import {
   insertJobServerErrorResponseSchema,
   insertJobSuccessResponseSchema,
 } from "@sho/models";
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { describeRoute, resolver } from "hono-openapi";
 import { okAsync, safeTry } from "neverthrow";
 import { createJobStoreResultBuilder } from "../../../../clientImpl";
 import { createJobStoreDBClientAdapter } from "../../../../clientImpl/adapter";
-import { getDb } from "../../../../db";
 
 const jobInsertRoute = describeRoute({
   security: [{ ApiKeyAuth: [] }],
@@ -52,17 +51,25 @@ app.post(
     const apiKey = c.req.header("x-api-key");
     const validApiKey = c.env.API_KEY;
     if (!apiKey || apiKey !== validApiKey) {
-      throw new HTTPException(401, { message: "Invalid API key" });
+      return c.json({ message: "Invalid API key" }, 401);
     }
     return next();
   },
-  vValidator("json", insertJobRequestBodySchema),
-  (c) => {
+  vValidator("json", insertJobRequestBodySchema, (result, c) => {
+    if (!result.success) {
+      console.log(
+        `Invalid request body: ${JSON.stringify(result.issues, null, 2)}`,
+      );
+      return c.json({ message: "Invalid request body" }, 400);
+    }
+    return c.json(result.output);
+  }),
+  async (c) => {
     const body = c.req.valid("json");
-    const db = getDb(c);
+    const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
     const jobStore = createJobStoreResultBuilder(dbClient);
-    const result = safeTry(async function* () {
+    const result = await safeTry(async function* () {
       const job = yield* await jobStore.insertJob(body);
       return okAsync(job);
     });
@@ -73,11 +80,13 @@ app.post(
 
         switch (error._tag) {
           case "InsertJobError":
-            throw new HTTPException(500, { message: error.message });
+            return c.json({ message: error.message }, 500);
           case "InsertJobDuplicationError":
-            throw new HTTPException(400, { message: error.message });
-          default:
-            throw new HTTPException(500, { message: "Unknown error occurred" });
+            return c.json({ message: error.message }, 400);
+          default: {
+            const _exhaustiveCheck: never = error;
+            return c.json({ message: "Unknown error occurred" }, 500);
+          }
         }
       },
     );

@@ -45,7 +45,7 @@ export type JobStoreCommand =
 // --- コマンドtypeごとのoutput型マッピング ---
 export type SearchFilter = InferOutput<typeof searchFilterSchema>;
 export interface CommandOutputMap {
-  InsertJob: { jobId: number };
+  InsertJob: { jobNumber: string };
   FindJobByNumber: { job: Job | null };
   FindJobs: {
     jobs: Job[];

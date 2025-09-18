@@ -7,6 +7,7 @@ import {
   jobListContinueServerErrorSchema,
   jobListSuccessResponseSchema,
 } from "@sho/models";
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { decode, sign } from "hono/jwt";
@@ -15,7 +16,6 @@ import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import { createJobStoreResultBuilder } from "../../../../../clientImpl";
 import { createJobStoreDBClientAdapter } from "../../../../../clientImpl/adapter";
-import { getDb } from "../../../../../db";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
 import {
@@ -61,7 +61,7 @@ app.get(
   vValidator("query", jobListContinueQuerySchema),
   (c) => {
     const { nextToken } = c.req.valid("query");
-    const db = getDb(c);
+    const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db); // DrizzleをJobStoreDBClientに変換
     const jobStore = createJobStoreResultBuilder(dbClient);
 
