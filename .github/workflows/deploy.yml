@@ -46,5 +46,6 @@ jobs:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           QUEUE_URL: ${{ secrets.QUEUE_URL }}
           API_KEY: ${{ secrets.API_KEY }}
+          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
         run: |
           pnpm exec cdk deploy --all --require-approval never
