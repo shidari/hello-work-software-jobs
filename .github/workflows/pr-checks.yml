@@ -49,7 +49,12 @@ jobs:
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
-      # 8. Format & Lint changed files
+      # 8. Run tests
+      - name: Run tests
+        run: pnpm run test
+        continue-on-error: false
+
+      # 9. Format & Lint changed files
       - name: Format & Lint changed files
         run: |
           mapfile -t CHANGED_FILES < <(
@@ -66,7 +71,7 @@ jobs:
             echo "No JS/TS/JSX/TSX files changed"
           fi
 
-      # 9. Check if formatting or linting changed files
+      # 10. Check if formatting or linting changed files
       - name: Check if formatting or linting changed files
         id: format-check
         run: |
@@ -76,7 +81,7 @@ jobs:
             echo "formatted=true" >> $GITHUB_OUTPUT
           fi
 
-      # 10. Commit formatting & lint fixes
+      # 11. Commit formatting & lint fixes
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
@@ -88,7 +93,7 @@ jobs:
           git commit -m "style: auto-format and lint fixes [skip ci]"
           git push
 
-      # 11. Comment on PR if formatted
+      # 12. Comment on PR if formatted
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
@@ -100,8 +105,3 @@ jobs:
               repo: context.repo.repo,
               body: '🎨 Code has been automatically formatted and linted.'
             })
-
-      # 12. Run tests
-      - name: Run tests
-        run: pnpm run test
-        continue-on-error: false
