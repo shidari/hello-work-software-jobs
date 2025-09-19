@@ -105,20 +105,24 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     );
 
     // デッドレターキュー監視用Lambda（定期実行）
-    const deadLetterMonitor = new NodejsFunction(this, "DeadLetterMonitorFunction", {
-      entry: "lib/functions/deadLetterMonitor/handler.ts",
-      handler: "handler",
-      runtime: lambda.Runtime.NODEJS_22_X,
-      memorySize: 512,
-      timeout: Duration.seconds(30),
-      environment: {
-        DEAD_LETTER_QUEUE_URL: deadLetterQueue.queueUrl,
-        SNS_TOPIC_ARN: scraperAlarmTopic.topicArn,
-        GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
-        GITHUB_OWNER: "shidari",
-        GITHUB_REPO: "hello-work-software-jobs",
+    const deadLetterMonitor = new NodejsFunction(
+      this,
+      "DeadLetterMonitorFunction",
+      {
+        entry: "lib/functions/deadLetterMonitor/handler.ts",
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        memorySize: 512,
+        timeout: Duration.seconds(30),
+        environment: {
+          DEAD_LETTER_QUEUE_URL: deadLetterQueue.queueUrl,
+          SNS_TOPIC_ARN: scraperAlarmTopic.topicArn,
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
+          GITHUB_OWNER: "shidari",
+          GITHUB_REPO: "hello-work-software-jobs",
+        },
       },
-    });
+    );
 
     // 定期的にデッドレターキューをチェック（平日毎日朝9時）
     const deadLetterCheckRule = new events.Rule(this, "DeadLetterCheckRule", {
@@ -129,7 +133,9 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       }),
     });
 
-    deadLetterCheckRule.addTarget(new targets.LambdaFunction(deadLetterMonitor));
+    deadLetterCheckRule.addTarget(
+      new targets.LambdaFunction(deadLetterMonitor),
+    );
 
     // 必要な権限を付与
     deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
