@@ -6,13 +6,15 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "pnpm -r test",
     "type-check": "pnpm -r exec tsc --noEmit ",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "pnpm exec biome lint",
+    "format": "pnpm exec biome format --write --no-errors-on-unmatched"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json,jsonc}": [
-      "pnpm exec biome check --fix --unsafe --no-errors-on-unmatched --files-ignore-unknown=true --colors=off",
+      "biome lint --write --no-errors-on-unmatched",
       "git add"
     ]
   },
