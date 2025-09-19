@@ -52,7 +52,9 @@ jobs:
       # 8. Format & Lint changed files
       - name: Format & Lint changed files
         run: |
-          mapfile -t CHANGED_FILES < <(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$')
+          mapfile -t CHANGED_FILES < <(
+            git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$'
+          )
 
           if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
             echo "Changed files: ${CHANGED_FILES[@]}"
