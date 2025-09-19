@@ -12,44 +12,43 @@ jobs:
       pull-requests: write
 
     steps:
-      # 1. コードをチェックアウト（main も fetch）
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
-          fetch-depth: 0  # ← 全履歴を取得、origin/main が参照可能になる
+          fetch-depth: 0  # ← main も fetch
 
-      # 2. Node.js のセットアップ
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
 
-      # 3. pnpm のセットアップ
+      # 3. Install pnpm
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 10.15.1
 
-      # 4. 依存関係インストール
+      # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 5. ビルド
+      # 5. Build
       - name: Build packages
         run: pnpm -r build
 
-      # 6. 型チェック
+      # 6. Type check
       - name: Type check
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
-      # 7. 差分ファイルだけフォーマット & Lint
+      # 7. Format & Lint changed files (JS/TS/JSX/TSX だけ)
       - name: Format & Lint changed files
         run: |
-          # PR の差分ファイルを取得（JS/TS/JSON 系だけ）
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx|json|jsonc)$')
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$')
           
           if [ -n "$CHANGED_FILES" ]; then
             echo "Changed files: $CHANGED_FILES"
@@ -63,10 +62,10 @@ jobs:
             # ステージ
             git add $CHANGED_FILES
           else
-            echo "No JS/TS/JSON files changed"
+            echo "No JS/TS/JSX/TSX files changed"
           fi
 
-      # 8. フォーマットや Lint による差分チェック
+      # 8. Check if formatting or linting changed files
       - name: Check if formatting or linting changed files
         id: format-check
         run: |
@@ -76,7 +75,7 @@ jobs:
             echo "formatted=true" >> $GITHUB_OUTPUT
           fi
 
-      # 9. 差分があれば自動コミット
+      # 9. Commit formatting & lint fixes
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
@@ -85,7 +84,7 @@ jobs:
           git commit -m "style: auto-format and lint fixes [skip ci]"
           git push
 
-      # 10. PR にコメント
+      # 10. Comment on PR if formatted
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
@@ -98,7 +97,7 @@ jobs:
               body: '🎨 Code has been automatically formatted and linted.'
             })
 
-      # 11. テスト
+      # 11. Run tests
       - name: Run tests
         run: pnpm run test
         continue-on-error: false
