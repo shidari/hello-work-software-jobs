@@ -16,7 +16,7 @@ TypeScript + neverthrow + AWS Lambda + Cloudflare Workers + Next.js 15 + React 1
 モノレポ型サーバーレス構成（コスト最適化重視）
 
 **実績**\
-約1200件の求人データを自動収集・構造化、手動検索プロセスを完全自動化
+約2000件の求人データを自動収集・構造化、手動検索プロセスを完全自動化
 
 **技術的ハイライト**
 
@@ -204,8 +204,6 @@ graph TD
   - TypeScript (v5.8.3)
   - neverthrow (v8.2.0) - エラーハンドリング
   - tsx (v4.20.3) - TypeScript実行環境
-  - fs-extra (v11.3.0) - ファイルシステム操作
-  - find-up (v7.0.0) - ファイル検索
 - **機能**:
   - スキーマコピー等の開発支援スクリプト (`copy-schema`)
 
