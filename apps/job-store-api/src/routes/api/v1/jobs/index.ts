@@ -1,6 +1,10 @@
 import { vValidator } from "@hono/valibot-validator";
 import {
   type DecodedNextToken,
+  insertJobClientErrorResponseSchema,
+  insertJobRequestBodySchema,
+  insertJobServerErrorResponseSchema,
+  insertJobSuccessResponseSchema,
   jobFetchClientErrorResponseSchema,
   jobFetchParamSchema,
   jobFetchServerErrorSchema,
@@ -55,6 +59,128 @@ const jobListRoute = describeRoute({
       content: {
         "application/json": {
           schema: resolver(jobListServerErrorSchema),
+        },
+      },
+    },
+  },
+});
+
+const jobInsertRoute = describeRoute({
+  security: [{ ApiKeyAuth: [] }],
+  requestBody: {
+    description: "Job insert request body",
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            wageMin: {
+              type: "number",
+              description: "最低賃金"
+            },
+            wageMax: {
+              type: "number",
+              description: "最高賃金"
+            },
+            workingStartTime: {
+              type: "string",
+              description: "勤務開始時間"
+            },
+            workingEndTime: {
+              type: "string",
+              description: "勤務終了時間"
+            },
+            receivedDate: {
+              type: "string",
+              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              description: "受信日時（ISO形式）"
+            },
+            expiryDate: {
+              type: "string",
+              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              description: "有効期限（ISO形式）"
+            },
+            employeeCount: {
+              type: "number",
+              description: "従業員数"
+            },
+            jobNumber: {
+              type: "string",
+              pattern: "^[0-9]+$",
+              description: "求人番号"
+            },
+            companyName: {
+              type: "string",
+              description: "会社名"
+            },
+            homePage: {
+              type: "string",
+              description: "ホームページURL（任意）"
+            },
+            occupation: {
+              type: "string",
+              minLength: 1,
+              description: "職業"
+            },
+            employmentType: {
+              type: "string",
+              description: "雇用形態"
+            },
+            workPlace: {
+              type: "string",
+              description: "勤務地"
+            },
+            jobDescription: {
+              type: "string",
+              description: "求人内容・仕事内容"
+            },
+            qualifications: {
+              type: "string",
+              description: "必要な資格・経験（任意）"
+            }
+          },
+          required: [
+            "wageMin",
+            "wageMax",
+            "workingStartTime",
+            "workingEndTime",
+            "receivedDate",
+            "expiryDate",
+            "employeeCount",
+            "jobNumber",
+            "companyName",
+            "occupation",
+            "employmentType",
+            "workPlace",
+            "jobDescription"
+          ]
+        },
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(insertJobSuccessResponseSchema),
+        },
+      },
+    },
+    "400": {
+      description: "client error response",
+      content: {
+        "application/json": {
+          schema: resolver(insertJobClientErrorResponseSchema),
+        },
+      },
+    },
+    "500": {
+      description: "internal server error response",
+      content: {
+        "application/json": {
+          schema: resolver(insertJobServerErrorResponseSchema),
         },
       },
     },
@@ -225,6 +351,56 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     },
   );
 });
+
+app.post(
+  "/",
+  jobInsertRoute,
+  // APIキー認証ミドルウェア
+  (c, next) => {
+    const apiKey = c.req.header("x-api-key");
+    const validApiKey = c.env.API_KEY;
+    if (!apiKey || apiKey !== validApiKey) {
+      return c.json({ message: "Invalid API key" }, 401);
+    }
+    return next();
+  },
+  vValidator("json", insertJobRequestBodySchema, (result, c) => {
+    if (!result.success) {
+      console.log(
+        `Invalid request body: ${JSON.stringify(result.issues, null, 2)}`,
+      );
+      return c.json({ message: "Invalid request body" }, 400);
+    }
+    return c.json(result.output);
+  }),
+  async (c) => {
+    const body = c.req.valid("json");
+    const db = drizzle(c.env.DB);
+    const dbClient = createJobStoreDBClientAdapter(db);
+    const jobStore = createJobStoreResultBuilder(dbClient);
+    const result = await safeTry(async function* () {
+      const job = yield* await jobStore.insertJob(body);
+      return okAsync(job);
+    });
+    return result.match(
+      (job) => c.json(job),
+      (error) => {
+        console.error(error);
+
+        switch (error._tag) {
+          case "InsertJobError":
+            return c.json({ message: error.message }, 500);
+          case "InsertJobDuplicationError":
+            return c.json({ message: error.message }, 400);
+          default: {
+            const _exhaustiveCheck: never = error;
+            return c.json({ message: "Unknown error occurred" }, 500);
+          }
+        }
+      },
+    );
+  },
+);
 
 app.route("/continue", continueRoute);
 
