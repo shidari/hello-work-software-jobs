@@ -21,9 +21,19 @@ export class HeadlessCrawlerStack extends cdk.Stack {
 
     // The code that defines your stack goes here
 
+    // デッドレターキューを作成
+    const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
+      queueName: "scraping-job-dead-letter-queue",
+    });
+
     // example resource
     const queue = new sqs.Queue(this, "ScrapingJobQueue", {
       visibilityTimeout: cdk.Duration.seconds(300),
+      // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
+      deadLetterQueue: {
+        queue: deadLetterQueue,
+        maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
+      },
     });
 
     // EventBridgeルール(Cron)を作成（例: 毎日午前1時に実行）
@@ -93,6 +103,37 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     scraperAlarmTopic.addSubscription(
       new subs.EmailSubscription(process.env.MAIL_ADDRESS || ""),
     );
+
+    // デッドレターキュー監視用Lambda（定期実行）
+    const deadLetterMonitor = new NodejsFunction(this, "DeadLetterMonitorFunction", {
+      entry: "lib/functions/deadLetterMonitor/handler.ts",
+      handler: "handler",
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 512,
+      timeout: Duration.seconds(30),
+      environment: {
+        DEAD_LETTER_QUEUE_URL: deadLetterQueue.queueUrl,
+        SNS_TOPIC_ARN: scraperAlarmTopic.topicArn,
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
+        GITHUB_OWNER: "shidari",
+        GITHUB_REPO: "hello-work-software-jobs",
+      },
+    });
+
+    // 定期的にデッドレターキューをチェック（平日毎日朝9時）
+    const deadLetterCheckRule = new events.Rule(this, "DeadLetterCheckRule", {
+      schedule: events.Schedule.cron({
+        minute: "0",
+        hour: "9", // 朝9時（UTC）
+        weekDay: "MON-FRI", // 平日のみ
+      }),
+    });
+
+    deadLetterCheckRule.addTarget(new targets.LambdaFunction(deadLetterMonitor));
+
+    // 必要な権限を付与
+    deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
+    scraperAlarmTopic.grantPublish(deadLetterMonitor);
 
     // Lambda 実行回数のメトリクス
     const crawlerInvocationsMetric = new cloudwatch.Metric({
