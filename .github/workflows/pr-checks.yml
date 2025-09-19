@@ -38,35 +38,41 @@ jobs:
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
-      - name: Lint
-        run: pnpm run lint
-        continue-on-error: false
+      - name: Format & Lint changed files
+        run: |
+          # PR の差分ファイルを取得
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx|json|jsonc)$')
+          
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Changed files: $CHANGED_FILES"
 
-      - name: Run tests
-        run: pnpm run test
-        continue-on-error: false
+            # フォーマット
+            npx biome format --write $CHANGED_FILES
+            
+            # Lint + safe fix
+            npx biome lint --write --no-errors-on-unmatched $CHANGED_FILES
 
-      - name: Format code
-        run: pnpm run format
+            # ステージ
+            git add $CHANGED_FILES
+          else
+            echo "No JS/TS/JSON files changed"
+          fi
 
-      - name: Check if formatting changed files
+      - name: Check if formatting or linting changed files
         id: format-check
         run: |
-          git add .github/workflows/* 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "formatted=false" >> $GITHUB_OUTPUT
           else
             echo "formatted=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit formatting changes
+      - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
-          git add .github/workflows/* 2>/dev/null || true
-          git commit -m "style: auto-format code and workflows [skip ci]"
+          git commit -m "style: auto-format and lint fixes [skip ci]"
           git push
 
       - name: Comment on PR if formatted
@@ -78,5 +84,9 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🎨 Code has been automatically formatted and committed.'
+              body: '🎨 Code has been automatically formatted and linted.'
             })
+
+      - name: Run tests
+        run: pnpm run test
+        continue-on-error: false
