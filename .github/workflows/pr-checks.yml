@@ -18,7 +18,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
-          fetch-depth: 0  # ← main も fetch
+          fetch-depth: 0  # main も fetch して差分取得可能にする
 
       # 2. Setup Node.js
       - name: Setup Node.js
@@ -48,19 +48,20 @@ jobs:
       # 7. Format & Lint changed files (JS/TS/JSX/TSX だけ)
       - name: Format & Lint changed files
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$')
-          
-          if [ -n "$CHANGED_FILES" ]; then
-            echo "Changed files: $CHANGED_FILES"
+          # 改行を安全に扱うために配列で取得
+          mapfile -t CHANGED_FILES < <(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$')
+
+          if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
+            echo "Changed files: ${CHANGED_FILES[@]}"
 
             # フォーマット
-            npx biome format --write $CHANGED_FILES
+            pnpm exec biome format --write "${CHANGED_FILES[@]}"
 
             # Lint + safe fix
-            npx biome lint --write --no-errors-on-unmatched $CHANGED_FILES
+            pnpm exec biome lint --write --no-errors-on-unmatched "${CHANGED_FILES[@]}"
 
             # ステージ
-            git add $CHANGED_FILES
+            git add "${CHANGED_FILES[@]}"
           else
             echo "No JS/TS/JSX/TSX files changed"
           fi
