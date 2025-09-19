@@ -18,9 +18,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
-          fetch-depth: 0  # main も fetch して差分取得可能にする
+          fetch-depth: 0
 
-      # 2. Disable husky (for CI)
+      # 2. Disable husky (for CI, kill hooks)
       - name: Disable husky
         run: git config core.hooksPath /dev/null
 
@@ -49,22 +49,16 @@ jobs:
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
-      # 8. Format & Lint changed files (JS/TS/JSX/TSX だけ)
+      # 8. Format & Lint changed files
       - name: Format & Lint changed files
         run: |
-          # 改行を安全に扱うために配列で取得
           mapfile -t CHANGED_FILES < <(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$')
 
           if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
             echo "Changed files: ${CHANGED_FILES[@]}"
 
-            # フォーマット
             pnpm exec biome format --write "${CHANGED_FILES[@]}"
-
-            # Lint + safe fix
             pnpm exec biome lint --write --no-errors-on-unmatched "${CHANGED_FILES[@]}"
-
-            # ステージ
             git add "${CHANGED_FILES[@]}"
           else
             echo "No JS/TS/JSX/TSX files changed"
@@ -84,6 +78,9 @@ jobs:
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
+          # 念押しで husky 無効化（ここ大事）
+          git config core.hooksPath /dev/null
+
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m "style: auto-format and lint fixes [skip ci]"
@@ -97,3 +94,12 @@ jobs:
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🎨 Code has been automatically formatted and linted.'
+            })
+
+      # 12. Run tests
+      - name: Run tests
+        run: pnpm run test
+        continue-on-error: false
