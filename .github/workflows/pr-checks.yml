@@ -12,35 +12,43 @@ jobs:
       pull-requests: write
 
     steps:
+      # 1. コードをチェックアウト（main も fetch）
       - name: Checkout code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
+          fetch-depth: 0  # ← 全履歴を取得、origin/main が参照可能になる
 
+      # 2. Node.js のセットアップ
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
 
+      # 3. pnpm のセットアップ
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 10.15.1
 
+      # 4. 依存関係インストール
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 5. ビルド
       - name: Build packages
         run: pnpm -r build
 
+      # 6. 型チェック
       - name: Type check
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
+      # 7. 差分ファイルだけフォーマット & Lint
       - name: Format & Lint changed files
         run: |
-          # PR の差分ファイルを取得
+          # PR の差分ファイルを取得（JS/TS/JSON 系だけ）
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx|json|jsonc)$')
           
           if [ -n "$CHANGED_FILES" ]; then
@@ -48,7 +56,7 @@ jobs:
 
             # フォーマット
             npx biome format --write $CHANGED_FILES
-            
+
             # Lint + safe fix
             npx biome lint --write --no-errors-on-unmatched $CHANGED_FILES
 
@@ -58,6 +66,7 @@ jobs:
             echo "No JS/TS/JSON files changed"
           fi
 
+      # 8. フォーマットや Lint による差分チェック
       - name: Check if formatting or linting changed files
         id: format-check
         run: |
@@ -67,6 +76,7 @@ jobs:
             echo "formatted=true" >> $GITHUB_OUTPUT
           fi
 
+      # 9. 差分があれば自動コミット
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
@@ -75,6 +85,7 @@ jobs:
           git commit -m "style: auto-format and lint fixes [skip ci]"
           git push
 
+      # 10. PR にコメント
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
@@ -87,6 +98,7 @@ jobs:
               body: '🎨 Code has been automatically formatted and linted.'
             })
 
+      # 11. テスト
       - name: Run tests
         run: pnpm run test
         continue-on-error: false
