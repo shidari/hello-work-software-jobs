@@ -12,6 +12,10 @@ jobs:
       pull-requests: write
 
     steps:
+      # 0. Disable husky (for CI)
+      - name: Disable husky
+        run: git config core.hooksPath /dev/null
+
       # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
