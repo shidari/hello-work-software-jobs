@@ -77,68 +77,68 @@ const jobInsertRoute = describeRoute({
           properties: {
             wageMin: {
               type: "number",
-              description: "最低賃金"
+              description: "最低賃金",
             },
             wageMax: {
               type: "number",
-              description: "最高賃金"
+              description: "最高賃金",
             },
             workingStartTime: {
               type: "string",
-              description: "勤務開始時間"
+              description: "勤務開始時間",
             },
             workingEndTime: {
               type: "string",
-              description: "勤務終了時間"
+              description: "勤務終了時間",
             },
             receivedDate: {
               type: "string",
               pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-              description: "受信日時（ISO形式）"
+              description: "受信日時（ISO形式）",
             },
             expiryDate: {
               type: "string",
               pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-              description: "有効期限（ISO形式）"
+              description: "有効期限（ISO形式）",
             },
             employeeCount: {
               type: "number",
-              description: "従業員数"
+              description: "従業員数",
             },
             jobNumber: {
               type: "string",
               pattern: "^[0-9]+$",
-              description: "求人番号"
+              description: "求人番号",
             },
             companyName: {
               type: "string",
-              description: "会社名"
+              description: "会社名",
             },
             homePage: {
               type: "string",
-              description: "ホームページURL（任意）"
+              description: "ホームページURL（任意）",
             },
             occupation: {
               type: "string",
               minLength: 1,
-              description: "職業"
+              description: "職業",
             },
             employmentType: {
               type: "string",
-              description: "雇用形態"
+              description: "雇用形態",
             },
             workPlace: {
               type: "string",
-              description: "勤務地"
+              description: "勤務地",
             },
             jobDescription: {
               type: "string",
-              description: "求人内容・仕事内容"
+              description: "求人内容・仕事内容",
             },
             qualifications: {
               type: "string",
-              description: "必要な資格・経験（任意）"
-            }
+              description: "必要な資格・経験（任意）",
+            },
           },
           required: [
             "wageMin",
@@ -153,8 +153,8 @@ const jobInsertRoute = describeRoute({
             "occupation",
             "employmentType",
             "workPlace",
-            "jobDescription"
-          ]
+            "jobDescription",
+          ],
         },
       },
     },
