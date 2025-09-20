@@ -95,90 +95,91 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     // SNSトピック
-    if (process.env.MAIL_ADDRESS) {
-      const crawlerAlarmTopic = new sns.Topic(this, "CrawlerAlarmTopic");
-      crawlerAlarmTopic.addSubscription(
-        new subs.EmailSubscription(process.env.MAIL_ADDRESS || ""),
-      );
-      // Lambda 実行回数のメトリクス
-      const crawlerInvocationsMetric = new cloudwatch.Metric({
-        namespace: "AWS/Lambda",
-        metricName: "Invocations",
-        statistic: "Sum",
-        period: cdk.Duration.hours(1),
-        dimensionsMap: {
-          FunctionName: crawler.functionName,
-        },
-      });
-      const crawlingAlrm = new cloudwatch.Alarm(this, "CrawlerInvocationAlarm", {
-        metric: crawlerInvocationsMetric,
-        threshold: 1000,
-        evaluationPeriods: 1,
-        alarmDescription: "crawling Lambda invocation count exceeded threshold",
-      });
-      const scraperAlarmTopic = new sns.Topic(this, "ScraperAlarmTopic");
-      scraperAlarmTopic.addSubscription(
-        new subs.EmailSubscription(process.env.MAIL_ADDRESS || ""),
-      );
-      crawlingAlrm.addAlarmAction(
-        new cloudwatch_actions.SnsAction(crawlerAlarmTopic),
-      );
-      const scraperInvocationsMetric = new cloudwatch.Metric({
-        namespace: "AWS/Lambda",
-        metricName: "Invocations",
-        statistic: "Sum",
-        period: cdk.Duration.hours(1),
-        dimensionsMap: {
-          FunctionName: scraper.functionName,
-        },
-      });
-      const scrapingAlarm = new cloudwatch.Alarm(this, "ScraperInvocationAlarm", {
-        metric: scraperInvocationsMetric,
-        threshold: 1000,
-        evaluationPeriods: 1,
-        alarmDescription: "scraping Lambda invocation count exceeded threshold",
-      });
-      scrapingAlarm.addAlarmAction(
-        new cloudwatch_actions.SnsAction(scraperAlarmTopic),
-      );
+    const crawlerAlarmTopic = new sns.Topic(this, "CrawlerAlarmTopic");
+    crawlerAlarmTopic.addSubscription(
+      new subs.EmailSubscription(process.env.MAIL_ADDRESS || ""),
+    );
+    const scraperAlarmTopic = new sns.Topic(this, "ScraperAlarmTopic");
+    scraperAlarmTopic.addSubscription(
+      new subs.EmailSubscription(process.env.MAIL_ADDRESS || ""),
+    );
 
-      // デッドレターキュー監視用Lambda（定期実行）
-      const deadLetterMonitor = new NodejsFunction(
-        this,
-        "DeadLetterMonitorFunction",
-        {
-          entry: "lib/functions/deadLetterMonitor/handler.ts",
-          handler: "handler",
-          runtime: lambda.Runtime.NODEJS_22_X,
-          memorySize: 512,
-          timeout: Duration.seconds(30),
-          environment: {
-            DEAD_LETTER_QUEUE_URL: deadLetterQueue.queueUrl,
-            SNS_TOPIC_ARN: scraperAlarmTopic.topicArn,
-            GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
-            GITHUB_OWNER: "shidari",
-            GITHUB_REPO: "hello-work-software-jobs",
-          },
+    // デッドレターキュー監視用Lambda（定期実行）
+    const deadLetterMonitor = new NodejsFunction(
+      this,
+      "DeadLetterMonitorFunction",
+      {
+        entry: "lib/functions/deadLetterMonitor/handler.ts",
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        memorySize: 512,
+        timeout: Duration.seconds(30),
+        environment: {
+          DEAD_LETTER_QUEUE_URL: deadLetterQueue.queueUrl,
+          SNS_TOPIC_ARN: scraperAlarmTopic.topicArn,
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN || "",
+          GITHUB_OWNER: "shidari",
+          GITHUB_REPO: "hello-work-software-jobs",
         },
-      );
-      // 定期的にデッドレターキューをチェック（平日毎日朝9時）
-      const deadLetterCheckRule = new events.Rule(this, "DeadLetterCheckRule", {
-        schedule: events.Schedule.cron({
-          minute: "0",
-          hour: "9", // 朝9時（UTC）
-          weekDay: "MON-FRI", // 平日のみ
-        }),
-      });
+      },
+    );
 
-      deadLetterCheckRule.addTarget(
-        new targets.LambdaFunction(deadLetterMonitor),
-      );
-      // 必要な権限を付与
-      deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
-      scraperAlarmTopic.grantPublish(deadLetterMonitor);
-    } else {
-      console.warn("MAIL_ADDRESS is not set. SNS topic will not be created.");
-    }
+    // 定期的にデッドレターキューをチェック（平日毎日朝9時）
+    const deadLetterCheckRule = new events.Rule(this, "DeadLetterCheckRule", {
+      schedule: events.Schedule.cron({
+        minute: "0",
+        hour: "9", // 朝9時（UTC）
+        weekDay: "MON-FRI", // 平日のみ
+      }),
+    });
+
+    deadLetterCheckRule.addTarget(
+      new targets.LambdaFunction(deadLetterMonitor),
+    );
+
+    // 必要な権限を付与
+    deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
+    scraperAlarmTopic.grantPublish(deadLetterMonitor);
+
+    // Lambda 実行回数のメトリクス
+    const crawlerInvocationsMetric = new cloudwatch.Metric({
+      namespace: "AWS/Lambda",
+      metricName: "Invocations",
+      statistic: "Sum",
+      period: cdk.Duration.hours(1),
+      dimensionsMap: {
+        FunctionName: crawler.functionName,
+      },
+    });
+    const scraperInvocationsMetric = new cloudwatch.Metric({
+      namespace: "AWS/Lambda",
+      metricName: "Invocations",
+      statistic: "Sum",
+      period: cdk.Duration.hours(1),
+      dimensionsMap: {
+        FunctionName: scraper.functionName,
+      },
+    });
+
+    const crawlingAlrm = new cloudwatch.Alarm(this, "CrawlerInvocationAlarm", {
+      metric: crawlerInvocationsMetric,
+      threshold: 1000,
+      evaluationPeriods: 1,
+      alarmDescription: "crawling Lambda invocation count exceeded threshold",
+    });
+    crawlingAlrm.addAlarmAction(
+      new cloudwatch_actions.SnsAction(crawlerAlarmTopic),
+    );
+    const scrapingAlarm = new cloudwatch.Alarm(this, "ScraperInvocationAlarm", {
+      metric: scraperInvocationsMetric,
+      threshold: 1000,
+      evaluationPeriods: 1,
+      alarmDescription: "scraping Lambda invocation count exceeded threshold",
+    });
+    scrapingAlarm.addAlarmAction(
+      new cloudwatch_actions.SnsAction(scraperAlarmTopic),
+    );
+
     scraper.addEventSource(
       new SqsEventSource(queue, {
         batchSize: 1,
