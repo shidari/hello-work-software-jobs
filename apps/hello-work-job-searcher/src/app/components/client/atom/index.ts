@@ -1,7 +1,7 @@
 import type { JobList, SearchFilter, TJobOverview } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { atom } from "jotai";
-import { hc } from 'hono/client'
+import { hc } from "hono/client";
 import type { AppType } from "@/app/api/[[...route]]/route";
 const client = hc<AppType>("/");
 // ジョブリストのatom（初期値をオブジェクトに修正）
@@ -54,12 +54,12 @@ export const initializeJobListWriterAtom = atom<
 >(null, async (_, set, searchFilter) => {
   const res = await client.api.jobs.$get({
     query: {
-      ...searchFilter
-    }
+      ...searchFilter,
+    },
   });
   const data = await res.json();
   if (!data.success) {
-    throw new Error(data.message)
+    throw new Error(data.message);
   }
   const {
     jobs,
@@ -80,11 +80,11 @@ export const continuousJobOverviewListWriterAtom = atom<
   Promise<void>
 >(null, async (_get, set, nextToken) => {
   const res = await client.api.jobs.continue.$get({
-    query: { nextToken }
+    query: { nextToken },
   });
   const data = await res.json();
   if (!data.success) {
-    throw new Error(data.message)
+    throw new Error(data.message);
   }
   const {
     jobs,
