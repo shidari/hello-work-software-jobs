@@ -10,7 +10,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "internal server error", "success": false });
   });
 
   test("should return 500 for invalid employeeCountLt (not a number)", async ({
@@ -21,7 +21,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "internal server error", "success": false });
   });
 
   test("should return 500 for negative employeeCountGt", async ({
@@ -32,7 +32,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "internal server error", "success": false });
   });
 
   test("should return 500 for negative employeeCountLt", async ({
@@ -43,7 +43,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "internal server error", "success": false });
   });
 });
 
@@ -53,7 +53,7 @@ test.describe("/api/proxy/job-store/jobs/continue", () => {
     const res = await request.get("/api/proxy/job-store/jobs/continue");
     expect(res.status()).toBe(400);
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "Missing nextToken", "success": false });
   });
 
   test("should return 500 if nextToken is invalid", async ({ request }) => {
@@ -62,6 +62,6 @@ test.describe("/api/proxy/job-store/jobs/continue", () => {
     );
     expect([400, 500]).toContain(res.status());
     const json = await res.json();
-    expect(json).toHaveProperty("error");
+    expect(json).toEqual({ "message": "internal server error", "success": false });
   });
 });
