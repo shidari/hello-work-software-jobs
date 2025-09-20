@@ -72,8 +72,8 @@ const jobsContinueApp = new Hono().get("/", async (c) => {
 });
 
 const routes = app
-  .route("/jobs", jobsApp)
-  .route("/jobs/continue", jobsContinueApp);
+  .route("/proxy/job-store/jobs", jobsApp)
+  .route("/proxy/job-store/jobs/continue", jobsContinueApp);
 
 export type AppType = typeof routes;
 
