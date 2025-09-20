@@ -4,17 +4,19 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # ← OIDCで必要
+
 jobs:
   ci-cd:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
       # 1. Checkout code
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
@@ -26,13 +28,13 @@ jobs:
 
       # 3. Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20'
 
       # 4. Install pnpm
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10.15.1
 
@@ -54,8 +56,32 @@ jobs:
         run: pnpm run test
         continue-on-error: false
 
+      # 8.5. Configure AWS credentials via OIDC
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        with:
+          role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
+          role-session-name: github-actions-oidc
+          aws-region: ap-northeast-1
+
+      # 8.6 CDK Dry-Run Deploy (モノレポ対応)
+      - name: CDK Dry-Run Deploy
+        working-directory: ./packages/headless-crawler
+        env:
+          MAIL_ADDRESS: "dummy@example.com"  # ダミー値で空文字回避
+        run: |
+          # CDK CLI インストール
+          npm install -g aws-cdk
+
+          # 依存関係インストール
+          pnpm install
+
+          # empty deploy (ChangeSet作成のみ)
+          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
+
       # 9. Format & Lint changed files
       - name: Format & Lint changed files
+        shell: bash
         run: |
           mapfile -t CHANGED_FILES < <(
             git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$'
@@ -85,9 +111,7 @@ jobs:
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
-          # 念押しで husky 無効化（ここ大事）
           git config core.hooksPath /dev/null
-
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m "style: auto-format and lint fixes [skip ci]"
@@ -96,7 +120,7 @@ jobs:
       # 12. Comment on PR if formatted
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           script: |
             github.rest.issues.createComment({
