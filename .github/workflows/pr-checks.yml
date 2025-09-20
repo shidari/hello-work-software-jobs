@@ -78,8 +78,10 @@ jobs:
 
           # empty deploy (ChangeSet作成のみ)
           pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
+
       # 9. Format & Lint changed files
       - name: Format & Lint changed files
+        shell: bash
         run: |
           mapfile -t CHANGED_FILES < <(
             git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$'
@@ -93,6 +95,7 @@ jobs:
             git add "${CHANGED_FILES[@]}"
           else
             echo "No JS/TS/JSX/TSX files changed"
+          fi
 
       # 10. Check if formatting or linting changed files
       - name: Check if formatting or linting changed files
