@@ -1,11 +1,11 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
-import { buildScrapingResult } from "../../domains/scraper/scraper";
 import {
   buildJobStoreClient,
   eventToFirstRecordToJobNumber,
   job2InsertedJob,
 } from "./helper";
+import { buildScrapingResult } from "../../lib/domains/scraper/scraper";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const effect = Effect.gen(function* () {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
-import { HeadlessCrawlerStack } from "../lib/stack/headless-crawler-stack";
+import { HeadlessCrawlerStack } from "../stacks/headless-crawler-stack";
 
 const app = new cdk.App();
 new HeadlessCrawlerStack(app, "HeadlessCrawlerStack", {
