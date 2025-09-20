@@ -1,4 +1,4 @@
-import type { jobListSuccessResponseSchema, SearchFilter } from "@sho/models";
+import type { JobListQuery, jobListSuccessResponseSchema } from "@sho/models";
 import type { ResultAsync } from "neverthrow";
 import type { InferOutput } from "valibot";
 /**
@@ -10,7 +10,7 @@ export interface JobStoreClient {
    * @param filter 検索フィルター
    */
   getInitialJobs(
-    filter?: SearchFilter,
+    query?: JobListQuery,
   ): ResultAsync<
     InferOutput<typeof jobListSuccessResponseSchema>,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError

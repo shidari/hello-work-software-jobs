@@ -1,7 +1,7 @@
 import {
   jobListQuerySchema,
   jobListSuccessResponseSchema,
-  type SearchFilter,
+  type JobListQuery,
 } from "@sho/models";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
@@ -16,7 +16,7 @@ import {
 const j = Symbol();
 type JobEndPoint = { [j]: unknown } & string;
 export const jobStoreClientOnServer: JobStoreClient = {
-  getInitialJobs(filter: SearchFilter = {}) {
+  getInitialJobs(query: JobListQuery = {}) {
     return safeTry(async function* () {
       const endpoint = yield* (() => {
         const envEndpoint = process.env.JOB_STORE_ENDPOINT;
@@ -28,28 +28,30 @@ export const jobStoreClientOnServer: JobStoreClient = {
         return ok(envEndpoint as JobEndPoint);
       })();
 
+      console.log(`query: ${JSON.stringify(query, null, 2)}`);
+
       const searchParams = new URLSearchParams();
-      if (filter.companyName) {
+      if (query.companyName) {
         searchParams.append(
           "companyName",
-          encodeURIComponent(filter.companyName),
+          encodeURIComponent(query.companyName),
         );
       }
-      if (filter.employeeCountGt) {
-        searchParams.append("employeeCountGt", String(filter.employeeCountGt));
+      if (query.employeeCountGt) {
+        searchParams.append("employeeCountGt", String(query.employeeCountGt));
       }
-      if (filter.employeeCountLt) {
-        searchParams.append("employeeCountLt", String(filter.employeeCountLt));
-      }
-
-      if (filter.jobDescription) {
-        searchParams.append("jobDescription", filter.jobDescription);
+      if (query.employeeCountLt) {
+        searchParams.append("employeeCountLt", String(query.employeeCountLt));
       }
 
-      if (filter.jobDescriptionExclude) {
+      if (query.jobDescription) {
+        searchParams.append("jobDescription", query.jobDescription);
+      }
+
+      if (query.jobDescriptionExclude) {
         searchParams.append(
           "jobDescriptionExclude",
-          filter.jobDescriptionExclude,
+          query.jobDescriptionExclude,
         );
       }
 
