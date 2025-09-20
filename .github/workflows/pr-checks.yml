@@ -64,8 +64,11 @@ jobs:
           # 依存関係インストール
           pnpm install
 
-          # 空デプロイ（ChangeSet作成のみ、実リソースは作らない）
+          # empty deploy (ChangeSet作成のみ)
           pnpm exec cdk deploy --all --require-approval never --no-execute-changeset \
+            --context MAIL_ADDRESS=dummy@example.com \
+            --context QUEUE_URL= \
+            --context API_KEY= \
             --context CDK_DEFAULT_ACCOUNT=000000000000 \
             --context CDK_DEFAULT_REGION=ap-northeast-1
 
