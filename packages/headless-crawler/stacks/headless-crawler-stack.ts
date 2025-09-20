@@ -46,12 +46,12 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     const playwrightLayer = new lambda.LayerVersion(this, "playwrightLayer", {
-      code: lambda.Code.fromAsset("lib/functions/layer/playwright.zip"),
+      code: lambda.Code.fromAsset("functions/layer/playwright.zip"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_22_X],
     });
     const crawler = new NodejsFunction(this, "CrawlingFunction", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "lib/functions/crawlerHandler/handler.ts",
+      entry: "functions/crawlerHandler/handler.ts",
       handler: "handler",
       memorySize: 1024,
       timeout: cdk.Duration.seconds(90),
@@ -72,7 +72,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     const scraper = new NodejsFunction(this, "ScrapingFunction", {
-      entry: "lib/functions/jobQueueHandler/handler.ts",
+      entry: "functions/jobQueueHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       memorySize: 1024,
@@ -109,7 +109,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       this,
       "DeadLetterMonitorFunction",
       {
-        entry: "lib/functions/deadLetterMonitor/handler.ts",
+        entry: "functions/deadLetterMonitor/handler.ts",
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_22_X,
         memorySize: 512,
