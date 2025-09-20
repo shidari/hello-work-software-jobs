@@ -1,7 +1,7 @@
 import type { EventBridgeEvent, Handler } from "aws-lambda";
 import { Effect, Exit, pipe } from "effect";
 import { sendJobToQueue } from "./helper";
-import { crawlerRunnable } from "../../lib/domains/crawler";
+import { crawlerRunnable } from "../../lib/crawler";
 
 export const handler: Handler<
   // biome-ignore lint/complexity/noBannedTypes: <explanation>

@@ -5,7 +5,7 @@ import {
   eventToFirstRecordToJobNumber,
   job2InsertedJob,
 } from "./helper";
-import { buildScrapingResult } from "../../lib/domains/scraper/scraper";
+import { buildScrapingResult } from "../../lib/scraper/scraper";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const effect = Effect.gen(function* () {
