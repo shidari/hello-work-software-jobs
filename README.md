@@ -119,14 +119,14 @@ graph TD
 ##### `headless-crawler`
 
 - **目的**: ハローワークサイトのクローリング・スクレイピング
-- **技術**:
+- **技術**: 
   - Playwright (v1.53.1) - ブラウザ自動化
   - AWS CDK (v2.1029.0) - インフラ管理
   - Effect (v3.16.5) - 関数型プログラミング（**今後neverthrowに移行予定**）
-  - AWS Lambda + SQS - 実行環境
   - @sparticuz/chromium (v138.0.0) - Lambda用Chromium
   - @aws-sdk/client-sqs (v3.840.0) - SQS連携
   - esbuild (v0.25.5) - ビルドツール
+  - AWS Lambda + SQS - 実行環境
   - Valibot (v1.1.0) + Zod (v4.1.5) - スキーマバリデーション
 - **機能**:
   - 求人検索条件に基づく求人一覧取得
@@ -181,6 +181,7 @@ graph TD
   - neverthrow (v8.2.0) - エラーハンドリング
   - Jotai (v2.13.1) - 状態管理
   - Valibot (v1.1.0) - バリデーション
+  - Hono (v4.8.3) - プロキシAPI兼RPC実装
   - Playwright (v1.55.0) - E2Eテスト
 - **デプロイ**: Vercel
 - **実装済み機能**:
