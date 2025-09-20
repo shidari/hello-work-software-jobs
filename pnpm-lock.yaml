@@ -39,6 +39,9 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.13.12
         version: 3.13.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      hono:
+        specifier: ^4.8.3
+        version: 4.9.6
       jotai:
         specifier: ^2.13.1
         version: 2.14.0(@types/react@19.1.12)(react@19.1.1)

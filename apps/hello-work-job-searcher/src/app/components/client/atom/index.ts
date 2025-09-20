@@ -1,8 +1,9 @@
 import type { JobList, SearchFilter, TJobOverview } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { atom } from "jotai";
-import { jobStoreClientOnBrowser } from "@/app/store/client";
-
+import { hc } from 'hono/client'
+import type { AppType } from "@/app/api/[[...route]]/route";
+const client = hc<AppType>("/");
 // ジョブリストのatom（初期値をオブジェクトに修正）
 export const jobListAtom = atom<{
   jobs: JobList;
@@ -51,13 +52,20 @@ export const initializeJobListWriterAtom = atom<
   [SearchFilter],
   Promise<void>
 >(null, async (_, set, searchFilter) => {
+  const res = await client.api.jobs.$get({
+    query: {
+      ...searchFilter
+    }
+  });
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message)
+  }
   const {
     jobs,
     nextToken,
     meta: { totalCount },
-  } = (
-    await jobStoreClientOnBrowser.getInitialJobs(searchFilter)
-  )._unsafeUnwrap();
+  } = data;
   set(jobListAtom, {
     jobs,
     nextToken,
@@ -71,13 +79,18 @@ export const continuousJobOverviewListWriterAtom = atom<
   [string],
   Promise<void>
 >(null, async (_get, set, nextToken) => {
+  const res = await client.api.jobs.continue.$get({
+    query: { nextToken }
+  });
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message)
+  }
   const {
     jobs,
     nextToken: newNextToken,
     meta: { totalCount },
-  } = (
-    await jobStoreClientOnBrowser.getContinuedJobs(nextToken)
-  )._unsafeUnwrap();
+  } = data;
   set(jobListAtom, (prev) => ({
     jobs: [...prev.jobs, ...jobs],
     nextToken: newNextToken,
