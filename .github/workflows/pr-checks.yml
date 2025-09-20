@@ -54,6 +54,19 @@ jobs:
         run: pnpm run test
         continue-on-error: false
 
+      # 8.5 CDK Dry-Run Deploy (モノレポ対応)
+      - name: CDK Dry-Run Deploy
+        working-directory: ./packages/headless-crawler
+        run: |
+          # CDK CLI インストール
+          npm install -g aws-cdk
+
+          # 依存関係インストール
+          pnpm install
+
+          # 空デプロイ（ChangeSet作成のみ、実リソースは作らない）
+          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
+
       # 9. Format & Lint changed files
       - name: Format & Lint changed files
         run: |
@@ -85,9 +98,7 @@ jobs:
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
-          # 念押しで husky 無効化（ここ大事）
           git config core.hooksPath /dev/null
-
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m "style: auto-format and lint fixes [skip ci]"
