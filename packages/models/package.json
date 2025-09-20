@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "playwright": "^1.53.1",
-    "tsup": "^8.5.0",
+    "tsdown": "^0.15.3",
     "typescript": "^5.8.3"
   }
 }
