@@ -57,6 +57,8 @@ jobs:
       # 8.5 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
         working-directory: ./packages/headless-crawler
+        env:
+          MAIL_ADDRESS: "dummy@example.com"  # ダミー値で空文字回避
         run: |
           # CDK CLI インストール
           npm install -g aws-cdk
@@ -66,7 +68,6 @@ jobs:
 
           # empty deploy (ChangeSet作成のみ)
           pnpm exec cdk deploy --all --require-approval never --no-execute-changeset \
-            --context MAIL_ADDRESS=dummy@example.com \
             --context QUEUE_URL= \
             --context API_KEY= \
             --context CDK_DEFAULT_ACCOUNT=000000000000 \
@@ -87,7 +88,6 @@ jobs:
             git add "${CHANGED_FILES[@]}"
           else
             echo "No JS/TS/JSX/TSX files changed"
-          fi
 
       # 10. Check if formatting or linting changed files
       - name: Check if formatting or linting changed files
