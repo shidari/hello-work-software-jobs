@@ -57,12 +57,6 @@ jobs:
       # 8.5 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
         working-directory: ./packages/headless-crawler
-        env:
-          CDK_DEFAULT_ACCOUNT: 000000000000  # ダミーアカウント
-          CDK_DEFAULT_REGION: ap-northeast-1 # 任意のリージョン
-          MAIL_ADDRESS: "dummy@example.com"  # ダミーアドレスで空文字回避
-          QUEUE_URL: ""                        # 必要に応じて空文字
-          API_KEY: ""                          # 必要に応じて空文字
         run: |
           # CDK CLI インストール
           npm install -g aws-cdk
@@ -71,7 +65,9 @@ jobs:
           pnpm install
 
           # 空デプロイ（ChangeSet作成のみ、実リソースは作らない）
-          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
+          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset \
+            --context CDK_DEFAULT_ACCOUNT=000000000000 \
+            --context CDK_DEFAULT_REGION=ap-northeast-1
 
       # 9. Format & Lint changed files
       - name: Format & Lint changed files
