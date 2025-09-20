@@ -4,12 +4,14 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # ← OIDCで必要
+
 jobs:
   ci-cd:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
       # 1. Checkout code
@@ -54,7 +56,15 @@ jobs:
         run: pnpm run test
         continue-on-error: false
 
-      # 8.5 CDK Dry-Run Deploy (モノレポ対応)
+      # 8.5. Configure AWS credentials via OIDC
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        with:
+          role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
+          role-session-name: github-actions-oidc
+          aws-region: ap-northeast-1
+
+      # 8.6 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
         working-directory: ./packages/headless-crawler
         env:
@@ -67,12 +77,7 @@ jobs:
           pnpm install
 
           # empty deploy (ChangeSet作成のみ)
-          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset \
-            --context QUEUE_URL= \
-            --context API_KEY= \
-            --context CDK_DEFAULT_ACCOUNT=000000000000 \
-            --context CDK_DEFAULT_REGION=ap-northeast-1
-
+          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
       # 9. Format & Lint changed files
       - name: Format & Lint changed files
         run: |
