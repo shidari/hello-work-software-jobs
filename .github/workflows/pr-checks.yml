@@ -14,7 +14,7 @@ jobs:
     steps:
       # 1. Checkout code
       - name: Checkout code
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
@@ -26,13 +26,13 @@ jobs:
 
       # 3. Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20'
 
       # 4. Install pnpm
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10.15.1
 
@@ -57,6 +57,12 @@ jobs:
       # 8.5 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
         working-directory: ./packages/headless-crawler
+        env:
+          CDK_DEFAULT_ACCOUNT: 000000000000  # ダミーアカウント
+          CDK_DEFAULT_REGION: ap-northeast-1 # 任意のリージョン
+          MAIL_ADDRESS: "dummy@example.com"  # ダミーアドレスで空文字回避
+          QUEUE_URL: ""                        # 必要に応じて空文字
+          API_KEY: ""                          # 必要に応じて空文字
         run: |
           # CDK CLI インストール
           npm install -g aws-cdk
@@ -107,7 +113,7 @@ jobs:
       # 12. Comment on PR if formatted
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           script: |
             github.rest.issues.createComment({
