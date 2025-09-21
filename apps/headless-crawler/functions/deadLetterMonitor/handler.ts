@@ -68,10 +68,12 @@ export const handler = async (_event: ScheduledEvent) => {
             ];
 
             // システム属性
-            const systemAttributes = message.Attributes ? [
-              `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
-              `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
-            ] : [];
+            const systemAttributes = message.Attributes
+              ? [
+                  `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
+                  `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
+                ]
+              : [];
 
             if (message.Attributes) {
               console.log(
@@ -91,24 +93,35 @@ export const handler = async (_event: ScheduledEvent) => {
               try {
                 const parsedBody = JSON.parse(message.Body || "") as any;
 
-                const jobIdDetail = parsedBody?.job?.id ? (() => {
-                  console.log("📋 Job ID:", parsedBody.job.id);
-                  return `**Job ID**: ${parsedBody.job.id}`;
-                })() : null;
+                const jobIdDetail = parsedBody?.job?.id
+                  ? (() => {
+                      console.log("📋 Job ID:", parsedBody.job.id);
+                      return `**Job ID**: ${parsedBody.job.id}`;
+                    })()
+                  : null;
 
-                const errorMessageDetail = parsedBody.errorMessage ? (() => {
-                  console.log("🚨 エラー:", parsedBody.errorMessage);
-                  return `**エラー**: ${parsedBody.errorMessage}`;
-                })() : null;
+                const errorMessageDetail = parsedBody.errorMessage
+                  ? (() => {
+                      console.log("🚨 エラー:", parsedBody.errorMessage);
+                      return `**エラー**: ${parsedBody.errorMessage}`;
+                    })()
+                  : null;
 
-                const errorTypeDetail = parsedBody.errorType ? (() => {
-                  console.log("🚨 タイプ:", parsedBody.errorType);
-                  return `**タイプ**: ${parsedBody.errorType}`;
-                })() : null;
+                const errorTypeDetail = parsedBody.errorType
+                  ? (() => {
+                      console.log("🚨 タイプ:", parsedBody.errorType);
+                      return `**タイプ**: ${parsedBody.errorType}`;
+                    })()
+                  : null;
 
                 const jsonDetail = `\n\`\`\`json\n${JSON.stringify(parsedBody, null, 2)}\n\`\`\`\n`;
 
-                return [jobIdDetail, errorMessageDetail, errorTypeDetail, jsonDetail].filter(Boolean);
+                return [
+                  jobIdDetail,
+                  errorMessageDetail,
+                  errorTypeDetail,
+                  jsonDetail,
+                ].filter(Boolean);
               } catch (e) {
                 console.error("メッセージ本文のパースエラー:", e);
                 // JSON形式でない場合はそのまま表示
@@ -116,7 +129,11 @@ export const handler = async (_event: ScheduledEvent) => {
               }
             })();
 
-            const errorSummary = [...basicInfo, ...systemAttributes, ...messageDetails].join('\n');
+            const errorSummary = [
+              ...basicInfo,
+              ...systemAttributes,
+              ...messageDetails,
+            ].join("\n");
 
             return errorSummary;
           });
@@ -124,7 +141,10 @@ export const handler = async (_event: ScheduledEvent) => {
           try {
             const title = `デッドレターキューエラー - ${new Date().toISOString().split("T")[0]} (${messages.Messages.length}件)`;
 
-            await createBugIssue({ title, errorLog: errorDetails.join("\n---\n") });
+            await createBugIssue({
+              title,
+              errorLog: errorDetails.join("\n---\n"),
+            });
           } catch (error) {
             console.error("❌ GitHub Issue作成エラー:", error);
           }
