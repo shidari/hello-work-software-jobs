@@ -151,7 +151,7 @@ importers:
         version: link:../../packages/models
       '@sho/scripts':
         specifier: workspace:*
-        version: link:../../packages/scripts
+        version: link:../../scripts
       '@valibot/to-json-schema':
         specifier: ^1.3.0
         version: 1.3.0(valibot@1.1.0(typescript@5.9.2))
@@ -221,7 +221,7 @@ importers:
         specifier: ^5.8.3
         version: 5.9.2
 
-  packages/scripts:
+  scripts:
     dependencies:
       find-up:
         specifier: ^7.0.0
