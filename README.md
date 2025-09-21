@@ -70,10 +70,10 @@ TypeScript + neverthrow + AWS Lambda + Cloudflare Workers + Next.js 15 + React 1
 hello-work-software-jobs/
 ├── apps/
 │   ├── hello-work-job-searcher/ # フロントエンドアプリケーション (Next.js 15)
-│   └── job-store-api/          # 求人情報データベース・API (Cloudflare Workers)
+│   ├── job-store-api/          # 求人情報データベース・API (Cloudflare Workers)
+│   └── headless-crawler/       # ハローワーククローラー (AWS Lambda)
 ├── packages/
 │   ├── models/          # 共通スキーマ・型定義 (@sho/models)
-│   ├── headless-crawler/ # ハローワーククローラー (AWS Lambda)
 │   └── scripts/         # 共通スクリプト・ユーティリティ (@sho/scripts)
 ├── pnpm-workspace.yaml # モノレポ設定
 ├── biome.json         # コードフォーマッター設定
@@ -116,7 +116,7 @@ graph TD
   - tsdown (v0.15.3) - ビルドツール
   - Playwright (v1.53.1) - テスト用ブラウザ自動化
 
-##### `headless-crawler`
+##### `apps/headless-crawler`
 
 - **目的**: ハローワークサイトのクローリング・スクレイピング
 - **技術**: 
@@ -242,7 +242,7 @@ pnpm dev  # http://localhost:9002 で起動
 #### クローラー
 
 ```bash
-cd packages/headless-crawler
+cd apps/headless-crawler
 pnpm verify:crawler  # クローラー動作確認
 pnpm verify:scraper  # スクレイパー動作確認
 pnpm type-check      # 型チェック
@@ -271,7 +271,7 @@ pnpm build    # 型定義・スキーマのビルド
 **前提条件**: Nix環境が必要です
 
 ```bash
-cd packages/headless-crawler
+cd apps/headless-crawler
 nix-shell           # Nix環境に入る
 pnpm bootstrap      # 初回のみ（CDK Bootstrap）
 pnpm run deploy     # AWS Lambda + SQSにデプロイ

@@ -66,7 +66,7 @@ jobs:
 
       # 8.6 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
-        working-directory: ./packages/headless-crawler
+        working-directory: ./apps/headless-crawler
         env:
           MAIL_ADDRESS: "dummy@example.com"  # ダミー値で空文字回避
         run: |
