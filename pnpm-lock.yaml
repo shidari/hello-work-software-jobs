@@ -31,6 +31,64 @@ importers:
         specifier: ^5.8.3
         version: 5.9.2
 
+  apps/headless-crawler:
+    dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.840.0
+        version: 3.879.0
+      '@sho/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      aws-cdk-lib:
+        specifier: 2.214.0
+        version: 2.214.0(constructs@10.4.2)
+      constructs:
+        specifier: ^10.0.0
+        version: 10.4.2
+      dotenv:
+        specifier: ^17.0.0
+        version: 17.2.2
+      effect:
+        specifier: ^3.16.5
+        version: 3.17.9
+      octokit:
+        specifier: ^5.0.3
+        version: 5.0.3
+      playwright:
+        specifier: ^1.53.1
+        version: 1.55.0
+      valibot:
+        specifier: ^1.1.0
+        version: 1.1.0(typescript@5.9.2)
+      zod:
+        specifier: ^4.1.5
+        version: 4.1.5
+    devDependencies:
+      '@sparticuz/chromium':
+        specifier: ^138.0.0
+        version: 138.0.2
+      '@types/aws-lambda':
+        specifier: ^8.10.149
+        version: 8.10.152
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/node':
+        specifier: 22.18.1
+        version: 22.18.1
+      aws-cdk:
+        specifier: 2.1029.0
+        version: 2.1029.0
+      esbuild:
+        specifier: ^0.25.5
+        version: 0.25.9
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.18.1)(typescript@5.9.2)
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   apps/hello-work-job-searcher:
     dependencies:
       '@sho/models':
@@ -140,64 +198,6 @@ importers:
       wrangler:
         specifier: 4.35.0
         version: 4.35.0
-
-  packages/headless-crawler:
-    dependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.840.0
-        version: 3.879.0
-      '@sho/models':
-        specifier: workspace:*
-        version: link:../models
-      aws-cdk-lib:
-        specifier: 2.214.0
-        version: 2.214.0(constructs@10.4.2)
-      constructs:
-        specifier: ^10.0.0
-        version: 10.4.2
-      dotenv:
-        specifier: ^17.0.0
-        version: 17.2.2
-      effect:
-        specifier: ^3.16.5
-        version: 3.17.9
-      octokit:
-        specifier: ^5.0.3
-        version: 5.0.3
-      playwright:
-        specifier: ^1.53.1
-        version: 1.55.0
-      valibot:
-        specifier: ^1.1.0
-        version: 1.1.0(typescript@5.9.2)
-      zod:
-        specifier: ^4.1.5
-        version: 4.1.5
-    devDependencies:
-      '@sparticuz/chromium':
-        specifier: ^138.0.0
-        version: 138.0.2
-      '@types/aws-lambda':
-        specifier: ^8.10.149
-        version: 8.10.152
-      '@types/jest':
-        specifier: ^29.5.14
-        version: 29.5.14
-      '@types/node':
-        specifier: 22.18.1
-        version: 22.18.1
-      aws-cdk:
-        specifier: 2.1029.0
-        version: 2.1029.0
-      esbuild:
-        specifier: ^0.25.5
-        version: 0.25.9
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.18.1)(typescript@5.9.2)
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.2
 
   packages/models:
     dependencies:
