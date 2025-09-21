@@ -3,8 +3,8 @@ import {
   GetQueueAttributesCommand,
   ReceiveMessageCommand,
 } from "@aws-sdk/client-sqs";
-import { Octokit } from "octokit";
 import type { ScheduledEvent } from "aws-lambda";
+import { createBugIssue } from "./helper";
 
 const sqsClient = new SQSClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -14,9 +14,6 @@ export const handler = async (_event: ScheduledEvent) => {
   console.log("デッドレターキューの監視を開始しました");
 
   const queueUrl = process.env.DEAD_LETTER_QUEUE_URL;
-  const githubToken = process.env.GITHUB_TOKEN;
-  const githubOwner = process.env.GITHUB_OWNER;
-  const githubRepo = process.env.GITHUB_REPO;
 
   if (!queueUrl) {
     console.error("DEAD_LETTER_QUEUE_URL環境変数が設定されていません");
@@ -59,18 +56,25 @@ export const handler = async (_event: ScheduledEvent) => {
             `📨 ${messages.Messages.length}件のメッセージを取得しました:`,
           );
 
-          const errorDetails: string[] = [];
-
-          messages.Messages.forEach((message, index) => {
+          const errorDetails = messages.Messages.map((message, index) => {
             console.log(`\n--- メッセージ ${index + 1} ---`);
             console.log("メッセージID:", message.MessageId);
             console.log("メッセージ本文:", message.Body);
 
             // エラー詳細を収集
-            let errorSummary = `### エラー ${index + 1}\n`;
-            errorSummary += `**メッセージID**: ${message.MessageId}\n`;
+            const basicInfo = [
+              `### エラー ${index + 1}`,
+              `**メッセージID**: ${message.MessageId}`,
+            ];
 
             // システム属性
+            const systemAttributes = message.Attributes
+              ? [
+                  `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
+                  `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
+                ]
+              : [];
+
             if (message.Attributes) {
               console.log(
                 "  - 受信回数:",
@@ -82,76 +86,72 @@ export const handler = async (_event: ScheduledEvent) => {
                   Number.parseInt(message.Attributes.SentTimestamp || "0"),
                 ).toISOString(),
               );
-              errorSummary += `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}\n`;
-              errorSummary += `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}\n`;
             }
 
             // メッセージ本文をJSONとしてパース
-            try {
-              const parsedBody = JSON.parse(message.Body || "");
-              if (parsedBody.errorMessage) {
-                console.log("🚨 エラー:", parsedBody.errorMessage);
-                errorSummary += `**エラー**: ${parsedBody.errorMessage}\n`;
-              }
-              if (parsedBody.errorType) {
-                console.log("🚨 タイプ:", parsedBody.errorType);
-                errorSummary += `**タイプ**: ${parsedBody.errorType}\n`;
-              }
-              errorSummary += `\n\`\`\`json\n${JSON.stringify(parsedBody, null, 2)}\n\`\`\`\n`;
-            } catch (e) {
-              console.error("メッセージ本文のパースエラー:", e);
-              // JSON形式でない場合はそのまま表示
-              errorSummary += `\n\`\`\`\n${message.Body}\n\`\`\`\n`;
-            }
+            const messageDetails = (() => {
+              try {
+                const parsedBody = JSON.parse(message.Body || "") as any;
 
-            errorDetails.push(errorSummary);
+                const jobIdDetail = parsedBody?.job?.id
+                  ? (() => {
+                      console.log("📋 Job ID:", parsedBody.job.id);
+                      return `**Job ID**: ${parsedBody.job.id}`;
+                    })()
+                  : null;
+
+                const errorMessageDetail = parsedBody.errorMessage
+                  ? (() => {
+                      console.log("🚨 エラー:", parsedBody.errorMessage);
+                      return `**エラー**: ${parsedBody.errorMessage}`;
+                    })()
+                  : null;
+
+                const errorTypeDetail = parsedBody.errorType
+                  ? (() => {
+                      console.log("🚨 タイプ:", parsedBody.errorType);
+                      return `**タイプ**: ${parsedBody.errorType}`;
+                    })()
+                  : null;
+
+                const jsonDetail = `\n\`\`\`json\n${JSON.stringify(parsedBody, null, 2)}\n\`\`\`\n`;
+
+                return [
+                  jobIdDetail,
+                  errorMessageDetail,
+                  errorTypeDetail,
+                  jsonDetail,
+                ].filter(Boolean);
+              } catch (e) {
+                console.error("メッセージ本文のパースエラー:", e);
+                // JSON形式でない場合はそのまま表示
+                return [`\n\`\`\`\n${message.Body}\n\`\`\`\n`];
+              }
+            })();
+
+            const errorSummary = [
+              ...basicInfo,
+              ...systemAttributes,
+              ...messageDetails,
+            ].join("\n");
+
+            return errorSummary;
           });
 
-          // GitHub Issue作成
-          if (githubToken && githubOwner && githubRepo) {
-            try {
-              const octokit = new Octokit({ auth: githubToken });
+          try {
+            const title = `デッドレターキューエラー - ${new Date().toISOString().split("T")[0]} (${messages.Messages.length}件)`;
 
-              const title = `デッドレターキューエラー - ${new Date().toISOString().split("T")[0]} (${messages.Messages.length}件)`;
-              const body = `
-## デッドレターキューエラーレポート
-
-**日時**: ${new Date().toLocaleString("ja-JP")}  
-**総メッセージ数**: ${messages.Messages.length}件
-
-## エラー詳細
-
-${errorDetails.join("\n")}
-
-## 対応項目
-- [ ] エラーの根本原因を調査する
-- [ ] 根本的な問題を修正する  
-- [ ] 失敗したメッセージの再処理を検討する
-- [ ] 必要に応じてエラーハンドリングを更新する
-
----
-*デッドレターキューモニターによる自動生成*
-              `.trim();
-
-              const issue = await octokit.rest.issues.create({
-                owner: githubOwner,
-                repo: githubRepo,
-                title,
-                body,
-                labels: ["bug", "dead-letter-queue", "monitoring"],
-              });
-
-              console.log(
-                `✅ GitHub Issueを作成しました: ${issue.data.html_url}`,
-              );
-            } catch (error) {
-              console.error("❌ GitHub Issue作成エラー:", error);
-            }
-          } else {
-            console.log(
-              "⚠️  GitHub連携が設定されていません（トークン/オーナー/リポジトリが不足）",
-            );
+            await createBugIssue({
+              title,
+              errorLog: errorDetails.join("\n---\n"),
+            });
+          } catch (error) {
+            console.error("❌ GitHub Issue作成エラー:", error);
           }
+        } else {
+          console.log(
+            "⚠️  GitHub連携が設定されていません（トークン/オーナー/リポジトリが不足）",
+          );
         }
       } catch (error) {
         console.error("メッセージ取得エラー:", error);
