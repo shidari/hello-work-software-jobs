@@ -113,7 +113,7 @@ graph TD
   - Zod (v4.1.5) - 追加スキーマバリデーション
   - Drizzle ORM (v0.44.2) - データベーススキーマ
   - TypeScript (v5.8.3) - 型定義
-  - tsup (v8.5.0) - ビルドツール
+  - tsdown (v0.15.3) - ビルドツール
   - Playwright (v1.53.1) - テスト用ブラウザ自動化
 
 ##### `headless-crawler`
@@ -147,7 +147,7 @@ graph TD
   - Valibot (v1.1.0) - バリデーション
   - neverthrow (v8.2.0) - エラーハンドリング
   - Wrangler (v4.35.0) - デプロイメントツール
-  - tsup (v8.5.0) - ビルドツール
+  - tsdown (v0.15.3) - ビルドツール
   - @hono/valibot-validator (v0.5.3) - Valibotバリデーション統合
   - @hono/swagger-ui (v0.5.2) - Swagger UI統合
   - hono-openapi (v1.0.8) - OpenAPI拡張
