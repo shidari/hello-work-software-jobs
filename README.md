@@ -73,8 +73,8 @@ hello-work-software-jobs/
 │   ├── job-store-api/          # 求人情報データベース・API (Cloudflare Workers)
 │   └── headless-crawler/       # ハローワーククローラー (AWS Lambda)
 ├── packages/
-│   ├── models/          # 共通スキーマ・型定義 (@sho/models)
-│   └── scripts/         # 共通スクリプト・ユーティリティ (@sho/scripts)
+│   └── models/          # 共通スキーマ・型定義 (@sho/models)
+├── scripts/             # 共通スクリプト・ユーティリティ (@sho/scripts)
 ├── pnpm-workspace.yaml # モノレポ設定
 ├── biome.json         # コードフォーマッター設定
 └── renovate.json      # 依存関係自動更新設定
