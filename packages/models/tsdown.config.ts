@@ -1,12 +1,9 @@
 import { defineConfig } from "tsdown";
 export default defineConfig({
-  entry: ["src/index.ts"],
-  noExternal: ["zod"],
+  entry: "src/index.ts",
+  noExternal: ["zod", "valibot"],
   outDir: "dist",
-  splitting: false,
   dts: true,
   sourcemap: true,
   clean: true,
-  format: ["cjs", "esm"],
-  target: "es2022",
 });

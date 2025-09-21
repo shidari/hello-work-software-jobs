@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "pnpm exec tsdown",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
