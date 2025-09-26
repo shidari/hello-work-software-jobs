@@ -28,7 +28,7 @@ jobs:
 
       # 3. Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@89d709d423dc495668cd762a18dd4a070611be3f
         with:
           node-version: '20'
 
