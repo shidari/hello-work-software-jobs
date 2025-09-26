@@ -1,51 +1,123 @@
-name: Deploy CDK
+name: PR Checks
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    branches: [main]
 
 permissions:
-  id-token: write # ← OIDCで必要
-  contents: read # ← checkoutに必要
+  contents: write
+  pull-requests: write
+  id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+          cache: 'pnpm'
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 10.15.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
-          node-version: 22
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 10.15.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r exec tsc --noEmit
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 10.15.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test
 
-      - name: Check pnpm version
-        run: pnpm --version
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  cdk-dry-run:
+    needs: [build, typecheck, test]   # ← 3つ終わったら実行
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 10.15.1
+      - run: pnpm install --frozen-lockfile
 
-      - name: Build models and scripts packages 
-        run: |
-          pnpm -r --filter='!hello-work-job-searcher' --filter='!job-store' build
-      # 👇 OIDCによるAssumeRole
-      - name: Configure AWS CDK Credentials via OIDC
+      - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
         with:
           role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-oidc
           aws-region: ap-northeast-1
 
-      - name: Deploy AWS CDK
+      - name: CDK Dry-Run Deploy
         working-directory: ./apps/headless-crawler
         env:
-          JOB_STORE_ENDPOINT: ${{ secrets.JOB_STORE_ENDPOINT }}
-          MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
-          QUEUE_URL: ${{ secrets.QUEUE_URL }}
-          API_KEY: ${{ secrets.API_KEY }}
-          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          MAIL_ADDRESS: "dummy@example.com"
         run: |
-          pnpm exec cdk deploy --all --require-approval never
+          npm install -g aws-cdk
+          pnpm install
+          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
+
+  lint-format:
+    needs: [cdk-dry-run]   # ← dry-run 終了後に実行
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 10.15.1
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format & Lint changed files
+        run: |
+          mapfile -t CHANGED_FILES < <(
+            git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$'
+          )
+          if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
+            pnpm exec biome format --write "${CHANGED_FILES[@]}"
+            pnpm exec biome lint --write --no-errors-on-unmatched "${CHANGED_FILES[@]}"
+            git add "${CHANGED_FILES[@]}"
+          fi
+
+      - name: Commit formatting & lint fixes
+        run: |
+          if ! git diff --cached --quiet; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git commit -m "style: auto-format and lint fixes [skip ci]"
+            git push
+          fi
