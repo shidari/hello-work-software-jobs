@@ -7,14 +7,13 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write # ← OIDCで必要
+  id-token: write
 
 jobs:
-  ci-cd:
+  # 並列実行グループ1: 型チェック  
+  type-check:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
@@ -22,64 +21,125 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      # 2. Disable husky (for CI, kill hooks)
-      - name: Disable husky
-        run: git config core.hooksPath /dev/null
-
-      # 3. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20'
 
-      # 4. Install pnpm
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
         with:
           version: 10.15.1
 
-      # 5. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 6. Build
       - name: Build packages
         run: pnpm -r build
 
-      # 7. Type check
       - name: Type check
         run: pnpm -r exec tsc --noEmit
-        continue-on-error: false
 
-      # 8. Run tests
+  # 並列実行グループ2: テスト
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          version: 10.15.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm -r build
+
       - name: Run tests
         run: pnpm run test
-        continue-on-error: false
 
-      # 8.5. Configure AWS credentials via OIDC
+  # 並列実行グループ3: CDK Dry-Run
+  cdk-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          version: 10.15.1
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: build-artifacts
+
       - name: Configure AWS Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838
         with:
           role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-oidc
           aws-region: ap-northeast-1
 
-      # 8.6 CDK Dry-Run Deploy (モノレポ対応)
       - name: CDK Dry-Run Deploy
         working-directory: ./apps/headless-crawler
         env:
-          MAIL_ADDRESS: "dummy@example.com"  # ダミー値で空文字回避
+          MAIL_ADDRESS: "dummy@example.com"
         run: |
-          # CDK CLI インストール
           npm install -g aws-cdk
-
-          # 依存関係インストール
-          pnpm install
-
-          # empty deploy (ChangeSet作成のみ)
           pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
 
-      # 9. Format & Lint changed files
+  # 最終ステップ: フォーマット適用とコミット（全チェック通過後）
+  format-and-commit:
+    runs-on: ubuntu-latest
+    needs: [type-check, test, cdk-check]
+    if: always() && (needs.type-check.result == 'success' || needs.type-check.result == 'skipped') && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.cdk-check.result == 'success' || needs.cdk-check.result == 'skipped')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Disable husky
+        run: git config core.hooksPath /dev/null
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          version: 10.15.1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Format & Lint changed files
         shell: bash
         run: |
@@ -89,7 +149,6 @@ jobs:
 
           if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
             echo "Changed files: ${CHANGED_FILES[@]}"
-
             pnpm exec biome format --write "${CHANGED_FILES[@]}"
             pnpm exec biome lint --write --no-errors-on-unmatched "${CHANGED_FILES[@]}"
             git add "${CHANGED_FILES[@]}"
@@ -97,7 +156,6 @@ jobs:
             echo "No JS/TS/JSX/TSX files changed"
           fi
 
-      # 10. Check if formatting or linting changed files
       - name: Check if formatting or linting changed files
         id: format-check
         run: |
@@ -107,17 +165,14 @@ jobs:
             echo "formatted=true" >> $GITHUB_OUTPUT
           fi
 
-      # 11. Commit formatting & lint fixes
       - name: Commit formatting & lint fixes
         if: steps.format-check.outputs.formatted == 'true'
         run: |
-          git config core.hooksPath /dev/null
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m "style: auto-format and lint fixes [skip ci]"
           git push
 
-      # 12. Comment on PR if formatted
       - name: Comment on PR if formatted
         if: steps.format-check.outputs.formatted == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
