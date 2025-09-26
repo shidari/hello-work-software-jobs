@@ -184,7 +184,7 @@ describe("/api/v1/jobs/:jobNumber", () => {
       await waitOnExecutionContext(ctx);
       expect(response.status).toBe(200);
     });
-  })
+  });
   describe("GET 異常系", () => {
     it("GET with too short format should fail", async () => {
       const request = new Request("http://localhost:8787/api/v1/jobs/123-1");
