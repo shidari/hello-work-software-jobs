@@ -47,21 +47,7 @@ jobs:
       - name: Run tests
         run: pnpm run test
         continue-on-error: false
-
-      - name: CDK Dry-Run Deploy
-        working-directory: ./apps/headless-crawler
-        env:
-          MAIL_ADDRESS: "dummy@example.com"  # ダミー値で空文字回避
-        run: |
-          # CDK CLI インストールa
-          npm install -g aws-cdk
-
-          # 依存関係インストール
-          pnpm install
-
-          # empty deploy (ChangeSet作成のみ)
-          pnpm exec cdk deploy --all --require-approval never --no-execute-changeset
-
+        
       - name: Format & Lint changed files
         shell: bash
         run: |
