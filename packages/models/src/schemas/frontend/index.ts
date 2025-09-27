@@ -1,6 +1,6 @@
-import * as v from "valibot"
+import * as v from "valibot";
 
-const ISODateSchema = v.pipe(v.string(), v.isoTimestamp())
+const ISODateSchema = v.pipe(v.string(), v.isoTimestamp());
 
 export const JobOverviewSchema = v.object({
   jobNumber: v.string(),

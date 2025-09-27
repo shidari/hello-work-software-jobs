@@ -1,4 +1,4 @@
-import type * as v from "valibot"
+import type * as v from "valibot";
 import type {
   JobDetailSchema,
   JobOverviewSchema,

@@ -1,6 +1,6 @@
 "use client";
 import { JobOverviewSchema } from "@sho/models";
-import * as v from "valibot"
+import * as v from "valibot";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
