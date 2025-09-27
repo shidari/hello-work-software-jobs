@@ -11,13 +11,29 @@ import { validateJobListPage, validateJobSearchPage } from "../core/validation";
 import type { JobNumberValidationError } from "../core/validation/jobDetail/error";
 import type { JobListPageValidationError } from "../core/validation/jobList/error";
 import type { JobSearchPageValidationError } from "../core/validation/jobSearch/error";
-import type { IsNextPageEnabledError, ListJobsError } from "../core/page/JobList/others/error";
-import type { EmploymentLabelToSelectorError, EngineeringLabelSelectorError, JobSearchCriteriaFillFormError } from "../core/page/JobSearch/form-fillings/error";
+import type {
+  IsNextPageEnabledError,
+  ListJobsError,
+} from "../core/page/JobList/others/error";
+import type {
+  EmploymentLabelToSelectorError,
+  EngineeringLabelSelectorError,
+  JobSearchCriteriaFillFormError,
+} from "../core/page/JobSearch/form-fillings/error";
 import type { ExtractJobNumbersError } from "../core/page/JobDetail/extractors/error";
-import type { GoToJobSearchPageError, SearchThenGotoJobListPageError } from "../core/page/JobSearch/navigations/error";
+import type {
+  GoToJobSearchPageError,
+  SearchThenGotoJobListPageError,
+} from "../core/page/JobSearch/navigations/error";
 import type { NextJobListPageError } from "../core/page/JobList/navigations/error";
-import { goToJobSearchPage, searchThenGotoJobListPage } from "../core/page/JobSearch/navigations";
-import { isNextPageEnabled, listJobOverviewElem } from "../core/page/JobList/others";
+import {
+  goToJobSearchPage,
+  searchThenGotoJobListPage,
+} from "../core/page/JobSearch/navigations";
+import {
+  isNextPageEnabled,
+  listJobOverviewElem,
+} from "../core/page/JobList/others";
 import { extractJobNumbers } from "../core/page/JobDetail/extractors";
 import { goToNextJobListPage } from "../core/page/JobList/navigations";
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
@@ -39,7 +55,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const buildHelloWorkCrawlerLayer = (config: HelloWorkCrawlingConfig) => {
   return Layer.effect(
@@ -113,11 +129,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });

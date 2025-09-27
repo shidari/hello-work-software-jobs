@@ -1,11 +1,11 @@
 import { Data } from "effect";
 
 export class FromJobListToJobDetailPageError extends Data.TaggedError(
-    "FromJobListToJobDetailPageError",
+  "FromJobListToJobDetailPageError",
 )<{
-    readonly message: string;
-}> { }
+  readonly message: string;
+}> {}
 
 export class NextJobListPageError extends Data.TaggedError(
-    "NextJobListPageError",
-)<{ readonly message: string }> { }
+  "NextJobListPageError",
+)<{ readonly message: string }> {}
