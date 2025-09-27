@@ -7,10 +7,8 @@ import {
 } from "../core/headless-browser";
 import type { HelloWorkCrawlingConfig } from "../config/crawler";
 import { delay } from "../core/util";
-import { validateJobListPage, validateJobSearchPage } from "../core/validation";
-import type { JobNumberValidationError } from "../core/validation/jobDetail/error";
-import type { JobListPageValidationError } from "../core/validation/jobList/error";
-import type { JobSearchPageValidationError } from "../core/validation/jobSearch/error";
+import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
+import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
 import type {
   IsNextPageEnabledError,
   ListJobsError,
@@ -36,6 +34,9 @@ import {
 } from "../core/page/JobList/others";
 import { extractJobNumbers } from "../core/page/JobDetail/extractors";
 import { goToNextJobListPage } from "../core/page/JobList/navigations";
+import type { JobNumberValidationError } from "../core/page/JobDetail/validators/error";
+import { validateJobSearchPage } from "../core/page/JobSearch/validators";
+import { validateJobListPage } from "../core/page/JobList/validators";
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
   {

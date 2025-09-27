@@ -7,17 +7,8 @@ import {
 } from "../core/headless-browser";
 import type { NewPageError } from "../core/headless-browser/error";
 import type { HelloWorkScrapingConfig } from "../config/scraper";
-import {
-  validateJobDetailPage,
-  validateJobListPage,
-  validateJobSearchPage,
-} from "../core/validation";
-import type {
-  JobDetailPageValidationError,
-  JobDetailPropertyValidationError,
-} from "../core/validation/jobDetail/error";
-import type { JobListPageValidationError } from "../core/validation/jobList/error";
-import type { JobSearchPageValidationError } from "../core/validation/jobSearch/error";
+import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
+import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
 import type { ListJobsError } from "../core/page/JobList/others/error";
 import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
 import type {
@@ -37,6 +28,13 @@ import {
 } from "../core/page/JobSearch/navigations";
 import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
 import { extractJobInfo } from "../core/page/JobDetail/extractors";
+import { validateJobDetailPage } from "../core/page/JobDetail/validators";
+import type {
+  JobDetailPageValidationError,
+  JobDetailPropertyValidationError,
+} from "../core/page/JobDetail/validators/error";
+import { validateJobSearchPage } from "../core/page/JobSearch/validators";
+import { validateJobListPage } from "../core/page/JobList/validators";
 
 export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
   HelloWorkScraper,
