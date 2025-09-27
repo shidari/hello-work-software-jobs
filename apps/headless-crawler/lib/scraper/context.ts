@@ -29,7 +29,10 @@ import {
 import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
 import { extractJobInfo } from "../core/page/JobDetail/extractors";
 import { validateJobDetailPage } from "../core/page/JobDetail/validators";
-import type { JobDetailPageValidationError, JobDetailPropertyValidationError } from "../core/page/JobDetail/validators/error";
+import type {
+  JobDetailPageValidationError,
+  JobDetailPropertyValidationError,
+} from "../core/page/JobDetail/validators/error";
 import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
 
@@ -57,7 +60,7 @@ export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
       | JobSearchWithJobNumberFillingError
     >;
   }
->() { }
+>() {}
 
 export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
   return Layer.effect(
@@ -95,4 +98,4 @@ export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> { }
+}> {}

@@ -56,7 +56,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const buildHelloWorkCrawlerLayer = (config: HelloWorkCrawlingConfig) => {
   return Layer.effect(
@@ -130,11 +130,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });
