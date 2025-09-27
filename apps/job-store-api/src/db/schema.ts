@@ -23,6 +23,14 @@ export const jobs = sqliteTable("jobs", {
   updatedAt: text("updatedAt").notNull(),
 });
 
+export const rawJobs = sqliteTable("raw_jobs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  jobNumber: text("jobNumber").notNull().unique(),
+  rawHTML: text("rawHTML").notNull(),
+  createdAt: text("createdAt").notNull(),
+  updatedAt: text("updatedAt").notNull(),
+});
+
 // これ、キーしか型チェック指定なので、かなりfreaky
 export const jobSelectSchema = object({
   id: number(),
