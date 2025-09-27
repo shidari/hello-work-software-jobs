@@ -1,5 +1,6 @@
 "use client";
 import { JobOverviewSchema } from "@sho/models";
+import * as v from "valibot";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -18,7 +19,7 @@ export function FavoriteJobOverviewList() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
-      const validated = parsed.map((item) => JobOverviewSchema.parse(item));
+      const validated = parsed.map((item) => v.parse(JobOverviewSchema, item));
       setFavoriteJobs(validated);
     } catch {
       // ignore

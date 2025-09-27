@@ -1,20 +1,22 @@
-import z from "zod";
-import { ISODateSchema } from "../common";
+import * as v from "valibot";
 
-export const JobOverviewSchema = z.object({
-  jobNumber: z.string(),
-  companyName: z.string(),
-  workPlace: z.string(),
-  jobTitle: z.string(),
-  employmentType: z.string(), // 後でもっと型を細かくする
-  employeeCount: z.number(),
+const ISODateSchema = v.pipe(v.string(), v.isoTimestamp());
+
+export const JobOverviewSchema = v.object({
+  jobNumber: v.string(),
+  companyName: v.string(),
+  workPlace: v.string(),
+  jobTitle: v.string(),
+  employmentType: v.string(), // 後でもっと型を細かくする
+  employeeCount: v.number(),
   receivedDate: ISODateSchema,
 });
 
-export const JobDetailSchema = JobOverviewSchema.extend({
-  salary: z.string(),
-  jobDescription: z.string(),
-  expiryDate: z.string(),
-  workingHours: z.string(),
-  qualifications: z.string(),
+export const JobDetailSchema = v.object({
+  ...JobOverviewSchema.entries,
+  salary: v.string(),
+  jobDescription: v.string(),
+  expiryDate: v.string(),
+  workingHours: v.string(),
+  qualifications: v.string(),
 });
