@@ -1,5 +1,5 @@
 import { Effect, LogLevel, Logger } from "effect";
-import scraperConfig from "../core/config/scraper";
+import scraperConfig from "../config/scraper";
 import { validateJobNumber } from "../core/validation";
 import { HelloWorkScraper, buildHelloWorkScrapingLayer } from "./context";
 export function buildScrapingResult(rawJobNumber: string) {

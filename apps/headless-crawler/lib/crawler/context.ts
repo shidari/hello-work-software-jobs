@@ -28,7 +28,7 @@ import type {
   NextJobListPageError,
   SearchThenGotoJobListPageError,
 } from "../core/browser/interactions/navigation/error";
-import type { HelloWorkCrawlingConfig } from "../core/config/crawler";
+import type { HelloWorkCrawlingConfig } from "../config/crawler";
 import { delay } from "../core/util";
 import { validateJobListPage, validateJobSearchPage } from "../core/validation";
 import type { JobNumberValidationError } from "../core/validation/jobDetail/error";

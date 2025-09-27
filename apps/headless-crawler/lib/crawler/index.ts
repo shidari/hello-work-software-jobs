@@ -1,5 +1,5 @@
 import { Effect, LogLevel, Logger } from "effect";
-import crawlingConfig from "../core/config/crawler";
+import crawlingConfig from "../config/crawler";
 import { HelloWorkCrawler, buildHelloWorkCrawlerLayer } from "./context";
 
 export const crawlerRunnable = Effect.gen(function* () {
