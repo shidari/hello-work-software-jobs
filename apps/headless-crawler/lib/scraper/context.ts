@@ -25,7 +25,7 @@ import type {
   GoToJobSearchPageError,
   SearchThenGotoFirstJobListPageError,
 } from "../core/browser/interactions/navigation/error";
-import type { HelloWorkScrapingConfig } from "../core/config/scraper";
+import type { HelloWorkScrapingConfig } from "../config/scraper";
 import {
   validateJobDetailPage,
   validateJobListPage,
