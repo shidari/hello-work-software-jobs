@@ -1,39 +1,41 @@
 import type { JobListPage, JobMetadata } from "@sho/models";
 import { Chunk, Context, Effect, Layer, Option, Stream } from "effect";
 import {
-  extractJobNumbers,
-  goToJobSearchPage,
-  goToNextJobListPage,
-  isNextPageEnabled,
-  listJobOverviewElem,
-  searchThenGotoJobListPage,
-} from "../core/browser";
-import {
   createContext,
   createPage,
   launchBrowser,
-} from "../core/browser/builder";
-import type {
-  IsNextPageEnabledError,
-  ListJobsError,
-} from "../core/browser/interactions/element-action/error";
-import type { ExtractJobNumbersError } from "../core/browser/interactions/extraction/jobDetail/error";
-import type {
-  EmploymentLabelToSelectorError,
-  EngineeringLabelSelectorError,
-  JobSearchCriteriaFillFormError,
-} from "../core/browser/interactions/form-filling/jobSearch/error";
-import type {
-  GoToJobSearchPageError,
-  NextJobListPageError,
-  SearchThenGotoJobListPageError,
-} from "../core/browser/interactions/navigation/error";
+} from "../core/headless-browser";
 import type { HelloWorkCrawlingConfig } from "../config/crawler";
 import { delay } from "../core/util";
 import { validateJobListPage, validateJobSearchPage } from "../core/validation";
 import type { JobNumberValidationError } from "../core/validation/jobDetail/error";
 import type { JobListPageValidationError } from "../core/validation/jobList/error";
 import type { JobSearchPageValidationError } from "../core/validation/jobSearch/error";
+import type {
+  IsNextPageEnabledError,
+  ListJobsError,
+} from "../core/page/JobList/others/error";
+import type {
+  EmploymentLabelToSelectorError,
+  EngineeringLabelSelectorError,
+  JobSearchCriteriaFillFormError,
+} from "../core/page/JobSearch/form-fillings/error";
+import type { ExtractJobNumbersError } from "../core/page/JobDetail/extractors/error";
+import type {
+  GoToJobSearchPageError,
+  SearchThenGotoJobListPageError,
+} from "../core/page/JobSearch/navigations/error";
+import type { NextJobListPageError } from "../core/page/JobList/navigations/error";
+import {
+  goToJobSearchPage,
+  searchThenGotoJobListPage,
+} from "../core/page/JobSearch/navigations";
+import {
+  isNextPageEnabled,
+  listJobOverviewElem,
+} from "../core/page/JobList/others";
+import { extractJobNumbers } from "../core/page/JobDetail/extractors";
+import { goToNextJobListPage } from "../core/page/JobList/navigations";
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
   {

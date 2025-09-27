@@ -1,6 +1,6 @@
 import type { JobListPage } from "@sho/models";
 import { Effect } from "effect";
-import { listJobOverviewElem } from "../interactions/element-action";
+import { listJobOverviewElem } from "../others";
 import { AssertSingleJobListedError } from "./error";
 
 export function assertSingleJobListed(page: JobListPage) {

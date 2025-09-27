@@ -1,30 +1,11 @@
 import type { JobNumber, ScrapedJob } from "@sho/models";
 import { Context, Data, Effect, Layer } from "effect";
 import {
-  extractJobInfo,
-  type FromJobListToJobDetailPageError,
-  goToJobSearchPage,
-  goToSingleJobDetailPage,
-  searchNoThenGotoSingleJobListPage,
-} from "../core/browser";
-import type { AssertSingleJobListedError } from "../core/browser/assertion/error";
-import {
   createContext,
   createPage,
   launchBrowser,
-} from "../core/browser/builder";
-import type { NewPageError } from "../core/browser/builder/error";
-import type {
-  HomePageElmNotFoundError,
-  ListJobsError,
-  QualificationsElmNotFoundError,
-} from "../core/browser/interactions/element-action/error";
-import type { ExtractTextContentError } from "../core/browser/interactions/extraction/jobDetail/error";
-import type { JobSearchWithJobNumberFillingError } from "../core/browser/interactions/form-filling/jobSearch/error";
-import type {
-  GoToJobSearchPageError,
-  SearchThenGotoFirstJobListPageError,
-} from "../core/browser/interactions/navigation/error";
+} from "../core/headless-browser";
+import type { NewPageError } from "../core/headless-browser/error";
 import type { HelloWorkScrapingConfig } from "../config/scraper";
 import {
   validateJobDetailPage,
@@ -37,6 +18,25 @@ import type {
 } from "../core/validation/jobDetail/error";
 import type { JobListPageValidationError } from "../core/validation/jobList/error";
 import type { JobSearchPageValidationError } from "../core/validation/jobSearch/error";
+import type { ListJobsError } from "../core/page/JobList/others/error";
+import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
+import type {
+  HomePageElmNotFoundError,
+  QualificationsElmNotFoundError,
+} from "../core/page/JobDetail/checkers/error";
+import type {
+  GoToJobSearchPageError,
+  SearchThenGotoFirstJobListPageError,
+} from "../core/page/JobSearch/navigations/error";
+import type { FromJobListToJobDetailPageError } from "../core/page/JobList/navigations/error";
+import type { ExtractTextContentError } from "../core/page/JobDetail/extractors/error";
+import type { JobSearchWithJobNumberFillingError } from "../core/page/JobSearch/form-fillings/error";
+import {
+  goToJobSearchPage,
+  searchNoThenGotoSingleJobListPage,
+} from "../core/page/JobSearch/navigations";
+import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
+import { extractJobInfo } from "../core/page/JobDetail/extractors";
 
 export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
   HelloWorkScraper,

@@ -1,11 +1,6 @@
-import type { JobDetailPage, JobListPage, JobOverViewList } from "@sho/models";
+import type { JobListPage, JobOverViewList } from "@sho/models";
 import { Effect } from "effect";
-import {
-  HomePageElmNotFoundError,
-  IsNextPageEnabledError,
-  ListJobsError,
-  QualificationsElmNotFoundError,
-} from "./error";
+import { IsNextPageEnabledError, ListJobsError } from "./error";
 
 export function listJobOverviewElem(
   jobListPage: JobListPage,
@@ -21,33 +16,6 @@ export function listJobOverviewElem(
         : Effect.succeed(tables as JobOverViewList),
     ),
   );
-}
-
-export function homePageElmExists(page: JobDetailPage) {
-  return Effect.tryPromise({
-    try: async () => {
-      const homePageLoc = page.locator("#ID_hp");
-      const count = await homePageLoc.count();
-      return count === 1;
-    },
-    catch: (e) =>
-      new HomePageElmNotFoundError({
-        message: `unexpected error\n${String(e)}`,
-      }),
-  });
-}
-export function qualificationsElmExists(page: JobDetailPage) {
-  return Effect.tryPromise({
-    try: async () => {
-      const homePageLoc = page.locator("#ID_hynaMenkyoSkku");
-      const count = await homePageLoc.count();
-      return count === 1;
-    },
-    catch: (e) =>
-      new QualificationsElmNotFoundError({
-        message: `unexpected error\n${String(e)}`,
-      }),
-  });
 }
 
 export function isNextPageEnabled(page: JobListPage) {

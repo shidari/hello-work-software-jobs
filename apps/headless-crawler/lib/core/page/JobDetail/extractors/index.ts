@@ -2,32 +2,8 @@ import type { JobDetailPage, JobOverViewList, ScrapedJob } from "@sho/models";
 import { Effect } from "effect";
 import { ZodError } from "zod";
 import {
-  validateCompanyName,
-  validateEmployeeCount,
-  validateEmploymentType,
-  validateExpiryDate,
-  validateHomePage,
-  validateJobDescription,
-  validateJobNumber,
-  validateOccupation,
-  validateQualification,
-  validateReceivedDate,
-  validateWage,
-  validateWorkPlace,
-  validateWorkingHours,
-} from "../../../../validation/jobDetail";
-import type { JobDetailPropertyValidationError } from "../../../../validation/jobDetail/error";
-import {
-  homePageElmExists,
-  qualificationsElmExists,
-} from "../../element-action";
-import type {
-  HomePageElmNotFoundError,
-  QualificationsElmNotFoundError,
-} from "../../element-action/error";
-import {
-  ExtractEmployMentTypeError,
   ExtractEmployeeCountError,
+  ExtractEmployMentTypeError,
   ExtractExpiryDateError,
   ExtractHomePageError,
   ExtractJobCompanyNameError,
@@ -39,9 +15,30 @@ import {
   ExtractReceivedDateError,
   type ExtractTextContentError,
   ExtractWageError,
-  ExtractWorkPlaceError,
   ExtractWorkingHoursError,
+  ExtractWorkPlaceError,
 } from "./error";
+import {
+  validateCompanyName,
+  validateEmployeeCount,
+  validateEmploymentType,
+  validateExpiryDate,
+  validateHomePage,
+  validateJobDescription,
+  validateJobNumber,
+  validateOccupation,
+  validateQualification,
+  validateReceivedDate,
+  validateWage,
+  validateWorkingHours,
+  validateWorkPlace,
+} from "../validators";
+import type { JobDetailPropertyValidationError } from "../validators/error";
+import { homePageElmExists, qualificationsElmExists } from "../checkers";
+import type {
+  HomePageElmNotFoundError,
+  QualificationsElmNotFoundError,
+} from "../checkers/error";
 
 export function extractJobNumbers(jobOverviewList: JobOverViewList) {
   return Effect.forEach(jobOverviewList, (table) => {
