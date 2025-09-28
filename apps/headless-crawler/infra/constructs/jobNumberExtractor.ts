@@ -20,7 +20,7 @@ export class JobNumberExtractConstruct extends Construct {
     super(scope, id);
     this.extractor = new NodejsFunction(this, "CrawlingFunction", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "functions/extractJobNumberToSqsHandler/handler.ts",
+      entry: "functions/extractJobNumberHandler/handler.ts",
       handler: "handler",
       memorySize: 1024,
       timeout: Duration.seconds(90),
