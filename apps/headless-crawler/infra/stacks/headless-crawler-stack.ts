@@ -20,15 +20,26 @@ export class HeadlessCrawlerStack extends cdk.Stack {
 
     // The code that defines your stack goes here
 
-    const playwrightLayer = new PlayWrightLayerConstruct(this, "PlayWrightLayer");
+    const playwrightLayer = new PlayWrightLayerConstruct(
+      this,
+      "PlayWrightLayer",
+    );
 
-    const jobNumberExtractor = new JobNumberExtractConstruct(this, "JobNumberExtractor", {
-      playwrightLayer: playwrightLayer.layer,
-    });
+    const jobNumberExtractor = new JobNumberExtractConstruct(
+      this,
+      "JobNumberExtractor",
+      {
+        playwrightLayer: playwrightLayer.layer,
+      },
+    );
 
-    const jobDetailExtractor = new JobDetailExtractorConstruct(this, "JobDetailExtractor", {
-      playwrightLayer: playwrightLayer.layer,
-    });
+    const jobDetailExtractor = new JobDetailExtractorConstruct(
+      this,
+      "JobDetailExtractor",
+      {
+        playwrightLayer: playwrightLayer.layer,
+      },
+    );
 
     // デッドレターキューを作成
     const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
@@ -54,7 +65,10 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       }),
     });
 
-    const deadLetterMonitorAlarmTopic = new cdk.aws_sns.Topic(this, "DeadLetterMonitorAlarmTopic");
+    const deadLetterMonitorAlarmTopic = new cdk.aws_sns.Topic(
+      this,
+      "DeadLetterMonitorAlarmTopic",
+    );
     deadLetterMonitorAlarmTopic.addSubscription(
       new cdk.aws_sns_subscriptions.EmailSubscription(
         process.env.MAIL_ADDRESS || "",
