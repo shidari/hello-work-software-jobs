@@ -45,11 +45,11 @@ export function validateJobNumber(val: unknown) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new JobNumberValidationError({
-            message: e.message,
-          })
+              message: e.message,
+            })
           : new JobNumberValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
   });
 }
@@ -61,8 +61,8 @@ export function validateCompanyName(val: unknown) {
       e instanceof v.ValiError
         ? new CompanyNameValidationError({ message: e.message })
         : new CompanyNameValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -73,8 +73,8 @@ export function validateReceivedDate(val: unknown) {
       e instanceof v.ValiError
         ? new ReceivedDateValidationError({ message: e.message })
         : new ReceivedDateValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 export function validateExpiryDate(val: unknown) {
@@ -84,8 +84,8 @@ export function validateExpiryDate(val: unknown) {
       e instanceof v.ValiError
         ? new ExpiryDateValidationError({ message: e.message })
         : new ExpiryDateValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 export function validateHomePage(val: unknown) {
@@ -95,8 +95,8 @@ export function validateHomePage(val: unknown) {
       e instanceof v.ValiError
         ? new HomePageValidationError({ message: e.message })
         : new HomePageValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -111,8 +111,8 @@ export function validateOccupation(val: unknown) {
         e instanceof v.ValiError
           ? new OccupationValidationError({ message: e.message })
           : new OccupationValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
   });
 }
@@ -124,8 +124,8 @@ export function validateEmploymentType(val: unknown) {
       e instanceof v.ValiError
         ? new EmploymentTypeValidationError({ message: e.message })
         : new EmploymentTypeValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -140,8 +140,8 @@ export function validateWage(val: unknown) {
         e instanceof v.ValiError
           ? new WageValidationError({ message: e.message })
           : new WageValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
   });
 }
@@ -153,8 +153,8 @@ export function validateWorkingHours(val: unknown) {
       e instanceof v.ValiError
         ? new WorkingHoursValidationError({ message: e.message })
         : new WorkingHoursValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 export function validateEmployeeCount(val: unknown) {
@@ -164,8 +164,8 @@ export function validateEmployeeCount(val: unknown) {
       e instanceof v.ValiError
         ? new EmployeeCountValidationError({ message: e.message })
         : new EmployeeCountValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -176,8 +176,8 @@ export function validateWorkPlace(val: unknown) {
       e instanceof v.ValiError
         ? new WorkPlaceValidationError({ message: e.message })
         : new WorkPlaceValidationError({
-          message: `unexpected error. \n${String(e)}`,
-        }),
+            message: `unexpected error. \n${String(e)}`,
+          }),
   });
 }
 
@@ -188,8 +188,8 @@ export function validateJobDescription(val: unknown) {
       e instanceof v.ValiError
         ? new JobDescriptionValidationError({ message: e.message })
         : new JobDescriptionValidationError({
-          message: `unexpected error.\n${String}`,
-        }),
+            message: `unexpected error.\n${String}`,
+          }),
   });
 }
 
