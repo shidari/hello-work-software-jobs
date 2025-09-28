@@ -1,6 +1,6 @@
 import type { JobDetailPage, JobOverViewList, ScrapedJob } from "@sho/models";
 import { Effect } from "effect";
-import { ZodError } from "zod";
+import * as v from "valibot";
 import {
   ExtractEmployeeCountError,
   ExtractEmployMentTypeError,
@@ -97,7 +97,7 @@ function extractCompanyName(page: JobDetailPage) {
         return text;
       },
       catch: (e) =>
-        e instanceof ZodError
+        e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
               message: e.message,
             })

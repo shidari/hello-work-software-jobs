@@ -1,5 +1,5 @@
 import type { Locator, Page } from "playwright";
-import type z from "zod";
+import type * as v from "valibot";
 import type { jobNumberSchema } from "../../schemas";
 
 const jobSearchPage = Symbol();
@@ -29,7 +29,7 @@ export type EngineeringLabel = "ソフトウェア開発技術者、プログラ
 type DirtyDesiredOccupation = EngineeringLabel;
 export type SearchPeriod = "all" | "today" | "week";
 
-export type JobNumber = z.infer<typeof jobNumberSchema>;
+export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 export type JobSearchCriteria = {
   jobNumber?: JobNumber;
   workLocation?: DirtyWorkLocation;

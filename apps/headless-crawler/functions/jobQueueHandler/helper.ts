@@ -81,7 +81,7 @@ export const job2InsertedJob = (job: ScrapedJob) => {
   } = job;
   return Effect.gen(function* () {
     const employeeCount = yield* Effect.try({
-      try: () => transformedEmployeeCountSchema.parse(rawEmploreeCount),
+      try: () => v.parse(transformedEmployeeCountSchema, rawEmploreeCount),
       catch: (e) =>
         new ParseEmployeeCountError({
           message: `parse employee count failed.\n${String(e)}`,
@@ -89,26 +89,26 @@ export const job2InsertedJob = (job: ScrapedJob) => {
     });
     const receivedDate = yield* Effect.try({
       try: () =>
-        transformedJSTReceivedDateToISOStrSchema.parse(rawReceivedDate),
+        v.parse(transformedJSTReceivedDateToISOStrSchema, rawReceivedDate),
       catch: (e) =>
         new ParseReceivedDateError({
           message: `parse received date failed.\n${String(e)}`,
         }),
     });
     const expiryDate = yield* Effect.try({
-      try: () => transformedJSTExpiryDateToISOStrSchema.parse(rawExpiryDate),
+      try: () => v.parse(transformedJSTExpiryDateToISOStrSchema, rawExpiryDate),
       catch: (e) =>
         new ParseExpiryDateError({
           message: `parse expiry date failed.\n${String(e)}`,
         }),
     });
     const { wageMax, wageMin } = yield* Effect.try({
-      try: () => transformedWageSchema.parse(rawWage),
+      try: () => v.parse(transformedWageSchema, rawWage),
       catch: (e) =>
         new ParseWageError({ message: `parse wage failed.\n${String(e)}` }),
     });
     const { workingEndTime, workingStartTime } = yield* Effect.try({
-      try: () => transformedWorkingHoursSchema.parse(rawWorkingHours),
+      try: () => v.parse(transformedWorkingHoursSchema, rawWorkingHours),
       catch: (e) =>
         new ParsedWorkingHoursError({
           message: `parse working hours failed.\n${String(e)}`,
