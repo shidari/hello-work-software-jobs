@@ -58,7 +58,14 @@ export function extractJobNumbers(jobOverviewList: JobOverViewList) {
           new ExtractJobNumbersError({
             message: `unexpected error. ${String(e)}`,
           }),
-      });
+      }).pipe(
+        Effect.tap((raw) => {
+          if (raw === null) {
+            return Effect.logDebug("Warning: jobNumber textContent is null");
+          }
+          return Effect.logDebug(`rawJobNumber=${raw}`);
+        }),
+      );
       if (rawJobNumber === null) {
         return yield* Effect.fail(
           new ExtractJobNumbersError({ message: "jobNumber is null" }),
@@ -84,6 +91,7 @@ function extractJobNumber(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawJobNumber=${rawJobNumber}`);
     const jobNumber = yield* validateJobNumber(rawJobNumber);
     return jobNumber;
   });
@@ -105,7 +113,9 @@ function extractCompanyName(page: JobDetailPage) {
               message: `unexpected error.\n${String(e)}`,
             }),
     });
+    yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
+    yield* Effect.logDebug(`companyName=${companyName}`);
     return companyName;
   });
 }
@@ -122,6 +132,7 @@ function extractReceivedDate(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawReceivedDate=${rawReceivedDate}`);
     if (!rawReceivedDate)
       return yield* Effect.fail(
         new ExtractReceivedDateError({
@@ -146,7 +157,9 @@ function extractExpiryDate(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawExpiryDate=${rawExpiryDate}`);
     const expiryDate = yield* validateExpiryDate(rawExpiryDate);
+    yield* Effect.logDebug(`expiryDate=${expiryDate}`);
     return expiryDate;
   });
 }
@@ -163,7 +176,9 @@ function extractHomePage(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawHomePage=${rawHomePage}`);
     const homePage = yield* validateHomePage(rawHomePage?.trim());
+    yield* Effect.logDebug(`homePage=${homePage}`);
     return homePage;
   });
 }
@@ -180,7 +195,9 @@ function extractOccupation(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawOccupation=${rawOccupation}`);
     const occupation = yield* validateOccupation(rawOccupation);
+    yield* Effect.logDebug(`occupation=${occupation}`);
     return occupation;
   });
 }
@@ -198,7 +215,9 @@ function extractEmploymentType(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawEmplomentType=${rawEmplomentType}`);
     const emplomentType = yield* validateEmploymentType(rawEmplomentType);
+    yield* Effect.logDebug(`emplomentType=${emplomentType}`);
     return emplomentType;
   });
 }
@@ -213,7 +232,9 @@ function extractWage(page: JobDetailPage) {
       catch: (e) =>
         new ExtractWageError({ message: `unexpected error.\n${String(e)}` }),
     });
+    yield* Effect.logDebug(`rawWage=${rawWage}`);
     const wage = yield* validateWage(rawWage);
+    yield* Effect.logDebug(`wage=${wage}`);
     return wage;
   });
 }
@@ -231,7 +252,9 @@ function extractWorkingHours(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawWorkingHours=${rawWorkingHours}`);
     const workingHours = yield* validateWorkingHours(rawWorkingHours);
+    yield* Effect.logDebug(`workingHours=${workingHours}`);
     return workingHours;
   });
 }
@@ -251,6 +274,7 @@ function extractEmployeeCount(page: JobDetailPage) {
     });
     yield* Effect.logDebug(`rawEmployeeCount=${rawEmployeeCount}`);
     const employeeCount = yield* validateEmployeeCount(rawEmployeeCount);
+    yield* Effect.logDebug(`employeeCount=${employeeCount}`);
     return employeeCount;
   });
 }
@@ -268,7 +292,9 @@ function extractWorkPlace(page: JobDetailPage) {
           message: `unexpected error,\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawWorkPlace=${rawWorkPlace}`);
     const workPlace = yield* validateWorkPlace(rawWorkPlace);
+    yield* Effect.logDebug(`workPlace=${workPlace}`);
     return workPlace;
   });
 }
@@ -286,7 +312,9 @@ function extractJobDescription(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawJobDescription=${rawJobDescription}`);
     const jobDescription = yield* validateJobDescription(rawJobDescription);
+    yield* Effect.logDebug(`jobDescription=${jobDescription}`);
     return jobDescription;
   });
 }
@@ -304,7 +332,9 @@ function extractQualifications(page: JobDetailPage) {
           message: `unexpected error.\n${String(e)}`,
         }),
     });
+    yield* Effect.logDebug(`rawQualifications=${rawQualifications}`);
     const qualifications = yield* validateQualification(rawQualifications);
+    yield* Effect.logDebug(`qualifications=${qualifications}`);
     return qualifications;
   });
 }
@@ -319,24 +349,39 @@ export function extractJobInfo(
   | QualificationsElmNotFoundError
 > {
   return Effect.gen(function* () {
+    yield* Effect.logDebug("Starting to extract job info from JobDetailPage");
     const jobNumber = yield* extractJobNumber(page);
+    yield* Effect.logDebug(`jobNumber=${jobNumber}`);
     const companyName = yield* extractCompanyName(page);
+    yield* Effect.logDebug(`companyName=${companyName}`);
     const receivedDate = yield* extractReceivedDate(page);
+    yield* Effect.logDebug(`receivedDate=${receivedDate}`);
     const expiryDate = yield* extractExpiryDate(page);
+    yield* Effect.logDebug(`expiryDate=${expiryDate}`);
     // そもそもURLを公開していないことがある
     const homePage = (yield* homePageElmExists(page))
       ? yield* extractHomePage(page)
       : null;
+    yield* Effect.logDebug(`homePage=${homePage}`);
     const occupation = yield* extractOccupation(page);
+    yield* Effect.logDebug(`occupation=${occupation}`);
     const employmentType = yield* extractEmploymentType(page);
+    yield* Effect.logDebug(`employmentType=${employmentType}`);
     const wage = yield* extractWage(page);
+    yield* Effect.logDebug(`wage=${wage}`);
     const workingHours = yield* extractWorkingHours(page);
+    yield* Effect.logDebug(`workingHours=${workingHours}`);
     const employeeCount = yield* extractEmployeeCount(page);
+    yield* Effect.logDebug(`employeeCount=${employeeCount}`);
     const workPlace = yield* extractWorkPlace(page);
+    yield* Effect.logDebug(`workPlace=${workPlace}`);
     const jobDescription = yield* extractJobDescription(page);
+    yield* Effect.logDebug(`jobDescription=${jobDescription}`);
     const qualifications = (yield* qualificationsElmExists(page))
       ? yield* extractQualifications(page)
       : null;
+    yield* Effect.logDebug(`qualifications=${qualifications}`);
+    yield* Effect.logDebug("Finished extracting job info from JobDetailPage");
     return {
       jobNumber,
       companyName,

@@ -60,41 +60,89 @@ export function validateJobNumber(val: unknown) {
 }
 
 export function validateCompanyName(val: unknown) {
-  const result = v.safeParse(companyNameSchema, val);
-  if (!result.success) {
-    return Effect.fail(
-      new CompanyNameValidationError({ message: result.issues.join("\n") }),
-    );
-  }
-  return Effect.succeed(result.output);
+  return Effect.gen(function* () {
+    const result = v.safeParse(companyNameSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new CompanyNameValidationError({ message: result.issues.join("\n") }),
+      ).pipe(
+        Effect.tap(() => {
+          return Effect.logDebug(
+            `failed to validate companyName. received=${JSON.stringify(
+              val,
+              null,
+              2,
+            )}`,
+          );
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
 }
 
 export function validateReceivedDate(val: unknown) {
-  const result = v.safeParse(RawReceivedDateShema, val);
-  if (!result.success) {
-    return Effect.fail(
-      new ReceivedDateValidationError({ message: result.issues.join("\n") }),
-    );
-  }
-  return Effect.succeed(result.output);
+  return Effect.gen(function* () {
+    const result = v.safeParse(RawReceivedDateShema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new ReceivedDateValidationError({ message: result.issues.join("\n") }),
+      ).pipe(
+        Effect.tap(() => {
+          Effect.logDebug(
+            `failed to validate receivedDate. received=${JSON.stringify(
+              val,
+              null,
+              2,
+            )}`,
+          );
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
 }
 export function validateExpiryDate(val: unknown) {
-  const result = v.safeParse(RawExpiryDateSchema, val);
-  if (!result.success) {
-    return Effect.fail(
-      new ExpiryDateValidationError({ message: result.issues.join("\n") }),
-    );
-  }
-  return Effect.succeed(result.output);
+  return Effect.gen(function* () {
+    const result = v.safeParse(RawExpiryDateSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new ExpiryDateValidationError({ message: result.issues.join("\n") }),
+      ).pipe(
+        Effect.tap(() => {
+          Effect.logDebug(
+            `failed to validate expiryDate. received=${JSON.stringify(
+              val,
+              null,
+              2,
+            )}`,
+          );
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
 }
 export function validateHomePage(val: unknown) {
-  const result = v.safeParse(homePageSchema, val);
-  if (!result.success) {
-    return Effect.fail(
-      new HomePageValidationError({ message: result.issues.join("\n") }),
-    );
-  }
-  return Effect.succeed(result.output);
+  return Effect.gen(function* () {
+    const result = v.safeParse(homePageSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new HomePageValidationError({ message: result.issues.join("\n") }),
+      ).pipe(
+        Effect.tap(() => {
+          Effect.logDebug(
+            `failed to validate homePage. received=${JSON.stringify(
+              val,
+              null,
+              2,
+            )}`,
+          );
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
 }
 
 export function validateOccupation(val: unknown) {
@@ -109,6 +157,16 @@ export function validateOccupation(val: unknown) {
       );
       return yield* Effect.fail(
         new OccupationValidationError({ message: result.issues.join("\n") }),
+      ).pipe(
+        Effect.tap(() => {
+          Effect.logDebug(
+            `failed to validate occupation. received=${JSON.stringify(
+              val,
+              null,
+              2,
+            )}`,
+          );
+        }),
       );
     }
     yield* Effect.logDebug(
@@ -143,7 +201,13 @@ export function validateWage(val: unknown) {
           : new WageValidationError({
               message: `unexpected error.\n${String(e)}`,
             }),
-    });
+    }).pipe(
+      Effect.tap((wage) => {
+        return Effect.logDebug(
+          `succeeded to validate wage. val=${JSON.stringify(wage, null, 2)}`,
+        );
+      }),
+    );
   });
 }
 
@@ -156,7 +220,13 @@ export function validateWorkingHours(val: unknown) {
         : new WorkingHoursValidationError({
             message: `unexpected error.\n${String(e)}`,
           }),
-  });
+  }).pipe(
+    Effect.tap((workingHours) => {
+      return Effect.logDebug(
+        `succeeded to validate workingHours. val=${JSON.stringify(workingHours, null, 2)}`,
+      );
+    }),
+  );
 }
 export function validateEmployeeCount(val: unknown) {
   return Effect.try({
@@ -167,7 +237,13 @@ export function validateEmployeeCount(val: unknown) {
         : new EmployeeCountValidationError({
             message: `unexpected error.\n${String(e)}`,
           }),
-  });
+  }).pipe(
+    Effect.tap((employeeCount) => {
+      return Effect.logDebug(
+        `succeeded to validate employeeCount. val=${JSON.stringify(employeeCount, null, 2)}`,
+      );
+    }),
+  );
 }
 
 export function validateWorkPlace(val: unknown) {
@@ -179,7 +255,13 @@ export function validateWorkPlace(val: unknown) {
         : new WorkPlaceValidationError({
             message: `unexpected error. \n${String(e)}`,
           }),
-  });
+  }).pipe(
+    Effect.tap((workPlace) => {
+      return Effect.logDebug(
+        `succeeded to validate workPlace. val=${JSON.stringify(workPlace, null, 2)}`,
+      );
+    }),
+  );
 }
 
 export function validateJobDescription(val: unknown) {
@@ -191,7 +273,13 @@ export function validateJobDescription(val: unknown) {
         : new JobDescriptionValidationError({
             message: `unexpected error.\n${String}`,
           }),
-  });
+  }).pipe(
+    Effect.tap((jobDescription) => {
+      return Effect.logDebug(
+        `succeeded to validate jobDescription. val=${JSON.stringify(jobDescription, null, 2)}`,
+      );
+    }),
+  );
 }
 
 export function validateQualification(
@@ -204,6 +292,16 @@ export function validateQualification(
   if (!result.success) {
     return Effect.fail(
       new QualificationValidationError({ message: result.issues.join("\n") }),
+    ).pipe(
+      Effect.tap(() => {
+        Effect.logDebug(
+          `failed to validate qualification. received=${JSON.stringify(
+            val,
+            null,
+            2,
+          )}`,
+        );
+      }),
     );
   }
   return Effect.succeed(result.output);
@@ -221,7 +319,11 @@ export function validateJobDetailPage(
         new JobDetailPageValidationError({
           message: `unexpected error.\n${String(e)}`,
         }),
-    });
+    }).pipe(
+      Effect.tap((jobTitle) => {
+        return Effect.logDebug(`extracted job title: ${jobTitle}`);
+      }),
+    );
     if (jobTitle !== "求人情報")
       throw new JobDetailPageValidationError({
         message: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,

@@ -19,7 +19,14 @@ export function goToSingleJobDetailPage(page: JobListPage) {
         new FromJobListToJobDetailPageError({
           message: `unexpected error.\n${String(e)}`,
         }),
-    });
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug(
+          "navigated to job detail page from job list page.",
+        );
+      }),
+    );
+    return page;
   });
 }
 
@@ -32,5 +39,9 @@ export function goToNextJobListPage(page: JobListPage) {
     },
     catch: (e) =>
       new NextJobListPageError({ message: `unexpected error.\n${String(e)}` }),
-  });
+  }).pipe(
+    Effect.tap(() => {
+      return Effect.logDebug("navigated to next job list page.");
+    }),
+  );
 }

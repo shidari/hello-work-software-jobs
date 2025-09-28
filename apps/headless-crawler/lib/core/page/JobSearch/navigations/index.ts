@@ -20,7 +20,11 @@ export function goToJobSearchPage(page: Page) {
       new GoToJobSearchPageError({
         message: `unexpected error.\n${String(e)}`,
       }),
-  });
+  }).pipe(
+    Effect.tap(() => {
+      return Effect.logDebug("navigated to job search page.");
+    }),
+  );
 }
 
 export function searchThenGotoJobListPage(
@@ -42,7 +46,13 @@ export function searchThenGotoJobListPage(
         new SearchThenGotoJobListPageError({
           message: `unexpected error.\n${String(e)}`,
         }),
-    });
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug(
+          "navigated to job list page from job search page.",
+        );
+      }),
+    );
   });
 }
 export function searchNoThenGotoSingleJobListPage(
@@ -63,7 +73,13 @@ export function searchNoThenGotoSingleJobListPage(
         new SearchThenGotoFirstJobListPageError({
           message: `unexpected error.\n${String(e)}`,
         }),
-    });
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug(
+          "navigated to job list page from job search page.",
+        );
+      }),
+    );
   });
 }
 
