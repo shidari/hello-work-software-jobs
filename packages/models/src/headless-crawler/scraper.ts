@@ -179,4 +179,3 @@ export const ScrapedJobSchema = v.object({
   jobDescription: jobDescriptionSchema,
   qualifications: v.nullable(qualificationsSchema),
 });
-

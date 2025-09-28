@@ -20,4 +20,3 @@ export const JobDetailSchema = v.object({
   workingHours: v.string(),
   qualifications: v.string(),
 });
-
