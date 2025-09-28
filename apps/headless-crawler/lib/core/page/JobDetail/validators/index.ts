@@ -40,64 +40,61 @@ export function validateJobNumber(val: unknown) {
     yield* Effect.logDebug(
       `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
     );
-    return yield* Effect.try({
-      try: () => v.parse(jobNumberSchema, val),
-      catch: (e) =>
-        e instanceof v.ValiError
-          ? new JobNumberValidationError({
-              message: e.message,
-            })
-          : new JobNumberValidationError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
-    });
+    const result = v.safeParse(jobNumberSchema, val);
+    if (!result.success) {
+      yield* Effect.logDebug(
+        `succeeded to validate jobNumber. val=${JSON.stringify(
+          result.output,
+          null,
+          2,
+        )}`,
+      );
+      return yield* Effect.fail(
+        new JobNumberValidationError({
+          message: result.issues.join("\n"),
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
   });
 }
 
 export function validateCompanyName(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(companyNameSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new CompanyNameValidationError({ message: e.message })
-        : new CompanyNameValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
-  });
+  const result = v.safeParse(companyNameSchema, val);
+  if (!result.success) {
+    return Effect.fail(
+      new CompanyNameValidationError({ message: result.issues.join("\n") }),
+    );
+  }
+  return Effect.succeed(result.output);
 }
 
 export function validateReceivedDate(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(RawReceivedDateShema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new ReceivedDateValidationError({ message: e.message })
-        : new ReceivedDateValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
-  });
+  const result = v.safeParse(RawReceivedDateShema, val);
+  if (!result.success) {
+    return Effect.fail(
+      new ReceivedDateValidationError({ message: result.issues.join("\n") }),
+    );
+  }
+  return Effect.succeed(result.output);
 }
 export function validateExpiryDate(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(RawExpiryDateSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new ExpiryDateValidationError({ message: e.message })
-        : new ExpiryDateValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
-  });
+  const result = v.safeParse(RawExpiryDateSchema, val);
+  if (!result.success) {
+    return Effect.fail(
+      new ExpiryDateValidationError({ message: result.issues.join("\n") }),
+    );
+  }
+  return Effect.succeed(result.output);
 }
 export function validateHomePage(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(homePageSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new HomePageValidationError({ message: e.message })
-        : new HomePageValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
-  });
+  const result = v.safeParse(homePageSchema, val);
+  if (!result.success) {
+    return Effect.fail(
+      new HomePageValidationError({ message: result.issues.join("\n") }),
+    );
+  }
+  return Effect.succeed(result.output);
 }
 
 export function validateOccupation(val: unknown) {
@@ -105,15 +102,19 @@ export function validateOccupation(val: unknown) {
     yield* Effect.logDebug(
       `calling validateOccupation. args=${JSON.stringify(val, null, 2)}`,
     );
-    return yield* Effect.try({
-      try: () => v.parse(occupationSchema, val),
-      catch: (e) =>
-        e instanceof v.ValiError
-          ? new OccupationValidationError({ message: e.message })
-          : new OccupationValidationError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
-    });
+    const result = v.safeParse(occupationSchema, val);
+    if (!result.success) {
+      yield* Effect.logDebug(
+        `failed to validate occupation. issues=${JSON.stringify(result.issues, null, 2)}`,
+      );
+      return yield* Effect.fail(
+        new OccupationValidationError({ message: result.issues.join("\n") }),
+      );
+    }
+    yield* Effect.logDebug(
+      `succeeded to validate occupation. val=${JSON.stringify(result.output, null, 2)}`,
+    );
+    return yield* Effect.succeed(result.output);
   });
 }
 
