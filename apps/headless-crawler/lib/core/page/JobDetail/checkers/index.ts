@@ -16,14 +16,16 @@ export function qualificationsElmExists(page: JobDetailPage) {
       new QualificationsElmNotFoundError({
         message: `unexpected error\n${String(e)}`,
       }),
-  }).pipe(Effect.tap((exists) => {
-    if (!exists) {
-      return Effect.logDebug(
-        "Warning: Qualifications element not found on the page."
-      );
-    }
-    return Effect.logDebug("Qualifications element found on the page.");
-  }));
+  }).pipe(
+    Effect.tap((exists) => {
+      if (!exists) {
+        return Effect.logDebug(
+          "Warning: Qualifications element not found on the page.",
+        );
+      }
+      return Effect.logDebug("Qualifications element found on the page.");
+    }),
+  );
 }
 
 export function homePageElmExists(page: JobDetailPage) {
@@ -37,10 +39,14 @@ export function homePageElmExists(page: JobDetailPage) {
       new HomePageElmNotFoundError({
         message: `unexpected error\n${String(e)}`,
       }),
-  }).pipe(Effect.tap((exists) => {
-    if (!exists) {
-      return Effect.logDebug("Warning: Home page element not found on the page.");
-    }
-    return Effect.logDebug("Home page element found on the page.");
-  }));
+  }).pipe(
+    Effect.tap((exists) => {
+      if (!exists) {
+        return Effect.logDebug(
+          "Warning: Home page element not found on the page.",
+        );
+      }
+      return Effect.logDebug("Home page element found on the page.");
+    }),
+  );
 }

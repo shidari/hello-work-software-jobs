@@ -58,12 +58,14 @@ export function extractJobNumbers(jobOverviewList: JobOverViewList) {
           new ExtractJobNumbersError({
             message: `unexpected error. ${String(e)}`,
           }),
-      }).pipe(Effect.tap((raw) => {
-        if (raw === null) {
-          return Effect.logDebug("Warning: jobNumber textContent is null");
-        }
-        return Effect.logDebug(`rawJobNumber=${raw}`);
-      }));
+      }).pipe(
+        Effect.tap((raw) => {
+          if (raw === null) {
+            return Effect.logDebug("Warning: jobNumber textContent is null");
+          }
+          return Effect.logDebug(`rawJobNumber=${raw}`);
+        }),
+      );
       if (rawJobNumber === null) {
         return yield* Effect.fail(
           new ExtractJobNumbersError({ message: "jobNumber is null" }),
@@ -105,11 +107,11 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-            message: e.message,
-          })
+              message: e.message,
+            })
           : new ExtractJobCompanyNameError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);

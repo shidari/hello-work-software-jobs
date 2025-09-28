@@ -20,9 +20,11 @@ export function validateJobSearchPage(page: Page) {
         new JobSearchPageValidationError({
           message: `unexpected error.\n${String(e)}`,
         }),
-    }).pipe(Effect.tap(() => {
-      return Effect.logDebug("succeeded to validate job search page.");
-    }));
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug("succeeded to validate job search page.");
+      }),
+    );
     return jobSearchPage;
   });
 }

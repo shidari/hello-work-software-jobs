@@ -12,15 +12,19 @@ export function validateJobListPage(page: Page) {
       new JobListPageValidationError({
         message: `unexpected error. ${String(e)}`,
       }),
-  }).pipe(
-    Effect.flatMap((pageCount) =>
-      pageCount === 0
-        ? Effect.fail(
-          new JobListPageValidationError({ message: "job list is empty" }),
-        )
-        : Effect.succeed(page as JobListPage),
-    ),
-  ).pipe(Effect.tap((_) => {
-    return Effect.logDebug("succeeded to validate job list page.");
-  }));
+  })
+    .pipe(
+      Effect.flatMap((pageCount) =>
+        pageCount === 0
+          ? Effect.fail(
+              new JobListPageValidationError({ message: "job list is empty" }),
+            )
+          : Effect.succeed(page as JobListPage),
+      ),
+    )
+    .pipe(
+      Effect.tap((_) => {
+        return Effect.logDebug("succeeded to validate job list page.");
+      }),
+    );
 }
