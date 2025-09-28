@@ -1,7 +1,3 @@
-import { z } from "zod";
+import * as v from "valibot";
 
-export const ISODateSchema = z
-  .string()
-  .refine((str) => !Number.isNaN(Date.parse(str)), {
-    message: "有効なISO 8601日付ではありません",
-  });
+export const ISODateSchema = v.pipe(v.string(), v.isoTimestamp());

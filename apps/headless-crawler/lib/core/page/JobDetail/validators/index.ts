@@ -17,8 +17,7 @@ import {
 } from "@sho/models";
 import { Effect } from "effect";
 import type { Page } from "playwright";
-import type z from "zod";
-import { ZodError } from "zod";
+import * as v from "valibot";
 import {
   CompanyNameValidationError,
   EmployeeCountValidationError,
@@ -42,9 +41,9 @@ export function validateJobNumber(val: unknown) {
       `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
     );
     return yield* Effect.try({
-      try: () => jobNumberSchema.parse(val),
+      try: () => v.parse(jobNumberSchema, val),
       catch: (e) =>
-        e instanceof ZodError
+        e instanceof v.ValiError
           ? new JobNumberValidationError({
               message: e.message,
             })
@@ -57,9 +56,9 @@ export function validateJobNumber(val: unknown) {
 
 export function validateCompanyName(val: unknown) {
   return Effect.try({
-    try: () => companyNameSchema.parse(val),
+    try: () => v.parse(companyNameSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new CompanyNameValidationError({ message: e.message })
         : new CompanyNameValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -69,9 +68,9 @@ export function validateCompanyName(val: unknown) {
 
 export function validateReceivedDate(val: unknown) {
   return Effect.try({
-    try: () => RawReceivedDateShema.parse(val),
+    try: () => v.parse(RawReceivedDateShema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new ReceivedDateValidationError({ message: e.message })
         : new ReceivedDateValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -80,9 +79,9 @@ export function validateReceivedDate(val: unknown) {
 }
 export function validateExpiryDate(val: unknown) {
   return Effect.try({
-    try: () => RawExpiryDateSchema.parse(val),
+    try: () => v.parse(RawExpiryDateSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new ExpiryDateValidationError({ message: e.message })
         : new ExpiryDateValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -91,9 +90,9 @@ export function validateExpiryDate(val: unknown) {
 }
 export function validateHomePage(val: unknown) {
   return Effect.try({
-    try: () => homePageSchema.parse(val),
+    try: () => v.parse(homePageSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new HomePageValidationError({ message: e.message })
         : new HomePageValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -107,9 +106,9 @@ export function validateOccupation(val: unknown) {
       `calling validateOccupation. args=${JSON.stringify(val, null, 2)}`,
     );
     return yield* Effect.try({
-      try: () => occupationSchema.parse(val),
+      try: () => v.parse(occupationSchema, val),
       catch: (e) =>
-        e instanceof ZodError
+        e instanceof v.ValiError
           ? new OccupationValidationError({ message: e.message })
           : new OccupationValidationError({
               message: `unexpected error.\n${String(e)}`,
@@ -120,9 +119,9 @@ export function validateOccupation(val: unknown) {
 
 export function validateEmploymentType(val: unknown) {
   return Effect.try({
-    try: () => employmentTypeSchema.parse(val),
+    try: () => v.parse(employmentTypeSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new EmploymentTypeValidationError({ message: e.message })
         : new EmploymentTypeValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -136,9 +135,9 @@ export function validateWage(val: unknown) {
       `calling validateWage. args=${JSON.stringify(val, null, 2)}`,
     );
     return yield* Effect.try({
-      try: () => RawWageSchema.parse(val),
+      try: () => v.parse(RawWageSchema, val),
       catch: (e) =>
-        e instanceof ZodError
+        e instanceof v.ValiError
           ? new WageValidationError({ message: e.message })
           : new WageValidationError({
               message: `unexpected error.\n${String(e)}`,
@@ -149,9 +148,9 @@ export function validateWage(val: unknown) {
 
 export function validateWorkingHours(val: unknown) {
   return Effect.try({
-    try: () => RawWorkingHoursSchema.parse(val),
+    try: () => v.parse(RawWorkingHoursSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new WorkingHoursValidationError({ message: e.message })
         : new WorkingHoursValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -160,9 +159,9 @@ export function validateWorkingHours(val: unknown) {
 }
 export function validateEmployeeCount(val: unknown) {
   return Effect.try({
-    try: () => RawEmployeeCountSchema.parse(val),
+    try: () => v.parse(RawEmployeeCountSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new EmployeeCountValidationError({ message: e.message })
         : new EmployeeCountValidationError({
             message: `unexpected error.\n${String(e)}`,
@@ -172,9 +171,9 @@ export function validateEmployeeCount(val: unknown) {
 
 export function validateWorkPlace(val: unknown) {
   return Effect.try({
-    try: () => workPlaceSchema.parse(val),
+    try: () => v.parse(workPlaceSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new WorkPlaceValidationError({ message: e.message })
         : new WorkPlaceValidationError({
             message: `unexpected error. \n${String(e)}`,
@@ -184,9 +183,9 @@ export function validateWorkPlace(val: unknown) {
 
 export function validateJobDescription(val: unknown) {
   return Effect.try({
-    try: () => jobDescriptionSchema.parse(val),
+    try: () => v.parse(jobDescriptionSchema, val),
     catch: (e) =>
-      e instanceof ZodError
+      e instanceof v.ValiError
         ? new JobDescriptionValidationError({ message: e.message })
         : new JobDescriptionValidationError({
             message: `unexpected error.\n${String}`,
@@ -197,16 +196,16 @@ export function validateJobDescription(val: unknown) {
 export function validateQualification(
   val: unknown,
 ): Effect.Effect<
-  z.infer<typeof qualificationsSchema>,
+  v.InferOutput<typeof qualificationsSchema>,
   QualificationValidationError
 > {
-  const result = qualificationsSchema.safeParse(val);
-  if (result.error) {
+  const result = v.safeParse(qualificationsSchema, val);
+  if (!result.success) {
     return Effect.fail(
-      new QualificationValidationError({ message: result.error.message }),
+      new QualificationValidationError({ message: result.issues.join("\n") }),
     );
   }
-  return Effect.succeed(result.data);
+  return Effect.succeed(result.output);
 }
 export function validateJobDetailPage(
   page: Page,
