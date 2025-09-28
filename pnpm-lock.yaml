@@ -40,8 +40,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/models
       aws-cdk-lib:
-        specifier: 2.214.0
-        version: 2.214.0(constructs@10.4.2)
+        specifier: 2.215.0
+        version: 2.215.0(constructs@10.4.2)
       constructs:
         specifier: ^10.0.0
         version: 10.4.2
@@ -2102,8 +2102,8 @@ packages:
     resolution: {integrity: sha512-cl76xfBQM6pztbrFWRnxbrDm9EOqDr1BF6+qQnnDZG2Co2LjyUktkN9GTJfBAfdae+DbT2nJf2nCGAdDDN7W2g==}
     engines: {node: '>=20.18.0'}
 
-  aws-cdk-lib@2.214.0:
-    resolution: {integrity: sha512-Mj9GSJkkXj8wjiy2pKARquOsiiHsu7tK1WDfdA8Db39hIznWWP+/KscI2iqnntDMeEmcj1QX25PbYT+6rq8zkw==}
+  aws-cdk-lib@2.215.0:
+    resolution: {integrity: sha512-DvRiUEsZSc4voeqfkYGrjP0f4NJ1u94JvbVCUQ+Fci4rf25xLRSEVPzyaH9Tf7V38i0Otts1+u7seunqe+R19g==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       constructs: ^10.0.0
@@ -5371,7 +5371,7 @@ snapshots:
       '@babel/parser': 7.28.4
       pathe: 2.0.3
 
-  aws-cdk-lib@2.214.0(constructs@10.4.2):
+  aws-cdk-lib@2.215.0(constructs@10.4.2):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.242
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
