@@ -1,11 +1,26 @@
 import type { Locator, Page } from "playwright";
-import type * as v from "valibot";
-import type { jobNumberSchema } from "../../schemas";
+import type * as v from "valibot"
+import type { jobNumberSchema, ScrapedJobSchema } from "./scraper";
+
+export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
+
+
+export type JobMetadata = {
+    jobNumber: JobNumber;
+};
+
+export type NewJobOpeningsFilter = "TodayYesterday" | "Within1Week";
+
+const jobDetailPage = Symbol();
+export type JobDetailPage = Page & { [jobDetailPage]: unknown };
+
+export type ScrapedJob = v.InferOutput<typeof ScrapedJobSchema>;
+
 
 const jobSearchPage = Symbol();
 
 export type JobSearchPage = Page & {
-  [jobSearchPage]: unknown;
+    [jobSearchPage]: unknown;
 };
 
 const firstJobListPage = Symbol();
@@ -15,13 +30,13 @@ export type FirstJobListPage = Page & { [firstJobListPage]: unknown };
 const jobListPage = Symbol();
 
 export type JobListPage =
-  | FirstJobListPage
-  | (Page & { [jobListPage]: unknown });
+    | FirstJobListPage
+    | (Page & { [jobListPage]: unknown });
 
 export type EmploymentType = "RegularEmployee" | "PartTimeWorker";
 
 export interface DirtyWorkLocation {
-  prefecture: "東京都";
+    prefecture: "東京都";
 }
 
 export type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
@@ -29,39 +44,38 @@ export type EngineeringLabel = "ソフトウェア開発技術者、プログラ
 type DirtyDesiredOccupation = EngineeringLabel;
 export type SearchPeriod = "all" | "today" | "week";
 
-export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 export type JobSearchCriteria = {
-  jobNumber?: JobNumber;
-  workLocation?: DirtyWorkLocation;
-  desiredOccupation?: {
-    occupationSelection?: DirtyDesiredOccupation;
-  };
-  employmentType?: EmploymentType;
-  searchPeriod: SearchPeriod;
+    jobNumber?: JobNumber;
+    workLocation?: DirtyWorkLocation;
+    desiredOccupation?: {
+        occupationSelection?: DirtyDesiredOccupation;
+    };
+    employmentType?: EmploymentType;
+    searchPeriod: SearchPeriod;
 };
 
 export type EngineeringLabelSelector = {
-  radioBtn: EngineeringLabelSelectorRadioBtn;
-  openerSibling: EngineeringLabelSelectorOpenerSibling;
+    radioBtn: EngineeringLabelSelectorRadioBtn;
+    openerSibling: EngineeringLabelSelectorOpenerSibling;
 };
 
 const engineeringLabelSelectorRadioBtn = Symbol();
 export type EngineeringLabelSelectorRadioBtn = string & {
-  [engineeringLabelSelectorRadioBtn]: unknown;
+    [engineeringLabelSelectorRadioBtn]: unknown;
 };
 const engineeringLabelSelectorOpener = Symbol();
 
 //　直接openerのセレクタをとってこれないため
 export type EngineeringLabelSelectorOpenerSibling = string & {
-  [engineeringLabelSelectorOpener]: unknown;
+    [engineeringLabelSelectorOpener]: unknown;
 };
 
 const jobOverviewList = Symbol();
 export type JobOverViewList = Locator[] & {
-  [jobOverviewList]: unknown;
+    [jobOverviewList]: unknown;
 };
 
 const emplomentTypeSelector = Symbol();
 export type EmploymentTypeSelector = string & {
-  [emplomentTypeSelector]: unknown;
+    [emplomentTypeSelector]: unknown;
 };
