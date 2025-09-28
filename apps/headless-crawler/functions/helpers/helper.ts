@@ -26,7 +26,9 @@ export const sendJobToQueue = (job: JobMetadata) =>
 export const sendJobToRawJobDetailExtractorQueue = (job: JobMetadata) =>
   Effect.gen(function* () {
     const sqs = new SQSClient({});
-    const QUEUE_URL = yield* Effect.fromNullable(process.env.RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL);
+    const QUEUE_URL = yield* Effect.fromNullable(
+      process.env.RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL,
+    );
     return yield* Effect.tryPromise({
       try: async () => {
         return await sqs.send(

@@ -42,9 +42,13 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
-    const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(this, "JobDetailRawHtmlExtractor", {
-      playwrightLayer: playwrightLayer.layer,
-    });
+    const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(
+      this,
+      "JobDetailRawHtmlExtractor",
+      {
+        playwrightLayer: playwrightLayer.layer,
+      },
+    );
 
     // デッドレターキューを作成
     const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
@@ -61,9 +65,11 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     });
 
-    const queueForJobDetailRawHtmlExtractor = new sqs.Queue(this, "JobDetailRawHtmlExtractorQueue", {
-    });
-
+    const queueForJobDetailRawHtmlExtractor = new sqs.Queue(
+      this,
+      "JobDetailRawHtmlExtractorQueue",
+      {},
+    );
 
     // EventBridgeルール(Cron)を作成（例: 毎日午前1時に実行）
     const rule = new events.Rule(this, "CrawlerScheduleRule", {
@@ -135,6 +141,8 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
 
     queue.grantSendMessages(jobNumberExtractor.extractor);
-    queueForJobDetailRawHtmlExtractor.grantSendMessages(jobNumberExtractor.extractor);
+    queueForJobDetailRawHtmlExtractor.grantSendMessages(
+      jobNumberExtractor.extractor,
+    );
   }
 }
