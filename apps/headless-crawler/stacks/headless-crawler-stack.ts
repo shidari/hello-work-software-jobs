@@ -51,7 +51,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
     const crawler = new NodejsFunction(this, "CrawlingFunction", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "functions/crawlerHandler/handler.ts",
+      entry: "functions/extractJobNumberToSqsHandler/handler.ts",
       handler: "handler",
       memorySize: 1024,
       timeout: cdk.Duration.seconds(90),
@@ -72,7 +72,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     const scraper = new NodejsFunction(this, "ScrapingFunction", {
-      entry: "functions/jobQueueHandler/handler.ts",
+      entry: "functions/extractTransformAndSaveJobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       memorySize: 1024,
