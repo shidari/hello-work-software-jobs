@@ -11,6 +11,7 @@ import * as dotenv from "dotenv";
 import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
 import { JobNumberExtractConstruct } from "../constructs/jobNumberExtractor";
 import { JobDetailExtractorConstruct } from "../constructs/jobDetailExtractor";
+import { JobDetailRawHtmlExtractorConstruct } from "../constructs/jobDetailRawHtmlExtractor";
 
 dotenv.config();
 
@@ -41,6 +42,10 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
+    const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(this, "JobDetailRawHtmlExtractor", {
+      playwrightLayer: playwrightLayer.layer,
+    });
+
     // デッドレターキューを作成
     const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
       queueName: "scraping-job-dead-letter-queue",
@@ -55,6 +60,10 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
       },
     });
+
+    const queueForJobDetailRawHtmlExtractor = new sqs.Queue(this, "JobDetailRawHtmlExtractorQueue", {
+    });
+
 
     // EventBridgeルール(Cron)を作成（例: 毎日午前1時に実行）
     const rule = new events.Rule(this, "CrawlerScheduleRule", {
@@ -117,9 +126,15 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         batchSize: 1,
       }),
     );
+    jobDetailRawHtmlExtractor.extractor.addEventSource(
+      new SqsEventSource(queueForJobDetailRawHtmlExtractor, {
+        batchSize: 1,
+      }),
+    );
 
     rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
 
     queue.grantSendMessages(jobNumberExtractor.extractor);
+    queueForJobDetailRawHtmlExtractor.grantSendMessages(jobNumberExtractor.extractor);
   }
 }

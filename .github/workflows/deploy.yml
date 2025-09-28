@@ -45,6 +45,7 @@ jobs:
           JOB_STORE_ENDPOINT: ${{ secrets.JOB_STORE_ENDPOINT }}
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           QUEUE_URL: ${{ secrets.QUEUE_URL }}
+          RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL: ${{ secrets.RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL }}
           API_KEY: ${{ secrets.API_KEY }}
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
         run: |
