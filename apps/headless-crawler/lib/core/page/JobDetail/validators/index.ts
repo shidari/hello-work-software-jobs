@@ -49,9 +49,11 @@ export function validateJobNumber(val: unknown) {
           2,
         )}`,
       );
-      return yield* Effect.fail(new JobNumberValidationError({
-        message: result.issues.join("\n"),
-      }))
+      return yield* Effect.fail(
+        new JobNumberValidationError({
+          message: result.issues.join("\n"),
+        }),
+      );
     }
     return yield* Effect.succeed(result.output);
   });
@@ -105,7 +107,9 @@ export function validateOccupation(val: unknown) {
       yield* Effect.logDebug(
         `failed to validate occupation. issues=${JSON.stringify(result.issues, null, 2)}`,
       );
-      return yield* Effect.fail(new OccupationValidationError({ message: result.issues.join("\n") }))
+      return yield* Effect.fail(
+        new OccupationValidationError({ message: result.issues.join("\n") }),
+      );
     }
     yield* Effect.logDebug(
       `succeeded to validate occupation. val=${JSON.stringify(result.output, null, 2)}`,
@@ -121,8 +125,8 @@ export function validateEmploymentType(val: unknown) {
       e instanceof v.ValiError
         ? new EmploymentTypeValidationError({ message: e.message })
         : new EmploymentTypeValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -137,8 +141,8 @@ export function validateWage(val: unknown) {
         e instanceof v.ValiError
           ? new WageValidationError({ message: e.message })
           : new WageValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
   });
 }
@@ -150,8 +154,8 @@ export function validateWorkingHours(val: unknown) {
       e instanceof v.ValiError
         ? new WorkingHoursValidationError({ message: e.message })
         : new WorkingHoursValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 export function validateEmployeeCount(val: unknown) {
@@ -161,8 +165,8 @@ export function validateEmployeeCount(val: unknown) {
       e instanceof v.ValiError
         ? new EmployeeCountValidationError({ message: e.message })
         : new EmployeeCountValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
   });
 }
 
@@ -173,8 +177,8 @@ export function validateWorkPlace(val: unknown) {
       e instanceof v.ValiError
         ? new WorkPlaceValidationError({ message: e.message })
         : new WorkPlaceValidationError({
-          message: `unexpected error. \n${String(e)}`,
-        }),
+            message: `unexpected error. \n${String(e)}`,
+          }),
   });
 }
 
@@ -185,8 +189,8 @@ export function validateJobDescription(val: unknown) {
       e instanceof v.ValiError
         ? new JobDescriptionValidationError({ message: e.message })
         : new JobDescriptionValidationError({
-          message: `unexpected error.\n${String}`,
-        }),
+            message: `unexpected error.\n${String}`,
+          }),
   });
 }
 
