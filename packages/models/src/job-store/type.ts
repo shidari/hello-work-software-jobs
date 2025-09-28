@@ -1,8 +1,9 @@
 import type { InferOutput } from "valibot";
-import type { cursorSchema } from "../../schemas";
-import type { searchFilterSchema } from "../../schemas/job-store/client";
-import type { Job } from "./jobFetch";
-import type { InsertJobRequestBody } from "./jobInsert";
+import type { cursorSchema, decodedNextTokenSchema } from "./jobList/continue";
+import type { JobListSchema, JobSchema, searchFilterSchema } from "./client";
+import type { jobs, jobSelectSchema } from "./drizzle";
+import type { insertJobRequestBodySchema } from "./jobInsert";
+import type { jobListQuerySchema } from "./jobList";
 
 export type Cursor = InferOutput<typeof cursorSchema>;
 // --- コマンド型 ---
@@ -69,3 +70,30 @@ export type CommandOutput<T extends JobStoreCommand> = T extends {
 export type JobStoreDBClient = {
   execute: <T extends JobStoreCommand>(cmd: T) => Promise<CommandOutput<T>>;
 };
+
+// 🔍 型チェック用ユーティリティ
+export type KeysMustMatch<A, B> = Exclude<keyof A, keyof B> extends never
+  ? Exclude<keyof B, keyof A> extends never
+    ? true
+    : ["Extra keys in B:", Exclude<keyof B, keyof A>]
+  : ["Extra keys in A:", Exclude<keyof A, keyof B>];
+
+type JobSelectFromDrizzle = typeof jobs.$inferSelect;
+
+type JobSelectFromValibot = InferOutput<typeof jobSelectSchema>;
+
+type Check = KeysMustMatch<JobSelectFromDrizzle, JobSelectFromValibot>;
+// 一旦キーだけ比較してる
+const _check: Check = true;
+
+export type Job = InferOutput<typeof JobSchema>;
+
+export type InsertJobRequestBody = InferOutput<
+  typeof insertJobRequestBodySchema
+>;
+
+export type JobList = InferOutput<typeof JobListSchema>;
+
+export type JobListQuery = InferOutput<typeof jobListQuerySchema>;
+
+export type DecodedNextToken = InferOutput<typeof decodedNextTokenSchema>;

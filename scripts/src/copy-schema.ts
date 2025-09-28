@@ -50,7 +50,7 @@ function getDrizzleSchemaPath() {
   return findGitRootByGit().asyncAndThen((repoRootDirPath) => {
     const drizzleSchemaPath = path.resolve(
       repoRootDirPath,
-      "./packages/models/src/schemas/job-store/drizzle.ts",
+      "./packages/models/src/job-store/drizzle.ts",
     );
     return ResultAsync.fromSafePromise(
       fs.pathExists(drizzleSchemaPath),

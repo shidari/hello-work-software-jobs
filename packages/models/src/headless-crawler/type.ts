@@ -1,6 +1,19 @@
 import type { Locator, Page } from "playwright";
 import type * as v from "valibot";
-import type { jobNumberSchema } from "../../schemas";
+import type { jobNumberSchema, ScrapedJobSchema } from "./scraper";
+
+export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
+
+export type JobMetadata = {
+  jobNumber: JobNumber;
+};
+
+export type NewJobOpeningsFilter = "TodayYesterday" | "Within1Week";
+
+const jobDetailPage = Symbol();
+export type JobDetailPage = Page & { [jobDetailPage]: unknown };
+
+export type ScrapedJob = v.InferOutput<typeof ScrapedJobSchema>;
 
 const jobSearchPage = Symbol();
 
@@ -29,7 +42,6 @@ export type EngineeringLabel = "ソフトウェア開発技術者、プログラ
 type DirtyDesiredOccupation = EngineeringLabel;
 export type SearchPeriod = "all" | "today" | "week";
 
-export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 export type JobSearchCriteria = {
   jobNumber?: JobNumber;
   workLocation?: DirtyWorkLocation;

@@ -1,3 +1,4 @@
+import type { Locator, Page } from "playwright";
 import * as v from "valibot";
 export const jobNumberSchema = v.pipe(
   v.string(),
