@@ -20,7 +20,7 @@ export function launchBrowser(options: LaunchOptions) {
       return { browser };
     }),
     ({ browser }) => Effect.promise(() => browser.close()),
-  ).pipe(Effect.map(({ browser }) => browser));
+  ).pipe(Effect.map(({ browser }) => browser)).pipe(Effect.tap((b) => Effect.logDebug(`Browser launched: ${b.version()}`)));
 }
 
 export function createContext(browser: Browser) {
@@ -34,7 +34,7 @@ export function createContext(browser: Browser) {
       return { context };
     }),
     ({ context }) => Effect.promise(() => context.close()),
-  ).pipe(Effect.map(({ context }) => context));
+  ).pipe(Effect.map(({ context }) => context)).pipe(Effect.tap((c) => Effect.logDebug(`BrowserContext created: ${c.browser()?.version()}`)));
 }
 
 export function createPage(context: BrowserContext) {
@@ -50,5 +50,5 @@ export function createPage(context: BrowserContext) {
       return { page };
     }),
     ({ page }) => Effect.promise(() => page.close()),
-  ).pipe(Effect.map(({ page }) => page));
+  ).pipe(Effect.map(({ page }) => page)).pipe(Effect.tap((p) => Effect.logDebug(`Page created: ${p.url()}`)));
 }
