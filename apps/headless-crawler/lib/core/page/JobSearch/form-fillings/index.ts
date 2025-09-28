@@ -33,7 +33,9 @@ function fillWorkType(page: JobSearchPage, employmentType: EmploymentType) {
         new FillWorkTypeError({
           message: `Error: invalid employmentType: ${employmentType}`,
         }),
-    });
+    }).pipe(Effect.tap(() => {
+      return Effect.logDebug(`filled work type field. employmentType=${employmentType}`);
+    }));
   });
 }
 
@@ -55,7 +57,9 @@ function fillPrefectureField(
         new FillPrefectureFieldError({
           message: `Error: workLocation=${workLocation} ${String(e)}`,
         }),
-    });
+    }).pipe(Effect.tap(() => {
+      return Effect.logDebug(`filled prefecture field. prefecture=${prefecture}`);
+    }));
   });
 }
 
@@ -83,7 +87,9 @@ function fillOccupationField(page: JobSearchPage, label: EngineeringLabel) {
         new FillOccupationFieldError({
           message: `unexpected Error. label=${label}\n${String(e)}`,
         }),
-    });
+    }).pipe(Effect.tap(() => {
+      return Effect.logDebug(`filled occupation field. label=${label}`);
+    }));
   });
 }
 
@@ -102,7 +108,9 @@ export function fillJobCriteriaField(
     if (searchPeriod) {
       yield* fillJobPeriod(page, searchPeriod);
     }
-  });
+  }).pipe(Effect.tap(() => {
+    return Effect.logDebug(`filled job criteria fields. criteria=${JSON.stringify(jobSearchCriteria, null, 2)}`);
+  }));
 }
 
 function engineeringLabelToSelector(
@@ -165,7 +173,9 @@ export function fillJobNumber(page: JobSearchPage, jobNumber: JobNumber) {
       new FillJobNumberError({
         message: `unexpected error.\njobNumber=${jobNumber}\n${String(e)}`,
       }),
-  });
+  }).pipe(Effect.tap(() => {
+    return Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`);
+  }));
 }
 
 export function fillJobPeriod(page: JobSearchPage, searchPeriod: SearchPeriod) {
@@ -188,5 +198,7 @@ export function fillJobPeriod(page: JobSearchPage, searchPeriod: SearchPeriod) {
             message: `Error: searchPeriod=${searchPeriod} ${String(e)}`,
           }),
       }));
-  });
+  }).pipe(Effect.tap(() => {
+    return Effect.logDebug(`filled job period field. searchPeriod=${searchPeriod}`);
+  }));
 }

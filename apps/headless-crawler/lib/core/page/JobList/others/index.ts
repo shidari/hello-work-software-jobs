@@ -15,7 +15,9 @@ export function listJobOverviewElem(
         ? Effect.fail(new ListJobsError({ message: "jobOverList is empty." }))
         : Effect.succeed(tables as JobOverViewList),
     ),
-  );
+  ).pipe(Effect.tap((jobOverViewList) => {
+    return Effect.logDebug(`succeeded to list job overview elements. count=${jobOverViewList.length}`);
+  }));
 }
 
 export function isNextPageEnabled(page: JobListPage) {
@@ -30,5 +32,7 @@ export function isNextPageEnabled(page: JobListPage) {
         message: `unexpected error. ${String(e)}`,
       });
     },
-  });
+  }).pipe(Effect.tap((enabled) => {
+    return Effect.logDebug(`is next page enabled: ${enabled}`);
+  }));
 }

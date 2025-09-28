@@ -16,9 +16,11 @@ export function validateJobListPage(page: Page) {
     Effect.flatMap((pageCount) =>
       pageCount === 0
         ? Effect.fail(
-            new JobListPageValidationError({ message: "job list is empty" }),
-          )
+          new JobListPageValidationError({ message: "job list is empty" }),
+        )
         : Effect.succeed(page as JobListPage),
     ),
-  );
+  ).pipe(Effect.tap((_) => {
+    return Effect.logDebug("succeeded to validate job list page.");
+  }));
 }
