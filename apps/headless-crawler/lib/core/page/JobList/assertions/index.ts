@@ -6,7 +6,7 @@ import { AssertSingleJobListedError } from "./error";
 export function assertSingleJobListed(page: JobListPage) {
   return Effect.gen(function* () {
     const jobOverViewList = yield* listJobOverviewElem(page);
-    if (jobOverViewList.length !== 1)
+    if (jobOverViewList.length !== 1) {
       yield* Effect.logDebug(
         `failed to assert single job listed. job count=${jobOverViewList.length}`,
       );
@@ -15,5 +15,6 @@ export function assertSingleJobListed(page: JobListPage) {
         message: `job list count should be 1 but ${jobOverViewList.length}`,
       }),
     );
+    }
   });
 }
