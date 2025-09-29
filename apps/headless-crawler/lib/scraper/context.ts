@@ -75,7 +75,7 @@ export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
       return HelloWorkScraper.of({
         scrapeJobData: (jobNumber: JobNumber) =>
           Effect.gen(function* () {
-            yield* Effect.logInfo("start scrapling...");
+            yield* Effect.logInfo(`start scrapling... jobNumber=${jobNumber}`);
             yield* Effect.logDebug("go to hello work seach page.");
             yield* goToJobSearchPage(page);
             const searchPage = yield* validateJobSearchPage(page);
