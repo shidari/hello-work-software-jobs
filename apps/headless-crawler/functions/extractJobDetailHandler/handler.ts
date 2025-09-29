@@ -1,6 +1,6 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
-import { extractJobDetailRawHtml } from "../../lib/rawJobDetailExtractor";
+import { extractJobDetailRawHtml } from "../../lib/jobDetailExtractor";
 import { eventToFirstRecordToJobNumber } from "../extractTransformAndSaveJobDetailHandler/helper";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
