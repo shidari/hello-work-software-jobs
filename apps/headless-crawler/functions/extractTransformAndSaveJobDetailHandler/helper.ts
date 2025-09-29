@@ -184,8 +184,6 @@ export function buildJobStoreClient() {
           yield* Effect.logDebug(
             `response data. ${JSON.stringify(data, null, 2)}`,
           );
-          const validated = yield* validateInsertJobSuccessResponse(data);
-          return validated;
         }),
     };
   });
