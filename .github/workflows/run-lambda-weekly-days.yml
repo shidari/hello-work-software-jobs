@@ -31,6 +31,6 @@ jobs:
       - name: Invoke Lambda function
         run: |
           aws lambda invoke \
-            --function-name HeadlessCrawlerStack-CrawlingFunctionDA39E31E-o6IdHOZ3QvEB \
+            --function-name HeadlessCrawlerStack-JobNumberExtractorCrawlingFun-HDmF0aF3VF7U \
             --payload '{}' \
             response.json
