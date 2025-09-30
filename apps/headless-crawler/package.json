@@ -24,7 +24,7 @@
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.840.0",
     "@sho/models": "workspace:*",
-    "aws-cdk-lib": "2.214.0",
+    "aws-cdk-lib": "2.216.0",
     "constructs": "^10.0.0",
     "dotenv": "^17.0.0",
     "effect": "^3.16.5",
