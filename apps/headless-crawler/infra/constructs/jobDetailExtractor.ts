@@ -17,7 +17,7 @@ export class JobDetailExtractorConstruct extends Construct {
   ) {
     super(scope, id);
     this.extractor = new NodejsFunction(this, "ScrapingFunction", {
-      entry: "functions/extractJobDetailHandler/handler.ts",
+      entry: "functions/extractTransformAndSaveJobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       memorySize: 1024,
