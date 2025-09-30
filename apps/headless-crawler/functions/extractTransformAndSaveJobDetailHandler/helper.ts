@@ -9,9 +9,10 @@ import {
   transformedWageSchema,
   transformedWorkingHoursSchema,
 } from "@sho/models";
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import * as v from "valibot";
 import {
+  FromExtractJobNumberJobQueueEventBodySchemaValidationError,
   GetEndPointError,
   InsertJobError,
   InsertJobSuccessResponseValidationError,
@@ -20,19 +21,25 @@ import {
   ParseExpiryDateError,
   ParseReceivedDateError,
   ParseWageError,
-  SafeParseEventBodyError,
   ToFirstRecordError,
 } from "./error";
-import { jobQueueEventBodySchema } from "./schema";
-import type { TsafeParseEventBody, TtoFirstRecord, TtoJobNumber } from "./type";
+import type { TtoFirstRecord } from "./type";
+import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
+import type { SQSRecord } from "aws-lambda";
 
-const safeParseEventBody: TsafeParseEventBody = (val) => {
-  const decode = Schema.decodeUnknownSync(jobQueueEventBodySchema);
-  return Effect.try({
-    try: () => decode(val),
-    catch: (e) =>
-      new SafeParseEventBodyError({ message: `parse failed. \n${String(e)}` }),
-  });
+const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
+  const result = v.safeParse(
+    fromExtractJobNumberHandlerJobQueueEventBodySchema,
+    val,
+  );
+  if (!result.success) {
+    return Effect.fail(
+      new FromExtractJobNumberJobQueueEventBodySchemaValidationError({
+        message: `parse failed. \n${String(result.issues.join("\n"))}`,
+      }),
+    );
+  }
+  return Effect.succeed(result.output);
 };
 
 const toFirstRecord: TtoFirstRecord = (records) => {
@@ -52,13 +59,17 @@ const toFirstRecord: TtoFirstRecord = (records) => {
   });
 };
 
-export const eventToFirstRecordToJobNumber: TtoJobNumber = ({ Records }) => {
+export const fromEventToFirstRecord = ({
+  Records,
+}: {
+  Records: SQSRecord[];
+}) => {
   return Effect.gen(function* () {
     const record = yield* toFirstRecord(Records);
     const { body } = record;
     const {
       job: { jobNumber },
-    } = yield* safeParseEventBody(body);
+    } = yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(body);
     return jobNumber as JobNumber;
   });
 };

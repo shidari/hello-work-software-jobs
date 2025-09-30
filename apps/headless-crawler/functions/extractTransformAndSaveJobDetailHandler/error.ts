@@ -43,3 +43,9 @@ export class InsertJobSuccessResponseValidationError extends Data.TaggedError(
 )<{
   readonly message: string;
 }> {}
+
+export class FromExtractJobNumberJobQueueEventBodySchemaValidationError extends Data.TaggedError(
+  "FromExtractJobNumberJobQueueEventBodySchemaValidationError",
+)<{
+  readonly message: string;
+}> {}

@@ -2,7 +2,6 @@ import type { JobNumber } from "@sho/models";
 import type { SQSEvent, SQSRecord } from "aws-lambda";
 import type { Effect } from "effect";
 import type { SafeParseEventBodyError, ToFirstRecordError } from "./error";
-import type { jobQueueEventBodySchema } from "./schema";
 
 export type JSONValue =
   | string
@@ -24,9 +23,3 @@ export type TtoJobNumber = (
 export type TtoFirstRecord = (
   records: SQSRecord[],
 ) => Effect.Effect<SQSRecord, ToFirstRecordError>;
-export type TsafeParseEventBody = (
-  val: string,
-) => Effect.Effect<
-  typeof jobQueueEventBodySchema.Type,
-  SafeParseEventBodyError
->;
