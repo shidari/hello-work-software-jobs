@@ -34,13 +34,14 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
-    const jobDetailExtractThenTransformThenLoad = new JobDetailExtractThenTransformThenLoadConstruct(
-      this,
-      "JobDetailExtractThenTransformThenLoad",
-      {
-        playwrightLayer: playwrightLayer.layer,
-      },
-    );
+    const jobDetailExtractThenTransformThenLoad =
+      new JobDetailExtractThenTransformThenLoadConstruct(
+        this,
+        "JobDetailExtractThenTransformThenLoad",
+        {
+          playwrightLayer: playwrightLayer.layer,
+        },
+      );
 
     const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(
       this,
@@ -56,14 +57,18 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     // example resource
-    const toJobDetailExtractThenTransformThenLoadQueue = new sqs.Queue(this, "ToJobDetailExtractThenTransformThenLoadQueue", {
-      visibilityTimeout: cdk.Duration.seconds(300),
-      // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
-      deadLetterQueue: {
-        queue: deadLetterQueue,
-        maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
+    const toJobDetailExtractThenTransformThenLoadQueue = new sqs.Queue(
+      this,
+      "ToJobDetailExtractThenTransformThenLoadQueue",
+      {
+        visibilityTimeout: cdk.Duration.seconds(300),
+        // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
+        deadLetterQueue: {
+          queue: deadLetterQueue,
+          maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
+        },
       },
-    });
+    );
 
     const queueForJobDetailRawHtmlExtractor = new sqs.Queue(
       this,
@@ -140,7 +145,9 @@ export class HeadlessCrawlerStack extends cdk.Stack {
 
     rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
 
-    toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(jobNumberExtractor.extractor);
+    toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(
+      jobNumberExtractor.extractor,
+    );
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
       jobNumberExtractor.extractor,
     );
