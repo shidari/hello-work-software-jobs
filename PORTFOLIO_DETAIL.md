@@ -467,10 +467,10 @@ const result = safeTry(async function* () {
 ### 1. @sho/models
 
 - **役割**: 全パッケージ共通の型定義・スキーマ管理（Source of Truth）
-- **主な技術**: TypeScript, Zod, Drizzle ORM, tsup
+- **主な技術**: TypeScript, Valibot, Drizzle ORM, tsdown
 - **設計ポイント**:
   - 型の一元管理でパッケージ間の整合性担保
-  - Zodによるランタイムバリデーション
+  - Valibotによるランタイムバリデーション
   - Drizzle ORMによるDB型定義
   - フロントエンド〜バックエンド〜DBまでの型の一貫性
 
@@ -479,7 +479,7 @@ const result = safeTry(async function* () {
 - **役割**: ハローワークサイトのクローリング・スクレイピング
 - **主な技術**: 
   - Playwright (v1.53.1) - ブラウザ自動化
-  - AWS CDK (v2.1025.0) - インフラ管理
+  - AWS CDK (v2.1029.2 / v2.216.0) - インフラ管理
   - Effect (v3.16.5) - 関数型プログラミング（neverthrowに移行予定）
   - @sparticuz/chromium (v138.0.0) - Lambda用Chromium
   - @aws-sdk/client-sqs (v3.840.0) - SQS連携
@@ -501,8 +501,8 @@ const result = safeTry(async function* () {
   - Drizzle ORM (v0.44.2) - データベースORM
   - Hono (v4.8.3) - Webフレームワーク
   - D1 (SQLite) - データベース
-  - Chanfana (v2.8.1) - OpenAPI生成
-  - Vitest (v3.2.0) - テスト
+  - hono-openapi (v1.0.8) - OpenAPI生成
+  - Vitest (v3.2.4) - テスト
   - neverthrow (v8.2.0) - エラーハンドリング
   - Wrangler (v4.26.1) - デプロイメントツール
   - @hono/zod-openapi (v1.0.2) - OpenAPI統合
@@ -515,9 +515,9 @@ const result = safeTry(async function* () {
   - neverthrowによる型安全なエラーハンドリング
   - ルートパスから自動的にドキュメントページへリダイレクト
   - 主要エンドポイント:
-    - `POST /api/v1/job` - 求人情報登録
+    - `POST /api/v1/jobs/` - 求人情報登録
     - `GET /api/v1/jobs/:jobNumber` - 求人詳細取得
-    - `GET /api/v1/jobs` - 求人一覧取得（高度なフィルタリング対応）
+    - `GET /api/v1/jobs/` - 求人一覧取得（高度なフィルタリング対応）
     - `GET /api/v1/jobs/continue` - 継続ページネーション（JWTトークンベース）
 
 ### 4. hello-work-job-searcher
@@ -525,7 +525,7 @@ const result = safeTry(async function* () {
 - **役割**: ユーザーインターフェース
 - **主な技術**:
   - React (v19.1.1)
-  - Next.js (v15.4.7) - App Router
+  - Next.js (v15.5.3) - App Router
   - TypeScript (v5)
   - Turbopack - 開発時高速化
   - TanStack React Virtual (v3.13.12) - 仮想化による無限スクロール
