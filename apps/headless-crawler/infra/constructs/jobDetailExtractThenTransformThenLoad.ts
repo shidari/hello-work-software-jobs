@@ -8,15 +8,15 @@ import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { Topic } from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
-export class JobDetailExtractorConstruct extends Construct {
-  public readonly extractor: NodejsFunction;
+export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
+  public readonly extractThenTransformThenLoader: NodejsFunction;
   constructor(
     scope: Construct,
     id: string,
     props: { playwrightLayer: lambda.LayerVersion },
   ) {
     super(scope, id);
-    this.extractor = new NodejsFunction(this, "ScrapingFunction", {
+    this.extractThenTransformThenLoader = new NodejsFunction(this, id, {
       entry: "functions/extractTransformAndSaveJobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -39,8 +39,8 @@ export class JobDetailExtractorConstruct extends Construct {
       },
     });
 
-    const scraperAlarmTopic = new Topic(this, "ScraperAlarmTopic");
-    scraperAlarmTopic.addSubscription(
+    const alarmTopic = new Topic(this, `${id}-AlarmTopic`);
+    alarmTopic.addSubscription(
       new EmailSubscription(process.env.MAIL_ADDRESS || ""),
     );
 
@@ -50,17 +50,17 @@ export class JobDetailExtractorConstruct extends Construct {
       statistic: "Sum",
       period: Duration.hours(1),
       dimensionsMap: {
-        FunctionName: this.extractor.functionName,
+        FunctionName: this.extractThenTransformThenLoader.functionName,
       },
     });
 
-    const scrapingAlarm = new Alarm(this, "ScraperInvocationAlarm", {
+    const alarm = new Alarm(this, `${id}-InvocationAlarm`, {
       metric: invocationMetric,
       threshold: 1000,
       evaluationPeriods: 1,
       alarmDescription: "scraping Lambda invocation count exceeded threshold",
     });
 
-    scrapingAlarm.addAlarmAction(new SnsAction(scraperAlarmTopic));
+    alarm.addAlarmAction(new SnsAction(alarmTopic));
   }
 }

@@ -10,8 +10,8 @@ import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
 import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
 import { JobNumberExtractConstruct } from "../constructs/jobNumberExtractor";
-import { JobDetailExtractorConstruct } from "../constructs/jobDetailExtractor";
 import { JobDetailRawHtmlExtractorConstruct } from "../constructs/jobDetailRawHtmlExtractor";
+import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/jobDetailExtractThenTransformThenLoad";
 
 dotenv.config();
 
@@ -34,13 +34,14 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
-    const jobDetailExtractor = new JobDetailExtractorConstruct(
-      this,
-      "JobDetailExtractor",
-      {
-        playwrightLayer: playwrightLayer.layer,
-      },
-    );
+    const jobDetailExtractThenTransformThenLoad =
+      new JobDetailExtractThenTransformThenLoadConstruct(
+        this,
+        "JobDetailExtractThenTransformThenLoad",
+        {
+          playwrightLayer: playwrightLayer.layer,
+        },
+      );
 
     const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(
       this,
@@ -56,14 +57,18 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     // example resource
-    const queue = new sqs.Queue(this, "ScrapingJobQueue", {
-      visibilityTimeout: cdk.Duration.seconds(300),
-      // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
-      deadLetterQueue: {
-        queue: deadLetterQueue,
-        maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
+    const toJobDetailExtractThenTransformThenLoadQueue = new sqs.Queue(
+      this,
+      "ToJobDetailExtractThenTransformThenLoadQueue",
+      {
+        visibilityTimeout: cdk.Duration.seconds(300),
+        // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
+        deadLetterQueue: {
+          queue: deadLetterQueue,
+          maxReceiveCount: 3, // 3回失敗したらデッドレターキューに送信
+        },
       },
-    });
+    );
 
     const queueForJobDetailRawHtmlExtractor = new sqs.Queue(
       this,
@@ -127,8 +132,8 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
     deadLetterMonitorAlarmTopic.grantPublish(deadLetterMonitor);
 
-    jobDetailExtractor.extractor.addEventSource(
-      new SqsEventSource(queue, {
+    jobDetailExtractThenTransformThenLoad.extractThenTransformThenLoader.addEventSource(
+      new SqsEventSource(toJobDetailExtractThenTransformThenLoadQueue, {
         batchSize: 1,
       }),
     );
@@ -140,7 +145,9 @@ export class HeadlessCrawlerStack extends cdk.Stack {
 
     rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
 
-    queue.grantSendMessages(jobNumberExtractor.extractor);
+    toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(
+      jobNumberExtractor.extractor,
+    );
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
       jobNumberExtractor.extractor,
     );
