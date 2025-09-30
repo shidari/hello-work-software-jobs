@@ -28,9 +28,16 @@ import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
 import type { SQSRecord } from "aws-lambda";
 
 const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
-  const result = v.safeParse(fromExtractJobNumberHandlerJobQueueEventBodySchema, val);
+  const result = v.safeParse(
+    fromExtractJobNumberHandlerJobQueueEventBodySchema,
+    val,
+  );
   if (!result.success) {
-    return Effect.fail(new FromExtractJobNumberJobQueueEventBodySchemaValidationError({ message: `parse failed. \n${String(result.issues.join("\n"))}` }));
+    return Effect.fail(
+      new FromExtractJobNumberJobQueueEventBodySchemaValidationError({
+        message: `parse failed. \n${String(result.issues.join("\n"))}`,
+      }),
+    );
   }
   return Effect.succeed(result.output);
 };
@@ -52,7 +59,11 @@ const toFirstRecord: TtoFirstRecord = (records) => {
   });
 };
 
-export const fromEventToFirstRecord = ({ Records }: { Records: SQSRecord[] }) => {
+export const fromEventToFirstRecord = ({
+  Records,
+}: {
+  Records: SQSRecord[];
+}) => {
   return Effect.gen(function* () {
     const record = yield* toFirstRecord(Records);
     const { body } = record;
