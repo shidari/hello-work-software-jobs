@@ -41,7 +41,7 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
     readonly extractRawHtml: (
       jobNumber: JobNumber,
     ) => Effect.Effect<
-      { rawHtml: string; fetchedDate: ISODateString },
+      { rawHtml: string; fetchedDate: ISODateString; jobNumber: JobNumber },
       | ListJobsError
       | ExtractJobDetailRawHtmlError
       | NewPageError
@@ -96,7 +96,7 @@ export function buildHelloWorkRawJobDetailHtmlExtractorLayer(
                 }),
             });
 
-            return { rawHtml, fetchedDate: nowISODateString() };
+            return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
           }),
       });
     }),
