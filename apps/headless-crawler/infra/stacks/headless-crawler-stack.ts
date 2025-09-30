@@ -10,8 +10,8 @@ import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
 import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
 import { JobNumberExtractConstruct } from "../constructs/jobNumberExtractor";
-import { JobDetailExtractorConstruct } from "../constructs/jobDetailExtractor";
 import { JobDetailRawHtmlExtractorConstruct } from "../constructs/jobDetailRawHtmlExtractor";
+import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/jobDetailExtractThenTransformThenLoad";
 
 dotenv.config();
 
@@ -34,9 +34,9 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
-    const jobDetailExtractor = new JobDetailExtractorConstruct(
+    const jobDetailExtractThenTransformThenLoad = new JobDetailExtractThenTransformThenLoadConstruct(
       this,
-      "JobDetailExtractor",
+      "JobDetailExtractThenTransformThenLoad",
       {
         playwrightLayer: playwrightLayer.layer,
       },
@@ -56,7 +56,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     });
 
     // example resource
-    const queue = new sqs.Queue(this, "ScrapingJobQueue", {
+    const toJobDetailExtractThenTransformThenLoadQueue = new sqs.Queue(this, "ToJobDetailExtractThenTransformThenLoadQueue", {
       visibilityTimeout: cdk.Duration.seconds(300),
       // リトライ機構を追加（3回リトライ後にデッドレターキューに送信）
       deadLetterQueue: {
@@ -127,8 +127,8 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
     deadLetterMonitorAlarmTopic.grantPublish(deadLetterMonitor);
 
-    jobDetailExtractor.extractor.addEventSource(
-      new SqsEventSource(queue, {
+    jobDetailExtractThenTransformThenLoad.extractThenTransformThenLoader.addEventSource(
+      new SqsEventSource(toJobDetailExtractThenTransformThenLoadQueue, {
         batchSize: 1,
       }),
     );
@@ -140,7 +140,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
 
     rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
 
-    queue.grantSendMessages(jobNumberExtractor.extractor);
+    toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(jobNumberExtractor.extractor);
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
       jobNumberExtractor.extractor,
     );
