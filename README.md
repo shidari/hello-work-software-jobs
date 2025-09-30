@@ -110,24 +110,23 @@ graph TD
 - **目的**: 共通の型定義とスキーマ（Source of Truth）
 - **技術**:
   - Valibot (v1.1.0) - スキーマバリデーション
-  - Zod (v4.1.5) - 追加スキーマバリデーション
   - Drizzle ORM (v0.44.2) - データベーススキーマ
   - TypeScript (v5.8.3) - 型定義
   - tsdown (v0.15.3) - ビルドツール
-  - Playwright (v1.53.1) - テスト用ブラウザ自動化
+  - Playwright (v1.53.1) - テスト用ブラウザ自動化（devDependency）
 
 ##### `apps/headless-crawler`
 
 - **目的**: ハローワークサイトのクローリング・スクレイピング
 - **技術**: 
   - Playwright (v1.53.1) - ブラウザ自動化
-  - AWS CDK (v2.1029.0) - インフラ管理
+  - AWS CDK (v2.1029.2 / v2.216.0) - インフラ管理
   - Effect (v3.16.5) - 関数型プログラミング（**今後neverthrowに移行予定**）
   - @sparticuz/chromium (v138.0.0) - Lambda用Chromium
   - @aws-sdk/client-sqs (v3.840.0) - SQS連携
   - esbuild (v0.25.5) - ビルドツール
   - AWS Lambda + SQS - 実行環境
-  - Valibot (v1.1.0) + Zod (v4.1.5) - スキーマバリデーション
+  - Valibot (v1.1.0) - スキーマバリデーション
 - **機能**:
   - 求人検索条件に基づく求人一覧取得
   - 個別求人詳細情報のスクレイピング
@@ -146,7 +145,7 @@ graph TD
   - Vitest (v3.2.4) - テスト
   - Valibot (v1.1.0) - バリデーション
   - neverthrow (v8.2.0) - エラーハンドリング
-  - Wrangler (v4.35.0) - デプロイメントツール
+  - Wrangler (v4.38.0) - デプロイメントツール
   - tsdown (v0.15.3) - ビルドツール
   - @hono/valibot-validator (v0.5.3) - Valibotバリデーション統合
   - @hono/swagger-ui (v0.5.2) - Swagger UI統合
@@ -159,22 +158,23 @@ graph TD
   - OpenAPI仕様書自動生成 (`/api/v1/docs`, `/docs`, `/openapi`)
   - ルートパスから自動的にドキュメントページへリダイレクト
   - 主要エンドポイント:
-    - `POST /api/v1/job` - 求人情報登録
+    - `POST /api/v1/jobs/` - 求人情報登録
     - `GET /api/v1/jobs/:jobNumber` - 求人詳細取得
-    - `GET /api/v1/jobs` - 求人一覧取得（高度なフィルタリング対応）
+    - `GET /api/v1/jobs/` - 求人一覧取得（高度なフィルタリング対応）
       - `companyName` - 会社名フィルタ（URLエンコード対応）
       - `jobDescription` - 職務内容キーワード検索
       - `jobDescriptionExclude` - 除外キーワード検索
       - `employeeCountGt` / `employeeCountLt` - 従業員数範囲フィルタ
       - `onlyNotExpired` - 期限切れ求人の除外
+      - `orderByReceiveDate` - 受信日時による並び順
     - `GET /api/v1/jobs/continue` - 継続ページネーション（JWTトークンベース）
 
 ##### `hello-work-job-searcher`
 
-- **目的**: ユーザーインターフェース
+- **役割**: ユーザーインターフェース
 - **技術**:
   - React (v19.1.1)
-  - Next.js (v15.5.2) - App Router
+  - Next.js (v15.5.3) - App Router
   - TypeScript (v5)
   - Turbopack - 開発時高速化
   - TanStack React Virtual (v3.13.12) - 仮想化による無限スクロール
@@ -374,9 +374,9 @@ pnpm start          # 本番環境での起動確認
 
 #### エンドポイント
 
-- `POST /api/v1/job` - 求人情報登録
-- `GET /api/v1/job/:jobNumber` - 求人詳細取得
-- `GET /api/v1/jobs?companyName={name}&jobDescription={keyword}&jobDescriptionExclude={exclude}&employeeCountGt={min}&employeeCountLt={max}` - 求人一覧取得（高度なフィルタリング対応）
+- `POST /api/v1/jobs/` - 求人情報登録
+- `GET /api/v1/jobs/:jobNumber` - 求人詳細取得
+- `GET /api/v1/jobs/?companyName={name}&jobDescription={keyword}&jobDescriptionExclude={exclude}&employeeCountGt={min}&employeeCountLt={max}&onlyNotExpired={bool}&orderByReceiveDate={asc|desc}` - 求人一覧取得（高度なフィルタリング対応）
 - `GET /api/v1/jobs/continue?nextToken={token}` - 継続ページネーション（JWTトークンベース、15分有効期限）
 
 #### プロキシAPI（フロントエンド）
