@@ -1,11 +1,12 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
 import { extractJobDetailRawHtml } from "../../lib/jobDetailExtractor";
-import { eventToFirstRecordToJobNumber } from "../extractTransformAndSaveJobDetailHandler/helper";
+import { fromEventToFirstRecord } from "../extractTransformAndSaveJobDetailHandler/helper";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const effect = Effect.gen(function* () {
-    const jobNumber = yield* eventToFirstRecordToJobNumber(event);
+    const jobNumber = yield* fromEventToFirstRecord(event);
+
     const rawHtml = yield* extractJobDetailRawHtml(jobNumber);
     return rawHtml;
   });
