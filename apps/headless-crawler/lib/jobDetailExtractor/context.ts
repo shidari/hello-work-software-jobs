@@ -31,8 +31,8 @@ import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
 import { format } from "date-fns";
 
-const i = Symbol()
-type ISODateString = string & { [i]: never }
+const i = Symbol();
+type ISODateString = string & { [i]: never };
 export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
   "HelloWorkRawJobDetailHtmlExtractor",
 )<
@@ -56,7 +56,7 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
       | JobSearchWithJobNumberFillingError
     >;
   }
->() { }
+>() {}
 
 const nowISODateString = (): ISODateString =>
   format(new Date(), "yyyy-MM-dd") as ISODateString;
@@ -107,4 +107,4 @@ class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   "ExtractJobDetailRawHtmlError",
 )<{
   readonly message: string;
-}> { }
+}> {}
