@@ -29,7 +29,10 @@ import type {
 } from "../core/page/JobDetail/validators/error";
 import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
+import { format } from "date-fns";
 
+const i = Symbol();
+type ISODateString = string & { [i]: never };
 export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
   "HelloWorkRawJobDetailHtmlExtractor",
 )<
@@ -38,7 +41,7 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
     readonly extractRawHtml: (
       jobNumber: JobNumber,
     ) => Effect.Effect<
-      string,
+      { rawHtml: string; fetchedDate: ISODateString; jobNumber: JobNumber },
       | ListJobsError
       | ExtractJobDetailRawHtmlError
       | NewPageError
@@ -55,6 +58,8 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
   }
 >() {}
 
+const nowISODateString = (): ISODateString =>
+  format(new Date(), "yyyy-MM-dd") as ISODateString;
 export function buildHelloWorkRawJobDetailHtmlExtractorLayer(
   config: HelloWorkScrapingConfig,
 ) {
@@ -90,7 +95,8 @@ export function buildHelloWorkRawJobDetailHtmlExtractorLayer(
                   message: `Failed to get page content: ${String(error)}`,
                 }),
             });
-            return rawHtml;
+
+            return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
           }),
       });
     }),
