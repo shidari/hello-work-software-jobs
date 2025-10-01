@@ -10,7 +10,14 @@ export function delay(ms: number) {
       }),
   );
 }
-export const issueToLogString = (issue: v.ObjectIssue | v.StringIssue | v.RegexIssue<string> | v.UrlIssue<string> | v.MinLengthIssue<string, number>) => {
-  const { received, expected, message } = issue
-  return `received: ${received}\nexpected: ${expected}\nmessage: ${message}`
-}
+export const issueToLogString = (
+  issue:
+    | v.ObjectIssue
+    | v.StringIssue
+    | v.RegexIssue<string>
+    | v.UrlIssue<string>
+    | v.MinLengthIssue<string, number>,
+) => {
+  const { received, expected, message } = issue;
+  return `received: ${received}\nexpected: ${expected}\nmessage: ${message}`;
+};
