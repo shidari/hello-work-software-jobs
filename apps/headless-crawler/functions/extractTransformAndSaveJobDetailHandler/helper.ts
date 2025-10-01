@@ -26,6 +26,7 @@ import {
 import type { TtoFirstRecord } from "./type";
 import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
 import type { SQSRecord } from "aws-lambda";
+import { issueToLogString } from "../../lib/core/util";
 
 const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
   const result = v.safeParse(
@@ -35,7 +36,7 @@ const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new FromExtractJobNumberJobQueueEventBodySchemaValidationError({
-        message: `parse failed. recevied\n ${JSON.stringify(val)}\n${String(result.issues.join("\n"))}`,
+        message: `parse failed. detail: ${result.issues.map(issueToLogString).join("\n")}`,
       }),
     );
   }
