@@ -6,7 +6,7 @@ export default defineHelloWorkCrawlingConfig(async () => {
     ? await import("@sparticuz/chromium").then((mod) => mod.default)
     : null;
   return {
-    roughMaxCount: 200,
+    roughMaxCount: 400,
     browserConfig: {
       executablePath: chromium ? await chromium.executablePath() : undefined,
       args: chromium ? chromium.args : [],
