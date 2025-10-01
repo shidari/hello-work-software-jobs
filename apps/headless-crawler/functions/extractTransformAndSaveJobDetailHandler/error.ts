@@ -49,3 +49,7 @@ export class FromExtractJobNumberJobQueueEventBodySchemaValidationError extends 
 )<{
   readonly message: string;
 }> {}
+
+export class JsonParseError extends Data.TaggedError("JsonParseError")<{
+  readonly message: string;
+}> {}

@@ -16,6 +16,7 @@ import {
   GetEndPointError,
   InsertJobError,
   InsertJobSuccessResponseValidationError,
+  JsonParseError,
   ParsedWorkingHoursError,
   ParseEmployeeCountError,
   ParseExpiryDateError,
@@ -68,9 +69,16 @@ export const fromEventToFirstRecord = ({
   return Effect.gen(function* () {
     const record = yield* toFirstRecord(Records);
     const { body } = record;
+    const parsed = yield* Effect.try({
+      try: () => JSON.parse(body),
+      catch: (e) =>
+        new JsonParseError({
+          message: `parse body to json failed.\n${e instanceof Error ? e.message : String(e)}`,
+        }),
+    });
     const {
       job: { jobNumber },
-    } = yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(body);
+    } = yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(parsed);
     return jobNumber as JobNumber;
   });
 };
