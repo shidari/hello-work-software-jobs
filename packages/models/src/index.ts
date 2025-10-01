@@ -1,3 +1,3 @@
 export * from "./headless-crawler";
-export * from "./job-store";
-export * from "./frontend";
+export * from "./job-store-api";
+export * from "./hello-work-job-searcher";

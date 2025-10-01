@@ -1,25 +1,25 @@
 import { number, object, string } from "valibot";
-import { searchFilterSchema } from "../../client";
+import { searchFilterSchema } from "../dbClient";
 
 export const jobListContinueQuerySchema = object({
-  nextToken: string(),
+    nextToken: string(),
 });
 
 export const cursorSchema = object({
-  jobId: number(),
-  receivedDateByISOString: string(),
+    jobId: number(),
+    receivedDateByISOString: string(),
 });
 
 export const decodedNextTokenSchema = object({
-  exp: number(),
-  cursor: cursorSchema,
-  filter: searchFilterSchema,
+    exp: number(),
+    cursor: cursorSchema,
+    filter: searchFilterSchema,
 });
 
 export const jobListContinueClientErrorResponseSchema = object({
-  message: string(),
+    message: string(),
 });
 
 export const jobListContinueServerErrorSchema = object({
-  message: string(),
+    message: string(),
 });
