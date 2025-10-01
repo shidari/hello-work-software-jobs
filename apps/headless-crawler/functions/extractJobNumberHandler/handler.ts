@@ -1,6 +1,6 @@
 import type { EventBridgeEvent, Handler } from "aws-lambda";
 import { Effect, Exit, pipe } from "effect";
-import { crawlerRunnable } from "../../lib/crawler";
+import { crawlerRunnable } from "../../lib/E-T-crawler";
 import { sendJobToQueue } from "../helpers/helper";
 
 export const handler: Handler<
