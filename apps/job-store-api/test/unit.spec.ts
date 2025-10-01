@@ -104,7 +104,7 @@ describe("/api/v1/jobs", () => {
       await waitOnExecutionContext(ctx);
       expect(response.status).toBe(200);
     });
-  })
+  });
   describe("POST 異常系", () => {
     it("with invalid API key should return 401", async () => {
       const request = new Request("http://localhost:8787/api/v1/jobs", {
@@ -134,7 +134,7 @@ describe("/api/v1/jobs", () => {
       await waitOnExecutionContext(ctx);
       expect(response.status).toBe(400);
     });
-  })
+  });
 });
 
 describe("/api/v1/jobs/continue", () => {
