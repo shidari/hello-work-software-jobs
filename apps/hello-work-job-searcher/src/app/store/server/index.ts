@@ -64,7 +64,7 @@ export const jobStoreClientOnServer: JobStoreClient = {
         if (!result.success) {
           return err(
             createValidateJobsError(
-              `Invalid job query: ${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job query. received:  ${JSON.stringify(paramsObj, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
             ),
           );
         }
@@ -93,7 +93,7 @@ export const jobStoreClientOnServer: JobStoreClient = {
         if (!result.success) {
           return err(
             createValidateJobsError(
-              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
             ),
           );
         }
@@ -137,7 +137,7 @@ export const jobStoreClientOnServer: JobStoreClient = {
         if (!result.success) {
           return err(
             createValidateJobsError(
-              `Invalid job data: ${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
             ),
           );
         }

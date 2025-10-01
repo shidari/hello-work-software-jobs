@@ -255,7 +255,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       if (!result.success)
         return err(
           createEmployeeCountGtValidationError(
-            `Invalid employeeCountGt.${result.issues.map((issue) => issue.message).join("\n")}`,
+            `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
           ),
         );
       return ok(result.output);
@@ -269,7 +269,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       if (!result.success)
         return err(
           createEmployeeCountLtValidationError(
-            `Invalid employeeCountLt.${result.issues.map((issue) => issue.message).join("\n")}`,
+            `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
           ),
         );
       return ok(result.output);
@@ -279,7 +279,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       if (!result.success)
         return err(
           createEnvError(
-            `Environment variable validation failed: ${String(result.issues)}`,
+            `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${String(result.issues)}`,
           ),
         );
       return ok(result.output);
