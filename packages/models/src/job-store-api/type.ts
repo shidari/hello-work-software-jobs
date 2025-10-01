@@ -1,9 +1,12 @@
 import type { InferOutput } from "valibot";
-import type { cursorSchema, decodedNextTokenSchema } from "./jobList/continue";
-import type { JobListSchema, JobSchema, searchFilterSchema } from "./client";
+import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
 import type { jobs, jobSelectSchema } from "./drizzle";
-import type { insertJobRequestBodySchema } from "./jobInsert";
-import type { jobListQuerySchema } from "./jobList";
+import type {
+  cursorSchema,
+  decodedNextTokenSchema,
+} from "./endpoints/jobListContinue";
+import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
+import type { jobListQuerySchema } from "./endpoints/jobList";
 
 export type Cursor = InferOutput<typeof cursorSchema>;
 // --- コマンド型 ---

@@ -1,6 +1,6 @@
 import { object, string } from "valibot";
-import { JobSchema } from "./client";
-import { jobNumberSchema } from "./tmp";
+import { jobNumberSchema } from "../tmp";
+import { JobSchema } from "../dbClient";
 
 export const jobFetchParamSchema = object({
   jobNumber: jobNumberSchema,

@@ -1,5 +1,5 @@
 import { literal, number, object, omit, pipe, regex, string } from "valibot";
-import { ISO8601, unbrandedScrapedJobSchema } from "./tmp";
+import { ISO8601, unbrandedScrapedJobSchema } from "../tmp";
 
 export const insertJobRequestBodySchema = object({
   ...omit(unbrandedScrapedJobSchema, ["wage", "workingHours"]).entries,

@@ -1,5 +1,5 @@
 import { number, object, optional, string } from "valibot";
-import { JobListSchema, searchFilterSchema } from "../client";
+import { JobListSchema, searchFilterSchema } from "../dbClient";
 
 export const jobListQuerySchema = object({
   ...searchFilterSchema.entries,
