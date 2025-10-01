@@ -35,7 +35,7 @@ const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new FromExtractJobNumberJobQueueEventBodySchemaValidationError({
-        message: `parse failed. \n${String(result.issues.join("\n"))}`,
+        message: `parse failed. recevied\n ${JSON.stringify(val)}\n${String(result.issues.join("\n"))}`,
       }),
     );
   }

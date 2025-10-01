@@ -51,7 +51,7 @@ export function validateJobNumber(val: unknown) {
       );
       return yield* Effect.fail(
         new JobNumberValidationError({
-          message: result.issues.join("\n"),
+          message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}`,
         }),
       );
     }
@@ -64,7 +64,7 @@ export function validateCompanyName(val: unknown) {
     const result = v.safeParse(companyNameSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
-        new CompanyNameValidationError({ message: result.issues.join("\n") }),
+        new CompanyNameValidationError({ message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
       ).pipe(
         Effect.tap(() => {
           return Effect.logDebug(
@@ -86,7 +86,7 @@ export function validateReceivedDate(val: unknown) {
     const result = v.safeParse(RawReceivedDateShema, val);
     if (!result.success) {
       return yield* Effect.fail(
-        new ReceivedDateValidationError({ message: result.issues.join("\n") }),
+        new ReceivedDateValidationError({ message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
       ).pipe(
         Effect.tap(() => {
           Effect.logDebug(
@@ -107,7 +107,7 @@ export function validateExpiryDate(val: unknown) {
     const result = v.safeParse(RawExpiryDateSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
-        new ExpiryDateValidationError({ message: result.issues.join("\n") }),
+        new ExpiryDateValidationError({ message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
       ).pipe(
         Effect.tap(() => {
           Effect.logDebug(
@@ -128,7 +128,7 @@ export function validateHomePage(val: unknown) {
     const result = v.safeParse(homePageSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
-        new HomePageValidationError({ message: result.issues.join("\n") }),
+        new HomePageValidationError({ message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
       ).pipe(
         Effect.tap(() => {
           Effect.logDebug(
@@ -156,7 +156,7 @@ export function validateOccupation(val: unknown) {
         `failed to validate occupation. issues=${JSON.stringify(result.issues, null, 2)}`,
       );
       return yield* Effect.fail(
-        new OccupationValidationError({ message: result.issues.join("\n") }),
+        new OccupationValidationError({ message: `parse error. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
       ).pipe(
         Effect.tap(() => {
           Effect.logDebug(
@@ -197,7 +197,7 @@ export function validateWage(val: unknown) {
       try: () => v.parse(RawWageSchema, val),
       catch: (e) =>
         e instanceof v.ValiError
-          ? new WageValidationError({ message: e.message })
+          ? new WageValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${e.message}` })
           : new WageValidationError({
               message: `unexpected error.\n${String(e)}`,
             }),
@@ -216,7 +216,7 @@ export function validateWorkingHours(val: unknown) {
     try: () => v.parse(RawWorkingHoursSchema, val),
     catch: (e) =>
       e instanceof v.ValiError
-        ? new WorkingHoursValidationError({ message: e.message })
+        ? new WorkingHoursValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${e.message}` })
         : new WorkingHoursValidationError({
             message: `unexpected error.\n${String(e)}`,
           }),
@@ -233,7 +233,7 @@ export function validateEmployeeCount(val: unknown) {
     try: () => v.parse(RawEmployeeCountSchema, val),
     catch: (e) =>
       e instanceof v.ValiError
-        ? new EmployeeCountValidationError({ message: e.message })
+        ? new EmployeeCountValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${e.message}` })
         : new EmployeeCountValidationError({
             message: `unexpected error.\n${String(e)}`,
           }),
@@ -251,7 +251,7 @@ export function validateWorkPlace(val: unknown) {
     try: () => v.parse(workPlaceSchema, val),
     catch: (e) =>
       e instanceof v.ValiError
-        ? new WorkPlaceValidationError({ message: e.message })
+        ? new WorkPlaceValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${e.message}` })
         : new WorkPlaceValidationError({
             message: `unexpected error. \n${String(e)}`,
           }),
@@ -269,7 +269,7 @@ export function validateJobDescription(val: unknown) {
     try: () => v.parse(jobDescriptionSchema, val),
     catch: (e) =>
       e instanceof v.ValiError
-        ? new JobDescriptionValidationError({ message: e.message })
+        ? new JobDescriptionValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${e.message}` })
         : new JobDescriptionValidationError({
             message: `unexpected error.\n${String}`,
           }),
@@ -291,7 +291,7 @@ export function validateQualification(
   const result = v.safeParse(qualificationsSchema, val);
   if (!result.success) {
     return Effect.fail(
-      new QualificationValidationError({ message: result.issues.join("\n") }),
+      new QualificationValidationError({ message: `parse failed. received=${JSON.stringify(val)}\n${result.issues.join("\n")}` }),
     ).pipe(
       Effect.tap(() => {
         Effect.logDebug(

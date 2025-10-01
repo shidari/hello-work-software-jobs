@@ -71,7 +71,7 @@ app.get(
         if (!result.success)
           return err(
             createEnvError(
-              `Environment variable validation failed: ${String(result.issues)}`,
+              `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${String(result.issues)}`,
             ),
           );
         return ok(result.output);
@@ -89,7 +89,7 @@ app.get(
       if (!payloadValidation.success) {
         return err(
           createDecodeJWTPayloadError(
-            `Decoding JWT payload failed.\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
+            `Decoding JWT payload failed. received: ${JSON.stringify(decodeResult.payload)}\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
           ),
         );
       }
