@@ -70,9 +70,9 @@ export const handler = async (_event: ScheduledEvent) => {
             // システム属性
             const systemAttributes = message.Attributes
               ? [
-                `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
-                `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
-              ]
+                  `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
+                  `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
+                ]
               : [];
 
             if (message.Attributes) {
@@ -95,23 +95,23 @@ export const handler = async (_event: ScheduledEvent) => {
 
                 const jobIdDetail = parsedBody?.job?.id
                   ? (() => {
-                    console.log("📋 Job ID:", parsedBody.job.id);
-                    return `**Job ID**: ${parsedBody.job.id}`;
-                  })()
+                      console.log("📋 Job ID:", parsedBody.job.id);
+                      return `**Job ID**: ${parsedBody.job.id}`;
+                    })()
                   : null;
 
                 const errorMessageDetail = parsedBody.errorMessage
                   ? (() => {
-                    console.log("🚨 エラー:", parsedBody.errorMessage);
-                    return `**エラー**: ${parsedBody.errorMessage}`;
-                  })()
+                      console.log("🚨 エラー:", parsedBody.errorMessage);
+                      return `**エラー**: ${parsedBody.errorMessage}`;
+                    })()
                   : null;
 
                 const errorTypeDetail = parsedBody.errorType
                   ? (() => {
-                    console.log("🚨 タイプ:", parsedBody.errorType);
-                    return `**タイプ**: ${parsedBody.errorType}`;
-                  })()
+                      console.log("🚨 タイプ:", parsedBody.errorType);
+                      return `**タイプ**: ${parsedBody.errorType}`;
+                    })()
                   : null;
 
                 const jsonDetail = `\n\`\`\`json\n${JSON.stringify(parsedBody, null, 2)}\n\`\`\`\n`;
