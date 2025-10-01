@@ -14,7 +14,6 @@ export const sendJobToQueue = (job: JobMetadata) =>
             QueueUrl: QUEUE_URL,
             MessageBody: JSON.stringify({
               job,
-              timestamp: new Date().toISOString(),
             }),
           }),
         );
@@ -36,7 +35,6 @@ export const sendJobToRawJobDetailExtractorQueue = (job: JobMetadata) =>
             QueueUrl: QUEUE_URL,
             MessageBody: JSON.stringify({
               job,
-              timestamp: new Date().toISOString(),
             }),
           }),
         );
