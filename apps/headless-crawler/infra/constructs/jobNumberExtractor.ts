@@ -23,7 +23,7 @@ export class JobNumberExtractConstruct extends Construct {
       entry: "functions/extractJobNumberHandler/handler.ts",
       handler: "handler",
       memorySize: 1024,
-      timeout: Duration.seconds(90),
+      timeout: Duration.seconds(120),
       environment: {
         QUEUE_URL: process.env.QUEUE_URL || "",
       },
