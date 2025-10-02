@@ -77,7 +77,7 @@ export const fromEventToFirstRecord = ({
         }),
     });
     const {
-      job: { jobNumber },
+      jobNumber,
     } = yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(parsed);
     return jobNumber as JobNumber;
   });

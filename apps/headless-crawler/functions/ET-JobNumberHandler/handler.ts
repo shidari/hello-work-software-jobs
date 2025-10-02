@@ -1,18 +1,24 @@
 import type { EventBridgeEvent, Handler } from "aws-lambda";
-import { Effect, Exit, pipe } from "effect";
+import { Effect, Exit, Config } from "effect";
 import { crawlerRunnable } from "../../lib/E-T-crawler";
-import { sendJobToQueue } from "../helpers/helper";
+import { sendMessageToQueue } from "../helpers/helper";
 
 export const handler: Handler<
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
   EventBridgeEvent<"Scheduled Event", {}>,
   unknown // 型つけるのが面倒くさいので
 > = async (_) => {
-  const program = pipe(
-    crawlerRunnable,
-    Effect.tap((jobs) => Effect.forEach(jobs, sendJobToQueue)),
-  );
-
+  const program = Effect.gen(function* () {
+    const QUEUE_URL = yield* Config.string("QUEUE_URL")
+    const jobs = yield* crawlerRunnable;
+    yield* Effect.forEach(jobs, (job) =>
+      sendMessageToQueue(
+        { jobNumber: job.jobNumber },
+        QUEUE_URL,
+      )
+    );
+    return jobs;
+  })
   const exit = await Effect.runPromiseExit(program);
   if (Exit.isSuccess(exit)) {
     console.log("handler succeeded", JSON.stringify(exit.value, null, 2));

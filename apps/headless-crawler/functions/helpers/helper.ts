@@ -2,19 +2,22 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import type { JobMetadata } from "@sho/models";
 import { Effect } from "effect";
 import { SendSQSMessageError } from "./error";
-
-export const sendJobToQueue = (job: JobMetadata) =>
+export type Serializable =
+  | string
+  | number
+  | boolean
+  | null
+  | Serializable[]
+  | { [key: string]: Serializable };
+export const sendMessageToQueue = (value: Serializable, url: string) =>
   Effect.gen(function* () {
     const sqs = new SQSClient({});
-    const QUEUE_URL = yield* Effect.fromNullable(process.env.QUEUE_URL);
     return yield* Effect.tryPromise({
       try: async () => {
         return await sqs.send(
           new SendMessageCommand({
-            QueueUrl: QUEUE_URL,
-            MessageBody: JSON.stringify({
-              job,
-            }),
+            QueueUrl: url,
+            MessageBody: JSON.stringify(value),
           }),
         );
       },
