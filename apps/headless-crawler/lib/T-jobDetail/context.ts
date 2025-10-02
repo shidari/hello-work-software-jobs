@@ -21,30 +21,47 @@ import type {
   JobDetailPropertyValidationError,
 } from "../core/page/JobDetail/validators/error";
 import type { InferOutput } from "valibot";
-import { parseHTML } from 'linkedom';
-import { validateCompanyName, validateEmploymentType, validateExpiryDate, validateHomePage, validateJobDescription, validateJobNumber, validateOccupation, validateQualification, validateReceivedDate, validateWorkPlace } from "../core/page/JobDetail/validators";
-import { toTransformedEmployeeCount, toTransformedWage, toTransformedWorkingHours } from "./helper";
-import type { EmployeeCountTransformationError, WageTransformationError, WorkingHoursTransformationError } from "./error";
+import { parseHTML } from "linkedom";
+import {
+  validateCompanyName,
+  validateEmploymentType,
+  validateExpiryDate,
+  validateHomePage,
+  validateJobDescription,
+  validateJobNumber,
+  validateOccupation,
+  validateQualification,
+  validateReceivedDate,
+  validateWorkPlace,
+} from "../core/page/JobDetail/validators";
+import {
+  toTransformedEmployeeCount,
+  toTransformedWage,
+  toTransformedWorkingHours,
+} from "./helper";
+import type {
+  EmployeeCountTransformationError,
+  WageTransformationError,
+  WorkingHoursTransformationError,
+} from "./error";
 
 export class TransformerConfig extends Context.Tag("Config")<
   TransformerConfig,
   {
     readonly getConfig: Effect.Effect<{
-      readonly logDebug: boolean
-    }>
+      readonly logDebug: boolean;
+    }>;
   }
->() { }
+>() {}
 
 export const ConfigLive = Layer.succeed(
   TransformerConfig,
   TransformerConfig.of({
     getConfig: Effect.succeed({
       logDebug: false,
-    })
-
-  })
-
-)
+    }),
+  }),
+);
 export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
   JobDetailTransformer,
   {
@@ -69,12 +86,11 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       | JobSearchWithJobNumberFillingError
       | WageTransformationError
       | WorkingHoursTransformationError
-      | EmployeeCountTransformationError
-      ,
+      | EmployeeCountTransformationError,
       TransformerConfig
     >;
   }
->() { }
+>() {}
 
 export const transformerLive = Layer.effect(
   JobDetailTransformer,
@@ -86,34 +102,53 @@ export const transformerLive = Layer.effect(
     return JobDetailTransformer.of({
       transform: (rawHtml: string) =>
         Effect.gen(function* () {
-          yield* Effect.logInfo(`start transforming... config=${JSON.stringify(config, null, 2)}`);
+          yield* Effect.logInfo(
+            `start transforming... config=${JSON.stringify(config, null, 2)}`,
+          );
           const { document } = parseHTML(rawHtml);
-          const rawJobNumber = document.querySelector("#ID_kjNo")?.textContent
+          const rawJobNumber = document.querySelector("#ID_kjNo")?.textContent;
           const jobNumber = yield* validateJobNumber(rawJobNumber);
-          const rawCompanyName = document.querySelector("#ID_jgshMei")?.textContent
+          const rawCompanyName =
+            document.querySelector("#ID_jgshMei")?.textContent;
           const companyName = yield* validateCompanyName(rawCompanyName);
-          const rawReceivedDate = document.querySelector("#ID_uktkYmd")?.textContent
-          const receivedDate = yield* validateReceivedDate(rawReceivedDate)
-          const rawExpiryDate = document.querySelector("#ID_shkiKigenHi")?.textContent
-          const expiryDate = yield* validateExpiryDate(rawExpiryDate)
-          const rawHomePage = document.querySelector("#ID_hp")?.textContent
-          const homePage = rawHomePage ? yield* validateHomePage(rawHomePage) : null;
-          const rawOccupation = document.querySelector("#ID_sksu")?.textContent
+          const rawReceivedDate =
+            document.querySelector("#ID_uktkYmd")?.textContent;
+          const receivedDate = yield* validateReceivedDate(rawReceivedDate);
+          const rawExpiryDate =
+            document.querySelector("#ID_shkiKigenHi")?.textContent;
+          const expiryDate = yield* validateExpiryDate(rawExpiryDate);
+          const rawHomePage = document.querySelector("#ID_hp")?.textContent;
+          const homePage = rawHomePage
+            ? yield* validateHomePage(rawHomePage)
+            : null;
+          const rawOccupation = document.querySelector("#ID_sksu")?.textContent;
           const occupation = yield* validateOccupation(rawOccupation);
-          const rawEmplomentType = document.querySelector("#ID_koyoKeitai")?.textContent
-          const employmentType = yield* validateEmploymentType(rawEmplomentType)
-          const rawWage = document.querySelector("#ID_chgn")?.textContent
+          const rawEmplomentType =
+            document.querySelector("#ID_koyoKeitai")?.textContent;
+          const employmentType =
+            yield* validateEmploymentType(rawEmplomentType);
+          const rawWage = document.querySelector("#ID_chgn")?.textContent;
           const { wageMax, wageMin } = yield* toTransformedWage(rawWage);
-          const rawWorkingHours = document.querySelector("#ID_shgJn1")?.textContent
-          const { workingEndTime, workingStartTime } = yield* toTransformedWorkingHours(rawWorkingHours);
-          const rawEmployeeCount = document.querySelector("#ID_jgisKigyoZentai")?.textContent
-          const employeeCount = yield* toTransformedEmployeeCount(rawEmployeeCount);
-          const rawWorkPlace = document.querySelector("#ID_shgBsJusho")?.textContent
-          const workPlace = yield* validateWorkPlace(rawWorkPlace)
-          const rawJobDescription = document.querySelector("#ID_shigotoNy")?.textContent
-          const jobDescription = yield* validateJobDescription(rawJobDescription)
-          const rawQualifications = document.querySelector("#ID_hynaMenkyoSkku")?.textContent
-          const qualifications = yield* validateQualification(rawQualifications)
+          const rawWorkingHours =
+            document.querySelector("#ID_shgJn1")?.textContent;
+          const { workingEndTime, workingStartTime } =
+            yield* toTransformedWorkingHours(rawWorkingHours);
+          const rawEmployeeCount = document.querySelector(
+            "#ID_jgisKigyoZentai",
+          )?.textContent;
+          const employeeCount =
+            yield* toTransformedEmployeeCount(rawEmployeeCount);
+          const rawWorkPlace =
+            document.querySelector("#ID_shgBsJusho")?.textContent;
+          const workPlace = yield* validateWorkPlace(rawWorkPlace);
+          const rawJobDescription =
+            document.querySelector("#ID_shigotoNy")?.textContent;
+          const jobDescription =
+            yield* validateJobDescription(rawJobDescription);
+          const rawQualifications =
+            document.querySelector("#ID_hynaMenkyoSkku")?.textContent;
+          const qualifications =
+            yield* validateQualification(rawQualifications);
           return {
             jobNumber,
             companyName,
@@ -130,7 +165,7 @@ export const transformerLive = Layer.effect(
             workPlace,
             jobDescription,
             qualifications,
-          }
+          };
         }),
     });
   }),
@@ -140,4 +175,4 @@ export const mainLive = transformerLive.pipe(Layer.provide(ConfigLive));
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> { }
+}> {}
