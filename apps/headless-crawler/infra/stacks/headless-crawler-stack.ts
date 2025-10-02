@@ -26,7 +26,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       "PlayWrightLayer",
     );
 
-    const jobNumberExtractor = new JobNumberExtractAndTransformConstruct(
+    const jobNumberExtractorConstruct = new JobNumberExtractAndTransformConstruct(
       this,
       "JobNumberExtractor",
       {
@@ -34,7 +34,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       },
     );
 
-    const jobDetailExtractThenTransformThenLoad =
+    const jobDetailExtractThenTransformThenLoadConstruct =
       new JobDetailExtractThenTransformThenLoadConstruct(
         this,
         "JobDetailExtractThenTransformThenLoad",
@@ -43,7 +43,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         },
       );
 
-    const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(
+    const jobDetailRawHtmlExtractorConstruct = new JobDetailRawHtmlExtractorConstruct(
       this,
       "JobDetailRawHtmlExtractor",
       {
@@ -132,24 +132,24 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
     deadLetterMonitorAlarmTopic.grantPublish(deadLetterMonitor);
 
-    jobDetailExtractThenTransformThenLoad.extractThenTransformThenLoader.addEventSource(
+    jobDetailExtractThenTransformThenLoadConstruct.extractThenTransformThenLoader.addEventSource(
       new SqsEventSource(toJobDetailExtractThenTransformThenLoadQueue, {
         batchSize: 1,
       }),
     );
-    jobDetailRawHtmlExtractor.extractor.addEventSource(
+    jobDetailRawHtmlExtractorConstruct.extractor.addEventSource(
       new SqsEventSource(queueForJobDetailRawHtmlExtractor, {
         batchSize: 1,
       }),
     );
 
-    rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
+    rule.addTarget(new targets.LambdaFunction(jobNumberExtractorConstruct.extractor));
 
     toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(
-      jobNumberExtractor.extractor,
+      jobNumberExtractorConstruct.extractor,
     );
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
-      jobNumberExtractor.extractor,
+      jobNumberExtractorConstruct.extractor,
     );
   }
 }
