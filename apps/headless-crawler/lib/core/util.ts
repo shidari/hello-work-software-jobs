@@ -16,7 +16,9 @@ export const issueToLogString = (
     | v.StringIssue
     | v.RegexIssue<string>
     | v.UrlIssue<string>
-    | v.MinLengthIssue<string, number>,
+    | v.MinLengthIssue<string, number>
+    | v.CheckIssue<{ wageMin: number; wageMax: number }>
+    | v.NumberIssue,
 ) => {
   const { received, expected, message } = issue;
   return `received: ${received}\nexpected: ${expected}\nmessage: ${message}`;
