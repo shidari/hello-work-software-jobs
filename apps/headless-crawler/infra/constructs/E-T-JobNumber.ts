@@ -10,7 +10,7 @@ import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { Topic } from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
-export class JobNumberExtractConstruct extends Construct {
+export class JobNumberExtractAndTransformConstruct extends Construct {
   public readonly extractor: NodejsFunction;
   constructor(
     scope: Construct,
@@ -20,7 +20,7 @@ export class JobNumberExtractConstruct extends Construct {
     super(scope, id);
     this.extractor = new NodejsFunction(this, "CrawlingFunction", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: "functions/extractJobNumberHandler/handler.ts",
+      entry: "functions/ET-JobNumberHandler/handler.ts",
       handler: "handler",
       memorySize: 1024,
       timeout: Duration.seconds(120),
