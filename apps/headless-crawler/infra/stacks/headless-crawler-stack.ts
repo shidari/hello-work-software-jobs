@@ -26,15 +26,12 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       "PlayWrightLayer",
     );
 
-    const jobNumberExtractor = new JobNumberExtractAndTransformConstruct(
-      this,
-      "JobNumberExtractor",
-      {
+    const jobNumberExtractorConstruct =
+      new JobNumberExtractAndTransformConstruct(this, "JobNumberExtractor", {
         playwrightLayer: playwrightLayer.layer,
-      },
-    );
+      });
 
-    const jobDetailExtractThenTransformThenLoad =
+    const jobDetailExtractThenTransformThenLoadConstruct =
       new JobDetailExtractThenTransformThenLoadConstruct(
         this,
         "JobDetailExtractThenTransformThenLoad",
@@ -43,13 +40,14 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         },
       );
 
-    const jobDetailRawHtmlExtractor = new JobDetailRawHtmlExtractorConstruct(
-      this,
-      "JobDetailRawHtmlExtractor",
-      {
-        playwrightLayer: playwrightLayer.layer,
-      },
-    );
+    const jobDetailRawHtmlExtractorConstruct =
+      new JobDetailRawHtmlExtractorConstruct(
+        this,
+        "JobDetailRawHtmlExtractor",
+        {
+          playwrightLayer: playwrightLayer.layer,
+        },
+      );
 
     // デッドレターキューを作成
     const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
@@ -132,24 +130,26 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     deadLetterQueue.grantConsumeMessages(deadLetterMonitor);
     deadLetterMonitorAlarmTopic.grantPublish(deadLetterMonitor);
 
-    jobDetailExtractThenTransformThenLoad.extractThenTransformThenLoader.addEventSource(
+    jobDetailExtractThenTransformThenLoadConstruct.extractThenTransformThenLoader.addEventSource(
       new SqsEventSource(toJobDetailExtractThenTransformThenLoadQueue, {
         batchSize: 1,
       }),
     );
-    jobDetailRawHtmlExtractor.extractor.addEventSource(
+    jobDetailRawHtmlExtractorConstruct.extractor.addEventSource(
       new SqsEventSource(queueForJobDetailRawHtmlExtractor, {
         batchSize: 1,
       }),
     );
 
-    rule.addTarget(new targets.LambdaFunction(jobNumberExtractor.extractor));
+    rule.addTarget(
+      new targets.LambdaFunction(jobNumberExtractorConstruct.extractor),
+    );
 
     toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(
-      jobNumberExtractor.extractor,
+      jobNumberExtractorConstruct.extractor,
     );
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
-      jobNumberExtractor.extractor,
+      jobNumberExtractorConstruct.extractor,
     );
   }
 }
