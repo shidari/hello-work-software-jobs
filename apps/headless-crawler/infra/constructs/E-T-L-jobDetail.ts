@@ -17,7 +17,7 @@ export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
   ) {
     super(scope, id);
     this.extractThenTransformThenLoader = new NodejsFunction(this, id, {
-      entry: "functions/extractTransformAndSaveJobDetailHandler/handler.ts",
+      entry: "functions/E-T-L-JobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       memorySize: 1024,

@@ -9,9 +9,9 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
 import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
-import { JobNumberExtractConstruct } from "../constructs/jobNumberExtractor";
-import { JobDetailRawHtmlExtractorConstruct } from "../constructs/jobDetailRawHtmlExtractor";
-import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/jobDetailExtractThenTransformThenLoad";
+import { JobDetailRawHtmlExtractorConstruct } from "../constructs/E-jobDetail";
+import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/E-T-L-jobDetail";
+import { JobNumberExtractAndTransformConstruct } from "../constructs/E-T-JobNumber";
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       "PlayWrightLayer",
     );
 
-    const jobNumberExtractor = new JobNumberExtractConstruct(
+    const jobNumberExtractor = new JobNumberExtractAndTransformConstruct(
       this,
       "JobNumberExtractor",
       {
