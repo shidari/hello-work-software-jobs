@@ -76,9 +76,8 @@ export const fromEventToFirstRecord = ({
           message: `parse body to json failed.\n${e instanceof Error ? e.message : String(e)}`,
         }),
     });
-    const {
-      jobNumber,
-    } = yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(parsed);
+    const { jobNumber } =
+      yield* safeParseFromExtractJobNumberJobQueueEventBodySchema(parsed);
     return jobNumber as JobNumber;
   });
 };

@@ -9,16 +9,13 @@ export const handler: Handler<
   unknown // 型つけるのが面倒くさいので
 > = async (_) => {
   const program = Effect.gen(function* () {
-    const QUEUE_URL = yield* Config.string("QUEUE_URL")
+    const QUEUE_URL = yield* Config.string("QUEUE_URL");
     const jobs = yield* crawlerRunnable;
     yield* Effect.forEach(jobs, (job) =>
-      sendMessageToQueue(
-        { jobNumber: job.jobNumber },
-        QUEUE_URL,
-      )
+      sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
     );
     return jobs;
-  })
+  });
   const exit = await Effect.runPromiseExit(program);
   if (Exit.isSuccess(exit)) {
     console.log("handler succeeded", JSON.stringify(exit.value, null, 2));
