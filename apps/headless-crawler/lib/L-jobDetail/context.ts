@@ -8,25 +8,17 @@ import type { InsertJobError } from "./error";
 export class LoaderConfig extends Context.Tag("LoaderConfig")<
   LoaderConfig,
   {}
->() { }
+>() {}
 
-export const configLive = Layer.succeed(
-  LoaderConfig,
-  LoaderConfig.of({}),
-);
+export const configLive = Layer.succeed(LoaderConfig, LoaderConfig.of({}));
 export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
   JobDetailLoader,
   {
     readonly load: (
       data: InferOutput<typeof transformedSchema>,
-    ) => Effect.Effect<
-      void,
-      | ConfigError
-      | InsertJobError,
-      LoaderConfig
-    >;
+    ) => Effect.Effect<void, ConfigError | InsertJobError, LoaderConfig>;
   }
->() { }
+>() {}
 
 export const loaderLive = Layer.effect(
   JobDetailLoader,
@@ -43,9 +35,7 @@ export const loaderLive = Layer.effect(
           yield* Effect.logInfo(
             `start transforming... config=${JSON.stringify(config, null, 2)}`,
           );
-
         }),
     });
   }),
 );
-

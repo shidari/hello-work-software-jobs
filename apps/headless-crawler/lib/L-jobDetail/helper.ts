@@ -2,10 +2,9 @@ import type { InsertJobRequestBody } from "@sho/models";
 import { Config, Effect } from "effect";
 import { InsertJobError } from "./error";
 
-
 export function buildJobStoreClient() {
   return Effect.gen(function* () {
-    const endpoint = yield* Config.string("JOB_STORE_ENDPOINT")
+    const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
     return {
       insertJob: (job: InsertJobRequestBody) =>
         Effect.gen(function* () {
