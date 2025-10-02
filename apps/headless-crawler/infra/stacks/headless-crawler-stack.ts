@@ -26,13 +26,10 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       "PlayWrightLayer",
     );
 
-    const jobNumberExtractorConstruct = new JobNumberExtractAndTransformConstruct(
-      this,
-      "JobNumberExtractor",
-      {
+    const jobNumberExtractorConstruct =
+      new JobNumberExtractAndTransformConstruct(this, "JobNumberExtractor", {
         playwrightLayer: playwrightLayer.layer,
-      },
-    );
+      });
 
     const jobDetailExtractThenTransformThenLoadConstruct =
       new JobDetailExtractThenTransformThenLoadConstruct(
@@ -43,13 +40,14 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         },
       );
 
-    const jobDetailRawHtmlExtractorConstruct = new JobDetailRawHtmlExtractorConstruct(
-      this,
-      "JobDetailRawHtmlExtractor",
-      {
-        playwrightLayer: playwrightLayer.layer,
-      },
-    );
+    const jobDetailRawHtmlExtractorConstruct =
+      new JobDetailRawHtmlExtractorConstruct(
+        this,
+        "JobDetailRawHtmlExtractor",
+        {
+          playwrightLayer: playwrightLayer.layer,
+        },
+      );
 
     // デッドレターキューを作成
     const deadLetterQueue = new sqs.Queue(this, "ScrapingJobDeadLetterQueue", {
@@ -143,7 +141,9 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       }),
     );
 
-    rule.addTarget(new targets.LambdaFunction(jobNumberExtractorConstruct.extractor));
+    rule.addTarget(
+      new targets.LambdaFunction(jobNumberExtractorConstruct.extractor),
+    );
 
     toJobDetailExtractThenTransformThenLoadQueue.grantSendMessages(
       jobNumberExtractorConstruct.extractor,
