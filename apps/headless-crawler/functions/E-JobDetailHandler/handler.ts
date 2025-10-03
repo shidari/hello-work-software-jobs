@@ -10,7 +10,10 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     // ちょっと、名前がよくない、多分、使い方が間違ってるかも
     const { rawHtml } = yield* buildProgram(jobNumber);
     return rawHtml;
-  }).pipe(Effect.provide(extractorLive)).pipe(Effect.provide(ConfigLive)).pipe(Effect.scoped);
+  })
+    .pipe(Effect.provide(extractorLive))
+    .pipe(Effect.provide(ConfigLive))
+    .pipe(Effect.scoped);
   const result = await Effect.runPromiseExit(runnable);
   if (Exit.isSuccess(result)) {
     console.log("Lambda job succeeded:", result.value);

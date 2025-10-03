@@ -30,7 +30,11 @@ import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
 import { format } from "date-fns";
 import type { LaunchOptions } from "playwright";
-import { ExtractJobDetailRawHtmlError, GetExecutablePathError, ImportChromiumError } from "./error";
+import {
+  ExtractJobDetailRawHtmlError,
+  GetExecutablePathError,
+  ImportChromiumError,
+} from "./error";
 
 const i = Symbol();
 type ISODateString = string & { [i]: never };
@@ -57,22 +61,27 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
       | JobSearchWithJobNumberFillingError
     >;
   }
->() { }
+>() {}
 
 export class ExtractorConfig extends Context.Tag("ExtractorConfig")<
   ExtractorConfig,
   {
     readonly getConfig: Effect.Effect<{
       readonly debugLog: boolean;
-      readonly browserConfig: Pick<LaunchOptions, "headless" | "executablePath" | "args">;
+      readonly browserConfig: Pick<
+        LaunchOptions,
+        "headless" | "executablePath" | "args"
+      >;
     }>;
   }
->() { }
+>() {}
 
 export const ConfigLive = Layer.effect(
   ExtractorConfig,
   Effect.gen(function* () {
-    const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string("AWS_LAMBDA_FUNCTION_NAME").pipe(Config.withDefault(""));
+    const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
+      "AWS_LAMBDA_FUNCTION_NAME",
+    ).pipe(Config.withDefault(""));
     const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
     const chromiumOrNull = yield* Effect.tryPromise({
       try: () =>
@@ -83,13 +92,16 @@ export const ConfigLive = Layer.effect(
         new ImportChromiumError({
           message: `Failed to import chromium: ${String(error)}`,
         }),
-    })
+    });
     const args = chromiumOrNull ? chromiumOrNull.args : [];
     const executablePath = chromiumOrNull
       ? yield* Effect.tryPromise({
-        try: () => chromiumOrNull.executablePath(),
-        catch: (error) => new GetExecutablePathError({ message: `Failed to get chromium executable path: ${String(error)}` }),
-      })
+          try: () => chromiumOrNull.executablePath(),
+          catch: (error) =>
+            new GetExecutablePathError({
+              message: `Failed to get chromium executable path: ${String(error)}`,
+            }),
+        })
       : undefined;
     return {
       getConfig: Effect.succeed({
@@ -105,41 +117,43 @@ export const ConfigLive = Layer.effect(
 );
 const nowISODateString = (): ISODateString =>
   format(new Date(), "yyyy-MM-dd") as ISODateString;
-export const extractorLive = Layer.effect(HelloWorkRawJobDetailHtmlExtractor, Effect.gen(function* () {
-  // ちょっといい方法思いつかないので、
-  const config = yield* ExtractorConfig;
-  const config2 = yield* config.getConfig;
-  yield* Effect.logInfo(
-    `building jobDetail extractor: config=${JSON.stringify(config2, null, 2)}`,
-  );
-  const browser = yield* launchBrowser(config2.browserConfig);
-  const context = yield* createContext(browser);
-  const page = yield* createPage(context);
-  return {
-    extractRawHtml: (jobNumber: JobNumber) => Effect.gen(function* () {
-      yield* Effect.logInfo("start extracting raw job detail HTML...");
-      yield* Effect.logDebug("go to hello work seach page.");
-      yield* goToJobSearchPage(page);
-      const searchPage = yield* validateJobSearchPage(page);
-      yield* Effect.logDebug(
-        "fill jobNumber then go to hello work seach page.",
-      );
-      yield* searchNoThenGotoSingleJobListPage(searchPage, jobNumber);
-      const jobListPage = yield* validateJobListPage(searchPage);
-      yield* Effect.logDebug("now on job List page.");
+export const extractorLive = Layer.effect(
+  HelloWorkRawJobDetailHtmlExtractor,
+  Effect.gen(function* () {
+    // ちょっといい方法思いつかないので、
+    const config = yield* ExtractorConfig;
+    const config2 = yield* config.getConfig;
+    yield* Effect.logInfo(
+      `building jobDetail extractor: config=${JSON.stringify(config2, null, 2)}`,
+    );
+    const browser = yield* launchBrowser(config2.browserConfig);
+    const context = yield* createContext(browser);
+    const page = yield* createPage(context);
+    return {
+      extractRawHtml: (jobNumber: JobNumber) =>
+        Effect.gen(function* () {
+          yield* Effect.logInfo("start extracting raw job detail HTML...");
+          yield* Effect.logDebug("go to hello work seach page.");
+          yield* goToJobSearchPage(page);
+          const searchPage = yield* validateJobSearchPage(page);
+          yield* Effect.logDebug(
+            "fill jobNumber then go to hello work seach page.",
+          );
+          yield* searchNoThenGotoSingleJobListPage(searchPage, jobNumber);
+          const jobListPage = yield* validateJobListPage(searchPage);
+          yield* Effect.logDebug("now on job List page.");
 
-      yield* goToSingleJobDetailPage(jobListPage);
-      const jobDetailPage = yield* validateJobDetailPage(jobListPage);
-      const rawHtml = yield* Effect.tryPromise({
-        try: () => jobDetailPage.content(),
-        catch: (error) =>
-          new ExtractJobDetailRawHtmlError({
-            message: `Failed to get page content: ${error instanceof Error ? error.message : String(error)}`,
-          }),
-      });
-      return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
-    })
-  }
-}));
-
-
+          yield* goToSingleJobDetailPage(jobListPage);
+          const jobDetailPage = yield* validateJobDetailPage(jobListPage);
+          const rawHtml = yield* Effect.tryPromise({
+            try: () => jobDetailPage.content(),
+            catch: (error) =>
+              new ExtractJobDetailRawHtmlError({
+                message: `Failed to get page content: ${error instanceof Error ? error.message : String(error)}`,
+              }),
+          });
+          return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
+        }),
+    };
+  }),
+);
