@@ -11,7 +11,11 @@ export const insertJobSuccessResponseSchema = object({
   }),
 });
 
-export const insertJobClientErrorResponseSchema = object({
+export const insertJobDuplicationErrorResponseSchema = object({
+  message: string(),
+});
+
+export const insertJobGeneralClientErrorResponseSchema = object({
   message: string(),
 });
 
