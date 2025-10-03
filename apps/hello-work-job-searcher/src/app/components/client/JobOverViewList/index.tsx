@@ -24,17 +24,7 @@ function NewBadge() {
     </span>
   );
 }
-
-export function JobOverviewList({
-  initialDataFromServer,
-}: {
-  initialDataFromServer: {
-    jobs: JobList;
-    nextToken: string | undefined;
-    totalCount: number;
-  };
-}) {
-  useHydrateAtoms([[jobListAtom, initialDataFromServer]]);
+export function JobOverviewList() {
   const { items, nextToken } = useAtomValue(JobOverviewListAtom);
   const wrappedItems = useJobsWithFavorite(items);
   const fetchNextPage = useSetAtom(continuousJobOverviewListWriterAtom);
@@ -130,4 +120,17 @@ export function JobOverviewList({
       </div>
     </div>
   );
+}
+
+export function HydratedJobOverviewList({
+  initialDataFromServer,
+}: {
+  initialDataFromServer: {
+    jobs: JobList;
+    nextToken: string | undefined;
+    totalCount: number;
+  };
+}) {
+  useHydrateAtoms([[jobListAtom, initialDataFromServer]]);
+  return <JobOverviewList />;
 }
