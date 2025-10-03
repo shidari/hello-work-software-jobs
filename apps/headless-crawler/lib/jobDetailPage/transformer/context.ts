@@ -171,7 +171,9 @@ export const transformerLive = Layer.effect(
   }),
 );
 
-export const mainLive = transformerLive.pipe(Layer.provide(transformerConfigLive));
+export const mainLive = transformerLive.pipe(
+  Layer.provide(transformerConfigLive),
+);
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
