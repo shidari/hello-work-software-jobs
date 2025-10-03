@@ -7,9 +7,9 @@ import { drizzle } from "drizzle-orm/d1";
 import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
-import { createJobStoreResultBuilder } from "../src/clientImpl";
-import { createJobStoreDBClientAdapter } from "../src/clientImpl/adapter";
-
+import { parse } from "valibot";
+import { insertJobRequestBodySchema } from "@sho/models";
+import { createJobStoreDBClientAdapter } from "../src/adapters";
 const MOCK_ENV = {
   ...env,
   API_KEY: "test-api-key",
@@ -155,8 +155,7 @@ describe("/api/v1/jobs/:jobNumber", () => {
     beforeAll(async () => {
       const db = drizzle(env.DB);
       const dbClient = createJobStoreDBClientAdapter(db);
-      const jobStore = createJobStoreResultBuilder(dbClient);
-      const insertingJob = {
+      const insertingJob = parse(insertJobRequestBodySchema, {
         jobNumber,
         companyName: "Tech Corp",
         jobDescription: "ソフトウェアエンジニアの募集です。",
@@ -166,14 +165,17 @@ describe("/api/v1/jobs/:jobNumber", () => {
         employmentType: "正社員",
         workingStartTime: "09:00",
         workingEndTime: "18:00",
-        receivedDate: "2024-06-01",
-        expiryDate: "2024-12-31",
+        receivedDate: "2024-06-01T12:34:56Z",
+        expiryDate: "2024-12-31T23:59:59Z",
         employeeCount: 200,
         occupation: "IT",
         homePage: "https://techcorp.example.com",
         qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-      };
-      await jobStore.insertJob(insertingJob);
+      });
+      await dbClient.execute({
+        type: "InsertJob",
+        payload: insertingJob,
+      });
     });
     it("jobNumberでデータを取得できる", async () => {
       const request = new Request(
