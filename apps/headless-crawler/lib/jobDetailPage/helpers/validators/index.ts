@@ -26,7 +26,6 @@ import {
   HomePageValidationError,
   JobDescriptionValidationError,
   JobDetailPageValidationError,
-  JobNumberValidationError,
   OccupationValidationError,
   QualificationValidationError,
   ReceivedDateValidationError,
@@ -34,31 +33,7 @@ import {
   WorkingHoursValidationError,
   WorkPlaceValidationError,
 } from "./error";
-import { issueToLogString } from "../../../util";
-
-export function validateJobNumber(val: unknown) {
-  return Effect.gen(function* () {
-    yield* Effect.logDebug(
-      `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
-    );
-    const result = v.safeParse(jobNumberSchema, val);
-    if (!result.success) {
-      yield* Effect.logDebug(
-        `succeeded to validate jobNumber. val=${JSON.stringify(
-          result.output,
-          null,
-          2,
-        )}`,
-      );
-      return yield* Effect.fail(
-        new JobNumberValidationError({
-          message: `parse error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
-        }),
-      );
-    }
-    return yield* Effect.succeed(result.output);
-  });
-}
+import { issueToLogString } from "../../../core/util";
 
 export function validateCompanyName(val: unknown) {
   return Effect.gen(function* () {

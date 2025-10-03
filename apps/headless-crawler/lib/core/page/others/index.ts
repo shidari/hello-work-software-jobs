@@ -1,7 +1,8 @@
-import type { JobListPage, JobOverViewList } from "@sho/models";
+import { jobNumberSchema, type JobListPage, type JobOverViewList } from "@sho/models";
 import { Effect } from "effect";
-import { IsNextPageEnabledError, ListJobsError } from "./error";
-
+import { IsNextPageEnabledError, JobNumberValidationError, ListJobsError } from "./error";
+import * as v from "valibot";
+import { issueToLogString } from "../../util";
 export function listJobOverviewElem(
   jobListPage: JobListPage,
 ): Effect.Effect<JobOverViewList, ListJobsError, never> {
@@ -43,4 +44,28 @@ export function isNextPageEnabled(page: JobListPage) {
       return Effect.logDebug(`is next page enabled: ${enabled}`);
     }),
   );
+}
+
+export function validateJobNumber(val: unknown) {
+  return Effect.gen(function* () {
+    yield* Effect.logDebug(
+      `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
+    );
+    const result = v.safeParse(jobNumberSchema, val);
+    if (!result.success) {
+      yield* Effect.logDebug(
+        `succeeded to validate jobNumber. val=${JSON.stringify(
+          result.output,
+          null,
+          2,
+        )}`,
+      );
+      return yield* Effect.fail(
+        new JobNumberValidationError({
+          message: `parse error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
 }

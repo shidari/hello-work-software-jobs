@@ -1,25 +1,25 @@
 import type { transformedSchema } from "@sho/models";
 import { Context, Data, Effect, Layer } from "effect";
-import type { NewPageError } from "../core/headless-browser/error";
-import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
-import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
-import type { ListJobsError } from "../core/page/JobList/others/error";
-import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
+import type { NewPageError } from "../../core/headless-browser/error";
+import type { JobListPageValidationError } from "../../core/page/JobList/validators/error";
+import type { JobSearchPageValidationError } from "../../core/page/JobSearch/validators/error";
+import type { ListJobsError } from "../../core/page/others/error";
+import type { AssertSingleJobListedError } from "../../core/page/JobList/assertions/error";
 import type {
   HomePageElmNotFoundError,
   QualificationsElmNotFoundError,
-} from "../core/page/JobDetail/checkers/error";
+} from "../helpers/checkers/error";
 import type {
   GoToJobSearchPageError,
   SearchThenGotoFirstJobListPageError,
-} from "../core/page/JobSearch/navigations/error";
-import type { FromJobListToJobDetailPageError } from "../core/page/JobList/navigations/error";
-import type { ExtractTextContentError } from "../core/page/JobDetail/extractors/error";
-import type { JobSearchWithJobNumberFillingError } from "../core/page/JobSearch/form-fillings/error";
+} from "../../core/page/JobSearch/navigations/error";
+import type { FromJobListToJobDetailPageError } from "../../core/page/JobList/navigations/error";
+import type { ExtractTextContentError } from "../helpers/extractors/error";
+import type { JobSearchWithJobNumberFillingError } from "../../core/page/JobSearch/form-fillings/error";
 import type {
   JobDetailPageValidationError,
   JobDetailPropertyValidationError,
-} from "../core/page/JobDetail/validators/error";
+} from "../helpers/validators/error";
 import type { InferOutput } from "valibot";
 import { parseHTML } from "linkedom";
 import {
@@ -28,12 +28,11 @@ import {
   validateExpiryDate,
   validateHomePage,
   validateJobDescription,
-  validateJobNumber,
   validateOccupation,
   validateQualification,
   validateReceivedDate,
   validateWorkPlace,
-} from "../core/page/JobDetail/validators";
+} from "../helpers/validators";
 import {
   toTransformedEmployeeCount,
   toTransformedWage,
@@ -44,6 +43,7 @@ import type {
   WageTransformationError,
   WorkingHoursTransformationError,
 } from "./error";
+import { validateJobNumber } from "../../core/page/others";
 
 export class TransformerConfig extends Context.Tag("Config")<
   TransformerConfig,

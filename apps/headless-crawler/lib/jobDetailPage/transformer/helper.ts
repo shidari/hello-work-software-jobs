@@ -10,7 +10,7 @@ import {
   WageTransformationError,
   WorkingHoursTransformationError,
 } from "./error";
-import { issueToLogString } from "../core/util";
+import { issueToLogString } from "../../core/util";
 
 export const toTransformedWage = (val: unknown) => {
   const result = safeParse(transformedWageSchema, val);

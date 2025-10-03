@@ -4,30 +4,30 @@ import {
   createContext,
   createPage,
   launchBrowser,
-} from "../core/headless-browser";
-import type { NewPageError } from "../core/headless-browser/error";
-import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
-import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
-import type { ListJobsError } from "../core/page/JobList/others/error";
-import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
+} from "../../core/headless-browser";
+import type { NewPageError } from "../../core/headless-browser/error";
+import type { JobListPageValidationError } from "../../core/page/JobList/validators/error";
+import type { JobSearchPageValidationError } from "../../core/page/JobSearch/validators/error";
+import type { ListJobsError } from "../../core/page/others/error";
+import type { AssertSingleJobListedError } from "../../core/page/JobList/assertions/error";
 import type {
   GoToJobSearchPageError,
   SearchThenGotoFirstJobListPageError,
-} from "../core/page/JobSearch/navigations/error";
-import type { FromJobListToJobDetailPageError } from "../core/page/JobList/navigations/error";
-import type { JobSearchWithJobNumberFillingError } from "../core/page/JobSearch/form-fillings/error";
+} from "../../core/page/JobSearch/navigations/error";
+import type { FromJobListToJobDetailPageError } from "../../core/page/JobList/navigations/error";
+import type { JobSearchWithJobNumberFillingError } from "../../core/page/JobSearch/form-fillings/error";
 import {
   goToJobSearchPage,
   searchNoThenGotoSingleJobListPage,
-} from "../core/page/JobSearch/navigations";
-import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
-import { validateJobDetailPage } from "../core/page/JobDetail/validators";
+} from "../../core/page/JobSearch/navigations";
+import { goToSingleJobDetailPage } from "../../core/page/JobList/navigations";
+import { validateJobDetailPage } from "../helpers/validators";
 import type {
   JobDetailPageValidationError,
   JobDetailPropertyValidationError,
-} from "../core/page/JobDetail/validators/error";
-import { validateJobSearchPage } from "../core/page/JobSearch/validators";
-import { validateJobListPage } from "../core/page/JobList/validators";
+} from "../helpers/validators/error";
+import { validateJobSearchPage } from "../../core/page/JobSearch/validators";
+import { validateJobListPage } from "../../core/page/JobList/validators";
 import { format } from "date-fns";
 import type { LaunchOptions } from "playwright";
 import {

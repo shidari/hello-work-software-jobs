@@ -9,32 +9,26 @@ import type { NewPageError } from "../core/headless-browser/error";
 import type { HelloWorkScrapingConfig } from "../config/scraper";
 import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
 import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
-import type { ListJobsError } from "../core/page/JobList/others/error";
+import type { JobNumberValidationError, ListJobsError } from "../core/page/others/error";
 import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
-import type {
-  HomePageElmNotFoundError,
-  QualificationsElmNotFoundError,
-} from "../core/page/JobDetail/checkers/error";
 import type {
   GoToJobSearchPageError,
   SearchThenGotoFirstJobListPageError,
 } from "../core/page/JobSearch/navigations/error";
 import type { FromJobListToJobDetailPageError } from "../core/page/JobList/navigations/error";
-import type { ExtractTextContentError } from "../core/page/JobDetail/extractors/error";
 import type { JobSearchWithJobNumberFillingError } from "../core/page/JobSearch/form-fillings/error";
 import {
   goToJobSearchPage,
   searchNoThenGotoSingleJobListPage,
 } from "../core/page/JobSearch/navigations";
 import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
-import { extractJobInfo } from "../core/page/JobDetail/extractors";
-import { validateJobDetailPage } from "../core/page/JobDetail/validators";
-import type {
-  JobDetailPageValidationError,
-  JobDetailPropertyValidationError,
-} from "../core/page/JobDetail/validators/error";
 import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
+import { validateJobDetailPage } from "../jobDetailPage/helpers/validators";
+import { extractJobInfo } from "../jobDetailPage/helpers/extractors";
+import type { JobDetailPageValidationError, JobDetailPropertyValidationError } from "../jobDetailPage/helpers/validators/error";
+import type { ExtractTextContentError } from "../jobDetailPage/helpers/extractors/error";
+import type { HomePageElmNotFoundError, QualificationsElmNotFoundError } from "../jobDetailPage/helpers/checkers/error";
 
 export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
   HelloWorkScraper,
@@ -47,20 +41,21 @@ export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
       | ScrapeJobDataError
       | NewPageError
       | AssertSingleJobListedError
-      | HomePageElmNotFoundError
-      | QualificationsElmNotFoundError
       | GoToJobSearchPageError
       | SearchThenGotoFirstJobListPageError
       | FromJobListToJobDetailPageError
       | JobSearchPageValidationError
       | JobListPageValidationError
-      | JobDetailPageValidationError
-      | JobDetailPropertyValidationError
-      | ExtractTextContentError
       | JobSearchWithJobNumberFillingError
+      | JobDetailPageValidationError
+      | ExtractTextContentError
+      | JobNumberValidationError
+      | JobDetailPropertyValidationError
+      | HomePageElmNotFoundError
+      | QualificationsElmNotFoundError
     >;
   }
->() {}
+>() { }
 
 export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
   return Layer.effect(
@@ -98,4 +93,4 @@ export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> {}
+}> { }
