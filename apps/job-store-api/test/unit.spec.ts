@@ -145,7 +145,7 @@ describe("/api/v1/jobs", () => {
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);
       expect(response.status).toBe(409);
-    })
+    });
     it("with invalid API key should return 401", async () => {
       const request = new Request("http://localhost:8787/api/v1/jobs", {
         method: "POST",

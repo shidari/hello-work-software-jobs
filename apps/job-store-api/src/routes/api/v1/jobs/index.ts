@@ -415,14 +415,14 @@ app.post(
         }),
       );
       if (!duplicateResult.success) {
-        return err(
-          createUnexpectedError("Failed to check duplication"),
-        );
+        return err(createUnexpectedError("Failed to check duplication"));
       }
       console.log(JSON.stringify(duplicateResult, null, 2));
       if (duplicateResult.job !== null) {
         return err(
-          createInsertJobDuplicationError("Job with the same jobNumber already exists"),
+          createInsertJobDuplicationError(
+            "Job with the same jobNumber already exists",
+          ),
         );
       }
       const jobResult = yield* ResultAsync.fromSafePromise(
