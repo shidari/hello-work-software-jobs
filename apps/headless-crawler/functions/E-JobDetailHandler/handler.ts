@@ -1,16 +1,20 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
-import { extractJobDetailRawHtml } from "../../lib/jobDetailExtractor";
 import { fromEventToFirstRecord } from "../E-T-L-JobDetailHandler/helper";
+import { buildProgram } from "../../lib/E-jobDetail";
+import { ConfigLive, extractorLive } from "../../lib/E-jobDetail/context";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
-  const effect = Effect.gen(function* () {
+  const runnable = Effect.gen(function* () {
     const jobNumber = yield* fromEventToFirstRecord(event);
-
-    const rawHtml = yield* extractJobDetailRawHtml(jobNumber);
+    // ちょっと、名前がよくない、多分、使い方が間違ってるかも
+    const { rawHtml } = yield* buildProgram(jobNumber);
     return rawHtml;
-  });
-  const result = await Effect.runPromiseExit(effect);
+  })
+    .pipe(Effect.provide(extractorLive))
+    .pipe(Effect.provide(ConfigLive))
+    .pipe(Effect.scoped);
+  const result = await Effect.runPromiseExit(runnable);
   if (Exit.isSuccess(result)) {
     console.log("Lambda job succeeded:", result.value);
   } else {
