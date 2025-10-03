@@ -106,6 +106,46 @@ describe("/api/v1/jobs", () => {
     });
   });
   describe("POST 異常系", () => {
+    const jobNumber = "52495-40218";
+    const insertingJob = parse(insertJobRequestBodySchema, {
+      jobNumber,
+      companyName: "Tech Corp",
+      jobDescription: "ソフトウェアエンジニアの募集です。",
+      workPlace: "東京",
+      wageMin: 50000000,
+      wageMax: 80000000,
+      employmentType: "正社員",
+      workingStartTime: "09:00",
+      workingEndTime: "18:00",
+      receivedDate: "2024-06-01T12:34:56Z",
+      expiryDate: "2024-12-31T23:59:59Z",
+      employeeCount: 200,
+      occupation: "IT",
+      homePage: "https://techcorp.example.com",
+      qualifications: " コンピュータサイエンスの学位、3年以上の経験",
+    });
+    beforeAll(async () => {
+      const db = drizzle(env.DB);
+      const dbClient = createJobStoreDBClientAdapter(db);
+      await dbClient.execute({
+        type: "InsertJob",
+        payload: insertingJob,
+      });
+    });
+    it("with duplicate jobNumber insertion failed.", async () => {
+      const request = new Request("http://localhost:8787/api/v1/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "test-api-key",
+        },
+        body: JSON.stringify(insertingJob),
+      });
+      const ctx = createExecutionContext();
+      const response = await worker.fetch(request, MOCK_ENV, ctx);
+      await waitOnExecutionContext(ctx);
+      expect(response.status).toBe(409);
+    })
     it("with invalid API key should return 401", async () => {
       const request = new Request("http://localhost:8787/api/v1/jobs", {
         method: "POST",

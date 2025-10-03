@@ -11,3 +11,18 @@ export const createFetchValidationError = (
   message,
   errorType: "client",
 });
+
+
+export type UnexpectedError ={
+  readonly _tag: "UnexpectedError";
+  readonly message: string;
+  readonly errorType: "server";
+}
+
+export const createUnexpectedError = (
+  message: string,
+): UnexpectedError => ({
+  _tag: "UnexpectedError",
+  message,
+  errorType: "server",
+});

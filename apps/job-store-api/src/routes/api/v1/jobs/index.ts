@@ -1,7 +1,8 @@
 import { vValidator } from "@hono/valibot-validator";
 import {
   type DecodedNextToken,
-  insertJobClientErrorResponseSchema,
+  insertJobGeneralClientErrorResponseSchema,
+  insertJobDuplicationErrorResponseSchema,
   insertJobRequestBodySchema,
   insertJobServerErrorResponseSchema,
   insertJobSuccessResponseSchema,
@@ -39,6 +40,7 @@ import {
   createInsertJobError,
   createJobsCountError,
 } from "../../../../adapters/error";
+import { createUnexpectedError } from "./error";
 
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
@@ -174,11 +176,19 @@ const jobInsertRoute = describeRoute({
         },
       },
     },
+    "409": {
+      description: "duplication error response",
+      content: {
+        "application/json": {
+          schema: resolver(insertJobDuplicationErrorResponseSchema),
+        },
+      },
+    },
     "400": {
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(insertJobClientErrorResponseSchema),
+          schema: resolver(insertJobGeneralClientErrorResponseSchema),
         },
       },
     },
@@ -390,9 +400,10 @@ app.post(
       );
       return c.json({ message: "Invalid request body" }, 400);
     }
-    return c.json(result.output);
   }),
   async (c) => {
+    console.log("in job insert route");
+    // throw new Error("test error");
     const body = c.req.valid("json");
     const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
@@ -405,7 +416,13 @@ app.post(
       );
       if (!duplicateResult.success) {
         return err(
-          createInsertJobDuplicationError("Failed to check duplication"),
+          createUnexpectedError("Failed to check duplication"),
+        );
+      }
+      console.log(JSON.stringify(duplicateResult, null, 2));
+      if (duplicateResult.job !== null) {
+        return err(
+          createInsertJobDuplicationError("Job with the same jobNumber already exists"),
         );
       }
       const jobResult = yield* ResultAsync.fromSafePromise(
@@ -428,7 +445,9 @@ app.post(
           case "InsertJobError":
             return c.json({ message: error.message }, 500);
           case "InsertJobDuplicationError":
-            return c.json({ message: error.message }, 400);
+            return c.json({ message: error.message }, 409);
+          case "UnexpectedError":
+            return c.json({ message: error.message }, 500);
           default: {
             const _exhaustiveCheck: never = error;
             return c.json({ message: "Unknown error occurred" }, 500);
