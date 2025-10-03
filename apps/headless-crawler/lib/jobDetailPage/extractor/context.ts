@@ -76,7 +76,7 @@ export class ExtractorConfig extends Context.Tag("ExtractorConfig")<
   }
 >() {}
 
-export const ConfigLive = Layer.effect(
+export const extractorConfigLive = Layer.effect(
   ExtractorConfig,
   Effect.gen(function* () {
     const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(

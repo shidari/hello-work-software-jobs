@@ -54,7 +54,7 @@ export class TransformerConfig extends Context.Tag("Config")<
   }
 >() {}
 
-export const ConfigLive = Layer.succeed(
+export const transformerConfigLive = Layer.succeed(
   TransformerConfig,
   TransformerConfig.of({
     getConfig: Effect.succeed({
@@ -171,7 +171,7 @@ export const transformerLive = Layer.effect(
   }),
 );
 
-export const mainLive = transformerLive.pipe(Layer.provide(ConfigLive));
+export const mainLive = transformerLive.pipe(Layer.provide(transformerConfigLive));
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;

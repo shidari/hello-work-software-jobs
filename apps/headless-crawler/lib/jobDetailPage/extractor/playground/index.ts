@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { ConfigLive, extractorLive } from "../context";
+import { extractorConfigLive, extractorLive } from "../context";
 import { buildProgram } from "..";
 import type { JobNumber } from "@sho/models";
 
@@ -9,7 +9,7 @@ async function main() {
   // いまいち書き方がわかってない
   const runnable = program
     .pipe(Effect.provide(extractorLive))
-    .pipe(Effect.provide(ConfigLive))
+    .pipe(Effect.provide(extractorConfigLive))
     // これ、使い方わかってない、なんとなく、playwrightのclose処理に必要なRequirementなのかなと
     .pipe(Effect.scoped);
   Effect.runPromise(runnable).then((jobInfo) =>
