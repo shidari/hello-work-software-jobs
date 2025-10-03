@@ -52,7 +52,7 @@ export const initializeJobListWriterAtom = atom<
   [SearchFilter],
   Promise<void>
 >(null, async (_, set, searchFilter) => {
-  const res = await client.api.proxy["job-store"].jobs.$get({
+  const res = await client.api.jobs.$get({
     query: {
       ...searchFilter,
     },
@@ -79,7 +79,7 @@ export const continuousJobOverviewListWriterAtom = atom<
   [string],
   Promise<void>
 >(null, async (_get, set, nextToken) => {
-  const res = await client.api.proxy["job-store"].jobs.continue.$get({
+  const res = await client.api.jobs.continue.$get({
     query: { nextToken },
   });
   const data = await res.json();

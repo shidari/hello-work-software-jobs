@@ -6,7 +6,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     request,
   }) => {
     const res = await request.get(
-      "/api/proxy/job-store/jobs?employeeCountGt=abc",
+      "/api/jobs?employeeCountGt=abc",
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
@@ -17,7 +17,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     request,
   }) => {
     const res = await request.get(
-      "/api/proxy/job-store/jobs?employeeCountLt=xyz",
+      "/api/jobs?employeeCountLt=xyz",
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
@@ -28,7 +28,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     request,
   }) => {
     const res = await request.get(
-      "/api/proxy/job-store/jobs?employeeCountGt=-1",
+      "/api/jobs?employeeCountGt=-1",
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
@@ -39,7 +39,7 @@ test.describe("/api/proxy/job-store/jobs", () => {
     request,
   }) => {
     const res = await request.get(
-      "/api/proxy/job-store/jobs?employeeCountLt=-1",
+      "/api/jobs?employeeCountLt=-1",
     );
     expect(res.status()).toBe(500);
     const json = await res.json();
@@ -47,10 +47,9 @@ test.describe("/api/proxy/job-store/jobs", () => {
   });
 });
 
-// /api/proxy/job-store/jobs/continue GET: nextToken異常系
-test.describe("/api/proxy/job-store/jobs/continue", () => {
+test.describe("/api/jobs/continue", () => {
   test("should return 400 if nextToken is missing", async ({ request }) => {
-    const res = await request.get("/api/proxy/job-store/jobs/continue");
+    const res = await request.get("/api/jobs/continue");
     expect(res.status()).toBe(400);
     const json = await res.json();
     expect(json).toEqual({ message: "Missing nextToken", success: false });
@@ -58,7 +57,7 @@ test.describe("/api/proxy/job-store/jobs/continue", () => {
 
   test("should return 500 if nextToken is invalid", async ({ request }) => {
     const res = await request.get(
-      "/api/proxy/job-store/jobs/continue?nextToken=invalidtoken",
+      "/api/jobs/continue?nextToken=invalidtoken",
     );
     expect([400, 500]).toContain(res.status());
     const json = await res.json();
