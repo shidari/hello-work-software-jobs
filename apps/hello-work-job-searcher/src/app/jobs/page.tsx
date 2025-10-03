@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { Accordion } from "../components/client/Accordion";
-import { JobOverviewList } from "../components/client/JobOverViewList";
+import { HydratedJobOverviewList, JobOverviewList } from "../components/client/JobOverViewList";
 import { JobsSearchfilter } from "../components/client/JobsSearchfilter/index";
 import { JobtotalCount } from "../components/client/JobTotalCount";
 import { jobStoreClientOnServer } from "../store/server";
@@ -27,7 +27,7 @@ export default async function Page() {
           </Accordion>
         </div>
         <div className={styles.listSection}>
-          <JobOverviewList
+          <HydratedJobOverviewList
             initialDataFromServer={{
               jobs: data.jobs,
               nextToken: data.nextToken,

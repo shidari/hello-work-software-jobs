@@ -24,17 +24,7 @@ function NewBadge() {
     </span>
   );
 }
-
-export function JobOverviewList({
-  initialDataFromServer,
-}: {
-  initialDataFromServer: {
-    jobs: JobList;
-    nextToken: string | undefined;
-    totalCount: number;
-  };
-}) {
-  useHydrateAtoms([[jobListAtom, initialDataFromServer]]);
+export function JobOverviewList() {
   const { items, nextToken } = useAtomValue(JobOverviewListAtom);
   const wrappedItems = useJobsWithFavorite(items);
   const fetchNextPage = useSetAtom(continuousJobOverviewListWriterAtom);
@@ -89,7 +79,7 @@ export function JobOverviewList({
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-              3 * 24 * 60 * 60 * 1000;
+            3 * 24 * 60 * 60 * 1000;
           return (
             <div
               key={item.jobNumber}
@@ -130,4 +120,17 @@ export function JobOverviewList({
       </div>
     </div>
   );
+}
+
+export function HydratedJobOverviewList({
+  initialDataFromServer,
+}: {
+  initialDataFromServer: {
+    jobs: JobList;
+    nextToken: string | undefined;
+    totalCount: number;
+  };
+}) {
+  useHydrateAtoms([[jobListAtom, initialDataFromServer]]);
+  return <JobOverviewList />;
 }
