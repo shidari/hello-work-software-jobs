@@ -50,16 +50,51 @@ export type JobStoreCommand =
 // _tagは、実装側から追加してしまった、大変よろしくない
 export type SearchFilter = InferOutput<typeof searchFilterSchema>;
 export interface CommandOutputMap {
-  InsertJob: { success: true, jobNumber: string } | { success: false; reason: "unknown", error: Error, _tag: 'InsertJobFailed' };
-  FindJobByNumber: { success: true, job: Job | null } | { success: false, reason: "unknown", error: Error, _tag: 'FindJobByNumberFailed' };
-  FindJobs: {
-    success: true;
-    jobs: Job[];
-    cursor: Cursor;
-    meta: { totalCount: number; filter: SearchFilter };
-  } | { success: false; reason: "unknown", error: Error, _tag: 'FindJobsFailed' };
-  CheckJobExists: { success: true, exists: boolean } | { success: false, reason: "unknown", error: Error, _tag: 'CheckJobExistsFailed' };
-  CountJobs: { success: true, count: number } | { success: false, reason: "unknown", error: Error, _tag: 'CountJobsFailed' };
+  InsertJob:
+    | { success: true; jobNumber: string }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "InsertJobFailed";
+      };
+  FindJobByNumber:
+    | { success: true; job: Job | null }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FindJobByNumberFailed";
+      };
+  FindJobs:
+    | {
+        success: true;
+        jobs: Job[];
+        cursor: Cursor;
+        meta: { totalCount: number; filter: SearchFilter };
+      }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FindJobsFailed";
+      };
+  CheckJobExists:
+    | { success: true; exists: boolean }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CheckJobExistsFailed";
+      };
+  CountJobs:
+    | { success: true; count: number }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CountJobsFailed";
+      };
 }
 
 // --- typeからoutput型を推論 ---
@@ -67,8 +102,8 @@ export type CommandOutput<T extends JobStoreCommand> = T extends {
   type: infer U;
 }
   ? U extends keyof CommandOutputMap
-  ? CommandOutputMap[U]
-  : never
+    ? CommandOutputMap[U]
+    : never
   : never;
 
 // --- コマンドパターンなDBクライアント ---
@@ -79,8 +114,8 @@ export type JobStoreDBClient = {
 // 🔍 型チェック用ユーティリティ
 export type KeysMustMatch<A, B> = Exclude<keyof A, keyof B> extends never
   ? Exclude<keyof B, keyof A> extends never
-  ? true
-  : ["Extra keys in B:", Exclude<keyof B, keyof A>]
+    ? true
+    : ["Extra keys in B:", Exclude<keyof B, keyof A>]
   : ["Extra keys in A:", Exclude<keyof A, keyof B>];
 
 type JobSelectFromDrizzle = typeof jobs.$inferSelect;

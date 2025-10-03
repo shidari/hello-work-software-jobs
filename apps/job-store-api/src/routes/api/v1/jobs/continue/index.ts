@@ -24,7 +24,10 @@ import {
   createJWTExpiredError,
 } from "./error";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
-import { createFetchJobListError, createJobsCountError } from "../../../../../adapters/error";
+import {
+  createFetchJobListError,
+  createJobsCountError,
+} from "../../../../../adapters/error";
 
 export const jobListContinueRoute = describeRoute({
   responses: {
@@ -109,9 +112,11 @@ app.get(
           cursor: validatedPayload.cursor,
           limit,
           filter: validatedPayload.filter,
-        }
+        },
       };
-      const jobListResult = yield* ResultAsync.fromSafePromise(dbClient.execute(fetchJobListCommand))
+      const jobListResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute(fetchJobListCommand),
+      );
       if (!jobListResult.success) {
         return err(createFetchJobListError("Failed to fetch job list"));
       }
@@ -126,10 +131,12 @@ app.get(
         options: {
           cursor: validatedPayload.cursor,
           filter: validatedPayload.filter,
-        }
-      }
+        },
+      };
 
-      const restJobCountResult = yield* ResultAsync.fromSafePromise(dbClient.execute(countJobsInputCommand))
+      const restJobCountResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute(countJobsInputCommand),
+      );
       if (!restJobCountResult.success) {
         return err(createJobsCountError("Failed to count jobs"));
       }

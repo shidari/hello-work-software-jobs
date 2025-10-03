@@ -34,7 +34,6 @@ it("求人データを挿入できる", async () => {
   const result = await dbClient.execute({
     type: "InsertJob",
     payload: insertingJob,
-
   });
   expect(result.success).toBe(true);
   const result2 = await dbClient.execute({

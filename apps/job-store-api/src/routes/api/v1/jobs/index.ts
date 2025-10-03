@@ -32,7 +32,13 @@ import { envSchema } from "../../../util";
 // continueが予約後っぽいので
 import continueRoute from "./continue";
 import { createJobStoreDBClientAdapter } from "../../../../adapters";
-import { createFetchJobError, createFetchJobListError, createInsertJobDuplicationError, createInsertJobError, createJobsCountError } from "../../../../adapters/error";
+import {
+  createFetchJobError,
+  createFetchJobListError,
+  createInsertJobDuplicationError,
+  createInsertJobError,
+  createJobsCountError,
+} from "../../../../adapters/error";
 
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
@@ -283,22 +289,27 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
         );
       return ok(result.output);
     })();
-    const jobListResult = yield* await ResultAsync.fromSafePromise(dbClient.execute({
-      type: "FindJobs",
-      options: {
-        cursor: {jobId: INITIAL_JOB_ID,receivedDateByISOString: new Date(0).toISOString()}, // 初回は最初から取得
-        limit,
-        filter: {
-          companyName,
-          employeeCountGt,
-          employeeCountLt,
-          jobDescription,
-          jobDescriptionExclude,
-          onlyNotExpired,
-          orderByReceiveDate,
+    const jobListResult = yield* await ResultAsync.fromSafePromise(
+      dbClient.execute({
+        type: "FindJobs",
+        options: {
+          cursor: {
+            jobId: INITIAL_JOB_ID,
+            receivedDateByISOString: new Date(0).toISOString(),
+          }, // 初回は最初から取得
+          limit,
+          filter: {
+            companyName,
+            employeeCountGt,
+            employeeCountLt,
+            jobDescription,
+            jobDescriptionExclude,
+            onlyNotExpired,
+            orderByReceiveDate,
+          },
         },
-      },
-    }));
+      }),
+    );
     if (!jobListResult.success) {
       return err(createFetchJobListError("Failed to fetch job list"));
     }
@@ -308,13 +319,15 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       meta,
     } = jobListResult;
 
-    const restJobCountResult = yield* ResultAsync.fromSafePromise(dbClient.execute({
-      type: "CountJobs",
-      options: {
-        cursor: { jobId, receivedDateByISOString },
-        filter: meta.filter,
-      },
-    }));
+    const restJobCountResult = yield* ResultAsync.fromSafePromise(
+      dbClient.execute({
+        type: "CountJobs",
+        options: {
+          cursor: { jobId, receivedDateByISOString },
+          filter: meta.filter,
+        },
+      }),
+    );
     if (!restJobCountResult.success) {
       return err(createJobsCountError("Failed to count jobs"));
     }
@@ -391,13 +404,16 @@ app.post(
         }),
       );
       if (!duplicateResult.success) {
-        return err(createInsertJobDuplicationError("Failed to check duplication"));
+        return err(
+          createInsertJobDuplicationError("Failed to check duplication"),
+        );
       }
       const jobResult = yield* ResultAsync.fromSafePromise(
         dbClient.execute({
           type: "InsertJob",
           payload: body,
-        }))
+        }),
+      );
       if (!jobResult.success) {
         return err(createInsertJobError("Failed to insert job"));
       }
@@ -434,10 +450,12 @@ app.get(
     const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
     const result = safeTry(async function* () {
-      const jobResult = yield* await ResultAsync.fromSafePromise(dbClient.execute({
-        type: "FindJobByNumber",
-        jobNumber,
-      }));
+      const jobResult = yield* await ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "FindJobByNumber",
+          jobNumber,
+        }),
+      );
       if (!jobResult.success) {
         return err(createFetchJobError("Failed to fetch job"));
       }

@@ -11,7 +11,7 @@ import type {
 import { and, asc, desc, eq, gt, like, lt, not, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
-import { ResultAsync } from "neverthrow"
+import { ResultAsync } from "neverthrow";
 
 type DrizzleD1Client = DrizzleD1Database<Record<string, never>> & {
   $client: D1Database;
@@ -30,10 +30,15 @@ async function handleInsertJob(
   };
   const result = await ResultAsync.fromPromise(
     drizzle.insert(jobs).values(insertingValues).run(),
-    (error) => error instanceof Error ? error : new Error(String(error)),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
   );
   if (result.isErr()) {
-    return { success: false, reason: "unknown", error: result.error, _tag: 'InsertJobFailed' };
+    return {
+      success: false,
+      reason: "unknown",
+      error: result.error,
+      _tag: "InsertJobFailed",
+    };
   }
   return { success: true, jobNumber: cmd.payload.jobNumber };
 }
@@ -48,11 +53,15 @@ async function handleFindJobByNumber(
       .select()
       .from(jobs)
       .where(eq(jobs.jobNumber, cmd.jobNumber))
-      .limit(1)
+      .limit(1);
     return { success: true, job: data.length > 0 ? data[0] : null };
-
   } catch (error) {
-    return { success: false, reason: "unknown", error: error instanceof Error ? error : new Error(String(error)), _tag: 'FindJobByNumberFailed' };
+    return {
+      success: false,
+      reason: "unknown",
+      error: error instanceof Error ? error : new Error(String(error)),
+      _tag: "FindJobByNumberFailed",
+    };
   }
 }
 
@@ -61,7 +70,6 @@ async function handleFindJobs(
   cmd: FindJobsCommand,
 ): Promise<CommandOutput<FindJobsCommand>> {
   try {
-
     const { cursor, limit, filter } = cmd.options;
     const cursorConditions = [];
     console.log({ cursor, filter, limit });
@@ -123,7 +131,7 @@ async function handleFindJobs(
 
     const order =
       filter.orderByReceiveDate === undefined ||
-        filter.orderByReceiveDate === "asc"
+      filter.orderByReceiveDate === "asc"
         ? asc(jobs.receivedDate)
         : desc(jobs.receivedDate);
     const query = drizzle.select().from(jobs).orderBy(order);
@@ -154,7 +162,12 @@ async function handleFindJobs(
       },
     };
   } catch (error) {
-    return { success: false, reason: "unknown", error: error instanceof Error ? error : new Error(String(error)), _tag: 'FindJobsFailed' };
+    return {
+      success: false,
+      reason: "unknown",
+      error: error instanceof Error ? error : new Error(String(error)),
+      _tag: "FindJobsFailed",
+    };
   }
 }
 
@@ -171,8 +184,11 @@ async function handleCheckJobExists(
     return { success: true, exists: rows.length > 0 };
   } catch (error) {
     return {
-      success: false, reason: "unknown", error: error instanceof Error ? error : new Error(String(error)), _tag: 'CheckJobExistsFailed'
-    }
+      success: false,
+      reason: "unknown",
+      error: error instanceof Error ? error : new Error(String(error)),
+      _tag: "CheckJobExistsFailed",
+    };
   }
 }
 
@@ -213,7 +229,12 @@ async function handleCountJobs(
     const resCount = await drizzle.$count(jobs, and(...conditions));
     return { success: true, count: resCount };
   } catch (error) {
-    return { success: false, reason: "unknown", error: error instanceof Error ? error : new Error(String(error)), _tag: 'CountJobsFailed' };
+    return {
+      success: false,
+      reason: "unknown",
+      error: error instanceof Error ? error : new Error(String(error)),
+      _tag: "CountJobsFailed",
+    };
   }
 }
 
