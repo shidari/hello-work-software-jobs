@@ -1,8 +1,11 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
 import { fromEventToFirstRecord } from "../E-T-L-JobDetailHandler/helper";
-import { buildProgram } from "../../lib/E-jobDetail";
-import { ConfigLive, extractorLive } from "../../lib/E-jobDetail/context";
+import { buildProgram } from "../../lib/jobDetailPage/extractor";
+import {
+  ConfigLive,
+  extractorLive,
+} from "../../lib/jobDetailPage/extractor/context";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const runnable = Effect.gen(function* () {

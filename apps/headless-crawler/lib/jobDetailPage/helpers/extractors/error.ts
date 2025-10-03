@@ -50,10 +50,6 @@ export class ExtractQualificationsError extends Data.TaggedError(
   readonly message: string;
 }> {}
 
-export class ExtractJobNumbersError extends Data.TaggedError(
-  "ExtractJobNumbersError",
-)<{ readonly message: string }> {}
-
 export type ExtractTextContentError =
   | ExtractJobInfoError
   | ExtractJobCompanyNameError

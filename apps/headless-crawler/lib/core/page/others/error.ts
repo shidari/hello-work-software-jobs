@@ -7,3 +7,9 @@ export class ListJobsError extends Data.TaggedError("ListJobsError")<{
 export class IsNextPageEnabledError extends Data.TaggedError(
   "IsNextPageEnabledError",
 )<{ readonly message: string }> {}
+
+export class JobNumberValidationError extends Data.TaggedError(
+  "JobNumberValidationError",
+)<{
+  readonly message: string;
+}> {}

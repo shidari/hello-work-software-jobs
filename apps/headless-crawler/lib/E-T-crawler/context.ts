@@ -11,14 +11,14 @@ import type { JobListPageValidationError } from "../core/page/JobList/validators
 import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
 import type {
   IsNextPageEnabledError,
+  JobNumberValidationError,
   ListJobsError,
-} from "../core/page/JobList/others/error";
+} from "../core/page/others/error";
 import type {
   EmploymentLabelToSelectorError,
   EngineeringLabelSelectorError,
   JobSearchCriteriaFillFormError,
 } from "../core/page/JobSearch/form-fillings/error";
-import type { ExtractJobNumbersError } from "../core/page/JobDetail/extractors/error";
 import type {
   GoToJobSearchPageError,
   SearchThenGotoJobListPageError,
@@ -28,15 +28,12 @@ import {
   goToJobSearchPage,
   searchThenGotoJobListPage,
 } from "../core/page/JobSearch/navigations";
-import {
-  isNextPageEnabled,
-  listJobOverviewElem,
-} from "../core/page/JobList/others";
-import { extractJobNumbers } from "../core/page/JobDetail/extractors";
+import { isNextPageEnabled, listJobOverviewElem } from "../core/page/others";
 import { goToNextJobListPage } from "../core/page/JobList/navigations";
-import type { JobNumberValidationError } from "../core/page/JobDetail/validators/error";
 import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
+import { extractJobNumbers } from "../core/page/JobList/extractors";
+import type { ExtractJobNumbersError } from "../core/page/JobList/extractors/error";
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
   {
