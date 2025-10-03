@@ -1,22 +1,22 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
 import { fromEventToFirstRecord } from "./helper";
-import { buildProgram as buildExtractorProgram } from "../../lib/jobDetailPage/extractor";
-import { buildProgram as buildTransformerProgram } from "../../lib/jobDetailPage/transformer/transfomer";
+import { buildProgram as buildExtractorProgram } from "../../lib/jobDetail/extractor";
+import { buildProgram as buildTransformerProgram } from "../../lib/jobDetail/transformer/transfomer";
 // これ、よくない、命名が
-import { buildProgram as runLoaderProgram } from "../../lib/jobDetailPage/loader/loader";
+import { buildProgram as runLoaderProgram } from "../../lib/jobDetail/loader/loader";
 import {
   extractorConfigLive,
   extractorLive,
-} from "../../lib/jobDetailPage/extractor/context";
+} from "../../lib/jobDetail/extractor/context";
 import {
   transformerConfigLive,
   transformerLive,
-} from "../../lib/jobDetailPage/transformer/context";
+} from "../../lib/jobDetail/transformer/context";
 import {
   loaderConfigLive,
   loaderLive,
-} from "../../lib/jobDetailPage/loader/context";
+} from "../../lib/jobDetail/loader/context";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const program = Effect.gen(function* () {
