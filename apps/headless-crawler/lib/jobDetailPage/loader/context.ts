@@ -10,7 +10,10 @@ export class LoaderConfig extends Context.Tag("LoaderConfig")<
   {}
 >() {}
 
-export const configLive = Layer.succeed(LoaderConfig, LoaderConfig.of({}));
+export const loaderConfigLive = Layer.succeed(
+  LoaderConfig,
+  LoaderConfig.of({}),
+);
 export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
   JobDetailLoader,
   {

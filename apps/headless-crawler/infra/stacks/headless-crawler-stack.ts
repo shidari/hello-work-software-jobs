@@ -9,7 +9,6 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
 import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
-import { JobDetailRawHtmlExtractorConstruct } from "../constructs/E-jobDetail";
 import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/E-T-L-jobDetail";
 import { JobNumberExtractAndTransformConstruct } from "../constructs/E-T-JobNumber";
 
@@ -35,15 +34,6 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       new JobDetailExtractThenTransformThenLoadConstruct(
         this,
         "JobDetailExtractThenTransformThenLoad",
-        {
-          playwrightLayer: playwrightLayer.layer,
-        },
-      );
-
-    const jobDetailRawHtmlExtractorConstruct =
-      new JobDetailRawHtmlExtractorConstruct(
-        this,
-        "JobDetailRawHtmlExtractor",
         {
           playwrightLayer: playwrightLayer.layer,
         },
@@ -135,12 +125,6 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         batchSize: 1,
       }),
     );
-    jobDetailRawHtmlExtractorConstruct.extractor.addEventSource(
-      new SqsEventSource(queueForJobDetailRawHtmlExtractor, {
-        batchSize: 1,
-      }),
-    );
-
     rule.addTarget(
       new targets.LambdaFunction(jobNumberExtractorConstruct.extractor),
     );

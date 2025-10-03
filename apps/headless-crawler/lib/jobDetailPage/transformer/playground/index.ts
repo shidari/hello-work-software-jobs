@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { buildProgram } from "../transfomer";
-import { ConfigLive, transformerLive } from "../context";
+import { transformerConfigLive, transformerLive } from "../context";
 
 async function main() {
   const rawHtml = await readFile(
@@ -13,7 +13,7 @@ async function main() {
   // いまいち書き方がわかってない
   const runnable = program
     .pipe(Effect.provide(transformerLive))
-    .pipe(Effect.provide(ConfigLive));
+    .pipe(Effect.provide(transformerConfigLive));
   Effect.runPromise(runnable).then((jobInfo) =>
     console.dir({ ...jobInfo }, { depth: null }),
   );
