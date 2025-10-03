@@ -10,11 +10,11 @@ export function assertSingleJobListed(page: JobListPage) {
       yield* Effect.logDebug(
         `failed to assert single job listed. job count=${jobOverViewList.length}`,
       );
-    return yield* Effect.fail(
-      new AssertSingleJobListedError({
-        message: `job list count should be 1 but ${jobOverViewList.length}`,
-      }),
-    );
+      return yield* Effect.fail(
+        new AssertSingleJobListedError({
+          message: `job list count should be 1 but ${jobOverViewList.length}`,
+        }),
+      );
     }
   });
 }

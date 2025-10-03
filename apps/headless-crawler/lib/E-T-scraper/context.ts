@@ -9,7 +9,10 @@ import type { NewPageError } from "../core/headless-browser/error";
 import type { HelloWorkScrapingConfig } from "../config/scraper";
 import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
 import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
-import type { JobNumberValidationError, ListJobsError } from "../core/page/others/error";
+import type {
+  JobNumberValidationError,
+  ListJobsError,
+} from "../core/page/others/error";
 import type { AssertSingleJobListedError } from "../core/page/JobList/assertions/error";
 import type {
   GoToJobSearchPageError,
@@ -26,9 +29,15 @@ import { validateJobSearchPage } from "../core/page/JobSearch/validators";
 import { validateJobListPage } from "../core/page/JobList/validators";
 import { validateJobDetailPage } from "../jobDetailPage/helpers/validators";
 import { extractJobInfo } from "../jobDetailPage/helpers/extractors";
-import type { JobDetailPageValidationError, JobDetailPropertyValidationError } from "../jobDetailPage/helpers/validators/error";
+import type {
+  JobDetailPageValidationError,
+  JobDetailPropertyValidationError,
+} from "../jobDetailPage/helpers/validators/error";
 import type { ExtractTextContentError } from "../jobDetailPage/helpers/extractors/error";
-import type { HomePageElmNotFoundError, QualificationsElmNotFoundError } from "../jobDetailPage/helpers/checkers/error";
+import type {
+  HomePageElmNotFoundError,
+  QualificationsElmNotFoundError,
+} from "../jobDetailPage/helpers/checkers/error";
 
 export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
   HelloWorkScraper,
@@ -55,7 +64,7 @@ export class HelloWorkScraper extends Context.Tag("HelloWorkScraper")<
       | QualificationsElmNotFoundError
     >;
   }
->() { }
+>() {}
 
 export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
   return Layer.effect(
@@ -93,4 +102,4 @@ export function buildHelloWorkScrapingLayer(config: HelloWorkScrapingConfig) {
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> { }
+}> {}
