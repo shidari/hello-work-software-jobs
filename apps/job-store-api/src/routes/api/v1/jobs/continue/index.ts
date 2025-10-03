@@ -1,7 +1,9 @@
 import { vValidator } from "@hono/valibot-validator";
 import {
+  type CountJobsCommand,
   type DecodedNextToken,
   decodedNextTokenSchema,
+  type FindJobsCommand,
   jobListContinueClientErrorResponseSchema,
   jobListContinueQuerySchema,
   jobListContinueServerErrorSchema,
@@ -14,8 +16,6 @@ import { decode, sign } from "hono/jwt";
 import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
-import { createJobStoreResultBuilder } from "../../../../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../../../../clientImpl/adapter";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
 import {
@@ -23,6 +23,11 @@ import {
   createJWTDecodeError,
   createJWTExpiredError,
 } from "./error";
+import { createJobStoreDBClientAdapter } from "../../../../../adapters";
+import {
+  createFetchJobListError,
+  createJobsCountError,
+} from "../../../../../adapters/error";
 
 export const jobListContinueRoute = describeRoute({
   responses: {
@@ -63,7 +68,6 @@ app.get(
     const { nextToken } = c.req.valid("query");
     const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db); // DrizzleをJobStoreDBClientに変換
-    const jobStore = createJobStoreResultBuilder(dbClient);
 
     const result = safeTry(async function* () {
       const { JWT_SECRET: jwtSecret } = yield* (() => {
@@ -102,26 +106,41 @@ app.get(
       }
       const limit = 20;
       // ジョブリスト取得
-      const jobListResult = yield* await jobStore.fetchJobList({
-        cursor: {
-          jobId: validatedPayload.cursor.jobId,
-          receivedDateByISOString:
-            validatedPayload.cursor.receivedDateByISOString,
+      const fetchJobListCommand: FindJobsCommand = {
+        type: "FindJobs",
+        options: {
+          cursor: validatedPayload.cursor,
+          limit,
+          filter: validatedPayload.filter,
         },
-        limit,
-        filter: validatedPayload.filter,
-      });
-
+      };
+      const jobListResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute(fetchJobListCommand),
+      );
+      if (!jobListResult.success) {
+        return err(createFetchJobListError("Failed to fetch job list"));
+      }
       const {
         jobs,
         cursor: { jobId, receivedDateByISOString },
         meta,
       } = jobListResult;
 
-      const { count: restJobCount } = yield* await jobStore.countJobs({
-        cursor: { jobId, receivedDateByISOString },
-        filter: meta.filter,
-      });
+      const countJobsInputCommand: CountJobsCommand = {
+        type: "CountJobs",
+        options: {
+          cursor: validatedPayload.cursor,
+          filter: validatedPayload.filter,
+        },
+      };
+
+      const restJobCountResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute(countJobsInputCommand),
+      );
+      if (!restJobCountResult.success) {
+        return err(createJobsCountError("Failed to count jobs"));
+      }
+      const { count: restJobCount } = restJobCountResult;
 
       const newNextToken = yield* (() => {
         if (restJobCount <= limit) return okAsync(undefined);

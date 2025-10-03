@@ -22,8 +22,6 @@ import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import { safeParse } from "valibot";
-import { createJobStoreResultBuilder } from "../../../../clientImpl";
-import { createJobStoreDBClientAdapter } from "../../../../clientImpl/adapter";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
@@ -33,6 +31,14 @@ import {
 import { envSchema } from "../../../util";
 // continueが予約後っぽいので
 import continueRoute from "./continue";
+import { createJobStoreDBClientAdapter } from "../../../../adapters";
+import {
+  createFetchJobError,
+  createFetchJobListError,
+  createInsertJobDuplicationError,
+  createInsertJobError,
+  createJobsCountError,
+} from "../../../../adapters/error";
 
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
@@ -241,7 +247,6 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
 
   const db = drizzle(c.env.DB);
   const dbClient = createJobStoreDBClientAdapter(db);
-  const jobStore = createJobStoreResultBuilder(dbClient);
 
   const limit = 20;
 
@@ -284,36 +289,50 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
         );
       return ok(result.output);
     })();
-    const jobListResult = yield* await jobStore.fetchJobList({
-      cursor: {
-        jobId: INITIAL_JOB_ID,
-        receivedDateByISOString:
-          orderByReceiveDate === "desc"
-            ? "9999-12-31T23:59:59.999Z"
-            : "0000-01-01T00:00:00.000Z",
-      },
-      limit,
-      filter: {
-        companyName,
-        employeeCountGt,
-        employeeCountLt,
-        jobDescription,
-        jobDescriptionExclude,
-        onlyNotExpired,
-        orderByReceiveDate,
-      },
-    });
-
+    const jobListResult = yield* await ResultAsync.fromSafePromise(
+      dbClient.execute({
+        type: "FindJobs",
+        options: {
+          cursor: {
+            jobId: INITIAL_JOB_ID,
+            receivedDateByISOString: new Date(0).toISOString(),
+          }, // 初回は最初から取得
+          limit,
+          filter: {
+            companyName,
+            employeeCountGt,
+            employeeCountLt,
+            jobDescription,
+            jobDescriptionExclude,
+            onlyNotExpired,
+            orderByReceiveDate,
+          },
+        },
+      }),
+    );
+    if (!jobListResult.success) {
+      return err(createFetchJobListError("Failed to fetch job list"));
+    }
     const {
       jobs,
       cursor: { jobId, receivedDateByISOString },
       meta,
     } = jobListResult;
 
-    const { count: restJobCount } = yield* await jobStore.countJobs({
-      cursor: { jobId, receivedDateByISOString },
-      filter: meta.filter,
-    });
+    const restJobCountResult = yield* ResultAsync.fromSafePromise(
+      dbClient.execute({
+        type: "CountJobs",
+        options: {
+          cursor: { jobId, receivedDateByISOString },
+          filter: meta.filter,
+        },
+      }),
+    );
+    if (!restJobCountResult.success) {
+      return err(createJobsCountError("Failed to count jobs"));
+    }
+
+    const { count: restJobCount } = restJobCountResult;
 
     const nextToken = yield* (() => {
       if (restJobCount <= limit) return okAsync(undefined);
@@ -377,16 +396,34 @@ app.post(
     const body = c.req.valid("json");
     const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
-    const jobStore = createJobStoreResultBuilder(dbClient);
     const result = await safeTry(async function* () {
-      const job = yield* await jobStore.insertJob(body);
+      const duplicateResult = yield* await ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "FindJobByNumber",
+          jobNumber: body.jobNumber,
+        }),
+      );
+      if (!duplicateResult.success) {
+        return err(
+          createInsertJobDuplicationError("Failed to check duplication"),
+        );
+      }
+      const jobResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "InsertJob",
+          payload: body,
+        }),
+      );
+      if (!jobResult.success) {
+        return err(createInsertJobError("Failed to insert job"));
+      }
+      const job = jobResult;
       return okAsync(job);
     });
     return result.match(
       (job) => c.json(job),
       (error) => {
         console.error(error);
-
         switch (error._tag) {
           case "InsertJobError":
             return c.json({ message: error.message }, 500);
@@ -412,10 +449,17 @@ app.get(
     const { jobNumber } = c.req.valid("param");
     const db = drizzle(c.env.DB);
     const dbClient = createJobStoreDBClientAdapter(db);
-    const jobStore = createJobStoreResultBuilder(dbClient);
-
     const result = safeTry(async function* () {
-      const job = yield* await jobStore.fetchJob(jobNumber);
+      const jobResult = yield* await ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "FindJobByNumber",
+          jobNumber,
+        }),
+      );
+      if (!jobResult.success) {
+        return err(createFetchJobError("Failed to fetch job"));
+      }
+      const job = jobResult.job;
       return okAsync(job);
     });
     return result.match(

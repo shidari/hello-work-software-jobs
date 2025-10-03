@@ -47,17 +47,54 @@ export type JobStoreCommand =
   | CountJobsCommand;
 
 // --- コマンドtypeごとのoutput型マッピング ---
+// _tagは、実装側から追加してしまった、大変よろしくない
 export type SearchFilter = InferOutput<typeof searchFilterSchema>;
 export interface CommandOutputMap {
-  InsertJob: { jobNumber: string };
-  FindJobByNumber: { job: Job | null };
-  FindJobs: {
-    jobs: Job[];
-    cursor: Cursor;
-    meta: { totalCount: number; filter: SearchFilter };
-  };
-  CheckJobExists: { exists: boolean };
-  CountJobs: { count: number };
+  InsertJob:
+    | { success: true; jobNumber: string }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "InsertJobFailed";
+      };
+  FindJobByNumber:
+    | { success: true; job: Job | null }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FindJobByNumberFailed";
+      };
+  FindJobs:
+    | {
+        success: true;
+        jobs: Job[];
+        cursor: Cursor;
+        meta: { totalCount: number; filter: SearchFilter };
+      }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FindJobsFailed";
+      };
+  CheckJobExists:
+    | { success: true; exists: boolean }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CheckJobExistsFailed";
+      };
+  CountJobs:
+    | { success: true; count: number }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CountJobsFailed";
+      };
 }
 
 // --- typeからoutput型を推論 ---
