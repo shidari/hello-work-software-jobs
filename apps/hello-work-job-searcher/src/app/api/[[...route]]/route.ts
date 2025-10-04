@@ -42,6 +42,34 @@ const jobsApp = new Hono().get("/", async (c) => {
   }
 });
 
+const jobApp = new Hono().get("/:jobNumber", async (c) => {
+  try {
+    const { jobNumber } = c.req.param();
+    if (!jobNumber) {
+      return c.json(
+        { message: "Missing jobNumber", success: false },
+        { status: 400 },
+      );
+    }
+    const result = await jobStoreClientOnServer.getJob(jobNumber);
+    return result.match(
+      (validatedData) => {
+        return c.json({ ...validatedData, success: true });
+      },
+      (error) => {
+        console.error("Error fetching job data:", error);
+        return c.json(
+          { message: "internal server error", success: false },
+          { status: 500 },
+        );
+      },
+    );
+  } catch (error) {
+    console.error("Error fetching job data:", error);
+    return c.json({ message: "internal server error", success: false }, 500);
+  }
+});
+
 const jobsContinueApp = new Hono().get("/", async (c) => {
   try {
     const nextToken = c.req.query("nextToken");
@@ -73,7 +101,8 @@ const jobsContinueApp = new Hono().get("/", async (c) => {
 
 const routes = app
   .route("/jobs", jobsApp)
-  .route("/jobs/continue", jobsContinueApp);
+  .route("/jobs/continue", jobsContinueApp)
+  .route("/jobs", jobApp);
 
 export type AppType = typeof routes;
 
