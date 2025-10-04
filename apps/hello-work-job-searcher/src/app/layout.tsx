@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./styles/globals.css";
 import { Provider } from "jotai";
-import { NavHeader } from "./components/NavHeader";
+import { NavHeader } from "./_components/NavHeader";
 import layoutStyles from "./Layout.module.css";
 export const metadata: Metadata = {
   title: "ハローワーク求人情報検索",

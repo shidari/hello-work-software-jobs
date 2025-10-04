@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { jobStoreClientOnServer } from "@/app/store/server";
+import { jobStoreClientOnServer } from "@/app/_store/server";
 const app = new Hono().basePath("/api");
 
 const jobsApp = new Hono().get("/", async (c) => {

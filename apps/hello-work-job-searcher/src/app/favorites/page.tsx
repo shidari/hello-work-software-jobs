@@ -1,4 +1,4 @@
-import { FavoriteJobOverviewList } from "../components/client/JobFavoriteOverviewList";
+import { FavoriteJobOverviewList } from "../_components/client/JobFavoriteOverviewList";
 import styles from "./page.module.css";
 
 export default function Page() {

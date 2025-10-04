@@ -1,6 +1,6 @@
 import { jobFetchSuccessResponseSchema } from "@sho/models";
 import * as v from "valibot";
-import { JobDetail } from "@/app/components/Job";
+import { JobDetail } from "@/app/_components/Job";
 import styles from "./page.module.css";
 
 interface PageProps {
