@@ -20,16 +20,16 @@ export default async function Page() {
   }
   const data = result.value;
   return (
-    <main className={styles.mainSection}>
-      <div className={styles.layoutContainer}>
-        <div className={styles.headerSection}>
+    <div className={styles.mainSection}>
+      <div className={styles.searchLayoutContainer}>
+        <div className={styles.searchLayoutHeaderSection}>
           <h1>求人情報一覧</h1>
           <JobtotalCount initialDataFromServer={data.meta.totalCount} />
           <Accordion title="絞り込み">
             <JobsSearchfilter />
           </Accordion>
         </div>
-        <div className={styles.listSection}>
+        <div className={styles.searchLayoutListSection}>
           <HydratedJobOverviewList
             initialDataFromServer={{
               jobs: data.jobs,
@@ -39,6 +39,6 @@ export default async function Page() {
           />
         </div>
       </div>
-    </main>
+    </div>
   );
 }

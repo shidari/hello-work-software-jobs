@@ -2,7 +2,7 @@
   height: 100%;
 }
 
-.layoutContainer {
+.searchLayoutContainer {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -11,13 +11,13 @@
 
 
 
-.headerSection {
+.searchLayoutHeaderSection {
   min-height: 0;
 }
 
 
 
-.listSection {
+.searchLayoutListSection {
   min-height: 0;
   flex: 1;
 }
