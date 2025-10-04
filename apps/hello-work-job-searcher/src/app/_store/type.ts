@@ -1,4 +1,4 @@
-import type { JobListQuery, jobListSuccessResponseSchema } from "@sho/models";
+import type { jobFetchSuccessResponseSchema, JobListQuery, jobListSuccessResponseSchema } from "@sho/models";
 import type { ResultAsync } from "neverthrow";
 import type { InferOutput } from "valibot";
 /**
@@ -26,6 +26,8 @@ export interface JobStoreClient {
     InferOutput<typeof jobListSuccessResponseSchema>,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
+
+  getJob(jobNumber: string): ResultAsync<InferOutput<typeof jobFetchSuccessResponseSchema>, EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError>;
 }
 
 export type EndpointNotFoundError = {
@@ -38,6 +40,15 @@ export type FetchJobsError = {
   readonly message: string;
 };
 
+export type FetchJobError = {
+  readonly _tag: "FetchJobError";
+  readonly message: string;
+};
+
+export type ValidateJobError = {
+  readonly _tag: "ValidateJobError";
+  readonly message: string;
+};
 export type ParseJsonError = {
   readonly _tag: "ParseJsonError";
   readonly message: string;
@@ -55,6 +66,13 @@ export const createValidateJobsError: (message: string) => ValidateJobsError = (
   message,
 });
 
+export const createValidateJobError: (message: string) => ValidateJobError = (
+  message,
+) => ({
+  _tag: "ValidateJobError",
+  message,
+});
+
 export const createParseJsonError: (message: string) => ParseJsonError = (
   message,
 ) => ({
@@ -66,6 +84,11 @@ export const createFetchJobsError: (message: string) => FetchJobsError = (
   message,
 ) => ({
   _tag: "FetchJobsError",
+  message,
+});
+
+export const createFetchJobError = (message: string): FetchJobError => ({
+  _tag: "FetchJobError",
   message,
 });
 

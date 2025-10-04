@@ -1,4 +1,5 @@
 import {
+  jobFetchSuccessResponseSchema,
   jobListQuerySchema,
   jobListSuccessResponseSchema,
   type JobListQuery,
@@ -7,8 +8,10 @@ import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import {
   createEndPointNotFoundError,
+  createFetchJobError,
   createFetchJobsError,
   createParseJsonError,
+  createValidateJobError,
   createValidateJobsError,
   type JobStoreClient,
 } from "../type";
@@ -146,4 +149,46 @@ export const jobStoreClientOnServer: JobStoreClient = {
       return okAsync(validatedData);
     });
   },
+  getJob(jobNumber: string) {
+    return safeTry(async function* () {
+      const endpoint = yield* (() => {
+        const envEndpoint = process.env.JOB_STORE_ENDPOINT;
+        if (!envEndpoint) {
+          return err(
+            createEndPointNotFoundError("JOB_STORE_ENDPOINT is not defined"),
+          );
+        }
+        return ok(envEndpoint as JobEndPoint);
+      })();
+
+      const url = `${endpoint}/jobs/${jobNumber}`;
+      const response = yield* ResultAsync.fromPromise(fetch(url), (error) =>
+        createFetchJobError(`Failed to fetch job: ${String(error)}`),
+      );
+      const data = yield* ResultAsync.fromPromise(response.json(), (error) =>
+        createParseJsonError(`Failed to parse job response: ${String(error)}`),
+      );
+
+      if (!response.ok) {
+        return err(
+          createFetchJobError(
+            `Failed to fetch job.\nstatus: ${response.status}\nbody: ${JSON.stringify(data, null, 2)}`,
+          ),
+        );
+      }
+
+      const validatedData = yield* (() => {
+        const result = v.safeParse(jobFetchSuccessResponseSchema, data);
+        if (!result.success) {
+          return err(
+            createValidateJobError(
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
+            ),
+          );
+        }
+        return ok(result.output);
+      })();
+      return okAsync(validatedData);
+    });
+  }
 };

@@ -1,4 +1,4 @@
-import type { JobList, SearchFilter, TJobOverview } from "@sho/models";
+import type { JobList, SearchFilter, TJobDetail, TJobOverview } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { atom } from "jotai";
 import { hc } from "hono/client";
@@ -96,6 +96,31 @@ export const continuousJobOverviewListWriterAtom = atom<
         nextToken: newNextToken,
         totalCount: totalCount,
     }));
+});
+
+export const jobAtom = atom<TJobDetail | undefined>();
+export const jobWriterAtom = atom<null, [string], Promise<void>>(null, async (_get, set, jobNumber) => {
+    const res = await client.api.jobs[":jobNumber"].$get({
+        param: { jobNumber },
+    });
+    const data = await res.json();
+    if (!data.success) {
+        throw new Error(data.message);
+    }
+    set(jobAtom, {
+        jobNumber: data.jobNumber,
+        jobTitle: data.occupation,
+        companyName: data.companyName,
+        employmentType: data.employmentType,
+        workPlace: data.workPlace || "不明",
+        employeeCount: data.employeeCount || Number.NaN,
+        receivedDate: data.receivedDate,
+        jobDescription: data.jobDescription || "説明なし",
+        qualifications: data.qualifications || "不明",
+        salary: `${data.wageMin} ~ ${data.wageMax} 円`,
+        workingHours: `${data.workingStartTime} ~ ${data.workingEndTime}`,
+        expiryDate: data.expiryDate,
+    });
 });
 
 export const scrollRestorationByItemIndexAtom = atom(0);
