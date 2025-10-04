@@ -4,7 +4,7 @@ import * as v from "valibot";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
-import { JobOverview } from "@/app/components/Job";
+import { JobOverview } from "@/app/_components/Job";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "../atom";
 import styles from "./index.module.css";
 

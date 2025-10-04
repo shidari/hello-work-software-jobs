@@ -1,13 +1,13 @@
 export const dynamic = "force-dynamic";
 
-import { Accordion } from "../components/client/Accordion";
+import { Accordion } from "../_components/client/Accordion";
 import {
   HydratedJobOverviewList,
   JobOverviewList,
-} from "../components/client/JobOverViewList";
-import { JobsSearchfilter } from "../components/client/JobsSearchfilter/index";
-import { JobtotalCount } from "../components/client/JobTotalCount";
-import { jobStoreClientOnServer } from "../store/server";
+} from "../_components/client/JobOverViewList";
+import { JobsSearchfilter } from "../_components/client/JobsSearchfilter/index";
+import { JobtotalCount } from "../_components/client/JobTotalCount";
+import { jobStoreClientOnServer } from "../_store/server";
 import styles from "./page.module.css";
 
 export default async function Page() {

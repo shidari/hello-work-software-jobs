@@ -6,8 +6,8 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import Link from "next/link";
 import React, { useEffect } from "react";
-import { JobOverview } from "@/app/components/Job";
-import { useJobsWithFavorite } from "@/app/hooks/useJobsWithFavorite.tsx";
+import { JobOverview } from "@/app/_components/Job";
+import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,
