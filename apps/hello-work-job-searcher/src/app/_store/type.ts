@@ -1,4 +1,8 @@
-import type { jobFetchSuccessResponseSchema, JobListQuery, jobListSuccessResponseSchema } from "@sho/models";
+import type {
+  jobFetchSuccessResponseSchema,
+  JobListQuery,
+  jobListSuccessResponseSchema,
+} from "@sho/models";
 import type { ResultAsync } from "neverthrow";
 import type { InferOutput } from "valibot";
 /**
@@ -27,7 +31,12 @@ export interface JobStoreClient {
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
 
-  getJob(jobNumber: string): ResultAsync<InferOutput<typeof jobFetchSuccessResponseSchema>, EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError>;
+  getJob(
+    jobNumber: string,
+  ): ResultAsync<
+    InferOutput<typeof jobFetchSuccessResponseSchema>,
+    EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError
+  >;
 }
 
 export type EndpointNotFoundError = {

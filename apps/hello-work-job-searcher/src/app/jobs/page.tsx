@@ -3,9 +3,7 @@ export const dynamic = "force-dynamic";
 import type { TJobDetail } from "@sho/models";
 import { Accordion } from "../_components/client/Accordion";
 import { HydratedJob } from "../_components/client/HydratedJob";
-import {
-  HydratedJobOverviewList,
-} from "../_components/client/JobOverViewList";
+import { HydratedJobOverviewList } from "../_components/client/JobOverViewList";
 import { JobsSearchfilter } from "../_components/client/JobsSearchfilter/index";
 import { JobtotalCount } from "../_components/client/JobTotalCount";
 import { jobStoreClientOnServer } from "../_store/server";
@@ -33,7 +31,7 @@ export default async function Page() {
     qualifications: data.jobs[0]?.qualifications ?? "",
     employeeCount: data.jobs[0]?.employeeCount ?? Number.NaN,
     receivedDate: data.jobs[0]?.receivedDate ?? "",
-  }
+  };
   return (
     <div className={styles.mainSection}>
       <div className={styles.splitLayoutContainer}>

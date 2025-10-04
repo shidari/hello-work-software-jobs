@@ -190,5 +190,5 @@ export const jobStoreClientOnServer: JobStoreClient = {
       })();
       return okAsync(validatedData);
     });
-  }
+  },
 };
