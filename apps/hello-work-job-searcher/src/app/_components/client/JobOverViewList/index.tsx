@@ -5,7 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React from "react";
 import { JobOverview } from "@/app/_components/Job";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
 import {
@@ -52,17 +52,6 @@ export function JobOverviewList() {
 
   const totalSize = rowVirtualizer.getTotalSize();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: https://tanstack.com/virtual/latest/docs/framework/react/examples/infinite-scroll 一旦この通りに書いた、後で必要に応じて修正する
-  useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
-    if (!lastItem) {
-      return;
-    }
-    if (lastItem.index >= items.length - 5) {
-      nextToken && fetchNextPage(nextToken);
-    }
-  }, [rowVirtualizer.getVirtualItems(), items.length, nextToken]);
-
   return (
     <div ref={parentRef} style={{ height: "100%", overflow: "auto" }}>
       <div
@@ -79,7 +68,8 @@ export function JobOverviewList() {
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-              3 * 24 * 60 * 60 * 1000;
+            3 * 24 * 60 * 60 * 1000;
+          const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
           return (
             <div
               key={item.jobNumber}
@@ -114,6 +104,20 @@ export function JobOverviewList() {
                   <JobFavoriteButton />
                 </div>
               </section>
+              {virtualItem.index === lastItem.index && (
+                <div className={styles.moreJobsButtonWrapper}>
+                  <button
+                    type="button"
+                    className={styles.moreJobsButton}
+                    disabled={!nextToken}
+                    onClick={() => {
+                      nextToken && fetchNextPage(nextToken);
+                    }}
+                  >
+                    求人をもっと見る
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
