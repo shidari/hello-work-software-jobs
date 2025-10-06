@@ -1,0 +1,33 @@
+.mainSection {
+  height: 100%;
+}
+
+.splitLayoutContainer {
+  display: flex;
+  height: 100%;
+}
+
+.jobDetailLayoutContainer {
+  flex: 1;
+}
+
+.searchLayoutContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1.2rem;
+}
+
+
+
+.searchLayoutHeaderSection {
+  min-height: 0;
+}
+
+
+
+.searchLayoutListSection {
+  min-height: 0;
+  flex: 1;
+}
