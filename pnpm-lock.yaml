@@ -26,7 +26,7 @@ importers:
         version: 9.1.7
       lint-staged:
         specifier: ^16.1.0
-        version: 16.2.2
+        version: 16.2.3
       typescript:
         specifier: ^5.8.3
         version: 5.9.2
@@ -3025,8 +3025,8 @@ packages:
       canvas:
         optional: true
 
-  lint-staged@16.2.2:
-    resolution: {integrity: sha512-OFKtBWYJXOonKxj2Vv0thpTaaHE31CJD19/X69ks2BkeV38rhTrS/z68+JYXT43MCf4D2uqtpbOY7kxlvSoq5g==}
+  lint-staged@16.2.3:
+    resolution: {integrity: sha512-1OnJEESB9zZqsp61XHH2fvpS1es3hRCxMplF/AJUDa8Ho8VrscYDIuxGrj3m8KPXbcWZ8fT9XTMUhEQmOVKpKw==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -6326,7 +6326,7 @@ snapshots:
       htmlparser2: 10.0.0
       uhyphen: 0.2.0
 
-  lint-staged@16.2.2:
+  lint-staged@16.2.3:
     dependencies:
       commander: 14.0.1
       listr2: 9.0.4
