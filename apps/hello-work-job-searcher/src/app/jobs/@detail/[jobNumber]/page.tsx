@@ -31,9 +31,6 @@ export default async function Page({ params }: PageProps) {
   return (
     <main className={styles.mainSection}>
       <div className={styles.layoutContainer}>
-        <div className={styles.headerSection}>
-          <h1>求人詳細情報</h1>
-        </div>
         <div className={styles.detailSection}>
           <JobDetail jobDetail={jobDetail} />
         </div>
