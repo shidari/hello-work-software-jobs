@@ -12,7 +12,7 @@ import {
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { decode, sign } from "hono/jwt";
+import { decode, sign, verify } from "hono/jwt";
 import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
@@ -22,6 +22,7 @@ import {
   createDecodeJWTPayloadError,
   createJWTDecodeError,
   createJWTExpiredError,
+  createJWTVerificationError,
 } from "./error";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
 import {
@@ -81,9 +82,11 @@ app.get(
         return ok(result.output);
       })();
       const decodeResult = yield* ResultAsync.fromPromise(
-        Promise.resolve(decode(nextToken)),
+        verify(nextToken, jwtSecret),
         (error) =>
-          createJWTDecodeError(`JWT decoding failed.\n${String(error)}`),
+          createJWTVerificationError(
+            `JWT verification failed.\n${error instanceof Error ? error.message : String(error)}`,
+          ),
       );
 
       const payloadValidation = v.safeParse(
@@ -146,6 +149,9 @@ app.get(
         if (restJobCount <= limit) return okAsync(undefined);
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
+          iss: "sho-hello-work-job-searcher",
+          iat: Date.now(),
+          nbf: Date.now(),
           cursor: { jobId, receivedDateByISOString },
           filter: meta.filter,
         };
@@ -165,7 +171,7 @@ app.get(
         console.error(error);
 
         switch (error._tag) {
-          case "JWTDecodeError":
+          case "JWTVerificationError":
             throw new HTTPException(400, { message: "invalid nextToken" });
           case "JWTSignatureError":
           case "EnvError":

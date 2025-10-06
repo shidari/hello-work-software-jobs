@@ -13,10 +13,22 @@ export type DecodeJWTPayloadError = {
   readonly message: string;
 };
 
+export type JWTVerificationError = {
+  readonly _tag: "JWTVerificationError";
+  readonly message: string;
+};
+
 // エラー型定義
 // エラーファクトリ関数
 export const createJWTDecodeError = (message: string): JWTDecodeError => ({
   _tag: "JWTDecodeError",
+  message,
+});
+
+export const createJWTVerificationError = (
+  message: string,
+): JWTVerificationError => ({
+  _tag: "JWTVerificationError",
   message,
 });
 
