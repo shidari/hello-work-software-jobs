@@ -11,6 +11,9 @@ export const cursorSchema = object({
 });
 
 export const decodedNextTokenSchema = object({
+  iss: string(),
+  iat: number(),
+  nbf: number(),
   exp: number(),
   cursor: cursorSchema,
   filter: searchFilterSchema,

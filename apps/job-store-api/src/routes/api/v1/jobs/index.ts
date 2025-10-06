@@ -348,6 +348,9 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       if (restJobCount <= limit) return okAsync(undefined);
       const validPayload: DecodedNextToken = {
         exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
+        iss: "sho-hello-work-job-searcher",
+        iat: Date.now(),
+        nbf: Date.now(),
         cursor: { jobId, receivedDateByISOString },
         filter: meta.filter,
       };
