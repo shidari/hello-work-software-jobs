@@ -5,7 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import Link from "next/link";
-import React from "react";
+import React, { useTransition } from "react";
 import { JobOverview } from "@/app/_components/Job";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
 import {
@@ -49,6 +49,8 @@ export function JobOverviewList() {
       }
     },
   });
+
+  const [isPending, startTransition] = useTransition();
 
   const totalSize = rowVirtualizer.getTotalSize();
 
@@ -109,12 +111,14 @@ export function JobOverviewList() {
                   <button
                     type="button"
                     className={styles.moreJobsButton}
-                    disabled={!nextToken}
+                    disabled={!nextToken || isPending}
                     onClick={() => {
-                      nextToken && fetchNextPage(nextToken);
+                      startTransition(async () => {
+                        nextToken && (await fetchNextPage(nextToken));
+                      });
                     }}
                   >
-                    求人をもっと見る
+                    {isPending ? "求人を読み込み中" : "求人をもっと見る"}
                   </button>
                 </div>
               )}
