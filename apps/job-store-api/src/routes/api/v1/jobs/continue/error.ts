@@ -25,7 +25,9 @@ export const createJWTDecodeError = (message: string): JWTDecodeError => ({
   message,
 });
 
-export const createJWTVerificationError = (message: string): JWTVerificationError => ({
+export const createJWTVerificationError = (
+  message: string,
+): JWTVerificationError => ({
   _tag: "JWTVerificationError",
   message,
 });

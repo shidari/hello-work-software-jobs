@@ -82,7 +82,12 @@ app.get(
         return ok(result.output);
       })();
       const decodeResult = yield* ResultAsync.fromPromise(
-        verify(nextToken, jwtSecret), (error) => createJWTVerificationError(`JWT verification failed.\n${error instanceof Error ? error.message : String(error)}`));
+        verify(nextToken, jwtSecret),
+        (error) =>
+          createJWTVerificationError(
+            `JWT verification failed.\n${error instanceof Error ? error.message : String(error)}`,
+          ),
+      );
 
       const payloadValidation = v.safeParse(
         decodedNextTokenSchema,
