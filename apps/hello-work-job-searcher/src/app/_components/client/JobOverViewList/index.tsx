@@ -70,7 +70,7 @@ export function JobOverviewList() {
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-            3 * 24 * 60 * 60 * 1000;
+              3 * 24 * 60 * 60 * 1000;
           const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
           return (
             <div
@@ -114,7 +114,7 @@ export function JobOverviewList() {
                     disabled={!nextToken || isPending}
                     onClick={() => {
                       startTransition(async () => {
-                        nextToken && await fetchNextPage(nextToken);
+                        nextToken && (await fetchNextPage(nextToken));
                       });
                     }}
                   >
