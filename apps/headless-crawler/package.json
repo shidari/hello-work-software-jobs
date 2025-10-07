@@ -13,7 +13,7 @@
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@sparticuz/chromium": "^138.0.0",
+    "@sparticuz/chromium": "^140.0.0",
     "@types/aws-lambda": "^8.10.149",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.18.6",
