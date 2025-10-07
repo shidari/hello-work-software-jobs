@@ -50,7 +50,7 @@ importers:
         version: 4.1.0
       dotenv:
         specifier: ^17.0.0
-        version: 17.2.2
+        version: 17.2.3
       effect:
         specifier: ^3.16.5
         version: 3.17.9
@@ -160,7 +160,7 @@ importers:
         version: 1.3.0(valibot@1.1.0(typescript@5.9.2))
       dotenv:
         specifier: ^17.0.0
-        version: 17.2.2
+        version: 17.2.3
       hono:
         specifier: ^4.8.3
         version: 4.9.9
@@ -2606,8 +2606,8 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv@17.2.2:
-    resolution: {integrity: sha512-Sf2LSQP+bOlhKWWyhFsn0UsfdK/kCWRv1iuA2gXAwt3dyNabr6QSj00I2V10pidqz69soatm9ZwZvpQMTIOd5Q==}
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   drizzle-kit@0.31.5:
@@ -6017,7 +6017,7 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv@17.2.2: {}
+  dotenv@17.2.3: {}
 
   drizzle-kit@0.31.5:
     dependencies:
