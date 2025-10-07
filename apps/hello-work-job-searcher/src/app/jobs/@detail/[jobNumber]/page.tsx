@@ -27,7 +27,5 @@ export default async function Page({ params }: PageProps) {
     qualifications: validatedData.qualifications ?? "未記載",
   };
 
-  return (
-    <JobDetail jobDetail={jobDetail} />
-  );
+  return <JobDetail jobDetail={jobDetail} />;
 }

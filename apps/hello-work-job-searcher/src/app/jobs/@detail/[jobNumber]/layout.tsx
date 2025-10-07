@@ -4,9 +4,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className={styles["layout-container"]}>
-      {children}
-    </div>
-  );
+  return <div className={styles["layout-container"]}>{children}</div>;
 }

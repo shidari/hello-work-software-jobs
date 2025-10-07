@@ -18,7 +18,9 @@ export default function RootLayout({
       <body>
         <Provider>
           <div className={layoutStyles.wrapper}>
-            <header className={`${layoutStyles.header} ${layoutStyles["header-title"]} ${layoutStyles["header-title--primary"]}`}>
+            <header
+              className={`${layoutStyles.header} ${layoutStyles["header-title"]} ${layoutStyles["header-title--primary"]}`}
+            >
               <h1>ハローワーク求人情報検索</h1>
               <NavHeader />
             </header>
