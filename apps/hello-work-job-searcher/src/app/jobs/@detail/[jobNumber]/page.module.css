@@ -1,19 +1,6 @@
-.mainSection {
-  height: 100%;
-}
-
-.layoutContainer {
+.layout-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.headerSection {
-  min-height: 0;
-  flex: 1;
-}
-
-.detailSection {
-  min-height: 0;
-  flex: 9;
+  overflow: scroll;
 }

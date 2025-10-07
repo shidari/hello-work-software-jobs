@@ -17,14 +17,12 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <Provider>
-          <div className={layoutStyles.layoutRoot}>
-            <div className={layoutStyles.layoutHeader}>
-              <header className={layoutStyles.layoutTitle}>
-                ハローワーク求人情報検索
-              </header>
+          <div className={layoutStyles.wrapper}>
+            <header className={`${layoutStyles.header} ${layoutStyles["header-title"]} ${layoutStyles["header-title--primary"]}`}>
+              <h1>ハローワーク求人情報検索</h1>
               <NavHeader />
-            </div>
-            <div className={layoutStyles.layoutMain}>{children}</div>
+            </header>
+            <main className={layoutStyles.main}>{children}</main>
           </div>
         </Provider>
       </body>

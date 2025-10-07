@@ -32,15 +32,18 @@ export default async function Page() {
         receivedDate: data.jobs[0]?.receivedDate ?? "",
     };
     return (
-        <>
-            <div className={styles.searchLayoutHeaderSection}>
-                <h1>求人情報一覧</h1>
+        <div className={styles["layout-search"]}>
+            <div className={styles["layout-search-header"]}>
+                <h1 className={`${styles["header-title"]} ${styles['header-title--primary']}`}>
+                    求人情報一覧
+                </h1>
                 <JobtotalCount initialDataFromServer={data.meta.totalCount} />
                 <Accordion title="絞り込み">
                     <JobsSearchfilter />
                 </Accordion>
             </div>
-            <div className={styles.searchLayoutListSection}>
+
+            <div className={styles["layout-search-list"]}>
                 <HydratedJobOverviewList
                     initialDataFromServer={{
                         jobs: data.jobs,
@@ -49,6 +52,7 @@ export default async function Page() {
                     }}
                 />
             </div>
-        </>
+        </div>
+
     );
 }

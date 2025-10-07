@@ -1,4 +1,4 @@
-import styles from "./@search/page.module.css";
+import styles from "./layout.module.css";
 
 export default function JobsLayout({
     search,   // 左ペイン
@@ -8,12 +8,12 @@ export default function JobsLayout({
     detail: React.ReactNode
 }) {
     return (
-        <div className={styles.mainSection}>
-            <div className={styles.splitLayoutContainer}>
-                <div className={styles.searchLayoutContainer}>
+        <div className={styles["layout-container"]}>
+            <div className={styles["layout-split"]}>
+                <div className={styles["layout-column"]}>
                     {search}
                 </div>
-                <div className={styles.jobDetailLayoutContainer}>
+                <div className={styles["layout-column"]}>
                     {detail}
                 </div>
             </div>
