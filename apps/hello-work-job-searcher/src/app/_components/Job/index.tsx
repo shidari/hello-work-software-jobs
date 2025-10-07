@@ -1,5 +1,5 @@
-import { formatDate } from "../util";
-import "./index.css";
+import { formatDate } from "../../util";
+import styles from "./index.module.css";
 import type { TJobDetail, TJobOverview } from "@sho/models";
 
 export function JobOverview({
@@ -44,9 +44,11 @@ export function JobDetail(props: { jobDetail: TJobDetail }) {
     qualifications,
   } = props.jobDetail;
   return (
-    <article className="job-detail">
+    <article className={`${styles["layout-job-detail"]}`}>
       <h2>求人番号: {jobNumber}</h2>
-      <ul>
+      <ul
+        className={`${styles["layout-job-detailList"]} ${styles["layout-job-detailList--primary"]}`}
+      >
         <li data-label="company-name" data-value={companyName}>
           企業名: {companyName}
         </li>

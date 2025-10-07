@@ -1,7 +1,6 @@
 import { jobFetchSuccessResponseSchema } from "@sho/models";
 import * as v from "valibot";
 import { JobDetail } from "@/app/_components/Job";
-import styles from "./page.module.css";
 
 interface PageProps {
   params: Promise<{ jobNumber: string }>;
@@ -28,13 +27,5 @@ export default async function Page({ params }: PageProps) {
     qualifications: validatedData.qualifications ?? "未記載",
   };
 
-  return (
-    <main className={styles.mainSection}>
-      <div className={styles.layoutContainer}>
-        <div className={styles.detailSection}>
-          <JobDetail jobDetail={jobDetail} />
-        </div>
-      </div>
-    </main>
-  );
+  return <JobDetail jobDetail={jobDetail} />;
 }

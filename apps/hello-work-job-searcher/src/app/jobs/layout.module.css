@@ -1,0 +1,27 @@
+/* Layout */
+.layout-container {
+  height: 100%;
+}
+
+.layout-split {
+  display: flex;
+  height: 100%;
+  gap: 1.2rem; /* flex-gap で分割の余白を構造に含める場合 */
+}
+
+.layout-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* search 内部の縦分割 */
+.layout-column-header {
+  min-height: 0;
+}
+
+.layout-column-list {
+  flex: 1;
+  min-height: 0;
+}
