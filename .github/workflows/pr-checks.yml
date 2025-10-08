@@ -25,7 +25,7 @@ jobs:
         run: git config core.hooksPath /dev/null
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@13427813f706a0f6c9b74603b31103c40ab1c35a
         with:
           node-version: '22'
 
