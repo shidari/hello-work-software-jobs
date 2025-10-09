@@ -1,4 +1,4 @@
-import type { JobDetailPage, JobOverViewList, ScrapedJob } from "@sho/models";
+import { transformedEmployeeCountSchema, transformedJSTExpiryDateToISOStrSchema, transformedJSTReceivedDateToISOStrSchema, type JobDetailPage, type JobOverViewList, type ScrapedJob } from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
 import {
@@ -21,12 +21,12 @@ import {
   validateCompanyName,
   validateEmployeeCount,
   validateEmploymentType,
-  validateExpiryDate,
   validateHomePage,
   validateJobDescription,
   validateOccupation,
   validateQualification,
-  validateReceivedDate,
+  validateThenTransformExpiryDate,
+  validateThenTransformReceivedDate,
   validateWage,
   validateWorkingHours,
   validateWorkPlace,
@@ -68,11 +68,11 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-              message: e.message,
-            })
+            message: e.message,
+          })
           : new ExtractJobCompanyNameError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
@@ -80,7 +80,7 @@ function extractCompanyName(page: JobDetailPage) {
     return companyName;
   });
 }
-function extractReceivedDate(page: JobDetailPage) {
+function extractThenTransformReceivedDate(page: JobDetailPage) {
   return Effect.gen(function* () {
     const receivedDateLoc = page.locator("#ID_uktkYmd");
     const rawReceivedDate = yield* Effect.tryPromise({
@@ -101,11 +101,11 @@ function extractReceivedDate(page: JobDetailPage) {
         }),
       );
     yield* Effect.logDebug(`rawReceivedDate=${rawReceivedDate}`);
-    const receivedDate = yield* validateReceivedDate(rawReceivedDate);
+    const receivedDate = yield* validateThenTransformReceivedDate(rawReceivedDate);
     return receivedDate;
   });
 }
-function extractExpiryDate(page: JobDetailPage) {
+function extractThenTransformExpiryDate(page: JobDetailPage) {
   return Effect.gen(function* () {
     const expiryDateLoc = page.locator("#ID_shkiKigenHi");
     const rawExpiryDate = yield* Effect.tryPromise({
@@ -119,7 +119,7 @@ function extractExpiryDate(page: JobDetailPage) {
         }),
     });
     yield* Effect.logDebug(`rawExpiryDate=${rawExpiryDate}`);
-    const expiryDate = yield* validateExpiryDate(rawExpiryDate);
+    const expiryDate = yield* validateThenTransformExpiryDate(rawExpiryDate);
     yield* Effect.logDebug(`expiryDate=${expiryDate}`);
     return expiryDate;
   });
@@ -220,7 +220,7 @@ function extractWorkingHours(page: JobDetailPage) {
   });
 }
 
-function extractEmployeeCount(page: JobDetailPage) {
+function extractThenTransformEmployeeCount(page: JobDetailPage) {
   const employeeCountLoc = page.locator("#ID_jgisKigyoZentai");
   return Effect.gen(function* () {
     const rawEmployeeCount = yield* Effect.tryPromise({
@@ -315,9 +315,9 @@ export function extractJobInfo(
     yield* Effect.logDebug(`jobNumber=${jobNumber}`);
     const companyName = yield* extractCompanyName(page);
     yield* Effect.logDebug(`companyName=${companyName}`);
-    const receivedDate = yield* extractReceivedDate(page);
+    const receivedDate = yield* extractThenTransformReceivedDate(page);
     yield* Effect.logDebug(`receivedDate=${receivedDate}`);
-    const expiryDate = yield* extractExpiryDate(page);
+    const expiryDate = yield* extractThenTransformExpiryDate(page);
     yield* Effect.logDebug(`expiryDate=${expiryDate}`);
     // そもそもURLを公開していないことがある
     const homePage = (yield* homePageElmExists(page))
@@ -332,7 +332,7 @@ export function extractJobInfo(
     yield* Effect.logDebug(`wage=${wage}`);
     const workingHours = yield* extractWorkingHours(page);
     yield* Effect.logDebug(`workingHours=${workingHours}`);
-    const employeeCount = yield* extractEmployeeCount(page);
+    const employeeCount = yield* extractThenTransformEmployeeCount(page);
     yield* Effect.logDebug(`employeeCount=${employeeCount}`);
     const workPlace = yield* extractWorkPlace(page);
     yield* Effect.logDebug(`workPlace=${workPlace}`);
