@@ -26,11 +26,6 @@ export function buildJobStoreClient() {
                 message: `insert job response failed.\n${e instanceof Error ? e.message : String(e)}`,
               }),
           });
-          if (!res.ok) {
-            throw new InsertJobError({
-              message: `insert job failed.\nstatus=${res.status}\nstatusText=${res.statusText}`,
-            });
-          }
           const data = yield* Effect.tryPromise({
             try: () => res.json(),
             catch: (e) =>
@@ -38,6 +33,12 @@ export function buildJobStoreClient() {
                 message: `insert job transforming json failed.\n${e instanceof Error ? e.message : String(e)}`,
               }),
           });
+          if (!res.ok) {
+            throw new InsertJobError({
+              message: `insert job failed.\nstatus=${res.status}\nstatusText=${res.statusText}\nmessage=${JSON.stringify(data, null, 2)}`,
+            });
+          }
+
           yield* Effect.logDebug(
             `response data. ${JSON.stringify(data, null, 2)}`,
           );
