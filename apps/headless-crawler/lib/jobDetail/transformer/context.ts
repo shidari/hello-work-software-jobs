@@ -25,12 +25,10 @@ import { parseHTML } from "linkedom";
 import {
   validateCompanyName,
   validateEmploymentType,
-  validateExpiryDate,
   validateHomePage,
   validateJobDescription,
   validateOccupation,
   validateQualification,
-  validateReceivedDate,
   validateWorkPlace,
 } from "../helpers/validators";
 import {
@@ -44,6 +42,14 @@ import type {
   WorkingHoursTransformationError,
 } from "./error";
 import { validateJobNumber } from "../../core/page/others";
+import {
+  transformExpiryDate,
+  transformReceivedDate,
+} from "../helpers/transformers";
+import type {
+  ExpiryDateTransformationError,
+  ReceivedDateTransformationError,
+} from "../helpers/transformers/error";
 
 export class TransformerConfig extends Context.Tag("Config")<
   TransformerConfig,
@@ -86,7 +92,9 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       | JobSearchWithJobNumberFillingError
       | WageTransformationError
       | WorkingHoursTransformationError
-      | EmployeeCountTransformationError,
+      | EmployeeCountTransformationError
+      | ReceivedDateTransformationError
+      | ExpiryDateTransformationError,
       TransformerConfig
     >;
   }
@@ -113,10 +121,10 @@ export const transformerLive = Layer.effect(
           const companyName = yield* validateCompanyName(rawCompanyName);
           const rawReceivedDate =
             document.querySelector("#ID_uktkYmd")?.textContent;
-          const receivedDate = yield* validateReceivedDate(rawReceivedDate);
+          const receivedDate = yield* transformReceivedDate(rawReceivedDate);
           const rawExpiryDate =
             document.querySelector("#ID_shkiKigenHi")?.textContent;
-          const expiryDate = yield* validateExpiryDate(rawExpiryDate);
+          const expiryDate = yield* transformExpiryDate(rawExpiryDate);
           const rawHomePage = document.querySelector("#ID_hp")?.textContent;
           const homePage = rawHomePage
             ? yield* validateHomePage(rawHomePage)
