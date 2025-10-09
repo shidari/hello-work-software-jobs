@@ -401,7 +401,12 @@ app.post(
       console.log(
         `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
       );
-      return c.json({ message: `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}` }, 400);
+      return c.json(
+        {
+          message: `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
+        },
+        400,
+      );
     }
   }),
   async (c) => {
