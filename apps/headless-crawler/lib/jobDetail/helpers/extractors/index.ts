@@ -68,11 +68,11 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-            message: e.message,
-          })
+              message: e.message,
+            })
           : new ExtractJobCompanyNameError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+              message: `unexpected error.\n${String(e)}`,
+            }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
