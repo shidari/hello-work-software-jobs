@@ -399,9 +399,14 @@ app.post(
   vValidator("json", insertJobRequestBodySchema, (result, c) => {
     if (!result.success) {
       console.log(
-        `Invalid request body: ${JSON.stringify(result.issues, null, 2)}`,
+        `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
       );
-      return c.json({ message: "Invalid request body" }, 400);
+      return c.json(
+        {
+          message: `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
+        },
+        400,
+      );
     }
   }),
   async (c) => {
