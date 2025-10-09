@@ -42,8 +42,14 @@ import type {
   WorkingHoursTransformationError,
 } from "./error";
 import { validateJobNumber } from "../../core/page/others";
-import { transformExpiryDate, transformReceivedDate } from "../helpers/transformers";
-import type { ExpiryDateTransformationError, ReceivedDateTransformationError } from "../helpers/transformers/error";
+import {
+  transformExpiryDate,
+  transformReceivedDate,
+} from "../helpers/transformers";
+import type {
+  ExpiryDateTransformationError,
+  ReceivedDateTransformationError,
+} from "../helpers/transformers/error";
 
 export class TransformerConfig extends Context.Tag("Config")<
   TransformerConfig,
@@ -52,7 +58,7 @@ export class TransformerConfig extends Context.Tag("Config")<
       readonly logDebug: boolean;
     }>;
   }
->() { }
+>() {}
 
 export const transformerConfigLive = Layer.succeed(
   TransformerConfig,
@@ -92,7 +98,7 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       TransformerConfig
     >;
   }
->() { }
+>() {}
 
 export const transformerLive = Layer.effect(
   JobDetailTransformer,
@@ -179,4 +185,4 @@ export const mainLive = transformerLive.pipe(
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> { }
+}> {}
