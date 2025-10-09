@@ -1,7 +1,3 @@
-import {
-  transformedJSTExpiryDateToISOStrSchema,
-  transformedJSTReceivedDateToISOStrSchema,
-} from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
 import {
@@ -9,9 +5,13 @@ import {
   ReceivedDateTransformationError,
 } from "./error";
 import { issueToLogString } from "../../../core/util";
+import {
+  transformedExpiryDateToISOStrSchema,
+  transformedReceivedDateToISOStrSchema,
+} from "@sho/models";
 export function transformReceivedDate(val: unknown) {
   return Effect.gen(function* () {
-    const result = v.safeParse(transformedJSTReceivedDateToISOStrSchema, val);
+    const result = v.safeParse(transformedReceivedDateToISOStrSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
         new ReceivedDateTransformationError({
@@ -30,7 +30,7 @@ export function transformReceivedDate(val: unknown) {
 }
 export function transformExpiryDate(val: unknown) {
   return Effect.gen(function* () {
-    const result = v.safeParse(transformedJSTExpiryDateToISOStrSchema, val);
+    const result = v.safeParse(transformedExpiryDateToISOStrSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
         new ExpiryDateTransformationError({

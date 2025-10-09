@@ -1,5 +1,5 @@
 import { literal, object, string } from "valibot";
-import { transformedSchema } from "../../headless-crawler/transformer";
+import { transformedSchema } from "../../headless-crawler";
 
 export const insertJobRequestBodySchema = transformedSchema;
 

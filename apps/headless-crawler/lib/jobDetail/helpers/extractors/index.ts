@@ -1,4 +1,4 @@
-import type { JobDetailPage, JobOverViewList, ScrapedJob } from "@sho/models";
+import type { extractedJob, JobDetailPage } from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
 import {
@@ -303,7 +303,7 @@ function extractQualifications(page: JobDetailPage) {
 export function extractJobInfo(
   page: JobDetailPage,
 ): Effect.Effect<
-  ScrapedJob,
+  extractedJob,
   | ExtractTextContentError
   | JobDetailPropertyValidationError
   | HomePageElmNotFoundError

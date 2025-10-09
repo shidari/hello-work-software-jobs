@@ -1,6 +1,6 @@
 import type { Locator, Page } from "playwright";
 import type * as v from "valibot";
-import type { jobNumberSchema, ScrapedJobSchema } from "./scraper";
+import type { jobNumberSchema, extractedJobSchema } from "./jobDetail";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 
@@ -13,7 +13,7 @@ export type NewJobOpeningsFilter = "TodayYesterday" | "Within1Week";
 const jobDetailPage = Symbol();
 export type JobDetailPage = Page & { [jobDetailPage]: unknown };
 
-export type ScrapedJob = v.InferOutput<typeof ScrapedJobSchema>;
+export type extractedJob = v.InferOutput<typeof extractedJobSchema>;
 
 const jobSearchPage = Symbol();
 

@@ -1,11 +1,11 @@
 import {
+  type extractedJob,
   type InsertJobRequestBody,
   insertJobSuccessResponseSchema,
   type JobNumber,
-  type ScrapedJob,
   transformedEmployeeCountSchema,
-  transformedJSTExpiryDateToISOStrSchema,
-  transformedJSTReceivedDateToISOStrSchema,
+  transformedExpiryDateToISOStrSchema,
+  transformedReceivedDateToISOStrSchema,
   transformedWageSchema,
   transformedWorkingHoursSchema,
 } from "@sho/models";
@@ -82,7 +82,7 @@ export const fromEventToFirstRecord = ({
   });
 };
 
-export const job2InsertedJob = (job: ScrapedJob) => {
+export const job2InsertedJob = (job: extractedJob) => {
   const {
     jobNumber,
     companyName,
@@ -108,14 +108,14 @@ export const job2InsertedJob = (job: ScrapedJob) => {
     });
     const receivedDate = yield* Effect.try({
       try: () =>
-        v.parse(transformedJSTReceivedDateToISOStrSchema, rawReceivedDate),
+        v.parse(transformedReceivedDateToISOStrSchema, rawReceivedDate),
       catch: (e) =>
         new ParseReceivedDateError({
           message: `parse received date failed.\n${String(e)}`,
         }),
     });
     const expiryDate = yield* Effect.try({
-      try: () => v.parse(transformedJSTExpiryDateToISOStrSchema, rawExpiryDate),
+      try: () => v.parse(transformedExpiryDateToISOStrSchema, rawExpiryDate),
       catch: (e) =>
         new ParseExpiryDateError({
           message: `parse expiry date failed.\n${String(e)}`,
