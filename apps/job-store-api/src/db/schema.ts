@@ -4,7 +4,7 @@ import { nullable, number, object, string } from "valibot";
 export const jobs = sqliteTable("jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   jobNumber: text("jobNumber").notNull().unique(),
-  companyName: text("companyName").notNull(),
+  companyName: text("companyName"),
   receivedDate: text("receivedDate").notNull(),
   expiryDate: text("expiryDate").notNull(),
   homePage: text("homePage"),
@@ -27,7 +27,7 @@ export const jobs = sqliteTable("jobs", {
 export const jobSelectSchema = object({
   id: number(),
   jobNumber: string(),
-  companyName: string(),
+  companyName: nullable(string()),
   receivedDate: string(),
   expiryDate: string(),
   homePage: nullable(string()),

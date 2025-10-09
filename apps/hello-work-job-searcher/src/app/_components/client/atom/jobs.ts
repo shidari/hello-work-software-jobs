@@ -41,7 +41,7 @@ export const JobOverviewListAtom = atom<{
   return {
     items: jobs.map((job) => ({
       jobNumber: job.jobNumber,
-      companyName: job.companyName,
+      companyName: job.companyName || undefined,
       jobTitle: job.occupation,
       employmentType: job.employmentType,
       workPlace: job.workPlace || "不明",
@@ -117,7 +117,7 @@ export const jobWriterAtom = atom<null, [string], Promise<void>>(
     set(jobAtom, {
       jobNumber: data.jobNumber,
       jobTitle: data.occupation,
-      companyName: data.companyName,
+      companyName: data.companyName ?? undefined,
       employmentType: data.employmentType,
       workPlace: data.workPlace || "不明",
       employeeCount: data.employeeCount || Number.NaN,

@@ -19,6 +19,7 @@ export default async function Page({ params }: PageProps) {
   const validatedData = v.parse(jobFetchSuccessResponseSchema, data);
   const jobDetail = {
     ...validatedData,
+    companyName: validatedData.companyName ?? "未記載",
     workingHours: `${validatedData.workingStartTime}〜${validatedData.workingEndTime}`,
     jobTitle: validatedData.occupation,
     salary: `${validatedData.wageMin}円〜${validatedData.wageMax}円`,

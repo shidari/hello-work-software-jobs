@@ -4,7 +4,7 @@ export * from "./type";
 
 export const JobOverviewSchema = v.object({
   jobNumber: v.string(),
-  companyName: v.string(),
+  companyName: v.optional(v.string()),
   workPlace: v.string(),
   jobTitle: v.string(),
   employmentType: v.string(), // 後でもっと型を細かくする
@@ -18,5 +18,5 @@ export const JobDetailSchema = v.object({
   jobDescription: v.string(),
   expiryDate: v.string(),
   workingHours: v.string(),
-  qualifications: v.string(),
+  qualifications: v.optional(v.string()),
 });
