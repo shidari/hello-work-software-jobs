@@ -1,3 +1,2 @@
-export * from "./scraper";
+export * from "./jobDetail";
 export * from "./type";
-export * from "./transformer";

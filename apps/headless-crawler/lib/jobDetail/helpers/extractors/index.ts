@@ -1,4 +1,4 @@
-import type { JobDetailPage, JobOverViewList, ScrapedJob } from "@sho/models";
+import type { extractedJob, JobDetailPage } from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
 import {
@@ -68,11 +68,11 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-              message: e.message,
-            })
+            message: e.message,
+          })
           : new ExtractJobCompanyNameError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
@@ -303,7 +303,7 @@ function extractQualifications(page: JobDetailPage) {
 export function extractJobInfo(
   page: JobDetailPage,
 ): Effect.Effect<
-  ScrapedJob,
+  extractedJob,
   | ExtractTextContentError
   | JobDetailPropertyValidationError
   | HomePageElmNotFoundError
