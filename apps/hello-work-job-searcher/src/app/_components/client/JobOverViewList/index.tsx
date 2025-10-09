@@ -16,6 +16,7 @@ import {
   scrollRestorationByItemListAtom,
 } from "../atom";
 import styles from "./JobOverviewList.module.css";
+import { ClientNavLink } from "../ClientNavLink";
 
 function NewBadge() {
   return (
@@ -70,7 +71,7 @@ export function JobOverviewList() {
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-              3 * 24 * 60 * 60 * 1000;
+            3 * 24 * 60 * 60 * 1000;
           const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
           return (
             <div
@@ -89,9 +90,9 @@ export function JobOverviewList() {
               >
                 {isNew && <NewBadge />}
                 <div className={styles.sectionHeader}>
-                  <Link
-                    href={`/jobs/${item.jobNumber}`}
-                    className={styles.jobLink}
+                  <ClientNavLink
+                    to={`/jobs/${item.jobNumber}`}
+                  // className={styles.jobLink}
                   >
                     <JobOverview
                       jobNumber={item.jobNumber}
@@ -102,7 +103,7 @@ export function JobOverviewList() {
                       employeeCount={item.employeeCount}
                       receivedDate={item.receivedDate}
                     />
-                  </Link>
+                  </ClientNavLink>
                   <JobFavoriteButton />
                 </div>
               </section>
