@@ -5,7 +5,10 @@ export const jobNumberSchema = v.pipe(
   v.regex(/^\d{5}-\d{0,8}$/),
   v.brand("jobNumber"),
 );
-export const companyNameSchema = v.pipe(v.string(), v.brand("companyName"));
+export const companyNameSchema = v.pipe(
+  v.optional(v.string()),
+  v.brand("companyName"),
+);
 
 export const homePageSchema = v.pipe(
   v.string(),
@@ -65,7 +68,7 @@ export const jobDescriptionSchema = v.pipe(
 );
 
 export const qualificationsSchema = v.pipe(
-  v.string(),
+  v.optional(v.string()),
   v.brand("qualifications"),
 );
 
