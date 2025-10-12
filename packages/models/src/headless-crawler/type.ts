@@ -6,7 +6,14 @@ import type {
   transformedSchema,
 } from "./jobDetail";
 import type { eventSchema } from "./jobNumber";
-import type { etCrawlerConfigWithoutBrowserConfigSchema, jobSearchCriteriaSchema, paritalEngineeringLabelSchema, partialEmploymentTypeSchema, partialWorkLocationSchema, searchPeriodSchema } from "./jobNumber/config";
+import type {
+  etCrawlerConfigWithoutBrowserConfigSchema,
+  jobSearchCriteriaSchema,
+  paritalEngineeringLabelSchema,
+  partialEmploymentTypeSchema,
+  partialWorkLocationSchema,
+  searchPeriodSchema,
+} from "./jobNumber/config";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 
@@ -68,12 +75,15 @@ export type EmploymentTypeSelector = string & {
 export type JobNumberEvent = v.InferOutput<typeof eventSchema>;
 
 export type JobSearchCriteria = v.InferOutput<typeof jobSearchCriteriaSchema>;
-export type DirtyWorkLocation = v.InferOutput<typeof partialWorkLocationSchema>
-export type EmploymentType = v.InferOutput<typeof partialEmploymentTypeSchema>
-export type EngineeringLabel = v.InferOutput<typeof paritalEngineeringLabelSchema>;
+export type DirtyWorkLocation = v.InferOutput<typeof partialWorkLocationSchema>;
+export type EmploymentType = v.InferOutput<typeof partialEmploymentTypeSchema>;
+export type EngineeringLabel = v.InferOutput<
+  typeof paritalEngineeringLabelSchema
+>;
 export type SearchPeriod = v.InferOutput<typeof searchPeriodSchema>;
 
-export type etCrawlerConfig = v.InferOutput<typeof etCrawlerConfigWithoutBrowserConfigSchema> & {
+export type etCrawlerConfig = v.InferOutput<
+  typeof etCrawlerConfigWithoutBrowserConfigSchema
+> & {
   browserConfig: Pick<LaunchOptions, "headless" | "executablePath" | "args">;
-}
-
+};

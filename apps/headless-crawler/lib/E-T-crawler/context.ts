@@ -55,7 +55,7 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
       readonly roughMaxCount: number;
     };
   }
->() { }
+>() {}
 
 export const buildExtractorAndTransformerConfigLive = ({
   logDebug,
@@ -82,12 +82,12 @@ export const buildExtractorAndTransformerConfigLive = ({
       const args = chromiumOrNull ? chromiumOrNull.args : [];
       const executablePath = chromiumOrNull
         ? yield* Effect.tryPromise({
-          try: () => chromiumOrNull.executablePath(),
-          catch: (error) =>
-            new GetExecutablePathError({
-              message: `Failed to get chromium executable path: ${String(error)}`,
-            }),
-        })
+            try: () => chromiumOrNull.executablePath(),
+            catch: (error) =>
+              new GetExecutablePathError({
+                message: `Failed to get chromium executable path: ${String(error)}`,
+              }),
+          })
         : undefined;
       return {
         getConfig: {
@@ -130,7 +130,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -201,11 +201,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });
