@@ -1,4 +1,4 @@
-import type { Locator, Page } from "playwright";
+import type { LaunchOptions, Locator, Page } from "playwright";
 import type * as v from "valibot";
 import type {
   jobNumberSchema,
@@ -6,6 +6,14 @@ import type {
   transformedSchema,
 } from "./jobDetail";
 import type { eventSchema } from "./jobNumber";
+import type {
+  etCrawlerConfigWithoutBrowserConfigSchema,
+  jobSearchCriteriaSchema,
+  paritalEngineeringLabelSchema,
+  partialEmploymentTypeSchema,
+  partialWorkLocationSchema,
+  searchPeriodSchema,
+} from "./jobNumber/config";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 
@@ -38,27 +46,6 @@ export type JobListPage =
   | FirstJobListPage
   | (Page & { [jobListPage]: unknown });
 
-export type EmploymentType = "RegularEmployee" | "PartTimeWorker";
-
-export interface DirtyWorkLocation {
-  prefecture: "東京都";
-}
-
-export type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
-
-type DirtyDesiredOccupation = EngineeringLabel;
-export type SearchPeriod = "all" | "today" | "week";
-
-export type JobSearchCriteria = {
-  jobNumber?: JobNumber;
-  workLocation?: DirtyWorkLocation;
-  desiredOccupation?: {
-    occupationSelection?: DirtyDesiredOccupation;
-  };
-  employmentType?: EmploymentType;
-  searchPeriod: SearchPeriod;
-};
-
 export type EngineeringLabelSelector = {
   radioBtn: EngineeringLabelSelectorRadioBtn;
   openerSibling: EngineeringLabelSelectorOpenerSibling;
@@ -86,3 +73,17 @@ export type EmploymentTypeSelector = string & {
 };
 
 export type JobNumberEvent = v.InferOutput<typeof eventSchema>;
+
+export type JobSearchCriteria = v.InferOutput<typeof jobSearchCriteriaSchema>;
+export type DirtyWorkLocation = v.InferOutput<typeof partialWorkLocationSchema>;
+export type EmploymentType = v.InferOutput<typeof partialEmploymentTypeSchema>;
+export type EngineeringLabel = v.InferOutput<
+  typeof paritalEngineeringLabelSchema
+>;
+export type SearchPeriod = v.InferOutput<typeof searchPeriodSchema>;
+
+export type etCrawlerConfig = v.InferOutput<
+  typeof etCrawlerConfigWithoutBrowserConfigSchema
+> & {
+  browserConfig: Pick<LaunchOptions, "headless" | "executablePath" | "args">;
+};

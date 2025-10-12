@@ -103,6 +103,7 @@ export const buildExtractorAndTransformerConfigLive = ({
             desiredOccupation: {
               occupationSelection: "ソフトウェア開発技術者、プログラマー",
             },
+            employmentType: "RegularEmployee",
             searchPeriod: "today",
           },
           roughMaxCount: 400,
