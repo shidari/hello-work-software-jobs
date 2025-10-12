@@ -1,6 +1,6 @@
-import * as v from "valibot"
-import { extendedConfigSchema } from "./extendedConfig"
+import * as v from "valibot";
+import { extendedConfigSchema } from "./extendedConfig";
 
 export const eventSchema = v.object({
-    extendedConfig: v.optional(extendedConfigSchema)
-})
+  extendedConfig: v.optional(extendedConfigSchema),
+});

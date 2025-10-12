@@ -1,6 +1,10 @@
 import type { Locator, Page } from "playwright";
 import type * as v from "valibot";
-import type { jobNumberSchema, extractedJobSchema, transformedSchema } from "./jobDetail";
+import type {
+  jobNumberSchema,
+  extractedJobSchema,
+  transformedSchema,
+} from "./jobDetail";
 import type { eventSchema } from "./jobNumber";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;

@@ -1,5 +1,5 @@
-import * as v from "valibot"
+import * as v from "valibot";
 
 export const extendedConfigSchema = v.object({
-    logDebug: v.boolean(),
-})
+  logDebug: v.boolean(),
+});
