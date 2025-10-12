@@ -34,9 +34,14 @@ import { validateJobListPage } from "../core/page/JobList/validators";
 import { extractJobNumbers } from "../core/page/JobList/extractors";
 import type { ExtractJobNumbersError } from "../core/page/JobList/extractors/error";
 import type { LaunchOptions } from "playwright";
-import { GetExecutablePathError, ImportChromiumError } from "../core/headless-browser/error";
+import {
+  GetExecutablePathError,
+  ImportChromiumError,
+} from "../core/headless-browser/error";
 
-export class ExtractorAndTransformerConfig extends Context.Tag("ExtractorAndTransformerConfig")<
+export class ExtractorAndTransformerConfig extends Context.Tag(
+  "ExtractorAndTransformerConfig",
+)<
   ExtractorAndTransformerConfig,
   {
     readonly getConfig: {
@@ -47,60 +52,64 @@ export class ExtractorAndTransformerConfig extends Context.Tag("ExtractorAndTran
       >;
       readonly nextPageDelayMs: number;
       readonly jobSearchCriteria: JobSearchCriteria;
-      readonly roughMaxCount: number,
-
+      readonly roughMaxCount: number;
     };
   }
->() { }
+>() {}
 
-export const buildExtractorAndTransformerConfigLive = ({ logDebug }: { logDebug: boolean }) => Layer.effect(
-  ExtractorAndTransformerConfig,
-  Effect.gen(function* () {
-    const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
-      "AWS_LAMBDA_FUNCTION_NAME",
-    ).pipe(Config.withDefault(""));
-    const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
-    const chromiumOrNull = yield* Effect.tryPromise({
-      try: () =>
-        isLambda
-          ? import("@sparticuz/chromium").then((mod) => mod.default)
-          : Promise.resolve(null),
-      catch: (error) =>
-        new ImportChromiumError({
-          message: `Failed to import chromium: ${String(error)}`,
-        }),
-    });
-    const args = chromiumOrNull ? chromiumOrNull.args : [];
-    const executablePath = chromiumOrNull
-      ? yield* Effect.tryPromise({
-        try: () => chromiumOrNull.executablePath(),
+export const buildExtractorAndTransformerConfigLive = ({
+  logDebug,
+}: {
+  logDebug: boolean;
+}) =>
+  Layer.effect(
+    ExtractorAndTransformerConfig,
+    Effect.gen(function* () {
+      const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
+        "AWS_LAMBDA_FUNCTION_NAME",
+      ).pipe(Config.withDefault(""));
+      const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
+      const chromiumOrNull = yield* Effect.tryPromise({
+        try: () =>
+          isLambda
+            ? import("@sparticuz/chromium").then((mod) => mod.default)
+            : Promise.resolve(null),
         catch: (error) =>
-          new GetExecutablePathError({
-            message: `Failed to get chromium executable path: ${String(error)}`,
+          new ImportChromiumError({
+            message: `Failed to import chromium: ${String(error)}`,
           }),
-      })
-      : undefined;
-    return {
-      getConfig: {
-        debugLog: logDebug,
-        browserConfig: {
-          headless: false,
-          args,
-          executablePath: executablePath ?? undefined,
-        },
-        nextPageDelayMs: 3000,
-        jobSearchCriteria: {
-          workLocation: { prefecture: "東京都" },
-          desiredOccupation: {
-            occupationSelection: "ソフトウェア開発技術者、プログラマー",
+      });
+      const args = chromiumOrNull ? chromiumOrNull.args : [];
+      const executablePath = chromiumOrNull
+        ? yield* Effect.tryPromise({
+            try: () => chromiumOrNull.executablePath(),
+            catch: (error) =>
+              new GetExecutablePathError({
+                message: `Failed to get chromium executable path: ${String(error)}`,
+              }),
+          })
+        : undefined;
+      return {
+        getConfig: {
+          debugLog: logDebug,
+          browserConfig: {
+            headless: false,
+            args,
+            executablePath: executablePath ?? undefined,
           },
-          searchPeriod: "today",
+          nextPageDelayMs: 3000,
+          jobSearchCriteria: {
+            workLocation: { prefecture: "東京都" },
+            desiredOccupation: {
+              occupationSelection: "ソフトウェア開発技術者、プログラマー",
+            },
+            searchPeriod: "today",
+          },
+          roughMaxCount: 400,
         },
-        roughMaxCount: 400
-      }
-    }
-  }),
-);
+      };
+    }),
+  );
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
   {
@@ -120,7 +129,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -155,9 +164,7 @@ export const crawlerLive = Layer.effect(
           );
           const chunk = yield* Stream.runCollect(stream);
           const jobLinks = Chunk.toArray(chunk);
-          yield* Effect.logInfo(
-            `crawling finished. total: ${jobLinks.length}`,
-          );
+          yield* Effect.logInfo(`crawling finished. total: ${jobLinks.length}`);
           return jobLinks;
         }),
     });
@@ -193,11 +200,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });
