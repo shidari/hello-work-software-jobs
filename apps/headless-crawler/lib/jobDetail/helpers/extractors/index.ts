@@ -22,7 +22,7 @@ import {
   validateEmployeeCount,
   validateEmploymentType,
   validateExpiryDate,
-  validateHomePage,
+  validateRawHomePage,
   validateJobDescription,
   validateOccupation,
   validateQualification,
@@ -31,7 +31,7 @@ import {
   validateWorkingHours,
   validateWorkPlace,
 } from "../validators";
-import type { JobDetailPropertyValidationError } from "../validators/error";
+import type { JobDetailPropertyValidationError, RawHomePageValidationError } from "../validators/error";
 import { homePageElmExists, qualificationsElmExists } from "../checkers";
 import type {
   HomePageElmNotFoundError,
@@ -68,11 +68,11 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-              message: e.message,
-            })
+            message: e.message,
+          })
           : new ExtractJobCompanyNameError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
@@ -138,7 +138,7 @@ function extractHomePage(page: JobDetailPage) {
         }),
     });
     yield* Effect.logDebug(`rawHomePage=${rawHomePage}`);
-    const homePage = yield* validateHomePage(rawHomePage?.trim());
+    const homePage = yield* validateRawHomePage(rawHomePage?.trim());
     yield* Effect.logDebug(`homePage=${homePage}`);
     return homePage;
   });
@@ -308,6 +308,7 @@ export function extractJobInfo(
   | JobDetailPropertyValidationError
   | HomePageElmNotFoundError
   | QualificationsElmNotFoundError
+  | RawHomePageValidationError
 > {
   return Effect.gen(function* () {
     yield* Effect.logDebug("Starting to extract job info from JobDetailPage");

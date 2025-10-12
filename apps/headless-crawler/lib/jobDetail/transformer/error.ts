@@ -11,3 +11,7 @@ export class WorkingHoursTransformationError extends Data.TaggedError(
 export class EmployeeCountTransformationError extends Data.TaggedError(
   "EmployeeCountTransformationError",
 )<{ readonly message: string }> {}
+
+export class HomePageTransformationError extends Data.TaggedError(
+  "HomePageTransformationError",
+)<{ readonly message: string }> {}

@@ -25,7 +25,6 @@ import { parseHTML } from "linkedom";
 import {
   validateCompanyName,
   validateEmploymentType,
-  validateHomePage,
   validateJobDescription,
   validateOccupation,
   validateQualification,
@@ -33,11 +32,13 @@ import {
 } from "../helpers/validators";
 import {
   toTransformedEmployeeCount,
+  toTransformedHomePage,
   toTransformedWage,
   toTransformedWorkingHours,
 } from "./helper";
 import type {
   EmployeeCountTransformationError,
+  HomePageTransformationError,
   WageTransformationError,
   WorkingHoursTransformationError,
 } from "./error";
@@ -58,7 +59,7 @@ export class TransformerConfig extends Context.Tag("Config")<
       readonly logDebug: boolean;
     }>;
   }
->() {}
+>() { }
 
 export const transformerConfigLive = Layer.succeed(
   TransformerConfig,
@@ -94,11 +95,12 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       | WorkingHoursTransformationError
       | EmployeeCountTransformationError
       | ReceivedDateTransformationError
-      | ExpiryDateTransformationError,
+      | ExpiryDateTransformationError
+      | HomePageTransformationError,
       TransformerConfig
     >;
   }
->() {}
+>() { }
 
 export const transformerLive = Layer.effect(
   JobDetailTransformer,
@@ -127,8 +129,8 @@ export const transformerLive = Layer.effect(
           const expiryDate = yield* transformExpiryDate(rawExpiryDate);
           const rawHomePage = document.querySelector("#ID_hp")?.textContent;
           const homePage = rawHomePage
-            ? yield* validateHomePage(rawHomePage)
-            : null;
+            ? yield* toTransformedHomePage(rawHomePage)
+            : undefined;
           const rawOccupation = document.querySelector("#ID_sksu")?.textContent;
           const occupation = yield* validateOccupation(rawOccupation);
           const rawEmplomentType =
@@ -185,4 +187,4 @@ export const mainLive = transformerLive.pipe(
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> {}
+}> { }
