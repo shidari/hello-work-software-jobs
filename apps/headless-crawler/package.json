@@ -7,8 +7,8 @@
   "scripts": {
     "bootstrap": "aws-vault exec cdk-bootstrap-user -- cdk bootstrap  --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess",
     "deploy": "aws-vault exec cdk-deploy -- cdk deploy",
-    "verify:crawler": "ts-node lib/crawler/playground/index.ts",
-    "verify:scraper": "ts-node lib/scraper/playground/index.ts",
+    "verify:e-t-crawler": "ts-node lib/E-T-crawler/playground/index.ts",
+    "verify:job-detail-extractor": "ts-node lib/jobDetail/extractor/playground/index.ts",
     "verify:transform-jobDetail": "ts-node lib/T-jobDetail/playground/index.ts",
     "type-check": "pnpm exec tsc --noEmit"
   },
