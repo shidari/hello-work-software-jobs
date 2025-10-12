@@ -1,6 +1,6 @@
 import type { Locator, Page } from "playwright";
 import type * as v from "valibot";
-import type { jobNumberSchema, extractedJobSchema } from "./jobDetail";
+import type { jobNumberSchema, extractedJobSchema, transformedSchema } from "./jobDetail";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 
@@ -14,6 +14,8 @@ const jobDetailPage = Symbol();
 export type JobDetailPage = Page & { [jobDetailPage]: unknown };
 
 export type extractedJob = v.InferOutput<typeof extractedJobSchema>;
+
+export type TransformedJob = v.InferOutput<typeof transformedSchema>;
 
 const jobSearchPage = Symbol();
 

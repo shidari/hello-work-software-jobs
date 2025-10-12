@@ -10,10 +10,9 @@ export const companyNameSchema = v.pipe(
   v.brand("companyName"),
 );
 
-export const homePageSchema = v.pipe(
+export const rawHomePageSchema = v.pipe(
   v.string(),
-  v.url("home page should be url"),
-  v.brand("homePage"),
+  v.brand("homePage(raw)"),
 );
 export const occupationSchema = v.pipe(
   v.string(),
@@ -82,7 +81,7 @@ export const extractedJobSchema = v.object({
   companyName: companyNameSchema,
   receivedDate: RawReceivedDateShema,
   expiryDate: RawExpiryDateSchema,
-  homePage: v.nullable(homePageSchema),
+  homePage: v.nullable(rawHomePageSchema),
   occupation: occupationSchema,
   employmentType: employmentTypeSchema,
   employeeCount: RawEmployeeCountSchema,

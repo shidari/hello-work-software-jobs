@@ -28,6 +28,7 @@ import type { TtoFirstRecord } from "./type";
 import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
 import type { SQSRecord } from "aws-lambda";
 import { issueToLogString } from "../../lib/core/util";
+import { toTransformedHomePage } from "../../lib/jobDetail/transformer/helper";
 
 const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
   const result = v.safeParse(
@@ -90,7 +91,7 @@ export const job2InsertedJob = (job: extractedJob) => {
     employmentType,
     expiryDate: rawExpiryDate,
     receivedDate: rawReceivedDate,
-    homePage,
+    homePage: rawHomePage,
     wage: rawWage,
     workingHours: rawWorkingHours,
     occupation,
@@ -133,6 +134,7 @@ export const job2InsertedJob = (job: extractedJob) => {
           message: `parse working hours failed.\n${String(e)}`,
         }),
     });
+    const homePage = rawHomePage ? yield* toTransformedHomePage(rawHomePage) : undefined;
     return {
       jobNumber,
       companyName,

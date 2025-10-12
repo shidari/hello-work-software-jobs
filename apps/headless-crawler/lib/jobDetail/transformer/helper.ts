@@ -1,5 +1,6 @@
 import {
   transformedEmployeeCountSchema,
+  transformedHomePageSchema,
   transformedWageSchema,
   transformedWorkingHoursSchema,
 } from "@sho/models";
@@ -7,6 +8,7 @@ import { Effect } from "effect";
 import { safeParse } from "valibot";
 import {
   EmployeeCountTransformationError,
+  HomePageTransformationError,
   WageTransformationError,
   WorkingHoursTransformationError,
 } from "./error";
@@ -47,3 +49,15 @@ export const toTransformedEmployeeCount = (val: unknown) => {
   }
   return Effect.succeed(result.output);
 };
+
+export const toTransformedHomePage = (val: unknown) => {
+  const result = safeParse(transformedHomePageSchema, val)
+  if (!result.success) {
+    return Effect.fail(
+      new HomePageTransformationError({
+        message: `HomePageの変換に失敗しました。detail: ${result.issues.map(issueToLogString).join("\n")}`,
+      }),
+    );
+  }
+  return Effect.succeed(result.output);
+}

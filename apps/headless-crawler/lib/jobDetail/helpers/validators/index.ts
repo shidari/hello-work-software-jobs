@@ -8,11 +8,11 @@ import {
   RawWorkingHoursSchema,
   companyNameSchema,
   employmentTypeSchema,
-  homePageSchema,
   jobDescriptionSchema,
   jobNumberSchema,
   occupationSchema,
   qualificationsSchema,
+  rawHomePageSchema,
   workPlaceSchema,
 } from "@sho/models";
 import { Effect } from "effect";
@@ -23,11 +23,11 @@ import {
   EmployeeCountValidationError,
   EmploymentTypeValidationError,
   ExpiryDateValidationError,
-  HomePageValidationError,
   JobDescriptionValidationError,
   JobDetailPageValidationError,
   OccupationValidationError,
   QualificationValidationError,
+  RawHomePageValidationError,
   ReceivedDateValidationError,
   WageValidationError,
   WorkingHoursValidationError,
@@ -93,12 +93,12 @@ export function validateExpiryDate(val: unknown) {
     return yield* Effect.succeed(result.output);
   });
 }
-export function validateHomePage(val: unknown) {
+export function validateRawHomePage(val: unknown) {
   return Effect.gen(function* () {
-    const result = v.safeParse(homePageSchema, val);
+    const result = v.safeParse(rawHomePageSchema, val);
     if (!result.success) {
       return yield* Effect.fail(
-        new HomePageValidationError({
+        new RawHomePageValidationError({
           message: `parse error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
         }),
       ).pipe(
@@ -149,8 +149,8 @@ export function validateEmploymentType(val: unknown) {
       e instanceof v.ValiError
         ? new EmploymentTypeValidationError({ message: e.message })
         : new EmploymentTypeValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+          message: `unexpected error.\n${String(e)}`,
+        }),
   });
 }
 
@@ -164,11 +164,11 @@ export function validateWage(val: unknown) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new WageValidationError({
-              message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
-            })
+            message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
+          })
           : new WageValidationError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
+            message: `unexpected error.\n${String(e)}`,
+          }),
     }).pipe(
       Effect.tap((wage) => {
         return Effect.logDebug(
@@ -185,11 +185,11 @@ export function validateWorkingHours(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new WorkingHoursValidationError({
-            message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
-          })
+          message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
+        })
         : new WorkingHoursValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+          message: `unexpected error.\n${String(e)}`,
+        }),
   }).pipe(
     Effect.tap((workingHours) => {
       return Effect.logDebug(
@@ -204,11 +204,11 @@ export function validateEmployeeCount(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new EmployeeCountValidationError({
-            message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
-          })
+          message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
+        })
         : new EmployeeCountValidationError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
+          message: `unexpected error.\n${String(e)}`,
+        }),
   }).pipe(
     Effect.tap((employeeCount) => {
       return Effect.logDebug(
@@ -224,11 +224,11 @@ export function validateWorkPlace(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new WorkPlaceValidationError({
-            message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
-          })
+          message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
+        })
         : new WorkPlaceValidationError({
-            message: `unexpected error. \n${String(e)}`,
-          }),
+          message: `unexpected error. \n${String(e)}`,
+        }),
   }).pipe(
     Effect.tap((workPlace) => {
       return Effect.logDebug(
@@ -244,11 +244,11 @@ export function validateJobDescription(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new JobDescriptionValidationError({
-            message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
-          })
+          message: `parse failed. detail: ${e.issues.map(issueToLogString).join("\n")}`,
+        })
         : new JobDescriptionValidationError({
-            message: `unexpected error.\n${String}`,
-          }),
+          message: `unexpected error.\n${String}`,
+        }),
   }).pipe(
     Effect.tap((jobDescription) => {
       return Effect.logDebug(
