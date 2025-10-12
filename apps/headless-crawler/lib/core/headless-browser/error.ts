@@ -9,3 +9,15 @@ export class NewPageError extends Data.TaggedError("NewPageError")<{
 export class NewContextError extends Data.TaggedError("NewContextError")<{
   readonly message: string;
 }> {}
+
+export class ImportChromiumError extends Data.TaggedError(
+  "ImportChromiumError",
+)<{
+  readonly message: string;
+}> {}
+
+export class GetExecutablePathError extends Data.TaggedError(
+  "GetExecutablePathError",
+)<{
+  readonly message: string;
+}> {}

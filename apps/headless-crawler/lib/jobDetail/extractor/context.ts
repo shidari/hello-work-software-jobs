@@ -5,7 +5,11 @@ import {
   createPage,
   launchBrowser,
 } from "../../core/headless-browser";
-import type { NewPageError } from "../../core/headless-browser/error";
+import {
+  GetExecutablePathError,
+  ImportChromiumError,
+  type NewPageError,
+} from "../../core/headless-browser/error";
 import type { JobListPageValidationError } from "../../core/page/JobList/validators/error";
 import type { JobSearchPageValidationError } from "../../core/page/JobSearch/validators/error";
 import type { ListJobsError } from "../../core/page/others/error";
@@ -30,11 +34,7 @@ import { validateJobSearchPage } from "../../core/page/JobSearch/validators";
 import { validateJobListPage } from "../../core/page/JobList/validators";
 import { format } from "date-fns";
 import type { LaunchOptions } from "playwright";
-import {
-  ExtractJobDetailRawHtmlError,
-  GetExecutablePathError,
-  ImportChromiumError,
-} from "./error";
+import { ExtractJobDetailRawHtmlError } from "./error";
 
 const i = Symbol();
 type ISODateString = string & { [i]: never };
