@@ -1,5 +1,5 @@
-import type { JobListPage, JobMetadata, JobSearchCriteria } from "@sho/models";
-import { Chunk, Config, Context, Effect, Layer, Option, Stream } from "effect";
+import type { etCrawlerConfig, JobListPage, JobMetadata, JobSearchCriteria } from "@sho/models";
+import { Chunk, Config, Context, Effect, Layer, Logger, LogLevel, Option, Stream } from "effect";
 import {
   createContext,
   createPage,
@@ -55,62 +55,64 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
       readonly roughMaxCount: number;
     };
   }
->() {}
+>() { }
 
-export const buildExtractorAndTransformerConfigLive = ({
-  logDebug,
-}: {
-  logDebug: boolean;
-}) =>
-  Layer.effect(
-    ExtractorAndTransformerConfig,
-    Effect.gen(function* () {
-      const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
-        "AWS_LAMBDA_FUNCTION_NAME",
-      ).pipe(Config.withDefault(""));
-      const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
-      const chromiumOrNull = yield* Effect.tryPromise({
-        try: () =>
-          isLambda
-            ? import("@sparticuz/chromium").then((mod) => mod.default)
-            : Promise.resolve(null),
+
+export const mergeETCrawlerConfig = (extendedConfig: Partial<etCrawlerConfig> = {}) => {
+  return Effect.gen(function* () {
+    const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
+      "AWS_LAMBDA_FUNCTION_NAME",
+    ).pipe(Config.withDefault(""));
+    const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
+    const chromiumOrNull = yield* Effect.tryPromise({
+      try: () =>
+        isLambda
+          ? import("@sparticuz/chromium").then((mod) => mod.default)
+          : Promise.resolve(null),
+      catch: (error) =>
+        new ImportChromiumError({
+          message: `Failed to import chromium: ${String(error)}`,
+        }),
+    });
+    const args = chromiumOrNull ? chromiumOrNull.args : [];
+    const executablePath = chromiumOrNull
+      ? yield* Effect.tryPromise({
+        try: () => chromiumOrNull.executablePath(),
         catch: (error) =>
-          new ImportChromiumError({
-            message: `Failed to import chromium: ${String(error)}`,
+          new GetExecutablePathError({
+            message: `Failed to get chromium executable path: ${String(error)}`,
           }),
-      });
-      const args = chromiumOrNull ? chromiumOrNull.args : [];
-      const executablePath = chromiumOrNull
-        ? yield* Effect.tryPromise({
-            try: () => chromiumOrNull.executablePath(),
-            catch: (error) =>
-              new GetExecutablePathError({
-                message: `Failed to get chromium executable path: ${String(error)}`,
-              }),
-          })
-        : undefined;
-      return {
-        getConfig: {
-          debugLog: logDebug,
-          browserConfig: {
-            headless: false,
-            args,
-            executablePath: executablePath ?? undefined,
-          },
-          nextPageDelayMs: 3000,
-          jobSearchCriteria: {
-            workLocation: { prefecture: "東京都" },
-            desiredOccupation: {
-              occupationSelection: "ソフトウェア開発技術者、プログラマー",
-            },
-            employmentType: "RegularEmployee",
-            searchPeriod: "today",
-          },
-          roughMaxCount: 400,
+      })
+      : undefined;
+    const config = {
+      debugLog: false,
+      browserConfig: {
+        headless: false,
+        args,
+        executablePath: executablePath ?? undefined,
+      },
+      nextPageDelayMs: 3000,
+      jobSearchCriteria: {
+        workLocation: { prefecture: "東京都" },
+        desiredOccupation: {
+          occupationSelection: "ソフトウェア開発技術者、プログラマー",
         },
-      };
-    }),
+        employmentType: "RegularEmployee",
+        searchPeriod: "today",
+      },
+      roughMaxCount: 400,
+      ...extendedConfig,
+    } as const
+    return config;
+  })
+}
+export const buildExtractorAndTransformerConfigLive = (config: etCrawlerConfig) => {
+  return Layer.effect(
+    ExtractorAndTransformerConfig,
+    Effect.succeed({ getConfig: config }).pipe(Logger.withMinimumLogLevel(config.debugLog ? LogLevel.Debug : LogLevel.Info)),
   );
+
+}
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
   {
@@ -130,7 +132,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() {}
+>() { }
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -201,11 +203,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-            jobListPage: jobListPage,
-            count: tmpTotal,
-            roughMaxCount,
-            nextPageDelayMs, // 後で構造修正する予定
-          })
+          jobListPage: jobListPage,
+          count: tmpTotal,
+          roughMaxCount,
+          nextPageDelayMs, // 後で構造修正する予定
+        })
         : Option.none(),
     ] as const;
   });
