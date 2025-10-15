@@ -1,5 +1,15 @@
 import type { JobListPage, JobMetadata, JobSearchCriteria } from "@sho/models";
-import { Chunk, Config, Context, Effect, Layer, Logger, LogLevel, Option, Stream } from "effect";
+import {
+  Chunk,
+  Config,
+  Context,
+  Effect,
+  Layer,
+  Logger,
+  LogLevel,
+  Option,
+  Stream,
+} from "effect";
 import {
   createContext,
   createPage,
@@ -55,7 +65,7 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
       readonly roughMaxCount: number;
     };
   }
->() { }
+>() {}
 
 const buildExtractorAndTransformerConfigLive = ({
   logDebug,
@@ -82,12 +92,12 @@ const buildExtractorAndTransformerConfigLive = ({
       const args = chromiumOrNull ? chromiumOrNull.args : [];
       const executablePath = chromiumOrNull
         ? yield* Effect.tryPromise({
-          try: () => chromiumOrNull.executablePath(),
-          catch: (error) =>
-            new GetExecutablePathError({
-              message: `Failed to get chromium executable path: ${String(error)}`,
-            }),
-        })
+            try: () => chromiumOrNull.executablePath(),
+            catch: (error) =>
+              new GetExecutablePathError({
+                message: `Failed to get chromium executable path: ${String(error)}`,
+              }),
+          })
         : undefined;
       return {
         getConfig: {
@@ -109,7 +119,9 @@ const buildExtractorAndTransformerConfigLive = ({
           roughMaxCount: 400,
         },
       } as const;
-    }).pipe(Logger.withMinimumLogLevel(logDebug ? LogLevel.Debug : LogLevel.Info)),
+    }).pipe(
+      Logger.withMinimumLogLevel(logDebug ? LogLevel.Debug : LogLevel.Info),
+    ),
   );
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
@@ -130,7 +142,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -206,11 +218,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });
