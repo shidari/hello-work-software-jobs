@@ -13,11 +13,20 @@ export const handler = async (event: unknown) => {
     const QUEUE_URL = yield* Config.string("QUEUE_URL");
     const { extendedConfig } = yield* (() => {
       const result = safeParse(eventSchema, event);
-      if (!result.success) return Effect.fail(new EventSchemaValidationError({ message: `detail: ${result.issues.map(issueToLogString).join(", ")}` }));
+      if (!result.success)
+        return Effect.fail(
+          new EventSchemaValidationError({
+            message: `detail: ${result.issues.map(issueToLogString).join(", ")}`,
+          }),
+        );
       return Effect.succeed(result.output);
-    })()
+    })();
     const runnable = etCrawlerEffect
-      .pipe(Effect.provide(buildMainLive({ logDebug: extendedConfig.debugLog || false })))
+      .pipe(
+        Effect.provide(
+          buildMainLive({ logDebug: extendedConfig.debugLog || false }),
+        ),
+      )
       .pipe(Effect.scoped);
     const jobs = yield* runnable;
     yield* Effect.forEach(jobs, (job) =>

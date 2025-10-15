@@ -22,7 +22,6 @@ export const issueToLogString = (
     | v.BooleanIssue
     | v.LiteralIssue
     | v.UnionIssue<v.LiteralIssue>,
-
 ) => {
   const { received, expected, message } = issue;
   return `received: ${received}\nexpected: ${expected}\nmessage: ${message}`;
