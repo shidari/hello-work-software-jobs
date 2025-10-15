@@ -1,19 +1,13 @@
 import { Effect } from "effect";
 import { etCrawlerEffect } from "..";
 import {
-  buildExtractorAndTransformerConfigLive,
-  crawlerLive,
+  buildMainLive,
 } from "../context";
 
 async function main() {
   const runnable = etCrawlerEffect
-    .pipe(Effect.provide(crawlerLive))
+    .pipe(Effect.provide(buildMainLive({ logDebug: true })))
     .pipe(Effect.scoped)
-    .pipe(
-      Effect.provide(
-        buildExtractorAndTransformerConfigLive({ logDebug: false }),
-      ),
-    );
   Effect.runPromise(runnable).then((jobNumbers) =>
     console.dir({ jobNumbers }, { depth: null }),
   );
