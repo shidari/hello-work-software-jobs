@@ -1,5 +1,15 @@
 import type { JobListPage, JobMetadata, JobSearchCriteria } from "@sho/models";
-import { Chunk, Config, Context, Effect, Layer, Option, Stream } from "effect";
+import {
+  Chunk,
+  Config,
+  Context,
+  Effect,
+  Layer,
+  Logger,
+  LogLevel,
+  Option,
+  Stream,
+} from "effect";
 import {
   createContext,
   createPage,
@@ -108,8 +118,10 @@ const buildExtractorAndTransformerConfigLive = ({
           },
           roughMaxCount: 400,
         },
-      };
-    }),
+      } as const;
+    }).pipe(
+      Logger.withMinimumLogLevel(logDebug ? LogLevel.Debug : LogLevel.Info),
+    ),
   );
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
