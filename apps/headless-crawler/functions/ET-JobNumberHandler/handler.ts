@@ -21,13 +21,11 @@ export const handler = async (event: unknown) => {
       return Effect.succeed(result.output);
     })();
     const runnable = etCrawlerEffect
-      .pipe(
-        Effect.provide(
-          mainLive,
-        ),
-      )
+      .pipe(Effect.provide(mainLive))
       .pipe(Effect.scoped)
-      .pipe(Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info));
+      .pipe(
+        Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
+      );
     const jobs = yield* runnable;
     yield* Effect.forEach(jobs, (job) =>
       sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),

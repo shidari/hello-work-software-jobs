@@ -1,13 +1,5 @@
 import type { etCrawlerConfig, JobListPage, JobMetadata } from "@sho/models";
-import {
-  Chunk,
-  Config,
-  Context,
-  Effect,
-  Layer,
-  Option,
-  Stream,
-} from "effect";
+import { Chunk, Config, Context, Effect, Layer, Option, Stream } from "effect";
 import {
   createContext,
   createPage,
@@ -53,7 +45,7 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
   {
     readonly getConfig: etCrawlerConfig;
   }
->() { }
+>() {}
 
 const extractorAndTransfomerConfigLive = Layer.effect(
   ExtractorAndTransformerConfig,
@@ -75,12 +67,12 @@ const extractorAndTransfomerConfigLive = Layer.effect(
     const args = chromiumOrNull ? chromiumOrNull.args : [];
     const executablePath = chromiumOrNull
       ? yield* Effect.tryPromise({
-        try: () => chromiumOrNull.executablePath(),
-        catch: (error) =>
-          new GetExecutablePathError({
-            message: `Failed to get chromium executable path: ${String(error)}`,
-          }),
-      })
+          try: () => chromiumOrNull.executablePath(),
+          catch: (error) =>
+            new GetExecutablePathError({
+              message: `Failed to get chromium executable path: ${String(error)}`,
+            }),
+        })
       : undefined;
     return {
       getConfig: {
@@ -101,7 +93,7 @@ const extractorAndTransfomerConfigLive = Layer.effect(
         roughMaxCount: 400,
       },
     } as const;
-  })
+  }),
 );
 export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
   HelloWorkCrawler,
@@ -122,7 +114,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() { }
+>() {}
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -197,11 +189,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-          jobListPage: jobListPage,
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs, // 後で構造修正する予定
-        })
+            jobListPage: jobListPage,
+            count: tmpTotal,
+            roughMaxCount,
+            nextPageDelayMs, // 後で構造修正する予定
+          })
         : Option.none(),
     ] as const;
   });
