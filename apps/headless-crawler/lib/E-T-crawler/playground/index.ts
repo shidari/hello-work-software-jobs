@@ -1,11 +1,12 @@
-import { Effect } from "effect";
+import { Effect, Logger, LogLevel } from "effect";
 import { etCrawlerEffect } from "..";
-import { buildMainLive } from "../context";
+import { mainLive } from "../context";
 
 async function main() {
   const runnable = etCrawlerEffect
-    .pipe(Effect.provide(buildMainLive({ logDebug: true })))
-    .pipe(Effect.scoped);
+    .pipe(Effect.provide(mainLive))
+    .pipe(Effect.scoped)
+    .pipe(Logger.withMinimumLogLevel(LogLevel.Debug));
   Effect.runPromise(runnable).then((jobNumbers) =>
     console.dir({ jobNumbers }, { depth: null }),
   );
