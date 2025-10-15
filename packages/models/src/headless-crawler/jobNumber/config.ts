@@ -30,7 +30,6 @@ export const jobSearchCriteriaSchema = v.object({
 
 export const etCrawlerConfigWithoutBrowserConfigSchema = v.object({
   roughMaxCount: v.number(),
-  debugLog: v.boolean(),
   nextPageDelayMs: v.number(),
   jobSearchCriteria: jobSearchCriteriaSchema,
 });

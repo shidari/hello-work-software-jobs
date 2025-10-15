@@ -1,6 +1,5 @@
 import * as v from "valibot";
-import { etCrawlerConfigWithoutBrowserConfigSchema } from "./config";
 
-export const eventSchema = v.object({
-  extendedConfig: v.partial(etCrawlerConfigWithoutBrowserConfigSchema),
-});
+export const eventSchema = v.partial(v.object({
+  debugLog: v.boolean(),
+}));
