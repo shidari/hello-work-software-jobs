@@ -57,7 +57,7 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
   }
 >() {}
 
-export const buildExtractorAndTransformerConfigLive = ({
+const buildExtractorAndTransformerConfigLive = ({
   logDebug,
 }: {
   logDebug: boolean;
@@ -171,6 +171,11 @@ export const crawlerLive = Layer.effect(
     });
   }),
 );
+
+export const buildMainLive = ({ logDebug }: { logDebug: boolean }) =>
+  crawlerLive.pipe(
+    Layer.provide(buildExtractorAndTransformerConfigLive({ logDebug })),
+  );
 
 function fetchJobMetaData({
   jobListPage,
