@@ -8,6 +8,7 @@ import type {
   JobStoreCommand,
   JobStoreDBClient,
 } from "@sho/models";
+import { DateTime } from "luxon";
 import { and, asc, desc, eq, gt, like, lt, not, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
@@ -125,6 +126,23 @@ async function handleFindJobs(
     if (filter.onlyNotExpired) {
       const nowIsoStr = new Date().toISOString();
       filterConditions.push(gt(jobs.expiryDate, nowIsoStr));
+    }
+
+    if (filter.addedSince) {
+      const jstDateStr = filter.addedSince;
+      const start = DateTime.fromISO(jstDateStr, { zone: "Asia/Tokyo" })
+        .startOf("day")
+        .toUTC();
+      const result = start.toISO();
+      result && filterConditions.push(gt(jobs.createdAt, result));
+    }
+    if (filter.addedUntil) {
+      const jstDateStr = filter.addedUntil;
+      const end = DateTime.fromISO(jstDateStr, { zone: "Asia/Tokyo" })
+        .endOf("day")
+        .toUTC();
+      const result = end.toISO();
+      result && filterConditions.push(lt(jobs.createdAt, result));
     }
 
     const conditions = [...cursorConditions, ...filterConditions];

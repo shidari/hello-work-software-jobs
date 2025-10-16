@@ -243,6 +243,8 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     jobDescriptionExclude: encodedJobDescriptionExclude,
     onlyNotExpired,
     orderByReceiveDate,
+    addedSince,
+    addedUntil,
   } = c.req.valid("query");
   const companyName = encodedCompanyName
     ? decodeURIComponent(encodedCompanyName)
@@ -316,6 +318,8 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
             jobDescriptionExclude,
             onlyNotExpired,
             orderByReceiveDate,
+            addedSince,
+            addedUntil,
           },
         },
       }),
