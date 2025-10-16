@@ -2,6 +2,7 @@ import {
   array,
   boolean,
   integer,
+  isoDate,
   literal,
   number,
   object,
@@ -20,6 +21,8 @@ export const searchFilterSchema = object({
   jobDescriptionExclude: optional(string()), // 除外キーワード
   onlyNotExpired: optional(boolean()),
   orderByReceiveDate: optional(union([literal("asc"), literal("desc")])),
+  addedSince: optional(pipe(string(), isoDate())),
+  addedUntil: optional(pipe(string(), isoDate())),
 });
 
 const { id, createdAt, updatedAt, status, ...jobSelectSchemaWithoutSome } =
