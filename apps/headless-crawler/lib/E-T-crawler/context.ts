@@ -90,7 +90,7 @@ const extractorAndTransfomerConfigLive = Layer.effect(
           employmentType: "RegularEmployee",
           searchPeriod: "today",
         },
-        roughMaxCount: 400,
+        roughMaxCount: 800,
       },
     } as const;
   }),
