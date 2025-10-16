@@ -13,6 +13,6 @@ export function ClientNavLink(props: { to: string, children?: React.ReactNode })
       router.push(to);
     });
   }}
-    className={isPending ? styles["nav-link--disabled"] : undefined}
+    className={`${styles["nav-link"]} ${isPending ? styles["nav-link--disabled"] : undefined}`}
   > {children} </a>;
 }

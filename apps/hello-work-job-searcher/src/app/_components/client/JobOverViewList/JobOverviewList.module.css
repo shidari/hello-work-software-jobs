@@ -70,12 +70,6 @@
     margin-left: 0.5rem;
     display: inline-block;
 }
-
-.sectionHeader {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 .jobOverview {
     transition: all 0.2s ease;
     cursor: pointer;

@@ -89,7 +89,6 @@ export function JobOverviewList() {
                 className={`${styles.jobOverview} ${styles.jobOverviewRelative}`}
               >
                 {isNew && <NewBadge />}
-                <div className={styles.sectionHeader}>
                   <ClientNavLink
                     to={`/jobs/${item.jobNumber}`}
                   // className={styles.jobLink}
@@ -105,7 +104,6 @@ export function JobOverviewList() {
                     />
                   </ClientNavLink>
                   <JobFavoriteButton />
-                </div>
               </section>
               {virtualItem.index === lastItem.index && (
                 <div className={styles.moreJobsButtonWrapper}>
