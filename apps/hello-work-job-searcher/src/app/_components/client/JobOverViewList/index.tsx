@@ -71,7 +71,7 @@ export function JobOverviewList() {
           const isNew =
             !!item.receivedDate &&
             Date.now() - new Date(item.receivedDate).getTime() <=
-            3 * 24 * 60 * 60 * 1000;
+              3 * 24 * 60 * 60 * 1000;
           const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
           return (
             <div
@@ -89,21 +89,21 @@ export function JobOverviewList() {
                 className={`${styles.jobOverview} ${styles.jobOverviewRelative}`}
               >
                 {isNew && <NewBadge />}
-                  <ClientNavLink
-                    to={`/jobs/${item.jobNumber}`}
+                <ClientNavLink
+                  to={`/jobs/${item.jobNumber}`}
                   // className={styles.jobLink}
-                  >
-                    <JobOverview
-                      jobNumber={item.jobNumber}
-                      companyName={item.companyName}
-                      jobTitle={item.jobTitle}
-                      employmentType={item.employmentType}
-                      workPlace={item.workPlace}
-                      employeeCount={item.employeeCount}
-                      receivedDate={item.receivedDate}
-                    />
-                  </ClientNavLink>
-                  <JobFavoriteButton />
+                >
+                  <JobOverview
+                    jobNumber={item.jobNumber}
+                    companyName={item.companyName}
+                    jobTitle={item.jobTitle}
+                    employmentType={item.employmentType}
+                    workPlace={item.workPlace}
+                    employeeCount={item.employeeCount}
+                    receivedDate={item.receivedDate}
+                  />
+                </ClientNavLink>
+                <JobFavoriteButton />
               </section>
               {virtualItem.index === lastItem.index && (
                 <div className={styles.moreJobsButtonWrapper}>
