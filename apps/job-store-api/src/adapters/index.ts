@@ -72,84 +72,52 @@ async function handleFindJobs(
 ): Promise<CommandOutput<FindJobsCommand>> {
   try {
     const { cursor, limit, filter } = cmd.options;
-    const cursorConditions = [];
-    console.log({ cursor, filter, limit });
-    if (cursor) {
-      if (
-        filter.orderByReceiveDate === undefined ||
+    const cursorConditions = cursor ? [
+      filter.orderByReceiveDate === undefined ||
         filter.orderByReceiveDate === "asc"
-      ) {
-        cursorConditions.push(
-          or(
-            gt(jobs.receivedDate, cursor.receivedDateByISOString),
-            and(
-              eq(jobs.receivedDate, cursor.receivedDateByISOString),
-              gt(jobs.id, cursor.jobId),
-            ),
+        ? or(
+          gt(jobs.receivedDate, cursor.receivedDateByISOString),
+          and(
+            eq(jobs.receivedDate, cursor.receivedDateByISOString),
+            gt(jobs.id, cursor.jobId),
           ),
-        );
-      } else {
-        cursorConditions.push(
-          or(
-            lt(jobs.receivedDate, cursor.receivedDateByISOString),
-            and(
-              eq(jobs.receivedDate, cursor.receivedDateByISOString),
-              lt(jobs.id, cursor.jobId),
-            ),
+        )
+        : or(
+          lt(jobs.receivedDate, cursor.receivedDateByISOString),
+          and(
+            eq(jobs.receivedDate, cursor.receivedDateByISOString),
+            lt(jobs.id, cursor.jobId),
           ),
-        );
-      }
-    }
-    const filterConditions = [];
-    if (filter.companyName) {
-      filterConditions.push(like(jobs.companyName, `%${filter.companyName}%`));
-    }
-    if (filter.employeeCountGt !== undefined) {
-      filterConditions.push(gt(jobs.employeeCount, filter.employeeCountGt));
-    }
-    if (filter.employeeCountLt !== undefined) {
-      filterConditions.push(lt(jobs.employeeCount, filter.employeeCountLt));
-    }
-
-    if (filter.jobDescription !== undefined) {
-      filterConditions.push(
-        like(jobs.jobDescription, `%${filter.jobDescription}%`),
-      );
-    }
-
-    if (filter.jobDescriptionExclude !== undefined) {
-      filterConditions.push(
-        not(like(jobs.jobDescription, `%${filter.jobDescriptionExclude}%`)),
-      );
-    }
-
-    if (filter.onlyNotExpired) {
-      const nowIsoStr = new Date().toISOString();
-      filterConditions.push(gt(jobs.expiryDate, nowIsoStr));
-    }
-
-    if (filter.addedSince) {
-      const jstDateStr = filter.addedSince;
-      const start = DateTime.fromISO(jstDateStr, { zone: "Asia/Tokyo" })
-        .startOf("day")
-        .toUTC();
-      const result = start.toISO();
-      result && filterConditions.push(gt(jobs.createdAt, result));
-    }
-    if (filter.addedUntil) {
-      const jstDateStr = filter.addedUntil;
-      const end = DateTime.fromISO(jstDateStr, { zone: "Asia/Tokyo" })
-        .endOf("day")
-        .toUTC();
-      const result = end.toISO();
-      result && filterConditions.push(lt(jobs.createdAt, result));
-    }
+        ),
+    ] : []
+    const filterConditions = [
+      ...filter.companyName ? [like(jobs.companyName, `%${filter.companyName}%`)] : [],
+      ...filter.employeeCountGt ? [gt(jobs.employeeCount, filter.employeeCountGt)] : [],
+      ...filter.employeeCountLt ? [lt(jobs.employeeCount, filter.employeeCountLt)] : [],
+      ...filter.jobDescription ? [like(jobs.jobDescription, `%${filter.jobDescription}%`)] : [],
+      ...filter.jobDescriptionExclude ? [not(like(jobs.jobDescription, `%${filter.jobDescriptionExclude}%`))] : [],
+      ...filter.onlyNotExpired ? [gt(jobs.expiryDate, new Date().toISOString())] : [],
+      ...filter.addedSince ? (() => {
+        const result = DateTime.fromISO(filter.addedSince, { zone: "Asia/Tokyo" })
+          .startOf("day")
+          .toUTC()
+          .toISO();
+        return result ? [gt(jobs.createdAt, result)] : [];
+      })() : [],
+      ...filter.addedUntil ? (() => {
+        const result = DateTime.fromISO(filter.addedUntil, { zone: "Asia/Tokyo" })
+          .endOf("day")
+          .toUTC()
+          .toISO();
+        return result ? [lt(jobs.createdAt, result)] : [];
+      })() : [],
+    ];
 
     const conditions = [...cursorConditions, ...filterConditions];
 
     const order =
       filter.orderByReceiveDate === undefined ||
-      filter.orderByReceiveDate === "asc"
+        filter.orderByReceiveDate === "asc"
         ? asc(jobs.receivedDate)
         : desc(jobs.receivedDate);
     const query = drizzle.select().from(jobs).orderBy(order);
