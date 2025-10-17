@@ -45,6 +45,65 @@ import { createUnexpectedError } from "./error";
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
 const jobListRoute = describeRoute({
+  parameters: [
+    {
+      name: "companyName",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "employeeCountGt",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "employeeCountLt",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "jobDescription",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "jobDescriptionExclude",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "onlyNotExpired",
+      in: "query",
+      required: false,
+    },
+    {
+      name: "orderByReceiveDate",
+      in: "query",
+      required: false,
+      example: "desc"
+    },
+    {
+      name: "addedSince",
+      in: "query",
+      description: "追加された日時（ISO形式）",
+      example: "2025-10-17",
+      required: false
+    },
+    {
+      name: "addedUntil",
+      in: "query",
+      description: "追加された日時（ISO形式）",
+      example: "2025-10-17",
+      required: false
+    },
+    {
+      name: "addedUntil",
+      in: "query",
+      description: "追加された日時（ISO形式）",
+      example: "2025-10-17",
+      required: false
+    }
+  ],
   responses: {
     "200": {
       description: "Successful response",
