@@ -6,7 +6,7 @@
 		"deploy": "pnpm build && wrangler deploy",
 		"no-main-deploy": "wrangler versions upload",
 		"build": "tsdown",
-		"dev": "pnpm dump-remote-data && pnpm exec wrangler d1 execute job-store --local --file=./database.sql && wrangler dev;rm -f ./database.sql",
+		"dev": "wrangler dev --persist-to=d1Local",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
