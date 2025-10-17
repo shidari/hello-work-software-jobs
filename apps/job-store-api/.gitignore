@@ -167,4 +167,4 @@ out
 .dev.vars
 .wrangler/
 
-d1Local/
+database.sql
