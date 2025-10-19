@@ -364,10 +364,6 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       dbClient.execute({
         type: "FindJobs",
         options: {
-          cursor: {
-            jobId: INITIAL_JOB_ID,
-            receivedDateByISOString: new Date(0).toISOString(),
-          }, // 初回は最初から取得
           limit,
           filter: {
             companyName,
