@@ -74,22 +74,28 @@ async function handleFindJobs(
     const { cursor, limit, filter } = cmd.options;
     const cursorConditions = cursor
       ? [
-          filter.orderByReceiveDate === undefined ||
-          filter.orderByReceiveDate === "asc"
-            ? or(
-                gt(jobs.receivedDate, cursor.receivedDateByISOString),
-                and(
-                  eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                  gt(jobs.id, cursor.jobId),
-                ),
-              )
-            : or(
-                lt(jobs.receivedDate, cursor.receivedDateByISOString),
-                and(
-                  eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                  lt(jobs.id, cursor.jobId),
-                ),
-              ),
+          (() => {
+            switch (filter.orderByReceiveDate) {
+              case "asc":
+              case undefined:
+                return or(
+                  gt(jobs.receivedDate, cursor.receivedDateByISOString),
+                  and(
+                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
+                    gt(jobs.id, cursor.jobId),
+                  ),
+                );
+              case "desc": {
+                return or(
+                  lt(jobs.receivedDate, cursor.receivedDateByISOString),
+                  and(
+                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
+                    lt(jobs.id, cursor.jobId),
+                  ),
+                );
+              }
+            }
+          })(),
         ]
       : [];
     const filterConditions = [

@@ -80,29 +80,29 @@ const jobListRoute = describeRoute({
       name: "orderByReceiveDate",
       in: "query",
       required: false,
-      example: "desc"
+      example: "desc",
     },
     {
       name: "addedSince",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
+      required: false,
     },
     {
       name: "addedUntil",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
+      required: false,
     },
     {
       name: "addedUntil",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
-    }
+      required: false,
+    },
   ],
   responses: {
     "200": {
@@ -364,10 +364,6 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       dbClient.execute({
         type: "FindJobs",
         options: {
-          cursor: {
-            jobId: INITIAL_JOB_ID,
-            receivedDateByISOString: new Date(0).toISOString(),
-          }, // 初回は最初から取得
           limit,
           filter: {
             companyName,
