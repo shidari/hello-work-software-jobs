@@ -74,28 +74,29 @@ async function handleFindJobs(
     const { cursor, limit, filter } = cmd.options;
     const cursorConditions = cursor
       ? [
-        (() => {
-          switch (filter.orderByReceiveDate) {
-            case "asc":
-            case undefined:
-              return or(
-                gt(jobs.receivedDate, cursor.receivedDateByISOString),
-                and(
-                  eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                  gt(jobs.id, cursor.jobId),
-                ),
-              )
-            case "desc": {              return or(
-                lt(jobs.receivedDate, cursor.receivedDateByISOString),
-                and(
-                  eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                  lt(jobs.id, cursor.jobId),
-                ),
-              )
+          (() => {
+            switch (filter.orderByReceiveDate) {
+              case "asc":
+              case undefined:
+                return or(
+                  gt(jobs.receivedDate, cursor.receivedDateByISOString),
+                  and(
+                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
+                    gt(jobs.id, cursor.jobId),
+                  ),
+                );
+              case "desc": {
+                return or(
+                  lt(jobs.receivedDate, cursor.receivedDateByISOString),
+                  and(
+                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
+                    lt(jobs.id, cursor.jobId),
+                  ),
+                );
+              }
             }
-          }
-        })()
-      ]
+          })(),
+        ]
       : [];
     const filterConditions = [
       ...(filter.companyName
@@ -118,25 +119,25 @@ async function handleFindJobs(
         : []),
       ...(filter.addedSince
         ? (() => {
-          const result = DateTime.fromISO(filter.addedSince, {
-            zone: "Asia/Tokyo",
-          })
-            .startOf("day")
-            .toUTC()
-            .toISO();
-          return result ? [gt(jobs.createdAt, result)] : [];
-        })()
+            const result = DateTime.fromISO(filter.addedSince, {
+              zone: "Asia/Tokyo",
+            })
+              .startOf("day")
+              .toUTC()
+              .toISO();
+            return result ? [gt(jobs.createdAt, result)] : [];
+          })()
         : []),
       ...(filter.addedUntil
         ? (() => {
-          const result = DateTime.fromISO(filter.addedUntil, {
-            zone: "Asia/Tokyo",
-          })
-            .endOf("day")
-            .toUTC()
-            .toISO();
-          return result ? [lt(jobs.createdAt, result)] : [];
-        })()
+            const result = DateTime.fromISO(filter.addedUntil, {
+              zone: "Asia/Tokyo",
+            })
+              .endOf("day")
+              .toUTC()
+              .toISO();
+            return result ? [lt(jobs.createdAt, result)] : [];
+          })()
         : []),
     ];
 
@@ -144,7 +145,7 @@ async function handleFindJobs(
 
     const order =
       filter.orderByReceiveDate === undefined ||
-        filter.orderByReceiveDate === "asc"
+      filter.orderByReceiveDate === "asc"
         ? asc(jobs.receivedDate)
         : desc(jobs.receivedDate);
     const query = drizzle.select().from(jobs).orderBy(order);

@@ -80,29 +80,29 @@ const jobListRoute = describeRoute({
       name: "orderByReceiveDate",
       in: "query",
       required: false,
-      example: "desc"
+      example: "desc",
     },
     {
       name: "addedSince",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
+      required: false,
     },
     {
       name: "addedUntil",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
+      required: false,
     },
     {
       name: "addedUntil",
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
-      required: false
-    }
+      required: false,
+    },
   ],
   responses: {
     "200": {
