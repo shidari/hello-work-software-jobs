@@ -12,7 +12,7 @@ import {
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { decode, sign, verify } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
@@ -20,8 +20,6 @@ import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
 import {
   createDecodeJWTPayloadError,
-  createJWTDecodeError,
-  createJWTExpiredError,
   createJWTVerificationError,
 } from "./error";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
@@ -31,6 +29,12 @@ import {
 } from "../../../../../adapters/error";
 
 export const jobListContinueRoute = describeRoute({
+  parameters: [
+    {
+      name: "nextToken",
+      in: "query"
+    }
+  ],
   responses: {
     "200": {
       description: "Successful response",
@@ -85,28 +89,24 @@ app.get(
         verify(nextToken, jwtSecret),
         (error) =>
           createJWTVerificationError(
-            `JWT verification failed.\n${error instanceof Error ? error.message : String(error)}`,
+            `JWT verification failed.\n${error instanceof Error ? `error: ${error.name}, message: ${error.message}` : String(error)}`,
           ),
       );
 
+      console.log("Decoded JWT payload:", decodeResult);
+
       const payloadValidation = v.safeParse(
         decodedNextTokenSchema,
-        decodeResult.payload,
+        decodeResult,
       );
       if (!payloadValidation.success) {
         return err(
           createDecodeJWTPayloadError(
-            `Decoding JWT payload failed. received: ${JSON.stringify(decodeResult.payload)}\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
+            `Decoding JWT payload failed. received: ${JSON.stringify(decodeResult, null, 2)}\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
           ),
         );
       }
       const validatedPayload = payloadValidation.output;
-
-      // JWT有効期限チェック
-      const now = Math.floor(Date.now() / 1000);
-      if (validatedPayload.exp && validatedPayload.exp < now) {
-        return err(createJWTExpiredError("JWT expired"));
-      }
       const limit = 20;
       // ジョブリスト取得
       const fetchJobListCommand: FindJobsCommand = {
@@ -176,8 +176,6 @@ app.get(
           case "JWTSignatureError":
           case "EnvError":
             throw new HTTPException(500, { message: "internal server error" });
-          case "JWTExpiredError":
-            throw new HTTPException(401, { message: "nextToken expired" });
           case "DecodeJWTPayloadError":
             throw new HTTPException(400, { message: "invalid nextToken" });
           default:
