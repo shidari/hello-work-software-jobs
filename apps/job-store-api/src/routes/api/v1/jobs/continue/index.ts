@@ -32,8 +32,8 @@ export const jobListContinueRoute = describeRoute({
   parameters: [
     {
       name: "nextToken",
-      in: "query"
-    }
+      in: "query",
+    },
   ],
   responses: {
     "200": {
