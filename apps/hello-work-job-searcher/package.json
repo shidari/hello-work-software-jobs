@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
-    "@types/node": "24.9.0",
+    "@types/node": "24.9.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5"
