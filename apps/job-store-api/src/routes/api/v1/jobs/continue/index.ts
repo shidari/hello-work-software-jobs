@@ -126,7 +126,8 @@ app.get(
       const { jobs, meta } = jobListResult;
       const newNextToken = yield* (() => {
         const offset = (nextPage - 1) * PAGE_SIZE;
-        if (jobListResult.meta.totalCount <= offset + PAGE_SIZE) return okAsync(undefined);
+        if (jobListResult.meta.totalCount <= offset + PAGE_SIZE)
+          return okAsync(undefined);
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
           iss: "sho-hello-work-job-searcher",
