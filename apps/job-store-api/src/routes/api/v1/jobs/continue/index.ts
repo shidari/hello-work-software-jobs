@@ -108,8 +108,6 @@ app.get(
         );
       }
       const validatedPayload = payloadValidation.output;
-      const offset = (validatedPayload.page - 1) * PAGE_SIZE;
-
       const nextPage = validatedPayload.page + 1;
       // ジョブリスト取得
       const fetchJobListCommand: FetchJobsPageCommand = {
