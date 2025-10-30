@@ -178,8 +178,8 @@ importers:
         version: 1.1.0(typescript@5.9.3)
     devDependencies:
       '@cloudflare/vitest-pool-workers':
-        specifier: ^0.9.2
-        version: 0.9.14(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.9.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))
+        specifier: ^0.10.0
+        version: 0.10.3(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.9.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))
       '@types/luxon':
         specifier: ^3.7.1
         version: 3.7.1
@@ -475,8 +475,8 @@ packages:
       workerd:
         optional: true
 
-  '@cloudflare/vitest-pool-workers@0.9.14':
-    resolution: {integrity: sha512-1D/1KFa32EymaYDojWcrmUyMbHJwewn/mZSxsAqXdybvKMrHVaoaqGpLoH9bgWSfbrGs4af4RrmIXMINOqc4Lw==}
+  '@cloudflare/vitest-pool-workers@0.10.3':
+    resolution: {integrity: sha512-XI/EPx/t9+tNCM3P6m9n1vizqcJ+VCjmsA5drXWI7Y+XLZX9+/d/MvkJs14Xe8bgHVk7u2o8c3D3/yno+1kU0g==}
     peerDependencies:
       '@vitest/runner': 2.0.x - 3.2.x
       '@vitest/snapshot': 2.0.x - 3.2.x
@@ -3124,6 +3124,11 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  miniflare@4.20251011.1:
+    resolution: {integrity: sha512-Qbw1Z8HTYM1adWl6FAtzhrj34/6dPRDPwdYOx21dkae8a/EaxbMzRIPbb4HKVGMVvtqbK1FaRCgDLVLolNzGHg==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -3714,6 +3719,16 @@ packages:
       '@cloudflare/workers-types':
         optional: true
 
+  wrangler@4.45.3:
+    resolution: {integrity: sha512-0ddEA9t4HeBgSVTVTcqtBHl7Z5CorWZ8tGgTQCP5XuL+9E1TJRwS6t/zzG51Ruwjb17SZYCaLchoM8V629S8cw==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.20251011.0
+    peerDependenciesMeta:
+      '@cloudflare/workers-types':
+        optional: true
+
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
@@ -4218,17 +4233,17 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251011.0
 
-  '@cloudflare/vitest-pool-workers@0.9.14(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.9.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))':
+  '@cloudflare/vitest-pool-workers@0.10.3(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.9.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))':
     dependencies:
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
       birpc: 0.2.14
       cjs-module-lexer: 1.4.3
       devalue: 5.4.2
-      miniflare: 4.20251011.0
+      miniflare: 4.20251011.1
       semver: 7.7.3
       vitest: 3.2.4(@types/node@24.9.1)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1)
-      wrangler: 4.44.0
+      wrangler: 4.45.3
       zod: 3.25.76
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -6450,6 +6465,24 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  miniflare@4.20251011.1:
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      acorn: 8.14.0
+      acorn-walk: 8.3.2
+      exit-hook: 2.2.1
+      glob-to-regexp: 0.4.1
+      sharp: 0.33.5
+      stoppable: 1.1.0
+      undici: 7.14.0
+      workerd: 1.20251011.0
+      ws: 8.18.0
+      youch: 4.1.0-beta.10
+      zod: 3.22.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   minimist@1.2.8: {}
 
   ms@2.1.3: {}
@@ -7080,6 +7113,22 @@ snapshots:
       blake3-wasm: 2.1.5
       esbuild: 0.25.4
       miniflare: 4.20251011.0
+      path-to-regexp: 6.3.0
+      unenv: 2.0.0-rc.21
+      workerd: 1.20251011.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  wrangler@4.45.3:
+    dependencies:
+      '@cloudflare/kv-asset-handler': 0.4.0
+      '@cloudflare/unenv-preset': 2.7.8(unenv@2.0.0-rc.21)(workerd@1.20251011.0)
+      blake3-wasm: 2.1.5
+      esbuild: 0.25.4
+      miniflare: 4.20251011.1
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.21
       workerd: 1.20251011.0
