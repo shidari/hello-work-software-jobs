@@ -2,13 +2,11 @@ import type { InferOutput } from "valibot";
 import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
 import type { jobs, jobSelectSchema } from "./drizzle";
 import type {
-  cursorSchema,
   decodedNextTokenSchema,
 } from "./endpoints/jobListContinue";
 import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
 import type { jobListQuerySchema } from "./endpoints/jobList";
 
-export type Cursor = InferOutput<typeof cursorSchema>;
 // --- コマンド型 ---
 export type InsertJobCommand = {
   type: "InsertJob";
@@ -18,11 +16,10 @@ export type FindJobByNumberCommand = {
   type: "FindJobByNumber";
   jobNumber: string;
 };
-export type FindJobsCommand = {
-  type: "FindJobs";
+export type FetchJobsPageCommand = {
+  type: "FetchJobsPage";
   options: {
-    cursor?: Cursor;
-    limit: number;
+    page: number;
     filter: SearchFilter;
   };
 };
@@ -34,7 +31,7 @@ export type CheckJobExistsCommand = {
 export type CountJobsCommand = {
   type: "CountJobs";
   options: {
-    cursor?: Cursor;
+    page: number;
     filter: SearchFilter;
   };
 };
@@ -42,7 +39,7 @@ export type CountJobsCommand = {
 export type JobStoreCommand =
   | InsertJobCommand
   | FindJobByNumberCommand
-  | FindJobsCommand
+  | FetchJobsPageCommand
   | CheckJobExistsCommand
   | CountJobsCommand;
 
@@ -51,50 +48,49 @@ export type JobStoreCommand =
 export type SearchFilter = InferOutput<typeof searchFilterSchema>;
 export interface CommandOutputMap {
   InsertJob:
-    | { success: true; jobNumber: string }
-    | {
-        success: false;
-        reason: "unknown";
-        error: Error;
-        _tag: "InsertJobFailed";
-      };
+  | { success: true; jobNumber: string }
+  | {
+    success: false;
+    reason: "unknown";
+    error: Error;
+    _tag: "InsertJobFailed";
+  };
   FindJobByNumber:
-    | { success: true; job: Job | null }
-    | {
-        success: false;
-        reason: "unknown";
-        error: Error;
-        _tag: "FindJobByNumberFailed";
-      };
-  FindJobs:
-    | {
-        success: true;
-        jobs: Job[];
-        cursor: Cursor;
-        meta: { totalCount: number; filter: SearchFilter };
-      }
-    | {
-        success: false;
-        reason: "unknown";
-        error: Error;
-        _tag: "FindJobsFailed";
-      };
+  | { success: true; job: Job | null }
+  | {
+    success: false;
+    reason: "unknown";
+    error: Error;
+    _tag: "FindJobByNumberFailed";
+  };
+  FetchJobsPage:
+  | {
+    success: true;
+    jobs: Job[];
+    meta: { totalCount: number; filter: SearchFilter, page: number; };
+  }
+  | {
+    success: false;
+    reason: "unknown";
+    error: Error;
+    _tag: "FetchJobsPageFailed";
+  };
   CheckJobExists:
-    | { success: true; exists: boolean }
-    | {
-        success: false;
-        reason: "unknown";
-        error: Error;
-        _tag: "CheckJobExistsFailed";
-      };
+  | { success: true; exists: boolean }
+  | {
+    success: false;
+    reason: "unknown";
+    error: Error;
+    _tag: "CheckJobExistsFailed";
+  };
   CountJobs:
-    | { success: true; count: number }
-    | {
-        success: false;
-        reason: "unknown";
-        error: Error;
-        _tag: "CountJobsFailed";
-      };
+  | { success: true; count: number }
+  | {
+    success: false;
+    reason: "unknown";
+    error: Error;
+    _tag: "CountJobsFailed";
+  };
 }
 
 // --- typeからoutput型を推論 ---
@@ -102,8 +98,8 @@ export type CommandOutput<T extends JobStoreCommand> = T extends {
   type: infer U;
 }
   ? U extends keyof CommandOutputMap
-    ? CommandOutputMap[U]
-    : never
+  ? CommandOutputMap[U]
+  : never
   : never;
 
 // --- コマンドパターンなDBクライアント ---
@@ -114,8 +110,8 @@ export type JobStoreDBClient = {
 // 🔍 型チェック用ユーティリティ
 export type KeysMustMatch<A, B> = Exclude<keyof A, keyof B> extends never
   ? Exclude<keyof B, keyof A> extends never
-    ? true
-    : ["Extra keys in B:", Exclude<keyof B, keyof A>]
+  ? true
+  : ["Extra keys in B:", Exclude<keyof B, keyof A>]
   : ["Extra keys in A:", Exclude<keyof A, keyof B>];
 
 type JobSelectFromDrizzle = typeof jobs.$inferSelect;

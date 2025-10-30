@@ -41,6 +41,7 @@ import {
   createJobsCountError,
 } from "../../../../adapters/error";
 import { createUnexpectedError } from "./error";
+import { PAGE_SIZE } from "../../../../common";
 
 const INITIAL_JOB_ID = 1; // 初期のcursorとして使用するjobId
 
@@ -319,8 +320,6 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
   const db = drizzle(c.env.DB);
   const dbClient = createJobStoreDBClientAdapter(db);
 
-  const limit = 20;
-
   const result = safeTry(async function* () {
     const employeeCountGt = yield* (() => {
       if (rawEmployeeCountGt === undefined) return ok(undefined);
@@ -362,9 +361,9 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     })();
     const jobListResult = yield* await ResultAsync.fromSafePromise(
       dbClient.execute({
-        type: "FindJobs",
+        type: "FetchJobsPage",
         options: {
-          limit,
+          page: 1,
           filter: {
             companyName,
             employeeCountGt,
@@ -384,7 +383,6 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     }
     const {
       jobs,
-      cursor: { jobId, receivedDateByISOString },
       meta,
     } = jobListResult;
 
@@ -392,7 +390,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
       dbClient.execute({
         type: "CountJobs",
         options: {
-          cursor: { jobId, receivedDateByISOString },
+          page: 1,
           filter: meta.filter,
         },
       }),
@@ -404,13 +402,13 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     const { count: restJobCount } = restJobCountResult;
 
     const nextToken = yield* (() => {
-      if (restJobCount <= limit) return okAsync(undefined);
+      if (restJobCount <= PAGE_SIZE) return okAsync(undefined);
       const validPayload: DecodedNextToken = {
         exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
         iss: "sho-hello-work-job-searcher",
         iat: Math.floor(Date.now() / 1000),
         nbf: Math.floor(Date.now() / 1000),
-        cursor: { jobId, receivedDateByISOString },
+        page: 1,
         filter: meta.filter,
       };
       const signResult = ResultAsync.fromPromise(
