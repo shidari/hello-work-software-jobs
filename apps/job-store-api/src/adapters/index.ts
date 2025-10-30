@@ -186,14 +186,7 @@ async function handleCountJobs(
   const conditions = [];
   const { page, filter } = cmd.options;
   const offset = (page - 1) * PAGE_SIZE;
-  if (
-    filter.orderByReceiveDate === undefined ||
-    filter.orderByReceiveDate === "asc"
-  ) {
-    conditions.push(lt(jobs.id, offset)); // 古→新
-  } else {
-    conditions.push(gt(jobs.id, offset)); // 古→新
-  }
+  // Do not add any condition based on jobs.id and offset for counting
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));
   }
