@@ -130,8 +130,8 @@ app.get(
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
           iss: "sho-hello-work-job-searcher",
-          iat: Date.now() / 1000,
-          nbf: Date.now() / 1000,
+          iat: Math.floor(Date.now() / 1000),
+          nbf: Math.floor(Date.now() / 1000),
           page: nextPage,
           filter: meta.filter,
         };
