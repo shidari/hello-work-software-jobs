@@ -5,17 +5,12 @@ export const jobListContinueQuerySchema = object({
   nextToken: string(),
 });
 
-export const cursorSchema = object({
-  jobId: number(),
-  receivedDateByISOString: string(),
-});
-
 export const decodedNextTokenSchema = object({
   iss: string(),
   iat: number(),
   nbf: number(),
   exp: number(),
-  cursor: cursorSchema,
+  page: number(),
   filter: searchFilterSchema,
 });
 

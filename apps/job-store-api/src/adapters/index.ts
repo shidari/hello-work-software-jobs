@@ -2,8 +2,8 @@ import type {
   CheckJobExistsCommand,
   CommandOutput,
   CountJobsCommand,
+  FetchJobsPageCommand,
   FindJobByNumberCommand,
-  FindJobsCommand,
   InsertJobCommand,
   JobStoreCommand,
   JobStoreDBClient,
@@ -13,6 +13,7 @@ import { and, asc, desc, eq, gt, like, lt, not, or } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
 import { ResultAsync } from "neverthrow";
+import { PAGE_SIZE } from "../common";
 
 type DrizzleD1Client = DrizzleD1Database<Record<string, never>> & {
   $client: D1Database;
@@ -66,38 +67,15 @@ async function handleFindJobByNumber(
   }
 }
 
-async function handleFindJobs(
+async function handleFetchJobsPage(
   drizzle: DrizzleD1Client,
-  cmd: FindJobsCommand,
-): Promise<CommandOutput<FindJobsCommand>> {
+  cmd: FetchJobsPageCommand,
+): Promise<CommandOutput<FetchJobsPageCommand>> {
   try {
-    const { cursor, limit, filter } = cmd.options;
-    const cursorConditions = cursor
-      ? [
-          (() => {
-            switch (filter.orderByReceiveDate) {
-              case "asc":
-              case undefined:
-                return or(
-                  gt(jobs.receivedDate, cursor.receivedDateByISOString),
-                  and(
-                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                    gt(jobs.id, cursor.jobId),
-                  ),
-                );
-              case "desc": {
-                return or(
-                  lt(jobs.receivedDate, cursor.receivedDateByISOString),
-                  and(
-                    eq(jobs.receivedDate, cursor.receivedDateByISOString),
-                    lt(jobs.id, cursor.jobId),
-                  ),
-                );
-              }
-            }
-          })(),
-        ]
-      : [];
+    const { page, filter } = cmd.options;
+
+    const offset = (page - 1) * PAGE_SIZE;
+
     const filterConditions = [
       ...(filter.companyName
         ? [like(jobs.companyName, `%${filter.companyName}%`)]
@@ -141,8 +119,6 @@ async function handleFindJobs(
         : []),
     ];
 
-    const conditions = [...cursorConditions, ...filterConditions];
-
     const order =
       filter.orderByReceiveDate === undefined ||
       filter.orderByReceiveDate === "asc"
@@ -151,9 +127,12 @@ async function handleFindJobs(
     const query = drizzle.select().from(jobs).orderBy(order);
 
     const jobList =
-      conditions.length > 0
-        ? await query.where(and(...conditions)).limit(limit)
-        : await query.limit(limit);
+      filterConditions.length > 0
+        ? await query
+            .where(and(...filterConditions))
+            .limit(PAGE_SIZE)
+            .offset(offset)
+        : await query.limit(PAGE_SIZE).offset(offset);
 
     const totalCount = await drizzle.$count(
       jobs,
@@ -163,16 +142,10 @@ async function handleFindJobs(
     return {
       success: true,
       jobs: jobList,
-      cursor: {
-        jobId: jobList.length > 0 ? jobList[jobList.length - 1].id : 1,
-        receivedDateByISOString:
-          jobList.length > 0
-            ? jobList[jobList.length - 1].receivedDate
-            : new Date().toISOString(),
-      },
       meta: {
         totalCount,
         filter,
+        page,
       },
     };
   } catch (error) {
@@ -180,7 +153,7 @@ async function handleFindJobs(
       success: false,
       reason: "unknown",
       error: error instanceof Error ? error : new Error(String(error)),
-      _tag: "FindJobsFailed",
+      _tag: "FetchJobsPageFailed",
     };
   }
 }
@@ -211,17 +184,9 @@ async function handleCountJobs(
   cmd: CountJobsCommand,
 ): Promise<CommandOutput<CountJobsCommand>> {
   const conditions = [];
-  const { cursor, filter } = cmd.options;
-  if (cursor) {
-    if (
-      filter.orderByReceiveDate === undefined ||
-      filter.orderByReceiveDate === "asc"
-    ) {
-      conditions.push(gt(jobs.id, cursor.jobId)); // 古→新
-    } else {
-      conditions.push(lt(jobs.id, cursor.jobId)); // 新→古
-    }
-  }
+  const { page, filter } = cmd.options;
+  const offset = (page - 1) * PAGE_SIZE;
+  // Do not add any condition based on jobs.id and offset for counting
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));
   }
@@ -270,10 +235,10 @@ export const createJobStoreDBClientAdapter = (
           drizzleClient,
           cmd as FindJobByNumberCommand,
         )) as CommandOutput<T>;
-      case "FindJobs":
-        return (await handleFindJobs(
+      case "FetchJobsPage":
+        return (await handleFetchJobsPage(
           drizzleClient,
-          cmd as FindJobsCommand,
+          cmd as FetchJobsPageCommand,
         )) as CommandOutput<T>;
       case "CheckJobExists":
         return (await handleCheckJobExists(

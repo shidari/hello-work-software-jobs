@@ -3,7 +3,7 @@ import {
   type CountJobsCommand,
   type DecodedNextToken,
   decodedNextTokenSchema,
-  type FindJobsCommand,
+  type FetchJobsPageCommand,
   jobListContinueClientErrorResponseSchema,
   jobListContinueQuerySchema,
   jobListContinueServerErrorSchema,
@@ -27,6 +27,7 @@ import {
   createFetchJobListError,
   createJobsCountError,
 } from "../../../../../adapters/error";
+import { PAGE_SIZE } from "../../../../../common";
 
 export const jobListContinueRoute = describeRoute({
   parameters: [
@@ -107,13 +108,12 @@ app.get(
         );
       }
       const validatedPayload = payloadValidation.output;
-      const limit = 20;
+      const nextPage = validatedPayload.page + 1;
       // ジョブリスト取得
-      const fetchJobListCommand: FindJobsCommand = {
-        type: "FindJobs",
+      const fetchJobListCommand: FetchJobsPageCommand = {
+        type: "FetchJobsPage",
         options: {
-          cursor: validatedPayload.cursor,
-          limit,
+          page: nextPage,
           filter: validatedPayload.filter,
         },
       };
@@ -123,36 +123,17 @@ app.get(
       if (!jobListResult.success) {
         return err(createFetchJobListError("Failed to fetch job list"));
       }
-      const {
-        jobs,
-        cursor: { jobId, receivedDateByISOString },
-        meta,
-      } = jobListResult;
-
-      const countJobsInputCommand: CountJobsCommand = {
-        type: "CountJobs",
-        options: {
-          cursor: validatedPayload.cursor,
-          filter: validatedPayload.filter,
-        },
-      };
-
-      const restJobCountResult = yield* ResultAsync.fromSafePromise(
-        dbClient.execute(countJobsInputCommand),
-      );
-      if (!restJobCountResult.success) {
-        return err(createJobsCountError("Failed to count jobs"));
-      }
-      const { count: restJobCount } = restJobCountResult;
-
+      const { jobs, meta } = jobListResult;
       const newNextToken = yield* (() => {
-        if (restJobCount <= limit) return okAsync(undefined);
+        const offset = (nextPage - 1) * PAGE_SIZE;
+        if (jobListResult.meta.totalCount <= offset + PAGE_SIZE)
+          return okAsync(undefined);
         const validPayload: DecodedNextToken = {
           exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
           iss: "sho-hello-work-job-searcher",
-          iat: Date.now(),
-          nbf: Date.now(),
-          cursor: { jobId, receivedDateByISOString },
+          iat: Math.floor(Date.now() / 1000),
+          nbf: Math.floor(Date.now() / 1000),
+          page: nextPage,
           filter: meta.filter,
         };
         const signResult = ResultAsync.fromPromise(

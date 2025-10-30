@@ -1,14 +1,10 @@
 import type { InferOutput } from "valibot";
 import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
 import type { jobs, jobSelectSchema } from "./drizzle";
-import type {
-  cursorSchema,
-  decodedNextTokenSchema,
-} from "./endpoints/jobListContinue";
+import type { decodedNextTokenSchema } from "./endpoints/jobListContinue";
 import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
 import type { jobListQuerySchema } from "./endpoints/jobList";
 
-export type Cursor = InferOutput<typeof cursorSchema>;
 // --- コマンド型 ---
 export type InsertJobCommand = {
   type: "InsertJob";
@@ -18,11 +14,10 @@ export type FindJobByNumberCommand = {
   type: "FindJobByNumber";
   jobNumber: string;
 };
-export type FindJobsCommand = {
-  type: "FindJobs";
+export type FetchJobsPageCommand = {
+  type: "FetchJobsPage";
   options: {
-    cursor?: Cursor;
-    limit: number;
+    page: number;
     filter: SearchFilter;
   };
 };
@@ -34,7 +29,7 @@ export type CheckJobExistsCommand = {
 export type CountJobsCommand = {
   type: "CountJobs";
   options: {
-    cursor?: Cursor;
+    page: number;
     filter: SearchFilter;
   };
 };
@@ -42,7 +37,7 @@ export type CountJobsCommand = {
 export type JobStoreCommand =
   | InsertJobCommand
   | FindJobByNumberCommand
-  | FindJobsCommand
+  | FetchJobsPageCommand
   | CheckJobExistsCommand
   | CountJobsCommand;
 
@@ -66,18 +61,17 @@ export interface CommandOutputMap {
         error: Error;
         _tag: "FindJobByNumberFailed";
       };
-  FindJobs:
+  FetchJobsPage:
     | {
         success: true;
         jobs: Job[];
-        cursor: Cursor;
-        meta: { totalCount: number; filter: SearchFilter };
+        meta: { totalCount: number; filter: SearchFilter; page: number };
       }
     | {
         success: false;
         reason: "unknown";
         error: Error;
-        _tag: "FindJobsFailed";
+        _tag: "FetchJobsPageFailed";
       };
   CheckJobExists:
     | { success: true; exists: boolean }
