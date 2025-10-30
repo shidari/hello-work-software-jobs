@@ -125,10 +125,7 @@ app.get(
       if (!jobListResult.success) {
         return err(createFetchJobListError("Failed to fetch job list"));
       }
-      const {
-        jobs,
-        meta,
-      } = jobListResult;
+      const { jobs, meta } = jobListResult;
       const newNextToken = yield* (() => {
         const offset = (nextPage - 1) * PAGE_SIZE;
         if (jobListResult.meta.totalCount <= offset) return okAsync(undefined);

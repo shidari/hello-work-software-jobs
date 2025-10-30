@@ -97,38 +97,41 @@ async function handleFetchJobsPage(
         : []),
       ...(filter.addedSince
         ? (() => {
-          const result = DateTime.fromISO(filter.addedSince, {
-            zone: "Asia/Tokyo",
-          })
-            .startOf("day")
-            .toUTC()
-            .toISO();
-          return result ? [gt(jobs.createdAt, result)] : [];
-        })()
+            const result = DateTime.fromISO(filter.addedSince, {
+              zone: "Asia/Tokyo",
+            })
+              .startOf("day")
+              .toUTC()
+              .toISO();
+            return result ? [gt(jobs.createdAt, result)] : [];
+          })()
         : []),
       ...(filter.addedUntil
         ? (() => {
-          const result = DateTime.fromISO(filter.addedUntil, {
-            zone: "Asia/Tokyo",
-          })
-            .endOf("day")
-            .toUTC()
-            .toISO();
-          return result ? [lt(jobs.createdAt, result)] : [];
-        })()
+            const result = DateTime.fromISO(filter.addedUntil, {
+              zone: "Asia/Tokyo",
+            })
+              .endOf("day")
+              .toUTC()
+              .toISO();
+            return result ? [lt(jobs.createdAt, result)] : [];
+          })()
         : []),
     ];
 
     const order =
       filter.orderByReceiveDate === undefined ||
-        filter.orderByReceiveDate === "asc"
+      filter.orderByReceiveDate === "asc"
         ? asc(jobs.receivedDate)
         : desc(jobs.receivedDate);
     const query = drizzle.select().from(jobs).orderBy(order);
 
     const jobList =
       filterConditions.length > 0
-        ? await query.where(and(...filterConditions)).limit(PAGE_SIZE).offset(offset)
+        ? await query
+            .where(and(...filterConditions))
+            .limit(PAGE_SIZE)
+            .offset(offset)
         : await query.limit(PAGE_SIZE).offset(offset);
 
     const totalCount = await drizzle.$count(
@@ -183,7 +186,8 @@ async function handleCountJobs(
   const conditions = [];
   const { page, filter } = cmd.options;
   const offset = (page - 1) * PAGE_SIZE;
-  if (filter.orderByReceiveDate === undefined ||
+  if (
+    filter.orderByReceiveDate === undefined ||
     filter.orderByReceiveDate === "asc"
   ) {
     conditions.push(lt(jobs.id, offset)); // 古→新

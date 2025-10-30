@@ -381,10 +381,7 @@ app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
     if (!jobListResult.success) {
       return err(createFetchJobListError("Failed to fetch job list"));
     }
-    const {
-      jobs,
-      meta,
-    } = jobListResult;
+    const { jobs, meta } = jobListResult;
 
     const restJobCountResult = yield* ResultAsync.fromSafePromise(
       dbClient.execute({
