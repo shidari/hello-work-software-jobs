@@ -150,11 +150,14 @@ export function validateEmploymentType(val: unknown) {
     try: () => v.parse(employmentTypeSchema, val),
     catch: (e) =>
       e instanceof v.ValiError
-        ? new EmploymentTypeValidationError({ detail: e.message, serializedVal: JSON.stringify(val, null, 2) })
+        ? new EmploymentTypeValidationError({
+            detail: e.message,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
         : new EmploymentTypeValidationError({
-          detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
+            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
   });
 }
 
@@ -168,13 +171,13 @@ export function validateWage(val: unknown) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new WageValidationError({
-            detail: `${e.issues.map(issueToLogString).join("\n")}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          })
+              detail: `${e.issues.map(issueToLogString).join("\n")}`,
+              serializedVal: JSON.stringify(val, null, 2),
+            })
           : new WageValidationError({
-            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          }),
+              detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+              serializedVal: JSON.stringify(val, null, 2),
+            }),
     }).pipe(
       Effect.tap((wage) => {
         return Effect.logDebug(
@@ -191,13 +194,13 @@ export function validateWorkingHours(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new WorkingHoursValidationError({
-          detail: `${e.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        })
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
         : new WorkingHoursValidationError({
-          detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
+            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
   }).pipe(
     Effect.tap((workingHours) => {
       return Effect.logDebug(
@@ -212,13 +215,13 @@ export function validateEmployeeCount(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new EmployeeCountValidationError({
-          detail: `${e.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        })
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
         : new EmployeeCountValidationError({
-          detail: `${e instanceof Error ? e.message : String(e)}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
+            detail: `${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
   }).pipe(
     Effect.tap((employeeCount) => {
       return Effect.logDebug(
@@ -234,13 +237,13 @@ export function validateWorkPlace(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new WorkPlaceValidationError({
-          detail: `${e.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        })
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
         : new WorkPlaceValidationError({
-          detail: `unexpected error. \n${e instanceof Error ? e.message : String(e)}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
+            detail: `unexpected error. \n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
   }).pipe(
     Effect.tap((workPlace) => {
       return Effect.logDebug(
@@ -256,13 +259,13 @@ export function validateJobDescription(val: unknown) {
     catch: (e) =>
       e instanceof v.ValiError
         ? new JobDescriptionValidationError({
-          detail: `${e.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        })
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
         : new JobDescriptionValidationError({
-          detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
+            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
   }).pipe(
     Effect.tap((jobDescription) => {
       return Effect.logDebug(

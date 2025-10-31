@@ -54,7 +54,7 @@ export const toTransformedEmployeeCount = (val: unknown) => {
 };
 
 export const toTransformedHomePage = (val: unknown) => {
-  const result = safeParse(transformedHomePageSchema, val)
+  const result = safeParse(transformedHomePageSchema, val);
   if (!result.success) {
     return Effect.fail(
       new HomePageTransformationError({
@@ -64,4 +64,4 @@ export const toTransformedHomePage = (val: unknown) => {
     );
   }
   return Effect.succeed(result.output);
-}
+};

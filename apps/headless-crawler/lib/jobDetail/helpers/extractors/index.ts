@@ -31,7 +31,10 @@ import {
   validateWorkingHours,
   validateWorkPlace,
 } from "../validators";
-import type { JobDetailPropertyValidationError, RawHomePageValidationError } from "../validators/error";
+import type {
+  JobDetailPropertyValidationError,
+  RawHomePageValidationError,
+} from "../validators/error";
 import { homePageElmExists, qualificationsElmExists } from "../checkers";
 import type {
   HomePageElmNotFoundError,
@@ -72,15 +75,15 @@ function extractCompanyName(page: JobDetailPage) {
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-            reason: e.message,
-            currentUrl: page.url(),
-            selector,
-          })
+              reason: e.message,
+              currentUrl: page.url(),
+              selector,
+            })
           : new ExtractJobCompanyNameError({
-            reason: `${e instanceof Error ? e.message : String(e)}`,
-            currentUrl: page.url(),
-            selector,
-          }),
+              reason: `${e instanceof Error ? e.message : String(e)}`,
+              currentUrl: page.url(),
+              selector,
+            }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
     const companyName = yield* validateCompanyName(rawCompanyName);
@@ -339,9 +342,7 @@ function extractQualifications(page: JobDetailPage) {
   });
 }
 
-export function extractJobInfo(
-  page: JobDetailPage,
-) {
+export function extractJobInfo(page: JobDetailPage) {
   return Effect.gen(function* () {
     yield* Effect.logDebug("Starting to extract job info from JobDetailPage");
     const jobNumber = yield* extractJobNumber(page);

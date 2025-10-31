@@ -4,10 +4,7 @@ import {
   type JobOverViewList,
 } from "@sho/models";
 import { Effect } from "effect";
-import {
-  IsNextPageEnabledError,
-  ListJobsError,
-} from "./error";
+import { IsNextPageEnabledError, ListJobsError } from "./error";
 import * as v from "valibot";
 import { issueToLogString } from "../../util";
 import { JobNumberValidationError } from "../../../jobDetail/helpers/validators/error";
@@ -71,7 +68,7 @@ export function validateJobNumber(val: unknown) {
       return yield* Effect.fail(
         new JobNumberValidationError({
           detail: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2)
+          serializedVal: JSON.stringify(val, null, 2),
         }),
       );
     }

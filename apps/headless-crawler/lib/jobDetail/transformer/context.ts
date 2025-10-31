@@ -59,7 +59,7 @@ export class TransformerConfig extends Context.Tag("Config")<
       readonly logDebug: boolean;
     }>;
   }
->() { }
+>() {}
 
 export const transformerConfigLive = Layer.succeed(
   TransformerConfig,
@@ -98,12 +98,11 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       | ExpiryDateTransformationError
       | HomePageTransformationError
       | ExpiryDateTransformationError
-      | HomePageTransformationError
-      ,
+      | HomePageTransformationError,
       TransformerConfig
     >;
   }
->() { }
+>() {}
 
 export const transformerLive = Layer.effect(
   JobDetailTransformer,
@@ -190,4 +189,4 @@ export const mainLive = transformerLive.pipe(
 
 class ScrapeJobDataError extends Data.TaggedError("ScrapeJobDataError")<{
   readonly message: string;
-}> { }
+}> {}

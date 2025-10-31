@@ -6,4 +6,4 @@ export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   readonly jobNumber: string;
   readonly currentUrl: string;
   readonly reason: string;
-}> { }
+}> {}
