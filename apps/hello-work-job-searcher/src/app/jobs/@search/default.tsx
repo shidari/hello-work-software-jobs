@@ -6,7 +6,7 @@ import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
 import { Accordion } from "@/app/_components/client/Accordion";
 import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
 import { HydratedJobOverviewList } from "@/app/_components/client/JobOverViewList";
-import { jobStoreClientOnServer } from "@/app/_store/server";
+import { jobStoreClientOnServer } from "@/app/_job-store-fetcher";
 
 export default async function Page() {
   // 一旦対応めんどいからunsafeUnwrapを使う

@@ -14,7 +14,7 @@ import {
   createValidateJobError,
   createValidateJobsError,
   type JobStoreClient,
-} from "../type";
+} from "./type";
 
 const j = Symbol();
 type JobEndPoint = { [j]: unknown } & string;

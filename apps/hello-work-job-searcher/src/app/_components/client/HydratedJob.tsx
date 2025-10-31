@@ -2,7 +2,7 @@
 
 import type { TJobDetail } from "@sho/models";
 import { useHydrateAtoms } from "jotai/utils";
-import { jobAtom } from "./atom";
+import { jobAtom } from "../../_atom";
 import { useAtomValue } from "jotai";
 import { JobDetail } from "../Job";
 
