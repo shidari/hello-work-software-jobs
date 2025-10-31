@@ -59,17 +59,11 @@ export const jobStoreClientOnServer: JobStoreClient = {
       }
 
       if (query.addedSince) {
-        searchParams.append(
-          "addedSince",
-          query.addedSince,
-        );
+        searchParams.append("addedSince", query.addedSince);
       }
 
       if (query.addedUntil) {
-        searchParams.append(
-          "addedUntil",
-          query.addedUntil,
-        );
+        searchParams.append("addedUntil", query.addedUntil);
       }
 
       searchParams.append("orderByReceiveDate", "desc");
