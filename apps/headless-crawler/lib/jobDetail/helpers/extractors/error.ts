@@ -2,52 +2,92 @@ import { Data } from "effect";
 
 export class ExtractJobInfoError extends Data.TaggedError(
   "ExtractJobInfoError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractJobCompanyNameError extends Data.TaggedError(
   "ExtractJobCompanyName",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractReceivedDateError extends Data.TaggedError(
   "ExtractReceivedDateError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractExpiryDateError extends Data.TaggedError(
   "ExtractExpiryDateError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractHomePageError extends Data.TaggedError(
   "ExtractHomePageError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractOccupationError extends Data.TaggedError(
   "ExtractOccupationError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractEmployMentTypeError extends Data.TaggedError(
   "ExtractEmployMentTypeError",
-)<{ readonly message: string }> {}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
+}> {}
 export class ExtractWageError extends Data.TaggedError("ExtractWageError")<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 export class ExtractWorkingHoursError extends Data.TaggedError(
   "ExtractWorkingHoursError",
 )<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 export class ExtractEmployeeCountError extends Data.TaggedError(
   "ExtractEmployeeCountError",
 )<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 export class ExtractWorkPlaceError extends Data.TaggedError(
   "ExtractWorkPlaceError",
 )<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 export class ExtractJobDescriptionError extends Data.TaggedError(
   "ExtractJobDescriptionError",
 )<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 export class ExtractQualificationsError extends Data.TaggedError(
   "ExtractQualificationsError",
 )<{
-  readonly message: string;
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly selector: string;
 }> {}
 
 export type ExtractTextContentError =

@@ -23,22 +23,20 @@ export function buildJobStoreClient() {
               }),
             catch: (e) =>
               new InsertJobError({
-                message: `insert job response failed.\n${e instanceof Error ? e.message : String(e)}`,
+                reason: `${e instanceof Error ? e.message : String(e)}`,
+                serializedPayload: JSON.stringify(job, null, 2),
               }),
           });
           const data = yield* Effect.tryPromise({
             try: () => res.json(),
             catch: (e) =>
               new InsertJobError({
-                message: `insert job transforming json failed.\n${e instanceof Error ? e.message : String(e)}`,
+                reason: `${e instanceof Error ? e.message : String(e)}`,
+                serializedPayload: JSON.stringify(job, null, 2),
+                responseStatus: res.status,
+                responseStatusMessage: res.statusText,
               }),
           });
-          if (!res.ok) {
-            throw new InsertJobError({
-              message: `insert job failed.\nstatus=${res.status}\nstatusText=${res.statusText}\nmessage=${JSON.stringify(data, null, 2)}`,
-            });
-          }
-
           yield* Effect.logDebug(
             `response data. ${JSON.stringify(data, null, 2)}`,
           );

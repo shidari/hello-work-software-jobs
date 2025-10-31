@@ -2,16 +2,16 @@ import { Data } from "effect";
 
 export class WageTransformationError extends Data.TaggedError(
   "WageTransformationError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; serializedVal: string }> {}
 
 export class WorkingHoursTransformationError extends Data.TaggedError(
   "WorkingHoursTransformationError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; serializedVal: string }> {}
 
 export class EmployeeCountTransformationError extends Data.TaggedError(
   "EmployeeCountTransformationError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; serializedVal: string }> {}
 
 export class HomePageTransformationError extends Data.TaggedError(
   "HomePageTransformationError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; serializedVal: string }> {}

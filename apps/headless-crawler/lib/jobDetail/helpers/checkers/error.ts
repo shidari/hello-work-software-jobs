@@ -2,8 +2,8 @@ import { Data } from "effect";
 
 export class QualificationsElmNotFoundError extends Data.TaggedError(
   "QualificationsElmNotFoundError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; currentUrl: string; selector: string }> {}
 
 export class HomePageElmNotFoundError extends Data.TaggedError(
   "HomePageElmNotFoundError",
-)<{ readonly message: string }> {}
+)<{ readonly reason: string; currentUrl: string; selector: string }> {}

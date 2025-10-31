@@ -149,7 +149,9 @@ export const extractorLive = Layer.effect(
             try: () => jobDetailPage.content(),
             catch: (error) =>
               new ExtractJobDetailRawHtmlError({
-                message: `Failed to get page content: ${error instanceof Error ? error.message : String(error)}`,
+                jobNumber,
+                currentUrl: jobDetailPage.url(),
+                reason: `${error instanceof Error ? error.message : String(error)}`,
               }),
           });
           return { rawHtml, fetchedDate: nowISODateString(), jobNumber };

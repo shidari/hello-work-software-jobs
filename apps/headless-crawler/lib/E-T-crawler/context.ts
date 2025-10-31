@@ -10,7 +10,6 @@ import type { JobListPageValidationError } from "../core/page/JobList/validators
 import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
 import type {
   IsNextPageEnabledError,
-  JobNumberValidationError,
   ListJobsError,
 } from "../core/page/others/error";
 import type {
@@ -37,6 +36,7 @@ import {
   GetExecutablePathError,
   ImportChromiumError,
 } from "../core/headless-browser/error";
+import type { JobNumberValidationError } from "../jobDetail/helpers/validators/error";
 
 export class ExtractorAndTransformerConfig extends Context.Tag(
   "ExtractorAndTransformerConfig",
