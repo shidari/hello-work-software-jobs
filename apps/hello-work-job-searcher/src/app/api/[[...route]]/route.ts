@@ -12,6 +12,8 @@ const jobsApp = new Hono().get("/", async (c) => {
     const employeeCountLt = c.req.query("employeeCountLt");
     const jobDescription = c.req.query("jobDescription");
     const jobDescriptionExclude = c.req.query("jobDescriptionExclude");
+    const addedSince = c.req.query("addedSince");
+    const addedUntil = c.req.query("addedUntil");
 
     const filter = {
       ...(companyName ? { companyName } : {}),
@@ -19,6 +21,9 @@ const jobsApp = new Hono().get("/", async (c) => {
       ...(jobDescriptionExclude ? { jobDescriptionExclude } : {}),
       ...(employeeCountGt ? { employeeCountGt } : {}),
       ...(employeeCountLt ? { employeeCountLt } : {}),
+      ...(addedSince ? { addedSince } : {}),
+      ...(addedUntil ? { addedUntil } : {}),
+      onlyNotExpired: true,
       orderByReceiveDate: "desc" as const,
     };
 
