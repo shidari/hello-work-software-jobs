@@ -24,7 +24,7 @@
 		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.4",
-		"wrangler": "4.44.0"
+		"wrangler": "4.45.0"
 	},
 	"dependencies": {
 		"@hono/standard-validator": "^0.1.5",
