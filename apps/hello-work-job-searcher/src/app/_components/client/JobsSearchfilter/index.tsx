@@ -5,7 +5,7 @@ import {
   initializeJobListWriterAtom,
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
-} from "../atom";
+} from "../../../_atom";
 import styles from "./JobsSearchfilter.module.css";
 
 export const JobsSearchfilter = () => {

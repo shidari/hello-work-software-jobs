@@ -5,7 +5,7 @@ import {
   appendFavoriteJobAtom,
   favoriteJobsAtom,
   removeFavoriteJobAtom,
-} from "../atom";
+} from "../../../_atom";
 import styles from "./useJobsWithFavoriteButton.module.css";
 
 export function useJobsWithFavorite(items: TJobOverview[]) {

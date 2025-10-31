@@ -14,7 +14,7 @@ import {
   jobListAtom,
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
-} from "../atom";
+} from "../../../_atom";
 import styles from "./JobOverviewList.module.css";
 import { ClientNavLink } from "../ClientNavLink";
 
