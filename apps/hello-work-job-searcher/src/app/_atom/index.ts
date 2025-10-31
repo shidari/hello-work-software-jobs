@@ -1,2 +1,2 @@
-export * from "./jobs"
-export * from "./favorites"
+export * from "./jobs";
+export * from "./favorites";
