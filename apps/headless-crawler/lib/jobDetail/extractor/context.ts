@@ -61,7 +61,7 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
       | JobSearchWithJobNumberFillingError
     >;
   }
->() {}
+>() { }
 
 export class ExtractorConfig extends Context.Tag("ExtractorConfig")<
   ExtractorConfig,
@@ -74,7 +74,7 @@ export class ExtractorConfig extends Context.Tag("ExtractorConfig")<
       >;
     }>;
   }
->() {}
+>() { }
 
 export const extractorConfigLive = Layer.effect(
   ExtractorConfig,
@@ -96,12 +96,12 @@ export const extractorConfigLive = Layer.effect(
     const args = chromiumOrNull ? chromiumOrNull.args : [];
     const executablePath = chromiumOrNull
       ? yield* Effect.tryPromise({
-          try: () => chromiumOrNull.executablePath(),
-          catch: (error) =>
-            new GetExecutablePathError({
-              message: `Failed to get chromium executable path: ${String(error)}`,
-            }),
-        })
+        try: () => chromiumOrNull.executablePath(),
+        catch: (error) =>
+          new GetExecutablePathError({
+            message: `Failed to get chromium executable path: ${String(error)}`,
+          }),
+      })
       : undefined;
     return {
       getConfig: Effect.succeed({
@@ -149,7 +149,9 @@ export const extractorLive = Layer.effect(
             try: () => jobDetailPage.content(),
             catch: (error) =>
               new ExtractJobDetailRawHtmlError({
-                message: `Failed to get page content: ${error instanceof Error ? error.message : String(error)}`,
+                jobNumber,
+                currentUrl: jobDetailPage.url(),
+                reason: `${error instanceof Error ? error.message : String(error)}`,
               }),
           });
           return { rawHtml, fetchedDate: nowISODateString(), jobNumber };

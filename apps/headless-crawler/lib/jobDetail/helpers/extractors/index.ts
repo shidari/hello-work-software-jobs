@@ -40,8 +40,9 @@ import type {
 import { validateJobNumber } from "../../../core/page/others";
 
 function extractJobNumber(page: JobDetailPage) {
+  const selector = "#ID_kjNo";
   return Effect.gen(function* () {
-    const jobNumberLoc = page.locator("#ID_kjNo");
+    const jobNumberLoc = page.locator(selector);
     const rawJobNumber = yield* Effect.tryPromise({
       try: async () => {
         const rawJobNumber = await jobNumberLoc.textContent();
@@ -49,7 +50,9 @@ function extractJobNumber(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractJobInfoError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawJobNumber=${rawJobNumber}`);
@@ -58,20 +61,25 @@ function extractJobNumber(page: JobDetailPage) {
   });
 }
 function extractCompanyName(page: JobDetailPage) {
+  const selector = "#ID_jgshMei";
   return Effect.gen(function* () {
     const rawCompanyName = yield* Effect.tryPromise({
       try: async () => {
-        const companyNameLoc = page.locator("#ID_jgshMei");
+        const companyNameLoc = page.locator(selector);
         const text = await companyNameLoc.textContent();
         return text;
       },
       catch: (e) =>
         e instanceof v.ValiError
           ? new ExtractJobCompanyNameError({
-            message: e.message,
+            reason: e.message,
+            currentUrl: page.url(),
+            selector,
           })
           : new ExtractJobCompanyNameError({
-            message: `unexpected error.\n${String(e)}`,
+            reason: `${e instanceof Error ? e.message : String(e)}`,
+            currentUrl: page.url(),
+            selector,
           }),
     });
     yield* Effect.logDebug(`rawCompanyName=${rawCompanyName}`);
@@ -90,14 +98,18 @@ function extractReceivedDate(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractReceivedDateError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_uktkYmd",
         }),
     });
     yield* Effect.logDebug(`rawReceivedDate=${rawReceivedDate}`);
     if (!rawReceivedDate)
       return yield* Effect.fail(
         new ExtractReceivedDateError({
-          message: "received date textContent is null",
+          reason: "received date textContent is null",
+          currentUrl: page.url(),
+          selector: "#ID_uktkYmd",
         }),
       );
     yield* Effect.logDebug(`rawReceivedDate=${rawReceivedDate}`);
@@ -115,7 +127,9 @@ function extractExpiryDate(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractExpiryDateError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_shkiKigenHi",
         }),
     });
     yield* Effect.logDebug(`rawExpiryDate=${rawExpiryDate}`);
@@ -134,7 +148,9 @@ function extractHomePage(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractHomePageError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_hp",
         }),
     });
     yield* Effect.logDebug(`rawHomePage=${rawHomePage}`);
@@ -153,7 +169,9 @@ function extractOccupation(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractOccupationError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_sksu",
         }),
     });
     yield* Effect.logDebug(`rawOccupation=${rawOccupation}`);
@@ -173,7 +191,9 @@ function extractEmploymentType(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractEmployMentTypeError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_koyoKeitai",
         }),
     });
     yield* Effect.logDebug(`rawEmplomentType=${rawEmplomentType}`);
@@ -191,7 +211,11 @@ function extractWage(page: JobDetailPage) {
         return text;
       },
       catch: (e) =>
-        new ExtractWageError({ message: `unexpected error.\n${String(e)}` }),
+        new ExtractWageError({
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector: "#ID_chgn",
+        }),
     });
     yield* Effect.logDebug(`rawWage=${rawWage}`);
     const wage = yield* validateWage(rawWage);
@@ -200,17 +224,20 @@ function extractWage(page: JobDetailPage) {
   });
 }
 function extractWorkingHours(page: JobDetailPage) {
+  const selector = "#ID_shgJn1";
   return Effect.gen(function* () {
     const rawWorkingHours = yield* Effect.tryPromise({
       try: async () => {
         // 一旦一つだけ
-        const workingHoursLoc = page.locator("#ID_shgJn1");
+        const workingHoursLoc = page.locator(selector);
         const text = await workingHoursLoc.textContent();
         return text;
       },
       catch: (e) =>
         new ExtractWorkingHoursError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawWorkingHours=${rawWorkingHours}`);
@@ -221,7 +248,8 @@ function extractWorkingHours(page: JobDetailPage) {
 }
 
 function extractEmployeeCount(page: JobDetailPage) {
-  const employeeCountLoc = page.locator("#ID_jgisKigyoZentai");
+  const selector = "#ID_jgisKigyoZentai";
+  const employeeCountLoc = page.locator(selector);
   return Effect.gen(function* () {
     const rawEmployeeCount = yield* Effect.tryPromise({
       try: async () => {
@@ -230,7 +258,9 @@ function extractEmployeeCount(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractEmployeeCountError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawEmployeeCount=${rawEmployeeCount}`);
@@ -241,7 +271,8 @@ function extractEmployeeCount(page: JobDetailPage) {
 }
 
 function extractWorkPlace(page: JobDetailPage) {
-  const workPlaceLoc = page.locator("#ID_shgBsJusho");
+  const selector = "#ID_shgBsJusho";
+  const workPlaceLoc = page.locator(selector);
   return Effect.gen(function* () {
     const rawWorkPlace = yield* Effect.tryPromise({
       try: async () => {
@@ -250,7 +281,9 @@ function extractWorkPlace(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractWorkPlaceError({
-          message: `unexpected error,\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawWorkPlace=${rawWorkPlace}`);
@@ -261,7 +294,8 @@ function extractWorkPlace(page: JobDetailPage) {
 }
 
 function extractJobDescription(page: JobDetailPage) {
-  const jobDescriptionLoc = page.locator("#ID_shigotoNy");
+  const selector = "#ID_shigotoNy";
+  const jobDescriptionLoc = page.locator(selector);
   return Effect.gen(function* () {
     const rawJobDescription = yield* Effect.tryPromise({
       try: async () => {
@@ -270,7 +304,9 @@ function extractJobDescription(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractJobDescriptionError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawJobDescription=${rawJobDescription}`);
@@ -281,7 +317,8 @@ function extractJobDescription(page: JobDetailPage) {
 }
 
 function extractQualifications(page: JobDetailPage) {
-  const qualificationsLoc = page.locator("#ID_hynaMenkyoSkku");
+  const selector = "#ID_hynaMenkyoSkku";
+  const qualificationsLoc = page.locator(selector);
   return Effect.gen(function* () {
     const rawQualifications = yield* Effect.tryPromise({
       try: async () => {
@@ -290,7 +327,9 @@ function extractQualifications(page: JobDetailPage) {
       },
       catch: (e) =>
         new ExtractQualificationsError({
-          message: `unexpected error.\n${String(e)}`,
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+          selector,
         }),
     });
     yield* Effect.logDebug(`rawQualifications=${rawQualifications}`);
@@ -302,14 +341,7 @@ function extractQualifications(page: JobDetailPage) {
 
 export function extractJobInfo(
   page: JobDetailPage,
-): Effect.Effect<
-  extractedJob,
-  | ExtractTextContentError
-  | JobDetailPropertyValidationError
-  | HomePageElmNotFoundError
-  | QualificationsElmNotFoundError
-  | RawHomePageValidationError
-> {
+) {
   return Effect.gen(function* () {
     yield* Effect.logDebug("Starting to extract job info from JobDetailPage");
     const jobNumber = yield* extractJobNumber(page);

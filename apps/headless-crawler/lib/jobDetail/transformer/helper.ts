@@ -19,7 +19,8 @@ export const toTransformedWage = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new WageTransformationError({
-        message: `Wageの変換に失敗しました。detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        reason: ` ${result.issues.map(issueToLogString).join("\n")}`,
+        serializedVal: JSON.stringify(val, null, 2),
       }),
     );
   }
@@ -31,7 +32,8 @@ export const toTransformedWorkingHours = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new WorkingHoursTransformationError({
-        message: `WorkingHoursの変換に失敗しました。detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        serializedVal: JSON.stringify(val, null, 2),
       }),
     );
   }
@@ -43,7 +45,8 @@ export const toTransformedEmployeeCount = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new EmployeeCountTransformationError({
-        message: `EmployeeCountの変換に失敗しました。detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        serializedVal: JSON.stringify(val, null, 2),
       }),
     );
   }
@@ -55,7 +58,8 @@ export const toTransformedHomePage = (val: unknown) => {
   if (!result.success) {
     return Effect.fail(
       new HomePageTransformationError({
-        message: `HomePageの変換に失敗しました。detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        serializedVal: JSON.stringify(val, null, 2),
       }),
     );
   }

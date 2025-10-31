@@ -6,11 +6,11 @@ import {
 import { Effect } from "effect";
 import {
   IsNextPageEnabledError,
-  JobNumberValidationError,
   ListJobsError,
 } from "./error";
 import * as v from "valibot";
 import { issueToLogString } from "../../util";
+import { JobNumberValidationError } from "../../../jobDetail/helpers/validators/error";
 export function listJobOverviewElem(
   jobListPage: JobListPage,
 ): Effect.Effect<JobOverViewList, ListJobsError, never> {
@@ -70,7 +70,8 @@ export function validateJobNumber(val: unknown) {
       );
       return yield* Effect.fail(
         new JobNumberValidationError({
-          message: `parse error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+          detail: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2)
         }),
       );
     }

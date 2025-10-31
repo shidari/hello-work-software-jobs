@@ -15,7 +15,8 @@ export function transformReceivedDate(val: unknown) {
     if (!result.success) {
       return yield* Effect.fail(
         new ReceivedDateTransformationError({
-          message: `transformation error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+          reason: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
         }),
       ).pipe(
         Effect.tap(() => {
@@ -34,7 +35,8 @@ export function transformExpiryDate(val: unknown) {
     if (!result.success) {
       return yield* Effect.fail(
         new ExpiryDateTransformationError({
-          message: `transformation error. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+          reason: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
         }),
       ).pipe(
         Effect.tap(() => {

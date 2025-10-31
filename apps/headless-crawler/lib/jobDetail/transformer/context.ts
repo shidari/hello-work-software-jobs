@@ -96,7 +96,10 @@ export class JobDetailTransformer extends Context.Tag("JobDetailTransformer")<
       | EmployeeCountTransformationError
       | ReceivedDateTransformationError
       | ExpiryDateTransformationError
-      | HomePageTransformationError,
+      | HomePageTransformationError
+      | ExpiryDateTransformationError
+      | HomePageTransformationError
+      ,
       TransformerConfig
     >;
   }
