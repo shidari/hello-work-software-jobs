@@ -39,5 +39,6 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     console.log("Lambda job succeeded:", result.value);
   } else {
     console.error("Lambda job failed", result.cause);
+    throw new Error(JSON.stringify(result.cause, null, 2));
   }
 };
