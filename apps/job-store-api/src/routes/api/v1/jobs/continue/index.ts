@@ -1,19 +1,14 @@
 import { vValidator } from "@hono/valibot-validator";
 import {
-  type CountJobsCommand,
   type DecodedNextToken,
   decodedNextTokenSchema,
   type FetchJobsPageCommand,
-  jobListContinueClientErrorResponseSchema,
   jobListContinueQuerySchema,
-  jobListContinueServerErrorSchema,
-  jobListSuccessResponseSchema,
 } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { sign, verify } from "hono/jwt";
-import { describeRoute, resolver } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import * as v from "valibot";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
@@ -25,44 +20,9 @@ import {
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
 import {
   createFetchJobListError,
-  createJobsCountError,
 } from "../../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../../common";
-
-export const jobListContinueRoute = describeRoute({
-  parameters: [
-    {
-      name: "nextToken",
-      in: "query",
-    },
-  ],
-  responses: {
-    "200": {
-      description: "Successful response",
-      content: {
-        "application/json": {
-          schema: resolver(jobListSuccessResponseSchema),
-        },
-      },
-    },
-    "400": {
-      description: "client error response",
-      content: {
-        "application/json": {
-          schema: resolver(jobListContinueClientErrorResponseSchema),
-        },
-      },
-    },
-    "500": {
-      description: "internal server error response",
-      content: {
-        "application/json": {
-          schema: resolver(jobListContinueServerErrorSchema),
-        },
-      },
-    },
-  },
-});
+import { jobListContinueRoute } from "./routingSchema";
 
 const app = new Hono<{ Bindings: Env }>();
 
