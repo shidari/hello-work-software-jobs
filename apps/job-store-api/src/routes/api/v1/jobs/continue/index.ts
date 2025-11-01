@@ -18,9 +18,7 @@ import {
   createJWTVerificationError,
 } from "./error";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
-import {
-  createFetchJobListError,
-} from "../../../../../adapters/error";
+import { createFetchJobListError } from "../../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../../common";
 import { jobListContinueRoute } from "./routingSchema";
 
