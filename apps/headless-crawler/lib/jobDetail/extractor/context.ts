@@ -1,14 +1,12 @@
 import type { JobNumber } from "@sho/models";
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import {
   createContext,
   createPage,
   launchBrowser,
 } from "../../core/headless-browser";
-import {
-  GetExecutablePathError,
-  ImportChromiumError,
-  type NewPageError,
+import type {
+  NewPageError,
 } from "../../core/headless-browser/error";
 import type { JobListPageValidationError } from "../../core/page/JobList/validators/error";
 import type { JobSearchPageValidationError } from "../../core/page/JobSearch/validators/error";
@@ -35,6 +33,7 @@ import { validateJobListPage } from "../../core/page/JobList/validators";
 import { format } from "date-fns";
 import type { LaunchOptions } from "playwright";
 import { ExtractJobDetailRawHtmlError } from "./error";
+import { ExtractorConfig } from "../../service/jobDetail/config";
 
 const i = Symbol();
 type ISODateString = string & { [i]: never };
@@ -61,72 +60,18 @@ export class HelloWorkRawJobDetailHtmlExtractor extends Context.Tag(
       | JobSearchWithJobNumberFillingError
     >;
   }
->() {}
-
-export class ExtractorConfig extends Context.Tag("ExtractorConfig")<
-  ExtractorConfig,
-  {
-    readonly getConfig: Effect.Effect<{
-      readonly debugLog: boolean;
-      readonly browserConfig: Pick<
-        LaunchOptions,
-        "headless" | "executablePath" | "args"
-      >;
-    }>;
-  }
->() {}
-
-export const extractorConfigLive = Layer.effect(
-  ExtractorConfig,
-  Effect.gen(function* () {
-    const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
-      "AWS_LAMBDA_FUNCTION_NAME",
-    ).pipe(Config.withDefault(""));
-    const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
-    const chromiumOrNull = yield* Effect.tryPromise({
-      try: () =>
-        isLambda
-          ? import("@sparticuz/chromium").then((mod) => mod.default)
-          : Promise.resolve(null),
-      catch: (error) =>
-        new ImportChromiumError({
-          message: `Failed to import chromium: ${String(error)}`,
-        }),
-    });
-    const args = chromiumOrNull ? chromiumOrNull.args : [];
-    const executablePath = chromiumOrNull
-      ? yield* Effect.tryPromise({
-          try: () => chromiumOrNull.executablePath(),
-          catch: (error) =>
-            new GetExecutablePathError({
-              message: `Failed to get chromium executable path: ${String(error)}`,
-            }),
-        })
-      : undefined;
-    return {
-      getConfig: Effect.succeed({
-        debugLog: false,
-        browserConfig: {
-          headless: false,
-          args,
-          executablePath: executablePath ?? undefined,
-        },
-      }),
-    };
-  }),
-);
+>() { }
 const nowISODateString = (): ISODateString =>
   format(new Date(), "yyyy-MM-dd") as ISODateString;
 export const extractorLive = Layer.effect(
   HelloWorkRawJobDetailHtmlExtractor,
   Effect.gen(function* () {
     // ちょっといい方法思いつかないので、
-    const config = yield* ExtractorConfig;
-    const config2 = yield* config.getConfig;
+    const config = yield* ExtractorConfig
     yield* Effect.logInfo(
-      `building jobDetail extractor: config=${JSON.stringify(config2, null, 2)}`,
+      `building jobDetail extractor: config=${JSON.stringify(config, null, 2)}`,
     );
-    const browser = yield* launchBrowser(config2.browserConfig);
+    const browser = yield* launchBrowser(config.browserConfig);
     const context = yield* createContext(browser);
     const page = yield* createPage(context);
     return {
