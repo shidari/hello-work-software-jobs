@@ -6,7 +6,6 @@ import { buildProgram as buildTransformerProgram } from "../../lib/jobDetail/tra
 // これ、よくない、命名が
 import { buildProgram as runLoaderProgram } from "../../lib/jobDetail/loader/loader";
 import {
-  extractorConfigLive,
   extractorLive,
 } from "../../lib/jobDetail/extractor/context";
 import {
@@ -17,6 +16,7 @@ import {
   loaderConfigLive,
   loaderLive,
 } from "../../lib/jobDetail/loader/context";
+import { ExtractorConfig } from "../../lib/service/jobDetail/config";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const program = Effect.gen(function* () {
@@ -27,12 +27,12 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   });
   const runnable = program
     .pipe(Effect.provide(extractorLive))
-    .pipe(Effect.provide(extractorConfigLive))
     .pipe(Effect.scoped)
     .pipe(Effect.provide(transformerLive))
     .pipe(Effect.provide(transformerConfigLive))
     .pipe(Effect.provide(loaderLive))
-    .pipe(Effect.provide(loaderConfigLive));
+    .pipe(Effect.provide(loaderConfigLive))
+    .pipe(Effect.provide(ExtractorConfig.Default))
   const result = await Effect.runPromiseExit(runnable);
 
   if (Exit.isSuccess(result)) {
