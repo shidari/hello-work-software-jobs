@@ -2,6 +2,10 @@
 
 求人情報の自動収集・管理システム
 
+---
+**本プロジェクトは、ハローワーク求人サービスの利用規約（[ハローワーク求人情報提供サービス利用規約](https://www.hellowork.mhlw.go.jp/doc/kiyaku_kyuushoku_teikyou202001.pdf)）に則って運用・開発されています。サービス利用・データ取得・公開にあたっては、同規約の遵守を徹底しています。**
+---
+
 **🌐 デモサイト**: https://my-hello-work-job-list-hello-work-j.vercel.app/
 
 ## 🚀 TL;DR（斜め読み用サマリー）
@@ -65,6 +69,9 @@ TypeScript + neverthrow + AWS Lambda + Cloudflare Workers + Next.js 15 + React 1
 ## アーキテクチャ
 
 ### 全体構成
+## お知らせ
+
+一旦、DBに保存していた求人データは全て削除しました。今後再取得・再保存予定です。
 
 ```
 hello-work-software-jobs/
