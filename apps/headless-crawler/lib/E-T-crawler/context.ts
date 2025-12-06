@@ -1,10 +1,5 @@
 import type { etCrawlerConfig, JobListPage, JobMetadata } from "@sho/models";
 import { Chunk, Config, Context, Effect, Layer, Option, Stream } from "effect";
-import {
-  createContext,
-  createPage,
-  launchBrowser,
-} from "../core/headless-browser";
 import { delay } from "../core/util";
 import type { JobListPageValidationError } from "../core/page/JobList/validators/error";
 import type { JobSearchPageValidationError } from "../core/page/JobSearch/validators/error";
@@ -37,6 +32,7 @@ import {
   ImportChromiumError,
 } from "../core/headless-browser/error";
 import type { JobNumberValidationError } from "../jobDetail/helpers/validators/error";
+import { PlaywrightChromiumPageResource } from "../core/headless-browser";
 
 export class ExtractorAndTransformerConfig extends Context.Tag(
   "ExtractorAndTransformerConfig",
@@ -45,7 +41,7 @@ export class ExtractorAndTransformerConfig extends Context.Tag(
   {
     readonly getConfig: etCrawlerConfig;
   }
->() {}
+>() { }
 
 const extractorAndTransfomerConfigLive = Layer.effect(
   ExtractorAndTransformerConfig,
@@ -67,12 +63,12 @@ const extractorAndTransfomerConfigLive = Layer.effect(
     const args = chromiumOrNull ? chromiumOrNull.args : [];
     const executablePath = chromiumOrNull
       ? yield* Effect.tryPromise({
-          try: () => chromiumOrNull.executablePath(),
-          catch: (error) =>
-            new GetExecutablePathError({
-              message: `Failed to get chromium executable path: ${String(error)}`,
-            }),
-        })
+        try: () => chromiumOrNull.executablePath(),
+        catch: (error) =>
+          new GetExecutablePathError({
+            message: `Failed to get chromium executable path: ${String(error)}`,
+          }),
+      })
       : undefined;
     return {
       getConfig: {
@@ -114,7 +110,7 @@ export class HelloWorkCrawler extends Context.Tag("HelloWorkCrawler")<
       | JobNumberValidationError
     >;
   }
->() {}
+>() { }
 
 export const crawlerLive = Layer.effect(
   HelloWorkCrawler,
@@ -123,9 +119,8 @@ export const crawlerLive = Layer.effect(
     yield* Effect.logInfo(
       `building crawler: config=${JSON.stringify(config, null, 2)}`,
     );
-    const browser = yield* launchBrowser(config.browserConfig);
-    const context = yield* createContext(browser);
-    const page = yield* createPage(context);
+    const pageResource = yield* PlaywrightChromiumPageResource
+    const { page } = pageResource
     return HelloWorkCrawler.of({
       crawlJobLinks: () =>
         Effect.gen(function* () {
@@ -189,11 +184,11 @@ function fetchJobMetaData({
       chunked,
       nextPageEnabled && tmpTotal <= roughMaxCount
         ? Option.some({
-            jobListPage: jobListPage,
-            count: tmpTotal,
-            roughMaxCount,
-            nextPageDelayMs, // 後で構造修正する予定
-          })
+          jobListPage: jobListPage,
+          count: tmpTotal,
+          roughMaxCount,
+          nextPageDelayMs, // 後で構造修正する予定
+        })
         : Option.none(),
     ] as const;
   });

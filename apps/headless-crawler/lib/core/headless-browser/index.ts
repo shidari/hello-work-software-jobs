@@ -1,66 +1,84 @@
-import { Effect } from "effect";
+import { Console, Effect } from "effect";
 import {
-  type Browser,
-  type BrowserContext,
   type LaunchOptions,
   chromium,
 } from "playwright";
 import { LaunchBrowserError, NewContextError, NewPageError } from "./error";
 
-export function launchBrowser(options: LaunchOptions) {
-  return Effect.acquireRelease(
-    Effect.gen(function* () {
-      const browser = yield* Effect.tryPromise({
-        try: () => chromium.launch({ ...options }),
-        catch: (e) =>
-          new LaunchBrowserError({
-            message: `unexpected error.\n${String(e)}`,
-          }),
-      });
-      return { browser };
-    }),
-    ({ browser }) => Effect.promise(() => browser.close()),
-  )
-    .pipe(Effect.map(({ browser }) => browser))
-    .pipe(
-      Effect.tap((b) => Effect.logDebug(`Browser launched: ${b.version()}`)),
-    );
+export class PlaywrightBrowserConfig extends Effect.Service<PlaywrightBrowserConfig>()("PlaywrightBrowserConfig", {
+  // Define how to create the service
+  effect: Effect.sync(() => {
+    const options: LaunchOptions = {
+    };
+    return { options };
+  }),
+}) {
+  static dev = new PlaywrightBrowserConfig({
+    options: {
+      headless: false
+    }
+  })
 }
 
-export function createContext(browser: Browser) {
-  return Effect.acquireRelease(
-    Effect.gen(function* () {
-      const context = yield* Effect.tryPromise({
-        try: () => browser.newContext(),
-        catch: (e) =>
-          new NewContextError({ message: `unexpetcted error.\n${String(e)}` }),
-      });
-      return { context };
-    }),
-    ({ context }) => Effect.promise(() => context.close()),
-  )
-    .pipe(Effect.map(({ context }) => context))
-    .pipe(
-      Effect.tap((c) =>
-        Effect.logDebug(`BrowserContext created: ${c.browser()?.version()}`),
-      ),
-    );
-}
+export class PlaywrightChromiumBrowseResource extends Effect.Service<PlaywrightChromiumBrowseResource>()("PlaywrightChromiumBrowseResource", {
+  effect: Effect.gen(function* () {
+    const config = yield* PlaywrightBrowserConfig
+    yield* Effect.logDebug("launching chromium browser...");
+    yield* Effect.logDebug(`browser launch options: ${JSON.stringify(config.options,null,2)}`);
+    const browser = yield* Effect.acquireRelease(
+      Effect.gen(function* () {
+        const browser = yield* Effect.tryPromise({
+          try: () => chromium.launch(config.options),
+          catch: (e) =>
+            new LaunchBrowserError({
+              message: `unexpected error.\n${String(e)}`,
+            }),
+        });
+        return browser;
+      }),
+      (browser) => Effect.promise(() => browser.close()),
+    )
+    return { browser };
+  }),
+  dependencies: [PlaywrightBrowserConfig.Default]
+}) { }
 
-export function createPage(context: BrowserContext) {
-  return Effect.acquireRelease(
-    Effect.gen(function* () {
-      const page = yield* Effect.tryPromise({
-        try: () => context.newPage(),
-        catch: (e) =>
-          new NewPageError({ message: `unexpected error.\n${String(e)}` }),
-      });
-      page.setDefaultTimeout(20000);
-      page.setDefaultNavigationTimeout(200000);
-      return { page };
-    }),
-    ({ page }) => Effect.promise(() => page.close()),
-  )
-    .pipe(Effect.map(({ page }) => page))
-    .pipe(Effect.tap((p) => Effect.logDebug(`Page created: ${p.url()}`)));
-}
+class PlaywrightChromiumContextResource extends Effect.Service<PlaywrightChromiumContextResource>()("PlaywrightChromiumContextResource", {
+  effect: Effect.gen(function* () {
+    const browserResource = yield* PlaywrightChromiumBrowseResource
+    const { browser } = browserResource
+    const context = yield* Effect.acquireRelease(
+      Effect.gen(function* () {
+        const context = yield* Effect.tryPromise({
+          try: () => browser.newContext(),
+          catch: (e) =>
+            new NewContextError({ message: `unexpetcted error.\n${String(e)}` }),
+        });
+        return context;
+      }),
+      (context) => Effect.promise(() => context.close()),
+    )
+    return { context };
+  }),
+  dependencies: [PlaywrightChromiumBrowseResource.Default]
+}) { }
+
+export class PlaywrightChromiumPageResource extends Effect.Service<PlaywrightChromiumPageResource>()("PlaywrightChromiumPageResource", {
+  effect: Effect.gen(function* () {
+    const contextResource = yield* PlaywrightChromiumContextResource
+    const { context } = contextResource
+    const page = yield* Effect.acquireRelease(
+      Effect.gen(function* () {
+        const page = yield* Effect.tryPromise({
+          try: () => context.newPage(),
+          catch: (e) =>
+            new NewPageError({ message: `unexpected error.\n${String(e)}` }),
+        });
+        return page;
+      }),
+      (page) => Effect.promise(() => page.close()),
+    )
+    return { page };
+  }),
+  dependencies: [PlaywrightChromiumContextResource.Default]
+}) { }

@@ -6,6 +6,7 @@ import { eventSchema } from "@sho/models";
 import { EventSchemaValidationError } from "./error";
 import { issueToLogString } from "../../lib/core/util";
 import { mainLive } from "../../lib/E-T-crawler/context";
+import { PlaywrightChromiumPageResource } from "../../lib/core/headless-browser";
 
 export const handler = async (event: unknown) => {
   const program = Effect.gen(function* () {
@@ -22,6 +23,7 @@ export const handler = async (event: unknown) => {
     })();
     const runnable = etCrawlerEffect
       .pipe(Effect.provide(mainLive))
+      .pipe(Effect.provide(PlaywrightChromiumPageResource.Default))
       .pipe(Effect.scoped)
       .pipe(
         Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
