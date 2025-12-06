@@ -147,8 +147,8 @@ importers:
         specifier: ^0.5.2
         version: 0.5.2(hono@4.10.7)
       '@hono/valibot-validator':
-        specifier: ^0.5.3
-        version: 0.5.3(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))
+        specifier: ^0.6.0
+        version: 0.6.0(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))
       '@sho/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -1216,8 +1216,8 @@ packages:
     peerDependencies:
       hono: '*'
 
-  '@hono/valibot-validator@0.5.3':
-    resolution: {integrity: sha512-91wjmjDvrTdEm2ZcuCyLBghtld78QoLEduzfkqLo1L74n6sqqoVfc0gDfmju1Ar6w1eK8Q0UyIubrtj4KMWVnQ==}
+  '@hono/valibot-validator@0.6.0':
+    resolution: {integrity: sha512-p1kbfF9FiXX9+tjWZmDkfjs0GcZ+o6XGFMwCiXiTlUDl9C6Bu+qH5YMgxtokK6hAvMk4s3eScAFwKLC0qeN2Ow==}
     peerDependencies:
       hono: '>=3.9.0'
       valibot: ^1.0.0 || ^1.0.0-beta.4 || ^1.0.0-rc
@@ -4827,7 +4827,7 @@ snapshots:
     dependencies:
       hono: 4.10.7
 
-  '@hono/valibot-validator@0.5.3(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))':
+  '@hono/valibot-validator@0.6.0(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))':
     dependencies:
       hono: 4.10.7
       valibot: 1.2.0(typescript@5.9.3)
