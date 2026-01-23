@@ -27,7 +27,7 @@
 		"wrangler": "4.51.0"
 	},
 	"dependencies": {
-		"@hono/standard-validator": "^0.1.5",
+		"@hono/standard-validator": "^0.2.0",
 		"@hono/swagger-ui": "^0.5.2",
 		"@hono/valibot-validator": "^0.5.3",
 		"@sho/models": "workspace:*",
