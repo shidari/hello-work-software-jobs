@@ -147,8 +147,8 @@ importers:
         specifier: ^0.5.2
         version: 0.5.2(hono@4.10.7)
       '@hono/valibot-validator':
-        specifier: ^0.5.3
-        version: 0.5.3(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))
+        specifier: ^0.6.0
+        version: 0.6.1(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))
       '@sho/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -1408,8 +1408,8 @@ packages:
     peerDependencies:
       hono: '*'
 
-  '@hono/valibot-validator@0.5.3':
-    resolution: {integrity: sha512-91wjmjDvrTdEm2ZcuCyLBghtld78QoLEduzfkqLo1L74n6sqqoVfc0gDfmju1Ar6w1eK8Q0UyIubrtj4KMWVnQ==}
+  '@hono/valibot-validator@0.6.1':
+    resolution: {integrity: sha512-rqKhQJI8IVR8gRRNHHf2wGtIT7sKEqV1KoGL5f2SocNytl+tBNn4EtRu4zfk/D6axgWSswnaxeiuJhM5yNFrCg==}
     peerDependencies:
       hono: '>=3.9.0'
       valibot: ^1.0.0 || ^1.0.0-beta.4 || ^1.0.0-rc
@@ -3462,6 +3462,7 @@ packages:
   next@16.0.10:
     resolution: {integrity: sha512-RtWh5PUgI+vxlV3HdR+IfWA1UUHu0+Ram/JBO4vWB54cVPentCD0e+lxyAYEsDTqGGMg7qpjhKh6dc6aW7W/sA==}
     engines: {node: '>=20.9.0'}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -5141,7 +5142,7 @@ snapshots:
     dependencies:
       hono: 4.10.7
 
-  '@hono/valibot-validator@0.5.3(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))':
+  '@hono/valibot-validator@0.6.1(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))':
     dependencies:
       hono: 4.10.7
       valibot: 1.2.0(typescript@5.9.3)
