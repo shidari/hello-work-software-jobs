@@ -142,7 +142,7 @@ importers:
     dependencies:
       '@hono/standard-validator':
         specifier: ^0.2.0
-        version: 0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.10.7)
       '@hono/swagger-ui':
         specifier: ^0.5.2
         version: 0.5.3(hono@4.10.7)
@@ -166,7 +166,7 @@ importers:
         version: 4.10.7
       hono-openapi:
         specifier: ^1.0.8
-        version: 1.1.1(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.0.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.10.7)(openapi-types@12.1.3)
+        version: 1.1.1(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.10.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.10.7)(openapi-types@12.1.3)
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -205,8 +205,8 @@ importers:
         specifier: ~3.2.4
         version: 3.2.4(@types/node@24.10.0)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.2)
       wrangler:
-        specifier: 4.59.1
-        version: 4.59.1
+        specifier: 4.59.2
+        version: 4.59.2
 
   packages/models:
     dependencies:
@@ -466,20 +466,24 @@ packages:
     resolution: {integrity: sha512-Nu8ahitGFFJztxUml9oD/DLb7Z28C8cd8F46IVQ7y5Btz575pvMY8AqZsXkX7Gds29eCKdMgIHjIvzskHgPSFg==}
     engines: {node: '>=18.0.0'}
 
+  '@cloudflare/kv-asset-handler@0.4.2':
+    resolution: {integrity: sha512-SIOD2DxrRRwQ+jgzlXCqoEFiKOFqaPjhnNTGKXSRLvp1HiOvapLaFG2kEr9dYQTYe8rKrd9uvDUzmAITeNyaHQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@cloudflare/unenv-preset@2.10.0':
+    resolution: {integrity: sha512-/uII4vLQXhzCAZzEVeYAjFLBNg2nqTJ1JGzd2lRF6ItYe6U2zVoYGfeKpGx/EkBF6euiU+cyBXgMdtJih+nQ6g==}
+    peerDependencies:
+      unenv: 2.0.0-rc.24
+      workerd: ^1.20251221.0
+    peerDependenciesMeta:
+      workerd:
+        optional: true
+
   '@cloudflare/unenv-preset@2.7.11':
     resolution: {integrity: sha512-se23f1D4PxKrMKOq+Stz+Yn7AJ9ITHcEecXo2Yjb+UgbUDCEBch1FXQC6hx6uT5fNA3kmX3mfzeZiUmpK1W9IQ==}
     peerDependencies:
       unenv: 2.0.0-rc.24
       workerd: ^1.20251106.1
-    peerDependenciesMeta:
-      workerd:
-        optional: true
-
-  '@cloudflare/unenv-preset@2.9.0':
-    resolution: {integrity: sha512-99nEvuOTCGGGRNaIat8UVVXJ27aZK+U09SYDp0kVjQLwC9wyxcrQ28IqLwrQq2DjWLmBI1+UalGJzdPqYgPlRw==}
-    peerDependencies:
-      unenv: 2.0.0-rc.24
-      workerd: ^1.20251202.0
     peerDependenciesMeta:
       workerd:
         optional: true
@@ -497,8 +501,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-64@1.20260111.0':
-    resolution: {integrity: sha512-UGAjrGLev2/CMLZy7b+v1NIXA4Hupc/QJBFlJwMqldywMcJ/iEqvuUYYuVI2wZXuXeWkgmgFP87oFDQsg78YTQ==}
+  '@cloudflare/workerd-darwin-64@1.20260114.0':
+    resolution: {integrity: sha512-HNlsRkfNgardCig2P/5bp/dqDECsZ4+NU5XewqArWxMseqt3C5daSuptI620s4pn7Wr0ZKg7jVLH0PDEBkA+aA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
@@ -509,8 +513,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-arm64@1.20260111.0':
-    resolution: {integrity: sha512-YFAZwidLCQVa6rKCCaiWrhA+eh87a7MUhyd9lat3KSbLBAGpYM+ORpyTXpi2Gjm3j6Mp1e/wtzcFTSeMIy2UqA==}
+  '@cloudflare/workerd-darwin-arm64@1.20260114.0':
+    resolution: {integrity: sha512-qyE1UdFnAlxzb+uCfN/d9c8icch7XRiH49/DjoqEa+bCDihTuRS7GL1RmhVIqHJhb3pX3DzxmKgQZBDBL83Inw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
@@ -521,8 +525,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-64@1.20260111.0':
-    resolution: {integrity: sha512-zx1GW6FwfOBjCV7QUCRzGRkViUtn3Is/zaaVPmm57xyy9sjtInx6/SdeBr2Y45tx9AnOP1CnaOFFdmH1P7VIEg==}
+  '@cloudflare/workerd-linux-64@1.20260114.0':
+    resolution: {integrity: sha512-Z0BLvAj/JPOabzads2ddDEfgExWTlD22pnwsuNbPwZAGTSZeQa3Y47eGUWyHk+rSGngknk++S7zHTGbKuG7RRg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
@@ -533,8 +537,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-arm64@1.20260111.0':
-    resolution: {integrity: sha512-wFVKxNvCyjRaAcgiSnJNJAmIos3p3Vv6Uhf4pFUZ9JIxr69GNlLWlm9SdCPvtwNFAjzSoDaKzDwjj5xqpuCS6Q==}
+  '@cloudflare/workerd-linux-arm64@1.20260114.0':
+    resolution: {integrity: sha512-kPUmEtUxUWlr9PQ64kuhdK0qyo8idPe5IIXUgi7xCD7mDd6EOe5J7ugDpbfvfbYKEjx4DpLvN2t45izyI/Sodw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
@@ -545,8 +549,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workerd-windows-64@1.20260111.0':
-    resolution: {integrity: sha512-zWgd77L7OI1BxgBbG+2gybDahIMgPX5iNo6e3LqcEz1Xm3KfiqgnDyMBcxeQ7xDrj7fHUGAlc//QnKvDchuUoQ==}
+  '@cloudflare/workerd-windows-64@1.20260114.0':
+    resolution: {integrity: sha512-MJnKgm6i1jZGyt2ZHQYCnRlpFTEZcK2rv9y7asS3KdVEXaDgGF8kOns5u6YL6/+eMogfZuHRjfDS+UqRTUYIFA==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
@@ -1876,14 +1880,14 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@poppinss/colors@4.1.5':
-    resolution: {integrity: sha512-FvdDqtcRCtz6hThExcFOgW0cWX+xwSMWcRuQe5ZEb2m7cVQOAVZOIMt+/v9RxGiD9/OY16qJBXK4CVKWAPalBw==}
+  '@poppinss/colors@4.1.6':
+    resolution: {integrity: sha512-H9xkIdFswbS8n1d6vmRd8+c10t2Qe+rZITbbDHHkQixH5+2x1FDGmi/0K+WgWiqQFKPSlIYB7jlH6Kpfn6Fleg==}
 
   '@poppinss/dumper@0.6.5':
     resolution: {integrity: sha512-NBdYIb90J7LfOI32dOewKI1r7wnkiH6m920puQ3qHUeZkxNkQiFnXVWoE6YtFSv6QOiPPf7ys6i+HWWecDz7sw==}
 
-  '@poppinss/exception@1.2.2':
-    resolution: {integrity: sha512-m7bpKCD4QMlFCjA/nKTs23fuvoVFoA83brRKmObCUNmi/9tVu8Ve3w4YQAnJu4q3Tjf5fr685HYIC/IA2zHRSg==}
+  '@poppinss/exception@1.2.3':
+    resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
   '@quansync/fs@0.1.5':
     resolution: {integrity: sha512-lNS9hL2aS2NZgNW7BBj+6EBl4rOf8l+tQ0eRY6JWCI8jI2kc53gSoqbjojU0OnAWhzoXiOjFyGsHcDGePB3lhA==}
@@ -2173,8 +2177,8 @@ packages:
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
 
-  '@sindresorhus/is@7.1.1':
-    resolution: {integrity: sha512-rO92VvpgMc3kfiTjGT52LEtJ8Yc5kCWhZjLQ3LwlA4pSgPpQO7bVpYXParOD8Jwf+cVQECJo3yP/4I8aZtUQTQ==}
+  '@sindresorhus/is@7.2.0':
+    resolution: {integrity: sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw==}
     engines: {node: '>=18'}
 
   '@smithy/abort-controller@4.0.5':
@@ -2353,8 +2357,8 @@ packages:
     resolution: {integrity: sha512-vs5qUiK6kFCzLCxZ2buWONcB6jdF3VWdYp6kH1tt56tZ78p51dMAxfWsfk9P62z/jAeqbVg4V6Rb3Ic4aAeOKQ==}
     engines: {node: '>=20.11.0'}
 
-  '@speed-highlight/core@1.2.12':
-    resolution: {integrity: sha512-uilwrK0Ygyri5dToHYdZSjcvpS2ZwX0w5aSt3GCEN9hrjxWCoeV4Z2DTXuxjwbntaLQIEEAlCeNQss5SoHvAEA==}
+  '@speed-highlight/core@1.2.14':
+    resolution: {integrity: sha512-G4ewlBNhUtlLvrJTb88d2mdy2KRijzs4UhnlrOSRT4bmjh/IqNElZa3zkrZ+TC47TwtlDWzVLFADljF1Ijp5hA==}
 
   '@standard-community/standard-json@0.3.5':
     resolution: {integrity: sha512-4+ZPorwDRt47i+O7RjyuaxHRK/37QY/LmgxlGrRrSTLYoFatEOzvqIc85GTlM18SFZ5E91C+v0o/M37wZPpUHA==}
@@ -3441,8 +3445,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  miniflare@4.20260111.0:
-    resolution: {integrity: sha512-pUsbDlumPaTzliA+J9HMAM74nLR8wqpCQNOESximab51jAfvL7ZaP5Npzh4PWNV0Jfq28tlqazakuJcw6w5qlA==}
+  miniflare@4.20260114.0:
+    resolution: {integrity: sha512-QwHT7S6XqGdQxIvql1uirH/7/i3zDEt0B/YBXTYzMfJtVCR4+ue3KPkU+Bl0zMxvpgkvjh9+eCHhJbKEqya70A==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -4034,8 +4038,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workerd@1.20260111.0:
-    resolution: {integrity: sha512-ov6Pt4k6d/ALfJja/EIHohT9IrY/f6GAa0arWEPat2qekp78xHbVM7jSxNWAMbaE7ZmnQQIFEGD1ZhAWZmQKIg==}
+  workerd@1.20260114.0:
+    resolution: {integrity: sha512-kTJ+jNdIllOzWuVA3NRQRvywP0T135zdCjAE2dAUY1BFbxM6fmMZV8BbskEoQ4hAODVQUfZQmyGctcwvVCKxFA==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -4049,12 +4053,12 @@ packages:
       '@cloudflare/workers-types':
         optional: true
 
-  wrangler@4.59.1:
-    resolution: {integrity: sha512-5DddGSNxHd6dOjREWTDQdovQlZ1Lh80NNRXZFQ4/CrK3fNyVIBj9tqCs9pmXMNrKQ/AnKNeYzEs/l1kr8rHhOg==}
+  wrangler@4.59.2:
+    resolution: {integrity: sha512-Z4xn6jFZTaugcOKz42xvRAYKgkVUERHVbuCJ5+f+gK+R6k12L02unakPGOA0L0ejhUl16dqDjKe4tmL9sedHcw==}
     engines: {node: '>=20.0.0'}
     hasBin: true
     peerDependencies:
-      '@cloudflare/workers-types': ^4.20260111.0
+      '@cloudflare/workers-types': ^4.20260114.0
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
@@ -4557,17 +4561,19 @@ snapshots:
     dependencies:
       mime: 3.0.0
 
+  '@cloudflare/kv-asset-handler@0.4.2': {}
+
+  '@cloudflare/unenv-preset@2.10.0(unenv@2.0.0-rc.24)(workerd@1.20260114.0)':
+    dependencies:
+      unenv: 2.0.0-rc.24
+    optionalDependencies:
+      workerd: 1.20260114.0
+
   '@cloudflare/unenv-preset@2.7.11(unenv@2.0.0-rc.24)(workerd@1.20251125.0)':
     dependencies:
       unenv: 2.0.0-rc.24
     optionalDependencies:
       workerd: 1.20251125.0
-
-  '@cloudflare/unenv-preset@2.9.0(unenv@2.0.0-rc.24)(workerd@1.20260111.0)':
-    dependencies:
-      unenv: 2.0.0-rc.24
-    optionalDependencies:
-      workerd: 1.20260111.0
 
   '@cloudflare/vitest-pool-workers@0.10.11(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.10.0)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.2))':
     dependencies:
@@ -4589,31 +4595,31 @@ snapshots:
   '@cloudflare/workerd-darwin-64@1.20251125.0':
     optional: true
 
-  '@cloudflare/workerd-darwin-64@1.20260111.0':
+  '@cloudflare/workerd-darwin-64@1.20260114.0':
     optional: true
 
   '@cloudflare/workerd-darwin-arm64@1.20251125.0':
     optional: true
 
-  '@cloudflare/workerd-darwin-arm64@1.20260111.0':
+  '@cloudflare/workerd-darwin-arm64@1.20260114.0':
     optional: true
 
   '@cloudflare/workerd-linux-64@1.20251125.0':
     optional: true
 
-  '@cloudflare/workerd-linux-64@1.20260111.0':
+  '@cloudflare/workerd-linux-64@1.20260114.0':
     optional: true
 
   '@cloudflare/workerd-linux-arm64@1.20251125.0':
     optional: true
 
-  '@cloudflare/workerd-linux-arm64@1.20260111.0':
+  '@cloudflare/workerd-linux-arm64@1.20260114.0':
     optional: true
 
   '@cloudflare/workerd-windows-64@1.20251125.0':
     optional: true
 
-  '@cloudflare/workerd-windows-64@1.20260111.0':
+  '@cloudflare/workerd-windows-64@1.20260114.0':
     optional: true
 
   '@commitlint/cli@20.1.0(@types/node@24.10.9)(typescript@5.9.3)':
@@ -5144,9 +5150,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.0':
     optional: true
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.10.7)':
     dependencies:
-      '@standard-schema/spec': 1.0.0
+      '@standard-schema/spec': 1.1.0
       hono: 4.10.7
 
   '@hono/swagger-ui@0.5.3(hono@4.10.7)':
@@ -5573,17 +5579,17 @@ snapshots:
     dependencies:
       playwright: 1.57.0
 
-  '@poppinss/colors@4.1.5':
+  '@poppinss/colors@4.1.6':
     dependencies:
       kleur: 4.1.5
 
   '@poppinss/dumper@0.6.5':
     dependencies:
-      '@poppinss/colors': 4.1.5
-      '@sindresorhus/is': 7.1.1
+      '@poppinss/colors': 4.1.6
+      '@sindresorhus/is': 7.2.0
       supports-color: 10.2.2
 
-  '@poppinss/exception@1.2.2': {}
+  '@poppinss/exception@1.2.3': {}
 
   '@quansync/fs@0.1.5':
     dependencies:
@@ -5750,7 +5756,7 @@ snapshots:
 
   '@sinclair/typebox@0.27.8': {}
 
-  '@sindresorhus/is@7.1.1': {}
+  '@sindresorhus/is@7.2.0': {}
 
   '@smithy/abort-controller@4.0.5':
     dependencies:
@@ -6038,11 +6044,11 @@ snapshots:
       - bare-buffer
       - debug
 
-  '@speed-highlight/core@1.2.12': {}
+  '@speed-highlight/core@1.2.14': {}
 
-  '@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)':
+  '@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)':
     dependencies:
-      '@standard-schema/spec': 1.0.0
+      '@standard-schema/spec': 1.1.0
       '@types/json-schema': 7.0.15
       quansync: 0.2.11
     optionalDependencies:
@@ -6051,10 +6057,10 @@ snapshots:
       valibot: 1.2.0(typescript@5.9.3)
       zod: 3.25.76
 
-  '@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.0.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)':
+  '@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)':
     dependencies:
-      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
-      '@standard-schema/spec': 1.0.0
+      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
+      '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     optionalDependencies:
       effect: 3.18.4
@@ -6063,8 +6069,7 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@standard-schema/spec@1.1.0':
-    optional: true
+  '@standard-schema/spec@1.1.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:
@@ -6781,14 +6786,14 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono-openapi@1.1.1(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.0.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.10.7)(openapi-types@12.1.3):
+  hono-openapi@1.1.1(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.10.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.10.7)(openapi-types@12.1.3):
     dependencies:
-      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
-      '@standard-community/standard-openapi': 0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.0.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
+      '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
+      '@standard-community/standard-openapi': 0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.3.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.18.4)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.18.4)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7)
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.10.7)
       hono: 4.10.7
 
   hono@4.10.7: {}
@@ -7005,17 +7010,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  miniflare@4.20260111.0:
+  miniflare@4.20260114.0:
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      acorn: 8.14.0
-      acorn-walk: 8.3.2
-      exit-hook: 2.2.1
-      glob-to-regexp: 0.4.1
       sharp: 0.34.5
-      stoppable: 1.1.0
       undici: 7.14.0
-      workerd: 1.20260111.0
+      workerd: 1.20260114.0
       ws: 8.18.0
       youch: 4.1.0-beta.10
       zod: 3.25.76
@@ -7671,13 +7671,13 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251125.0
       '@cloudflare/workerd-windows-64': 1.20251125.0
 
-  workerd@1.20260111.0:
+  workerd@1.20260114.0:
     optionalDependencies:
-      '@cloudflare/workerd-darwin-64': 1.20260111.0
-      '@cloudflare/workerd-darwin-arm64': 1.20260111.0
-      '@cloudflare/workerd-linux-64': 1.20260111.0
-      '@cloudflare/workerd-linux-arm64': 1.20260111.0
-      '@cloudflare/workerd-windows-64': 1.20260111.0
+      '@cloudflare/workerd-darwin-64': 1.20260114.0
+      '@cloudflare/workerd-darwin-arm64': 1.20260114.0
+      '@cloudflare/workerd-linux-64': 1.20260114.0
+      '@cloudflare/workerd-linux-arm64': 1.20260114.0
+      '@cloudflare/workerd-windows-64': 1.20260114.0
 
   wrangler@4.51.0:
     dependencies:
@@ -7695,16 +7695,16 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  wrangler@4.59.1:
+  wrangler@4.59.2:
     dependencies:
-      '@cloudflare/kv-asset-handler': 0.4.1
-      '@cloudflare/unenv-preset': 2.9.0(unenv@2.0.0-rc.24)(workerd@1.20260111.0)
+      '@cloudflare/kv-asset-handler': 0.4.2
+      '@cloudflare/unenv-preset': 2.10.0(unenv@2.0.0-rc.24)(workerd@1.20260114.0)
       blake3-wasm: 2.1.5
       esbuild: 0.27.0
-      miniflare: 4.20260111.0
+      miniflare: 4.20260114.0
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
-      workerd: 1.20260111.0
+      workerd: 1.20260114.0
     optionalDependencies:
       fsevents: 2.3.3
     transitivePeerDependencies:
@@ -7749,14 +7749,14 @@ snapshots:
 
   youch-core@0.3.3:
     dependencies:
-      '@poppinss/exception': 1.2.2
+      '@poppinss/exception': 1.2.3
       error-stack-parser-es: 1.0.5
 
   youch@4.1.0-beta.10:
     dependencies:
-      '@poppinss/colors': 4.1.5
+      '@poppinss/colors': 4.1.6
       '@poppinss/dumper': 0.6.5
-      '@speed-highlight/core': 1.2.12
+      '@speed-highlight/core': 1.2.14
       cookie: 1.1.1
       youch-core: 0.3.3
 
