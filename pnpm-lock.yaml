@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@hono/swagger-ui':
         specifier: ^0.5.2
-        version: 0.5.2(hono@4.10.7)
+        version: 0.5.3(hono@4.10.7)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.0.6
@@ -145,7 +145,7 @@ importers:
         version: 0.2.2(@standard-schema/spec@1.0.0)(hono@4.10.7)
       '@hono/swagger-ui':
         specifier: ^0.5.2
-        version: 0.5.2(hono@4.10.7)
+        version: 0.5.3(hono@4.10.7)
       '@hono/valibot-validator':
         specifier: ^0.6.0
         version: 0.6.1(hono@4.10.7)(valibot@1.2.0(typescript@5.9.3))
@@ -1406,10 +1406,10 @@ packages:
       '@standard-schema/spec': ^1.0.0
       hono: '>=3.9.0'
 
-  '@hono/swagger-ui@0.5.2':
-    resolution: {integrity: sha512-7wxLKdb8h7JTdZ+K8DJNE3KXQMIpJejkBTQjrYlUWF28Z1PGOKw6kUykARe5NTfueIN37jbyG/sBYsbzXzG53A==}
+  '@hono/swagger-ui@0.5.3':
+    resolution: {integrity: sha512-Hn90DOOJ62ICJQplQvCDVpi9Jcn6EhtRaiffyJIS53wA5RmRLtMCDQGVc0bor8vQD7JIwpkweWjs+3cycp+IvA==}
     peerDependencies:
-      hono: '*'
+      hono: '>=4.0.0'
 
   '@hono/valibot-validator@0.6.1':
     resolution: {integrity: sha512-rqKhQJI8IVR8gRRNHHf2wGtIT7sKEqV1KoGL5f2SocNytl+tBNn4EtRu4zfk/D6axgWSswnaxeiuJhM5yNFrCg==}
@@ -5149,7 +5149,7 @@ snapshots:
       '@standard-schema/spec': 1.0.0
       hono: 4.10.7
 
-  '@hono/swagger-ui@0.5.2(hono@4.10.7)':
+  '@hono/swagger-ui@0.5.3(hono@4.10.7)':
     dependencies:
       hono: 4.10.7
 
