@@ -17,7 +17,7 @@ import { Effect } from "effect";
  * @template Dependencies - 必要な依存関係（Effectのコンテキスト）
  */
 export type Stage<Input, Output, Error, Dependencies = never> = (
-	input: Input,
+  input: Input,
 ) => Effect.Effect<Output, Error, Dependencies>;
 
 /**
@@ -31,15 +31,15 @@ export type Stage<Input, Output, Error, Dependencies = never> = (
  * @template Dependencies - 必要な依存関係の和集合
  */
 export interface Workflow<Input, Output, Error, Dependencies = never> {
-	/**
-	 * ワークフローを実行する
-	 */
-	readonly run: Stage<Input, Output, Error, Dependencies>;
+  /**
+   * ワークフローを実行する
+   */
+  readonly run: Stage<Input, Output, Error, Dependencies>;
 
-	/**
-	 * ワークフローの説明
-	 */
-	readonly description: string;
+  /**
+   * ワークフローの説明
+   */
+  readonly description: string;
 }
 
 /**
@@ -50,16 +50,16 @@ export interface Workflow<Input, Output, Error, Dependencies = never> {
  * @returns 合成されたステージ
  */
 export const composeStages =
-	<I, M, O, E1, E2, D1, D2>(
-		stage1: Stage<I, M, E1, D1>,
-		stage2: Stage<M, O, E2, D2>,
-	): Stage<I, O, E1 | E2, D1 | D2> =>
-	(input: I) =>
-		Effect.gen(function* () {
-			const intermediate = yield* stage1(input);
-			const output = yield* stage2(intermediate);
-			return output;
-		});
+  <I, M, O, E1, E2, D1, D2>(
+    stage1: Stage<I, M, E1, D1>,
+    stage2: Stage<M, O, E2, D2>,
+  ): Stage<I, O, E1 | E2, D1 | D2> =>
+  (input: I) =>
+    Effect.gen(function* () {
+      const intermediate = yield* stage1(input);
+      const output = yield* stage2(intermediate);
+      return output;
+    });
 
 /**
  * 複数のステージを順次合成する
@@ -68,13 +68,14 @@ export const composeStages =
  * @returns 合成されたステージ
  */
 export const pipeStages =
-	<T>(...stages: Stage<T, T, unknown, unknown>[]): Stage<T, T, unknown, unknown> =>
-	(input: T) =>
-		stages.reduce(
-			(effect, stage) =>
-				Effect.flatMap(effect, (result) => stage(result)),
-			Effect.succeed(input) as Effect.Effect<T, unknown, unknown>,
-		);
+  <T>(
+    ...stages: Stage<T, T, unknown, unknown>[]
+  ): Stage<T, T, unknown, unknown> =>
+  (input: T) =>
+    stages.reduce(
+      (effect, stage) => Effect.flatMap(effect, (result) => stage(result)),
+      Effect.succeed(input) as Effect.Effect<T, unknown, unknown>,
+    );
 
 /**
  * ワークフローを作成する
@@ -84,9 +85,9 @@ export const pipeStages =
  * @returns ワークフロー
  */
 export const createWorkflow = <Input, Output, Error, Dependencies = never>(
-	description: string,
-	run: Stage<Input, Output, Error, Dependencies>,
+  description: string,
+  run: Stage<Input, Output, Error, Dependencies>,
 ): Workflow<Input, Output, Error, Dependencies> => ({
-	description,
-	run,
+  description,
+  run,
 });

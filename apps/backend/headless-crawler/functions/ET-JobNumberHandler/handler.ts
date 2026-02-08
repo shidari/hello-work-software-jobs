@@ -42,13 +42,15 @@ export const handler = async (event: unknown) => {
     // ワークフローを実行
     yield* Effect.logInfo(`[Workflow] ${workflow.description} を実行中...`);
     const result = yield* workflow.run(criteria);
-    
+
     // SQSキューにメッセージを送信
     yield* Effect.forEach(result.jobNumbers, (job) =>
       sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
     );
-    
-    yield* Effect.logInfo(`[Complete] ${result.totalCount}件の求人番号を処理しました`);
+
+    yield* Effect.logInfo(
+      `[Complete] ${result.totalCount}件の求人番号を処理しました`,
+    );
     return result.jobNumbers;
   });
 
@@ -62,9 +64,11 @@ export const handler = async (event: unknown) => {
     Logger.withMinimumLogLevel(
       (() => {
         const result = safeParse(eventSchema, event);
-        return result.success && result.output.debugLog ? LogLevel.Debug : LogLevel.Info;
-      })()
-    )(runnable)
+        return result.success && result.output.debugLog
+          ? LogLevel.Debug
+          : LogLevel.Info;
+      })(),
+    )(runnable),
   );
 
   if (Exit.isSuccess(exit)) {

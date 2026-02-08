@@ -22,7 +22,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
   const program = Effect.gen(function* () {
     // SQSイベントから求人番号を取得
     const jobNumber = yield* fromEventToFirstRecord(event);
-    
+
     // ETLワークフローを作成
     const extractStage = createExtractJobDetailStage();
     const transformStage = createTransformStage();
@@ -32,15 +32,19 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       transformStage,
       loadStage,
     );
-    
+
     // ワークフローを実行
-    yield* Effect.logInfo(`[Workflow] ${workflow.description} を実行中: ${jobNumber}`);
+    yield* Effect.logInfo(
+      `[Workflow] ${workflow.description} を実行中: ${jobNumber}`,
+    );
     const result = yield* workflow.run(jobNumber);
-    yield* Effect.logInfo(`[Complete] 求人番号 ${jobNumber} の処理が完了しました`);
-    
+    yield* Effect.logInfo(
+      `[Complete] 求人番号 ${jobNumber} の処理が完了しました`,
+    );
+
     return result;
   });
-  
+
   // 依存関係を提供してプログラムを実行
   const runnable = program
     .pipe(Effect.provide(Extractor.Default))
@@ -48,7 +52,11 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     .pipe(Effect.provide(transformerLive))
     .pipe(Effect.provide(transformerConfigLive))
     .pipe(Effect.provide(loaderLive))
-    .pipe(Effect.provide(loaderConfigLive)) as Effect.Effect<LoadResult, any, never>;
+    .pipe(Effect.provide(loaderConfigLive)) as Effect.Effect<
+    LoadResult,
+    any,
+    never
+  >;
 
   const result = await Effect.runPromiseExit(runnable);
 

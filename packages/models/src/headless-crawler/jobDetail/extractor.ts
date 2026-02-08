@@ -10,10 +10,7 @@ export const companyNameSchema = v.pipe(
   v.brand("companyName"),
 );
 
-export const rawHomePageSchema = v.pipe(
-  v.string(),
-  v.brand("homePage(raw)"),
-);
+export const rawHomePageSchema = v.pipe(v.string(), v.brand("homePage(raw)"));
 export const occupationSchema = v.pipe(
   v.string(),
   v.minLength(1, "occupation should not be empty."),

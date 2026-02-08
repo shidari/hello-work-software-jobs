@@ -1,7 +1,7 @@
 import { Data } from "effect";
 
 export class GetExecutablePathError extends Data.TaggedError(
-    "GetExecutablePathError",
+  "GetExecutablePathError",
 )<{
-    readonly message: string;
-}> { }
+  readonly message: string;
+}> {}
