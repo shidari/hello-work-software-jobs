@@ -15,7 +15,7 @@
 		"dump-remote-data": "pnpm exec wrangler d1 export job-store --remote --output=./database.sql"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.10.0",
+		"@cloudflare/vitest-pool-workers": "^0.12.0",
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.0.15",
 		"drizzle-kit": "^0.31.4",
