@@ -40,7 +40,7 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: Deploy AWS CDK
-        working-directory: ./apps/headless-crawler
+        working-directory: ./apps/backend/headless-crawler
         env:
           JOB_STORE_ENDPOINT: ${{ secrets.JOB_STORE_ENDPOINT }}
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
