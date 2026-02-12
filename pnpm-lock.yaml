@@ -40,8 +40,8 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/models
       aws-cdk-lib:
-        specifier: 2.221.0
-        version: 2.221.0(constructs@10.4.2)
+        specifier: 2.237.1
+        version: 2.237.1(constructs@10.4.2)
       constructs:
         specifier: ^10.0.0
         version: 10.4.2
@@ -77,8 +77,8 @@ importers:
         specifier: ^29.5.14
         version: 29.5.14
       '@types/node':
-        specifier: 24.10.9
-        version: 24.10.9
+        specifier: 22.19.8
+        version: 22.19.8
       aws-cdk:
         specifier: 2.1030.0
         version: 2.1030.0
@@ -87,7 +87,7 @@ importers:
         version: 0.25.12
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@24.10.9)(typescript@5.9.3)
+        version: 10.9.2(@types/node@22.19.8)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -169,25 +169,25 @@ importers:
         version: link:../../../packages/models
       '@tanstack/react-virtual':
         specifier: ^3.13.12
-        version: 3.13.18(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 3.13.18(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       hono:
         specifier: ^4.8.3
         version: 4.10.7
       jotai:
         specifier: ^2.13.1
-        version: 2.15.1(@types/react@19.2.7)(react@19.2.1)
+        version: 2.15.1(@types/react@19.2.7)(react@19.2.4)
       neverthrow:
         specifier: ^8.2.0
         version: 8.2.0
       next:
         specifier: 16.1.5
-        version: 16.1.5(@playwright/test@1.58.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 16.1.5(@playwright/test@1.58.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
-        specifier: 19.2.1
-        version: 19.2.1
+        specifier: 19.2.4
+        version: 19.2.4
       react-dom:
-        specifier: 19.2.1
-        version: 19.2.1(react@19.2.1)
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
       valibot:
         specifier: ^1.1.0
         version: 1.2.0(typescript@5.9.3)
@@ -254,14 +254,14 @@ importers:
 
 packages:
 
-  '@aws-cdk/asset-awscli-v1@2.2.242':
-    resolution: {integrity: sha512-4c1bAy2ISzcdKXYS1k4HYZsNrgiwbiDzj36ybwFVxEWZXVAP0dimQTCaB9fxu7sWzEjw3d+eaw6Fon+QTfTIpQ==}
+  '@aws-cdk/asset-awscli-v1@2.2.263':
+    resolution: {integrity: sha512-X9JvcJhYcb7PHs8R7m4zMablO5C9PGb/hYfLnxds9h/rKJu6l7MiXE/SabCibuehxPnuO/vk+sVVJiUWrccarQ==}
 
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0':
     resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
 
-  '@aws-cdk/cloud-assembly-schema@48.6.0':
-    resolution: {integrity: sha512-VwAHw5G/meFQsiReu1drD+mkL+jiCL7FMD/xoWDjvKcvFf4Xszl22zVskhfcekeU6+9cUe5Uy+QKkwOwMi1vGg==}
+  '@aws-cdk/cloud-assembly-schema@48.20.0':
+    resolution: {integrity: sha512-+eeiav9LY4wbF/EFuCt/vfvi/Zoxo8bf94PW5clbMraChEliq83w4TbRVy0jB9jE0v1ooFTtIjSQkowSPkfISg==}
     engines: {node: '>= 18.0.0'}
     bundledDependencies:
       - jsonschema
@@ -2232,6 +2232,9 @@ packages:
   '@types/luxon@3.7.1':
     resolution: {integrity: sha512-H3iskjFIAn5SlJU7OuxUmTEpebK6TKB8rxZShDslBMZJ5u9S//KM1sbdAisiSrqwLQncVjnpi2OK2J51h+4lsg==}
 
+  '@types/node@22.19.8':
+    resolution: {integrity: sha512-ebO/Yl+EAvVe8DnMfi+iaAyIqYdK0q/q0y0rw82INWEKJOBe6b/P3YWE8NW7oOlF/nXFNrHwhARrN/hdgDkraA==}
+
   '@types/node@24.10.9':
     resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
@@ -2353,8 +2356,8 @@ packages:
     resolution: {integrity: sha512-TH+b3Lv6pUjy/Nu0m6A2JULtdzLpmqF9x1Dhj00ZoEiML8qvVA9j1flkzTKNYgdEhWrjDwtWNpyyCUbfQe514g==}
     engines: {node: '>=20.19.0'}
 
-  aws-cdk-lib@2.221.0:
-    resolution: {integrity: sha512-lOS0EnE4NQBW2+/0/qxwDBtGYGt8Fa/lCYsvC2/XTU3vBZ454mKkdI9zWKspZJ+Fo5b2iS1Q7iiSIbQVat2xJA==}
+  aws-cdk-lib@2.237.1:
+    resolution: {integrity: sha512-RH8mWHLBtc14stkeUF0gFLaWdS5iS2AHUHnoT5B5LLZfEkYP9G43LjJs0AMmpdlQ5/ZQVvCZ+VB83Q9vLxILRw==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       constructs: ^10.0.0
@@ -3285,16 +3288,16 @@ packages:
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
-  react-dom@19.2.1:
-    resolution: {integrity: sha512-ibrK8llX2a4eOskq1mXKu/TGZj9qzomO+sNfO98M6d9zIPOEhlBkMkBUBLd1vgS0gQsLDBzA+8jJBVXDnfHmJg==}
+  react-dom@19.2.4:
+    resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
-      react: ^19.2.1
+      react: ^19.2.4
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react@19.2.1:
-    resolution: {integrity: sha512-DGrYcCWK7tvYMnWh79yrPHt+vdx9tY+1gPZa7nJQtO/p8bLTDaHp4dzwEhQB7pZ4Xe3ok4XKuEPrVuc+wlpkmw==}
+  react@19.2.4:
+    resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
     engines: {node: '>=0.10.0'}
 
   readdirp@4.1.2:
@@ -3583,6 +3586,9 @@ packages:
   unconfig@7.3.3:
     resolution: {integrity: sha512-QCkQoOnJF8L107gxfHL0uavn7WD9b3dpBcFX6HtfQYmjw2YzWxGuFQ0N0J6tE9oguCBJn9KOvfqYDCMPHIZrBA==}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -3802,11 +3808,11 @@ packages:
 
 snapshots:
 
-  '@aws-cdk/asset-awscli-v1@2.2.242': {}
+  '@aws-cdk/asset-awscli-v1@2.2.263': {}
 
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0': {}
 
-  '@aws-cdk/cloud-assembly-schema@48.6.0': {}
+  '@aws-cdk/cloud-assembly-schema@48.20.0': {}
 
   '@aws-crypto/sha256-browser@5.2.0':
     dependencies:
@@ -5594,11 +5600,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@tanstack/react-virtual@3.13.18(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@tanstack/react-virtual@3.13.18(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/virtual-core': 3.13.18
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@tanstack/virtual-core@3.13.18': {}
 
@@ -5657,6 +5663,10 @@ snapshots:
       '@types/node': 24.10.9
 
   '@types/luxon@3.7.1': {}
+
+  '@types/node@22.19.8':
+    dependencies:
+      undici-types: 6.21.0
 
   '@types/node@24.10.9':
     dependencies:
@@ -5779,11 +5789,11 @@ snapshots:
       '@babel/parser': 7.28.5
       pathe: 2.0.3
 
-  aws-cdk-lib@2.221.0(constructs@10.4.2):
+  aws-cdk-lib@2.237.1(constructs@10.4.2):
     dependencies:
-      '@aws-cdk/asset-awscli-v1': 2.2.242
+      '@aws-cdk/asset-awscli-v1': 2.2.263
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
-      '@aws-cdk/cloud-assembly-schema': 48.6.0
+      '@aws-cdk/cloud-assembly-schema': 48.20.0
       constructs: 10.4.2
 
   aws-cdk@2.1030.0:
@@ -6338,10 +6348,10 @@ snapshots:
 
   jiti@2.6.1: {}
 
-  jotai@2.15.1(@types/react@19.2.7)(react@19.2.1):
+  jotai@2.15.1(@types/react@19.2.7)(react@19.2.4):
     optionalDependencies:
       '@types/react': 19.2.7
-      react: 19.2.1
+      react: 19.2.4
 
   js-tokens@4.0.0: {}
 
@@ -6486,16 +6496,16 @@ snapshots:
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.53.1
 
-  next@16.1.5(@playwright/test@1.58.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  next@16.1.5(@playwright/test@1.58.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.1.5
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.18
       caniuse-lite: 1.0.30001759
       postcss: 8.4.31
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
-      styled-jsx: 5.1.6(react@19.2.1)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      styled-jsx: 5.1.6(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.1.5
       '@next/swc-darwin-x64': 16.1.5
@@ -6617,14 +6627,14 @@ snapshots:
 
   quansync@0.2.11: {}
 
-  react-dom@19.2.1(react@19.2.1):
+  react-dom@19.2.4(react@19.2.4):
     dependencies:
-      react: 19.2.1
+      react: 19.2.4
       scheduler: 0.27.0
 
   react-is@18.3.1: {}
 
-  react@19.2.1: {}
+  react@19.2.4: {}
 
   readdirp@4.1.2: {}
 
@@ -6837,10 +6847,10 @@ snapshots:
 
   strnum@2.1.1: {}
 
-  styled-jsx@5.1.6(react@19.2.1):
+  styled-jsx@5.1.6(react@19.2.4):
     dependencies:
       client-only: 0.0.1
-      react: 19.2.1
+      react: 19.2.4
 
   supports-color@10.2.2: {}
 
@@ -6902,14 +6912,14 @@ snapshots:
 
   tree-kill@1.2.2: {}
 
-  ts-node@10.9.2(@types/node@24.10.9)(typescript@5.9.3):
+  ts-node@10.9.2(@types/node@22.19.8)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 24.10.9
+      '@types/node': 22.19.8
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
@@ -6965,6 +6975,8 @@ snapshots:
       defu: 6.1.4
       jiti: 2.6.1
       quansync: 0.2.11
+
+  undici-types@6.21.0: {}
 
   undici-types@7.16.0: {}
 
