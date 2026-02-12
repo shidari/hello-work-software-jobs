@@ -20,7 +20,7 @@
 		"@types/node": "^24.0.15",
 		"drizzle-kit": "^0.31.4",
 		"drizzle-orm": "^0.44.2",
-		"tsdown": "^0.15.3",
+		"tsdown": "^0.20.0",
 		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.4",
