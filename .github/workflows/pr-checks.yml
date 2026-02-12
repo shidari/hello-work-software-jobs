@@ -56,7 +56,7 @@ jobs:
       - name: Install Playwright Chromium (browsers + deps)
         run: |
           # Run the installer from the package that has Playwright as a dependency
-          cd apps/hello-work-job-searcher
+          cd apps/frontend/hello-work-job-searcher
           pnpm exec playwright install --with-deps chromium
 
       - name: Run tests
