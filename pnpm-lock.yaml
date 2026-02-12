@@ -40,7 +40,7 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/models
       aws-cdk-lib:
-        specifier: 2.221.0
+        specifier: 2.237.1
         version: 2.238.0(constructs@10.4.5)
       constructs:
         specifier: ^10.0.0
@@ -77,7 +77,7 @@ importers:
         specifier: ^29.5.14
         version: 30.0.0
       '@types/node':
-        specifier: 24.10.9
+        specifier: 22.19.8
         version: 25.2.3
       aws-cdk:
         specifier: 2.1030.0
@@ -183,10 +183,10 @@ importers:
         specifier: 16.1.5
         version: 16.1.6(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
-        specifier: 19.2.1
+        specifier: 19.2.4
         version: 19.2.4
       react-dom:
-        specifier: 19.2.1
+        specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       valibot:
         specifier: ^1.1.0
@@ -3014,11 +3014,6 @@ packages:
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
-
-  semver@7.7.3:
-    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
-    engines: {node: '>=10'}
-    hasBin: true
 
   semver@7.7.4:
     resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
@@ -6090,15 +6085,13 @@ snapshots:
 
   scheduler@0.27.0: {}
 
-  semver@7.7.3: {}
-
   semver@7.7.4: {}
 
   sharp@0.34.5:
     dependencies:
       '@img/colour': 1.0.0
       detect-libc: 2.1.2
-      semver: 7.7.3
+      semver: 7.7.4
     optionalDependencies:
       '@img/sharp-darwin-arm64': 0.34.5
       '@img/sharp-darwin-x64': 0.34.5
@@ -6285,7 +6278,7 @@ snapshots:
       picomatch: 4.0.3
       rolldown: 1.0.0-rc.3
       rolldown-plugin-dts: 0.22.1(rolldown@1.0.0-rc.3)(typescript@5.9.3)
-      semver: 7.7.3
+      semver: 7.7.4
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tree-kill: 1.2.2
