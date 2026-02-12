@@ -1,13 +1,12 @@
-import { Effect, Exit, Config, Logger, LogLevel } from "effect";
-import { etCrawlerEffect } from "../../lib/E-T-crawler";
-import { sendMessageToQueue } from "../helpers/helper";
-import { safeParse } from "valibot";
 import { eventSchema } from "@sho/models";
+import { Config, Effect, Exit, Logger, LogLevel } from "effect";
+import { safeParse } from "valibot";
+import { HelloWorkCrawler } from "../../lib/job-number-crawler/crawl";
+import { issueToLogString } from "../../lib/util";
+import { sendMessageToQueue } from "../helpers/helper";
 import { EventSchemaValidationError } from "./error";
-import { issueToLogString } from "../../lib/core/util";
-import { mainLive } from "../../lib/E-T-crawler/context";
-import { PlaywrightChromiumPageResource } from "../../lib/core/headless-browser";
 
+// Handler
 export const handler = async (event: unknown) => {
   const program = Effect.gen(function* () {
     const QUEUE_URL = yield* Config.string("QUEUE_URL");
@@ -21,19 +20,17 @@ export const handler = async (event: unknown) => {
         );
       return Effect.succeed(result.output);
     })();
-    const runnable = etCrawlerEffect
-      .pipe(Effect.provide(mainLive))
-      .pipe(Effect.provide(PlaywrightChromiumPageResource.Default))
-      .pipe(Effect.scoped)
+    const crawler = yield* HelloWorkCrawler;
+    const jobs = yield* crawler
+      .crawlJobLinks()
       .pipe(
         Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
       );
-    const jobs = yield* runnable;
     yield* Effect.forEach(jobs, (job) =>
       sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
     );
     return jobs;
-  });
+  }).pipe(Effect.provide(HelloWorkCrawler.Default), Effect.scoped);
   const exit = await Effect.runPromiseExit(program);
   if (Exit.isSuccess(exit)) {
     console.log("handler succeeded", JSON.stringify(exit.value, null, 2));
