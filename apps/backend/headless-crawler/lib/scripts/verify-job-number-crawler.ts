@@ -12,11 +12,15 @@ import {
 
 async function main() {
   const devLayer = HelloWorkCrawler.DefaultWithoutDependencies.pipe(
-    Layer.provide(Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev)),
+    Layer.provide(
+      Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
+    ),
     Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumBrowseResource.DefaultWithoutDependencies),
-    Layer.provide(Layer.succeed(PlaywrightBrowserConfig, PlaywrightBrowserConfig.dev)),
+    Layer.provide(
+      Layer.succeed(PlaywrightBrowserConfig, PlaywrightBrowserConfig.dev),
+    ),
   );
   const program = Effect.gen(function* () {
     const crawler = yield* HelloWorkCrawler;

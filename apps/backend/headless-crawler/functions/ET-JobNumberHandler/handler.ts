@@ -21,9 +21,11 @@ export const handler = async (event: unknown) => {
       return Effect.succeed(result.output);
     })();
     const crawler = yield* HelloWorkCrawler;
-    const jobs = yield* crawler.crawlJobLinks().pipe(
-      Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
-    );
+    const jobs = yield* crawler
+      .crawlJobLinks()
+      .pipe(
+        Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
+      );
     yield* Effect.forEach(jobs, (job) =>
       sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
     );
