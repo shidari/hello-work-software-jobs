@@ -80,6 +80,7 @@ Base: `/api/v1`
 - **Error Handling**: Use neverthrow Result types (no throwing exceptions)
 - **Validation**: Runtime validation with Valibot
 - **Package Manager**: pnpm 10.24.0
+- **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
 
 ## Environment Variables
 
