@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@22",
+    "awscli2@latest",
+    "aws-vault@latest",
+    "pnpm@latest",
+    "gh@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'headless-crawler devbox ready' > /dev/null"
+    ]
+  }
+}
