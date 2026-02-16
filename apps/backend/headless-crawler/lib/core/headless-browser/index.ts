@@ -1,4 +1,4 @@
-import { Console, Effect } from "effect";
+import { Effect } from "effect";
 import { type LaunchOptions, chromium } from "playwright";
 import { LaunchBrowserError, NewContextError, NewPageError } from "./error";
 

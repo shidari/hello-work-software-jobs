@@ -29,7 +29,7 @@ export const handler = async (_event: ScheduledEvent) => {
 
     const response = await sqsClient.send(command);
     const messageCount = Number.parseInt(
-      response.Attributes?.ApproximateNumberOfMessages || "0",
+      response.Attributes?.ApproximateNumberOfMessages || "0", 10
     );
 
     console.log(`デッドレターキューのメッセージ数: ${messageCount}`);
@@ -71,7 +71,7 @@ export const handler = async (_event: ScheduledEvent) => {
             const systemAttributes = message.Attributes
               ? [
                   `**リトライ回数**: ${message.Attributes.ApproximateReceiveCount}`,
-                  `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0")).toISOString()}`,
+                  `**送信時刻**: ${new Date(Number.parseInt(message.Attributes.SentTimestamp || "0", 10)).toISOString()}`,
                 ]
               : [];
 
@@ -83,7 +83,7 @@ export const handler = async (_event: ScheduledEvent) => {
               console.log(
                 "  - 送信時刻:",
                 new Date(
-                  Number.parseInt(message.Attributes.SentTimestamp || "0"),
+                  Number.parseInt(message.Attributes.SentTimestamp || "0", 10),
                 ).toISOString(),
               );
             }

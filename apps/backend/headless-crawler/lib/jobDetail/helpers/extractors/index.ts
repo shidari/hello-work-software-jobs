@@ -1,4 +1,4 @@
-import type { extractedJob, JobDetailPage } from "@sho/models";
+import type { JobDetailPage } from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
 import {
@@ -12,7 +12,6 @@ import {
   ExtractOccupationError,
   ExtractQualificationsError,
   ExtractReceivedDateError,
-  type ExtractTextContentError,
   ExtractWageError,
   ExtractWorkingHoursError,
   ExtractWorkPlaceError,
@@ -31,15 +30,7 @@ import {
   validateWorkingHours,
   validateWorkPlace,
 } from "../validators";
-import type {
-  JobDetailPropertyValidationError,
-  RawHomePageValidationError,
-} from "../validators/error";
 import { homePageElmExists, qualificationsElmExists } from "../checkers";
-import type {
-  HomePageElmNotFoundError,
-  QualificationsElmNotFoundError,
-} from "../checkers/error";
 import { validateJobNumber } from "../../../core/page/others";
 
 function extractJobNumber(page: JobDetailPage) {

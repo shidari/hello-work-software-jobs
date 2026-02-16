@@ -4,7 +4,6 @@ import type { JobList } from "@sho/models";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import Link from "next/link";
 import React, { useTransition } from "react";
 import { JobOverview } from "@/app/_components/Job";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
