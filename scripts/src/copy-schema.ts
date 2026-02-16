@@ -39,7 +39,7 @@ function findGitRootByGit(): Result<RepoRootDirPath, Error> {
       encoding: "utf8",
     }).trim();
     return ok(root as RepoRootDirPath);
-  } catch (_e) {
+  } catch (e) {
     return err(new Error("Git root not found"));
   }
 }

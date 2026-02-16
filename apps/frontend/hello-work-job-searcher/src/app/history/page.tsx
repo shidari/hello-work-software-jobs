@@ -7,7 +7,7 @@ export default async function Page({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const s = await searchParams;
-  const d = s.date;
+  const d = s["date"];
   const dateStr = Array.isArray(d)
     ? d[0]
     : d ||

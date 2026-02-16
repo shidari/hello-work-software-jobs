@@ -1,116 +1,113 @@
 /* 青色で可愛い「求人をもっと見る」ボタン */
 
 .moreJobsButtonWrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1.2em;
 }
 
 .moreJobsButton {
-  padding: 0.6em 2em;
-  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
-  color: #fff;
-  font-weight: bold;
-  border: none;
-  border-radius: 999px;
-  box-shadow: 0 0.13em 0.5em rgba(59, 130, 246, 0.15);
-  cursor: pointer;
-  font-size: 1rem;
-  transition:
-    background 0.2s,
-    box-shadow 0.2s,
-    transform 0.1s;
-  min-width: 10em;
-  max-width: 90vw;
-  width: fit-content;
+    padding: 0.6em 2em;
+    background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 999px;
+    box-shadow: 0 0.13em 0.5em rgba(59, 130, 246, 0.15);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    min-width: 10em;
+    max-width: 90vw;
+    width: fit-content;
 }
 
 @media (max-width: 600px) {
-  .moreJobsButtonWrapper {
-    padding-top: 1.5em;
-  }
-  .moreJobsButton {
-    font-size: 0.95rem;
-    padding: 0.6em 1.2em;
-    min-width: 7em;
-  }
+    .moreJobsButtonWrapper {
+        padding-top: 1.5em;
+    }
+    .moreJobsButton {
+        font-size: 0.95rem;
+        padding: 0.6em 1.2em;
+        min-width: 7em;
+    }
 }
 
 .moreJobsButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .moreJobsButton:hover:not(:disabled) {
-  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
-  transform: translateY(-2px) scale(1.03);
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+    transform: translateY(-2px) scale(1.03);
 }
 .jobOverviewRelative {
-  position: relative;
+    position: relative;
 }
 .jobLink {
-  flex: 1;
-  text-decoration: none;
-  color: inherit;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
 }
 .newBadgeAbsolute {
-  position: absolute;
-  top: 0.8rem;
-  left: 0.5rem;
-  z-index: 1;
-  padding-top: 0.3rem;
-  padding-left: 0.2rem;
+    position: absolute;
+    top: 0.8rem;
+    left: 0.5rem;
+    z-index: 1;
+    padding-top: 0.3rem;
+    padding-left: 0.2rem;
 }
 .newBadge {
-  background: #ff5252;
-  color: white;
-  border-radius: 0.5em;
-  font-size: 0.8em;
-  padding: 0.1em 0.6em;
-  font-weight: 700;
-  margin-left: 0.5rem;
-  display: inline-block;
+    background: #ff5252;
+    color: white;
+    border-radius: 0.5em;
+    font-size: 0.8em;
+    padding: 0.1em 0.6em;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    display: inline-block;
 }
 .jobOverview {
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border-radius: 8px;
-  margin: 4px;
-  border: 0.1em solid gainsboro;
-  padding: 2%;
-  position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 4px;
+    border: 0.1em solid gainsboro;
+    padding: 2%;
+    position: relative;
 }
 
 /* ちょっと良くない気がする */
 .jobOverview a {
-  text-decoration: none;
-  /* 下線を消す */
-  color: inherit;
-  /* 親要素の文字色を継承する */
+    text-decoration: none;
+    /* 下線を消す */
+    color: inherit;
+    /* 親要素の文字色を継承する */
 }
 
 .jobOverview:hover {
-  background-color: #e9ecef;
-  /* より濃いグレー */
-  /* または以下のような色も選択肢 */
-  /* background-color: #dee2e6; さらに濃い */
-  /* background-color: #f1f3f4; Google風 */
-  /* background-color: #e3f2fd; 薄い青 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-  border-color: #adb5bd;
-  /* ボーダーも少し濃く */
+    background-color: #e9ecef;
+    /* より濃いグレー */
+    /* または以下のような色も選択肢 */
+    /* background-color: #dee2e6; さらに濃い */
+    /* background-color: #f1f3f4; Google風 */
+    /* background-color: #e3f2fd; 薄い青 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    border-color: #adb5bd;
+    /* ボーダーも少し濃く */
 }
 
 .jobOverview:active {
-  transform: translateY(0px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(0px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .loadingMessage {
-  text-align: center;
-  padding: 20px;
-  color: #666;
+    text-align: center;
+    padding: 20px;
+    color: #666;
 }

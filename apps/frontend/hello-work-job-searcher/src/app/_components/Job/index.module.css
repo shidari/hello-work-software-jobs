@@ -8,19 +8,23 @@
   flex: 9;
 }
 
+
 .layout-job-detail {
   padding: 1em;
 }
 
+
 .layout-job-detail--primary {
   border: 0.1em solid gainsboro;
 }
+
 
 .layout-job-detailList {
   display: flex;
   flex-direction: column;
   gap: 1em;
 }
+
 
 .layout-job-detailList--primary {
   list-style: none;

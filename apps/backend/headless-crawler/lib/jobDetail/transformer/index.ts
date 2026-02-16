@@ -27,7 +27,8 @@ export class Transformer extends Effect.Service<Transformer>()(
       transform: Effect.fn("transform")(function* (rawHtml: string) {
         yield* Effect.logInfo("start transforming raw HTML...");
         const { document } = parseHTML(rawHtml);
-        const rawJobNumber = document.querySelector("#ID_kjNo")?.textContent;
+        const rawJobNumber =
+          document.querySelector("#ID_kjNo")?.textContent;
         const jobNumber = yield* validateJobNumber(rawJobNumber);
         const rawCompanyName =
           document.querySelector("#ID_jgshMei")?.textContent;
@@ -42,11 +43,13 @@ export class Transformer extends Effect.Service<Transformer>()(
         const homePage = rawHomePage
           ? yield* toTransformedHomePage(rawHomePage)
           : undefined;
-        const rawOccupation = document.querySelector("#ID_sksu")?.textContent;
+        const rawOccupation =
+          document.querySelector("#ID_sksu")?.textContent;
         const occupation = yield* validateOccupation(rawOccupation);
         const rawEmplomentType =
           document.querySelector("#ID_koyoKeitai")?.textContent;
-        const employmentType = yield* validateEmploymentType(rawEmplomentType);
+        const employmentType =
+          yield* validateEmploymentType(rawEmplomentType);
         const rawWage = document.querySelector("#ID_chgn")?.textContent;
         const { wageMax, wageMin } = yield* toTransformedWage(rawWage);
         const rawWorkingHours =
@@ -63,10 +66,12 @@ export class Transformer extends Effect.Service<Transformer>()(
         const workPlace = yield* validateWorkPlace(rawWorkPlace);
         const rawJobDescription =
           document.querySelector("#ID_shigotoNy")?.textContent;
-        const jobDescription = yield* validateJobDescription(rawJobDescription);
+        const jobDescription =
+          yield* validateJobDescription(rawJobDescription);
         const rawQualifications =
           document.querySelector("#ID_hynaMenkyoSkku")?.textContent;
-        const qualifications = yield* validateQualification(rawQualifications);
+        const qualifications =
+          yield* validateQualification(rawQualifications);
         return {
           jobNumber,
           companyName,

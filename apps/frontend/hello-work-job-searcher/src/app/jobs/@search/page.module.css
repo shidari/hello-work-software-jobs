@@ -16,6 +16,8 @@
   overflow: scroll;
 }
 
+
+
 /* ページ全体の左右分割 */
 .layout-root {
   display: flex;
@@ -64,6 +66,6 @@
   font-weight: 700;
   font-size: 1.35rem;
   text-align: left;
-  font-family: "Merriweather", "Times New Roman", Times, serif;
+  font-family: 'Merriweather', 'Times New Roman', Times, serif;
   letter-spacing: 0.04em;
 }

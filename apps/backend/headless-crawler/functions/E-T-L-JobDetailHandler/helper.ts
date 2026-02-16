@@ -134,9 +134,7 @@ export const job2InsertedJob = (job: extractedJob) => {
           message: `parse working hours failed.\n${String(e)}`,
         }),
     });
-    const homePage = rawHomePage
-      ? yield* toTransformedHomePage(rawHomePage)
-      : undefined;
+    const homePage = rawHomePage ? yield* toTransformedHomePage(rawHomePage) : undefined;
     return {
       jobNumber,
       companyName,

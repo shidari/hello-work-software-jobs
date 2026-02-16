@@ -1,23 +1,23 @@
 .spinner-wrapper {
-  display: block;
-  padding: 2.5em 0 2.5em 1.5em;
+    display: block;
+    padding: 2.5em 0 2.5em 1.5em;
 }
 
 .spinner {
-  width: 3em;
-  height: 3em;
-  border: 0.375em solid #e0e0e0;
-  border-top: 0.375em solid #1976d2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+    width: 3em;
+    height: 3em;
+    border: 0.375em solid #e0e0e0;
+    border-top: 0.375em solid #1976d2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
 
-  100% {
-    transform: rotate(360deg);
-  }
+    100% {
+        transform: rotate(360deg);
+    }
 }

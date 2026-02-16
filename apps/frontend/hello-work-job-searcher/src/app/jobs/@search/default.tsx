@@ -17,7 +17,7 @@ export default async function Page() {
     return <div>求人情報の取得に失敗しました。</div>;
   }
   const data = result.value;
-  const _initialJobData: TJobDetail = {
+  const initialJobData: TJobDetail = {
     jobNumber: data.jobs[0]?.jobNumber ?? "",
     companyName: data.jobs[0]?.companyName ?? "",
     jobTitle: data.jobs[0]?.occupation ?? "",

@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="https://www.hellowork.mhlw.go.jp/map/css/ol.css">
     <script type="text/javascript" src="https://www.hellowork.mhlw.go.jp/map/js/ol.js" charset="UTF-8"></script>
     <script><!-
-const _mapServerUrl = 'https://www.hellowork.mhlw.go.jp/';
-const _mapAppId = '';
-const _pointerUrl = 'https://www.hellowork.mhlw.go.jp/map/images/pin.png';
-const _maxZoom = 17;
-const _minZoom = 4;
+const mapServerUrl = 'https://www.hellowork.mhlw.go.jp/';
+const mapAppId = '';
+const pointerUrl = 'https://www.hellowork.mhlw.go.jp/map/images/pin.png';
+const maxZoom = 17;
+const minZoom = 4;
 -></script>
 
 
@@ -495,9 +495,9 @@ const _minZoom = 4;
                                     <input type="hidden" id="ID_pinLongitudemap1" name="pinLongitudemap1" value="">
 
                                     <script>
-                                        function _callbackmap1(json) {
+                                        function callbackmap1(json) {
                                             var funcName;
-                                            funcName = _callbackmap1.name;
+                                            funcName = callbackmap1.name;
                                             if (!funcName) { funcName = getFnName(this); }
                                             funcName = funcName.replace(/callback/, '');
                                             callback(json, 'map1');
@@ -1579,9 +1579,9 @@ const _minZoom = 4;
                                     <input type="hidden" id="ID_pinLongitudemap2" name="pinLongitudemap2" value="">
 
                                     <script>
-                                        function _callbackmap2(json) {
+                                        function callbackmap2(json) {
                                             var funcName;
-                                            funcName = _callbackmap2.name;
+                                            funcName = callbackmap2.name;
                                             if (!funcName) { funcName = getFnName(this); }
                                             funcName = funcName.replace(/callback/, '');
                                             callback(json, 'map2');
