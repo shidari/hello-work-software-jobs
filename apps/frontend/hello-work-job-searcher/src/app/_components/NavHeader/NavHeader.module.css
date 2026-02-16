@@ -13,7 +13,6 @@
   transition: background 0.15s;
 }
 
-
 /* --- nav --- */
 .nav {
   width: 100%;
@@ -38,8 +37,8 @@
   cursor: pointer;
   display: inline-block;
   margin-right: 1.1rem;
-  box-shadow: 0 2px 8px 0 rgba(60,60,60,0.08);
-  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 2px 8px 0 rgba(60, 60, 60, 0.08);
+  font-family: "Segoe UI", Arial, sans-serif;
   letter-spacing: 0.04em;
   transition: background 0.15s;
 }

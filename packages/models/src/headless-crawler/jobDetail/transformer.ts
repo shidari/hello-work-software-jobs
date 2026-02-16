@@ -102,8 +102,12 @@ export const transformedEmployeeCountSchema = v.pipe(
   v.brand("TransformedEmployeeCount"),
 );
 
-export const transformedHomePageSchema = v.pipe(rawHomePageSchema, v.transform((val) => val.trim()), v.url("home page should be url"), v.brand("homePage(transformed)"),);
-
+export const transformedHomePageSchema = v.pipe(
+  rawHomePageSchema,
+  v.transform((val) => val.trim()),
+  v.url("home page should be url"),
+  v.brand("homePage(transformed)"),
+);
 
 export const transformedSchema = v.object({
   ...v.omit(extractedJobSchema, ["wage", "workingHours", "homePage"]).entries,

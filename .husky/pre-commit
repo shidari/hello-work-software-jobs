@@ -1,7 +1,7 @@
 pnpm --filter job-store-api run copy-schema
 git add apps/backend/job-store-api/src/db/schema.ts
 pnpm exec lint-staged
-nix-shell -p pinact --run "pinact run"
-git add $(git diff --name-only -- 'github/workflows/*')
-git add .github/workflows/* 
+# nix-shell -p pinact --run "pinact run"
+# git add $(git diff --name-only -- 'github/workflows/*')
+# git add .github/workflows/* 
 

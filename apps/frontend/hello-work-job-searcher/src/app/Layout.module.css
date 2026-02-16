@@ -3,17 +3,17 @@
 }
 
 .header-title {
-  text-align: left;          /* 配置 */
+  text-align: left; /* 配置 */
   padding: 0.7em 0 0.9em 0.5em; /* 部品の骨格 */
   border-bottom: 1px solid #ccc; /* 骨格の境界線 */
-  box-shadow: none;          /* 骨格の影の有無 */
+  box-shadow: none; /* 骨格の影の有無 */
 }
 
 .header-title--primary {
   font-weight: 700;
   font-size: 1.35rem;
   color: #f3f4f6;
-  font-family: 'Merriweather', 'Times New Roman', Times, serif;
+  font-family: "Merriweather", "Times New Roman", Times, serif;
   letter-spacing: 0.04em;
   background: #4b5563;
 }
