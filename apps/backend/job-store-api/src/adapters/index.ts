@@ -9,7 +9,7 @@ import type {
   JobStoreDBClient,
 } from "@sho/models";
 import { DateTime } from "luxon";
-import { and, asc, desc, eq, gt, like, lt, not, } from "drizzle-orm";
+import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { jobs } from "../db/schema";
 import { ResultAsync } from "neverthrow";
