@@ -4,7 +4,7 @@ import {
   SQSClient,
 } from "@aws-sdk/client-sqs";
 import type { ScheduledEvent } from "aws-lambda";
-import { createBugIssue } from "../../lib/helpers/github";
+import { createBugIssue } from "../../lib/github";
 
 const sqsClient = new SQSClient({
   region: process.env.AWS_REGION || "us-east-1",
