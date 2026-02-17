@@ -1,9 +1,13 @@
 import type {
   InsertJobRequestBody,
+  JobListPage,
   JobNumber,
+  JobOverViewList,
+  JobSearchPage,
   transformedSchema,
 } from "@sho/models";
 import {
+  jobNumberSchema,
   transformedEmployeeCountSchema,
   transformedHomePageSchema,
   transformedWageSchema,
@@ -12,17 +16,10 @@ import {
 import { format } from "date-fns";
 import { Config, Data, Effect } from "effect";
 import { parseHTML } from "linkedom";
+import type { Page } from "playwright";
 import type { InferOutput } from "valibot";
-import { safeParse } from "valibot";
+import * as v from "valibot";
 import { PlaywrightChromiumPageResource } from "../browser";
-import { goToSingleJobDetailPage } from "../core/page/JobList/navigations";
-import { validateJobListPage } from "../core/page/JobList/validators";
-import {
-  goToJobSearchPage,
-  searchNoThenGotoSingleJobListPage,
-} from "../core/page/JobSearch/navigations";
-import { validateJobSearchPage } from "../core/page/JobSearch/validators";
-import { validateJobNumber } from "../core/page/others";
 import {
   transformExpiryDate,
   transformReceivedDate,
@@ -36,6 +33,7 @@ import {
   validateQualification,
   validateWorkPlace,
 } from "../jobDetail/helpers/validators";
+import { JobNumberValidationError } from "../jobDetail/helpers/validators/error";
 import { issueToLogString } from "../util";
 
 // ============================================================
@@ -73,12 +71,262 @@ export class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly responseStatusMessage?: string;
 }> {}
 
+class GoToJobSearchPageError extends Data.TaggedError(
+  "GoToJobSearchPageError",
+)<{ readonly message: string }> {}
+
+class JobSearchPageValidationError extends Data.TaggedError(
+  "JobSearchPageValidationError",
+)<{ readonly message: string }> {}
+
+class SearchThenGotoFirstJobListPageError extends Data.TaggedError(
+  "SearchThenGotoFirstJobListPageError",
+)<{ readonly message: string }> {}
+
+class FillJobNumberError extends Data.TaggedError("FillJobNumberError")<{
+  readonly message: string;
+}> {}
+
+class JobListPageValidationError extends Data.TaggedError(
+  "JobListPageValidationError",
+)<{ readonly message: string }> {}
+
+class FromJobListToJobDetailPageError extends Data.TaggedError(
+  "FromJobListToJobDetailPageError",
+)<{ readonly message: string }> {}
+
+class AssertSingleJobListedError extends Data.TaggedError(
+  "AssertSingleJobListedError",
+)<{ readonly message: string }> {}
+
+class ListJobsError extends Data.TaggedError("ListJobsError")<{
+  readonly message: string;
+}> {}
+
+// ============================================================
+// Page Operations (inlined from core/page/)
+// ============================================================
+
+function goToJobSearchPage(page: Page) {
+  return Effect.tryPromise({
+    try: async () => {
+      await page.goto(
+        "https://www.hellowork.mhlw.go.jp/kensaku/GECA110010.do?action=initDisp&screenId=GECA110010",
+      );
+    },
+    catch: (e) =>
+      new GoToJobSearchPageError({
+        message: `unexpected error.\n${String(e)}`,
+      }),
+  }).pipe(
+    Effect.tap(() => {
+      return Effect.logDebug("navigated to job search page.");
+    }),
+  );
+}
+
+function validateJobSearchPage(page: Page) {
+  return Effect.gen(function* () {
+    const url = page.url();
+    if (!url.includes("kensaku"))
+      yield* Effect.fail(
+        new JobSearchPageValidationError({
+          message: `not on job search page.\nurl=${url}`,
+        }),
+      );
+    const jobSearchPage = yield* Effect.tryPromise({
+      try: async () => {
+        return page as JobSearchPage;
+      },
+      catch: (e) =>
+        new JobSearchPageValidationError({
+          message: `unexpected error.\n${String(e)}`,
+        }),
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug("succeeded to validate job search page.");
+      }),
+    );
+    return jobSearchPage;
+  });
+}
+
+function fillJobNumber(page: JobSearchPage, jobNumber: JobNumber) {
+  return Effect.tryPromise({
+    try: async () => {
+      const jobNumberSplits = jobNumber.split("-");
+      const firstJobNumber = jobNumberSplits.at(0);
+      const secondJobNumber = jobNumberSplits.at(1);
+      if (!firstJobNumber)
+        throw new FillJobNumberError({
+          message: `firstJobnumber undefined. jobNumber=${jobNumber}`,
+        });
+      if (!secondJobNumber)
+        throw new FillJobNumberError({
+          message: `secondJobNumber undefined. jobNumber=${jobNumber}`,
+        });
+      const firstJobNumberInput = page.locator("#ID_kJNoJo1");
+      const secondJobNumberInput = page.locator("#ID_kJNoGe1");
+      await firstJobNumberInput.fill(firstJobNumber);
+      await secondJobNumberInput.fill(secondJobNumber);
+    },
+    catch: (e) =>
+      new FillJobNumberError({
+        message: `unexpected error.\njobNumber=${jobNumber}\n${String(e)}`,
+      }),
+  }).pipe(
+    Effect.tap(() => {
+      return Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`);
+    }),
+  );
+}
+
+function searchNoThenGotoSingleJobListPage(
+  page: JobSearchPage,
+  jobNumber: JobNumber,
+) {
+  return Effect.gen(function* () {
+    yield* fillJobNumber(page, jobNumber);
+    yield* Effect.tryPromise({
+      try: async () => {
+        const searchNoBtn = page.locator("#ID_searchNoBtn");
+        await Promise.all([
+          page.waitForURL("**/kensaku/*.do"),
+          searchNoBtn.click(),
+        ]);
+      },
+      catch: (e) =>
+        new SearchThenGotoFirstJobListPageError({
+          message: `unexpected error.\n${String(e)}`,
+        }),
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug(
+          "navigated to job list page from job search page.",
+        );
+      }),
+    );
+  });
+}
+
+function validateJobListPage(page: Page) {
+  return Effect.tryPromise({
+    try: async () => {
+      return page.locator(".kyujin").count();
+    },
+    catch: (e) =>
+      new JobListPageValidationError({
+        message: `unexpected error. ${String(e)}`,
+      }),
+  })
+    .pipe(
+      Effect.flatMap((pageCount) =>
+        pageCount === 0
+          ? Effect.fail(
+              new JobListPageValidationError({
+                message: "job list is empty. maybe job not found.",
+              }),
+            )
+          : Effect.succeed(page as JobListPage),
+      ),
+    )
+    .pipe(
+      Effect.tap((_) => {
+        return Effect.logDebug("succeeded to validate job list page.");
+      }),
+    );
+}
+
+function listJobOverviewElem(
+  jobListPage: JobListPage,
+): Effect.Effect<JobOverViewList, ListJobsError, never> {
+  return Effect.tryPromise({
+    try: () => jobListPage.locator("table.kyujin.mt1.noborder").all(),
+    catch: (e) =>
+      new ListJobsError({ message: `unexpected error.\n${String(e)}` }),
+  })
+    .pipe(
+      Effect.flatMap((tables) =>
+        tables.length === 0
+          ? Effect.fail(
+              new ListJobsError({ message: "jobOverList is empty." }),
+            )
+          : Effect.succeed(tables as JobOverViewList),
+      ),
+    )
+    .pipe(
+      Effect.tap((jobOverViewList) => {
+        return Effect.logDebug(
+          `succeeded to list job overview elements. count=${jobOverViewList.length}`,
+        );
+      }),
+    );
+}
+
+function assertSingleJobListed(page: JobListPage) {
+  return Effect.gen(function* () {
+    const jobOverViewList = yield* listJobOverviewElem(page);
+    if (jobOverViewList.length !== 1) {
+      yield* Effect.logDebug(
+        `failed to assert single job listed. job count=${jobOverViewList.length}`,
+      );
+      return yield* Effect.fail(
+        new AssertSingleJobListedError({
+          message: `job list count should be 1 but ${jobOverViewList.length}`,
+        }),
+      );
+    }
+  });
+}
+
+function goToSingleJobDetailPage(page: JobListPage) {
+  return Effect.gen(function* () {
+    yield* assertSingleJobListed(page);
+    yield* Effect.tryPromise({
+      try: async () => {
+        const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
+        showDetailBtn.evaluate((elm) => elm.removeAttribute("target"));
+        await showDetailBtn.click();
+      },
+      catch: (e) =>
+        new FromJobListToJobDetailPageError({
+          message: `unexpected error.\n${String(e)}`,
+        }),
+    }).pipe(
+      Effect.tap(() => {
+        return Effect.logDebug(
+          "navigated to job detail page from job list page.",
+        );
+      }),
+    );
+    return page;
+  });
+}
+
+function validateJobNumber(val: unknown) {
+  return Effect.gen(function* () {
+    yield* Effect.logDebug(
+      `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
+    );
+    const result = v.safeParse(jobNumberSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new JobNumberValidationError({
+          detail: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
+}
+
 // ============================================================
 // Transformer Helpers
 // ============================================================
 
 const toTransformedWage = (val: unknown) => {
-  const result = safeParse(transformedWageSchema, val);
+  const result = v.safeParse(transformedWageSchema, val);
   if (!result.success) {
     return Effect.fail(
       new WageTransformationError({
@@ -91,7 +339,7 @@ const toTransformedWage = (val: unknown) => {
 };
 
 const toTransformedWorkingHours = (val: unknown) => {
-  const result = safeParse(transformedWorkingHoursSchema, val);
+  const result = v.safeParse(transformedWorkingHoursSchema, val);
   if (!result.success) {
     return Effect.fail(
       new WorkingHoursTransformationError({
@@ -104,7 +352,7 @@ const toTransformedWorkingHours = (val: unknown) => {
 };
 
 const toTransformedEmployeeCount = (val: unknown) => {
-  const result = safeParse(transformedEmployeeCountSchema, val);
+  const result = v.safeParse(transformedEmployeeCountSchema, val);
   if (!result.success) {
     return Effect.fail(
       new EmployeeCountTransformationError({
@@ -117,7 +365,7 @@ const toTransformedEmployeeCount = (val: unknown) => {
 };
 
 const toTransformedHomePage = (val: unknown) => {
-  const result = safeParse(transformedHomePageSchema, val);
+  const result = v.safeParse(transformedHomePageSchema, val);
   if (!result.success) {
     return Effect.fail(
       new HomePageTransformationError({
