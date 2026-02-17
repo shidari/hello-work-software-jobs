@@ -5,11 +5,12 @@
     "awscli2@latest",
     "aws-vault@latest",
     "pnpm@latest",
-    "gh@latest"
+    "gh@latest",
+    "pinact@latest"
   ],
   "shell": {
     "init_hook": [
-      "echo 'headless-crawler devbox ready' > /dev/null"
+      "echo 'devbox ready' > /dev/null"
     ]
   }
 }

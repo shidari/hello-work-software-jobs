@@ -17,8 +17,7 @@ hello-work-software-jobs/
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
-│   ├── models/                      # Shared TypeScript types & schemas
-│   └── scripts/                     # Utility scripts
+│   └── models/                      # Shared TypeScript types & schemas
 ```
 
 ## Tech Stack
@@ -81,6 +80,10 @@ Base: `/api/v1`
 - **Validation**: Runtime validation with Valibot
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
+- **コミット前チェック**: ユーザーが「コミット」を依頼したら、`git commit` の前に以下を実行すること
+  1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format)
+  2. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
+  - 問題があれば修正してからコミットする
 
 ## Environment Variables
 

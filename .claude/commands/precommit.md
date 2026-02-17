@@ -6,9 +6,8 @@
 
 以下を順番に実行し、問題があれば修正する:
 
-1. **Biome lint + format** - ステージ済みファイルに対して `pnpm exec biome check --write` を実行
-2. **Type check** - `pnpm -r exec tsc --noEmit` で型チェック
-3. **copy-schema** - `pnpm --filter job-store-api run copy-schema` でスキーマをコピー（schema.ts に変更がある場合のみ）
+1. **Biome lint + format** - staged ファイルのみに対して `pnpm exec biome check --write <files>` を実行
+2. **Type check** - 変更があったパッケージのみ `pnpm exec tsc --noEmit` で型チェック
 
 ## 注意事項
 
