@@ -16,9 +16,9 @@
     "hono": "^4.8.3",
     "jotai": "^2.13.1",
     "neverthrow": "^8.2.0",
-    "next": "16.1.5",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "valibot": "^1.1.0"
   },
   "devDependencies": {
