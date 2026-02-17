@@ -29,7 +29,7 @@ hello-work-software-jobs/
 | API | Cloudflare Workers, Hono, Drizzle ORM, D1 (SQLite) |
 | Crawler | AWS Lambda, CDK, Playwright, Effect |
 | Shared | TypeScript 5.8, Valibot, neverthrow |
-| Quality | Biome, Husky, CommitLint, Playwright/Vitest |
+| Quality | Biome, CommitLint, Playwright/Vitest |
 
 ## Common Commands
 
