@@ -1,35 +1,15 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
+import { JobDetailCrawler } from "../../lib/job-detail-crawler/crawl";
 import { fromEventToFirstRecord } from "./helper";
-import { buildProgram as buildTransformerProgram } from "../../lib/jobDetail/transformer/transfomer";
-import { buildProgram as runLoaderProgram } from "../../lib/jobDetail/loader/loader";
-import {
-  transformerConfigLive,
-  transformerLive,
-} from "../../lib/jobDetail/transformer/context";
-import {
-  loaderConfigLive,
-  loaderLive,
-} from "../../lib/jobDetail/loader/context";
-import { ExtractorConfig } from "../../lib/service/jobDetail/config";
-import { Extractor } from "../../lib/jobDetail/extractor";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   const program = Effect.gen(function* () {
-    const extractor = yield* Extractor
+    const crawler = yield* JobDetailCrawler;
     const jobNumber = yield* fromEventToFirstRecord(event);
-    const { rawHtml } = yield* extractor.extractRawHtml(jobNumber);
-    const transformed = yield* buildTransformerProgram(rawHtml);
-    yield* runLoaderProgram(transformed);
-  });
-  const runnable = program
-    .pipe(Effect.provide(Extractor.Default))
-    .pipe(Effect.scoped)
-    .pipe(Effect.provide(transformerLive))
-    .pipe(Effect.provide(transformerConfigLive))
-    .pipe(Effect.provide(loaderLive))
-    .pipe(Effect.provide(loaderConfigLive))
-  const result = await Effect.runPromiseExit(runnable);
+    yield* crawler.processJob(jobNumber);
+  }).pipe(Effect.provide(JobDetailCrawler.Default), Effect.scoped);
+  const result = await Effect.runPromiseExit(program);
 
   if (Exit.isSuccess(result)) {
     console.log("Lambda job succeeded:", result.value);

@@ -1,7 +1,7 @@
 import {
-  SQSClient,
   GetQueueAttributesCommand,
   ReceiveMessageCommand,
+  SQSClient,
 } from "@aws-sdk/client-sqs";
 import type { ScheduledEvent } from "aws-lambda";
 import { createBugIssue } from "../../lib/helpers/github";

@@ -1,6 +1,7 @@
 // constructs/lambda-construct.ts
-import { Construct } from "constructs";
+
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import { Construct } from "constructs";
 
 export class PlayWrightLayerConstruct extends Construct {
   public readonly layer: lambda.LayerVersion;

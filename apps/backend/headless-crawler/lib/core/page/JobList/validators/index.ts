@@ -17,7 +17,9 @@ export function validateJobListPage(page: Page) {
       Effect.flatMap((pageCount) =>
         pageCount === 0
           ? Effect.fail(
-              new JobListPageValidationError({ message: "job list is empty. maybe job not found." }),
+              new JobListPageValidationError({
+                message: "job list is empty. maybe job not found.",
+              }),
             )
           : Effect.succeed(page as JobListPage),
       ),

@@ -8,9 +8,9 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 import * as dotenv from "dotenv";
-import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
-import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/E-T-L-jobDetail";
 import { JobNumberExtractAndTransformConstruct } from "../constructs/E-T-JobNumber";
+import { JobDetailExtractThenTransformThenLoadConstruct } from "../constructs/E-T-L-jobDetail";
+import { PlayWrightLayerConstruct } from "../constructs/PlayWrightLayer";
 
 dotenv.config();
 

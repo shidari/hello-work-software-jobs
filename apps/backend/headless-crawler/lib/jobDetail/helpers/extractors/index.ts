@@ -1,6 +1,30 @@
 import type { extractedJob, JobDetailPage } from "@sho/models";
 import { Effect } from "effect";
 import * as v from "valibot";
+import { validateJobNumber } from "../../../core/page/others";
+import { homePageElmExists, qualificationsElmExists } from "../checkers";
+import type {
+  HomePageElmNotFoundError,
+  QualificationsElmNotFoundError,
+} from "../checkers/error";
+import {
+  validateCompanyName,
+  validateEmployeeCount,
+  validateEmploymentType,
+  validateExpiryDate,
+  validateJobDescription,
+  validateOccupation,
+  validateQualification,
+  validateRawHomePage,
+  validateReceivedDate,
+  validateWage,
+  validateWorkingHours,
+  validateWorkPlace,
+} from "../validators";
+import type {
+  JobDetailPropertyValidationError,
+  RawHomePageValidationError,
+} from "../validators/error";
 import {
   ExtractEmployeeCountError,
   ExtractEmployMentTypeError,
@@ -17,30 +41,6 @@ import {
   ExtractWorkingHoursError,
   ExtractWorkPlaceError,
 } from "./error";
-import {
-  validateCompanyName,
-  validateEmployeeCount,
-  validateEmploymentType,
-  validateExpiryDate,
-  validateRawHomePage,
-  validateJobDescription,
-  validateOccupation,
-  validateQualification,
-  validateReceivedDate,
-  validateWage,
-  validateWorkingHours,
-  validateWorkPlace,
-} from "../validators";
-import type {
-  JobDetailPropertyValidationError,
-  RawHomePageValidationError,
-} from "../validators/error";
-import { homePageElmExists, qualificationsElmExists } from "../checkers";
-import type {
-  HomePageElmNotFoundError,
-  QualificationsElmNotFoundError,
-} from "../checkers/error";
-import { validateJobNumber } from "../../../core/page/others";
 
 function extractJobNumber(page: JobDetailPage) {
   const selector = "#ID_kjNo";

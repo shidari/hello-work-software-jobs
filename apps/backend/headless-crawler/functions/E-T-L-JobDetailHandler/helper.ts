@@ -1,34 +1,15 @@
-import {
-  type extractedJob,
-  type InsertJobRequestBody,
-  insertJobSuccessResponseSchema,
-  type JobNumber,
-  transformedEmployeeCountSchema,
-  transformedExpiryDateToISOStrSchema,
-  transformedReceivedDateToISOStrSchema,
-  transformedWageSchema,
-  transformedWorkingHoursSchema,
-} from "@sho/models";
+import type { JobNumber } from "@sho/models";
+import type { SQSRecord } from "aws-lambda";
 import { Effect } from "effect";
 import * as v from "valibot";
+import { issueToLogString } from "../../lib/util";
 import {
   FromExtractJobNumberJobQueueEventBodySchemaValidationError,
-  GetEndPointError,
-  InsertJobError,
-  InsertJobSuccessResponseValidationError,
   JsonParseError,
-  ParsedWorkingHoursError,
-  ParseEmployeeCountError,
-  ParseExpiryDateError,
-  ParseReceivedDateError,
-  ParseWageError,
   ToFirstRecordError,
 } from "./error";
-import type { TtoFirstRecord } from "./type";
 import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
-import type { SQSRecord } from "aws-lambda";
-import { issueToLogString } from "../../lib/core/util";
-import { toTransformedHomePage } from "../../lib/jobDetail/transformer/helper";
+import type { TtoFirstRecord } from "./type";
 
 const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
   const result = v.safeParse(
@@ -82,142 +63,3 @@ export const fromEventToFirstRecord = ({
     return jobNumber as JobNumber;
   });
 };
-
-export const job2InsertedJob = (job: extractedJob) => {
-  const {
-    jobNumber,
-    companyName,
-    employeeCount: rawEmploreeCount,
-    employmentType,
-    expiryDate: rawExpiryDate,
-    receivedDate: rawReceivedDate,
-    homePage: rawHomePage,
-    wage: rawWage,
-    workingHours: rawWorkingHours,
-    occupation,
-    workPlace,
-    jobDescription,
-    qualifications,
-  } = job;
-  return Effect.gen(function* () {
-    const employeeCount = yield* Effect.try({
-      try: () => v.parse(transformedEmployeeCountSchema, rawEmploreeCount),
-      catch: (e) =>
-        new ParseEmployeeCountError({
-          message: `parse employee count failed.\n${String(e)}`,
-        }),
-    });
-    const receivedDate = yield* Effect.try({
-      try: () =>
-        v.parse(transformedReceivedDateToISOStrSchema, rawReceivedDate),
-      catch: (e) =>
-        new ParseReceivedDateError({
-          message: `parse received date failed.\n${String(e)}`,
-        }),
-    });
-    const expiryDate = yield* Effect.try({
-      try: () => v.parse(transformedExpiryDateToISOStrSchema, rawExpiryDate),
-      catch: (e) =>
-        new ParseExpiryDateError({
-          message: `parse expiry date failed.\n${String(e)}`,
-        }),
-    });
-    const { wageMax, wageMin } = yield* Effect.try({
-      try: () => v.parse(transformedWageSchema, rawWage),
-      catch: (e) =>
-        new ParseWageError({ message: `parse wage failed.\n${String(e)}` }),
-    });
-    const { workingEndTime, workingStartTime } = yield* Effect.try({
-      try: () => v.parse(transformedWorkingHoursSchema, rawWorkingHours),
-      catch: (e) =>
-        new ParsedWorkingHoursError({
-          message: `parse working hours failed.\n${String(e)}`,
-        }),
-    });
-    const homePage = rawHomePage ? yield* toTransformedHomePage(rawHomePage) : undefined;
-    return {
-      jobNumber,
-      companyName,
-      employeeCount,
-      employmentType,
-      receivedDate,
-      expiryDate,
-      wageMax,
-      wageMin,
-      workingEndTime,
-      workingStartTime,
-      homePage,
-      occupation,
-      workPlace,
-      jobDescription,
-      qualifications,
-    } satisfies InsertJobRequestBody;
-  });
-};
-
-const getEndPoint = () => {
-  const endpoint = process.env.JOB_STORE_ENDPOINT;
-  if (!endpoint)
-    return Effect.fail(
-      new GetEndPointError({
-        message: `cannot get endpoint. endpoint=${endpoint}`,
-      }),
-    );
-  return Effect.succeed(endpoint);
-};
-
-export function buildJobStoreClient() {
-  return Effect.gen(function* () {
-    const endpoint = yield* getEndPoint();
-    return {
-      insertJob: (job: InsertJobRequestBody) =>
-        Effect.gen(function* () {
-          yield* Effect.logDebug(
-            `executing insert job api. job=${JSON.stringify(job, null, 2)}`,
-          );
-          const res = yield* Effect.tryPromise({
-            try: async () =>
-              fetch(`${endpoint}/job`, {
-                method: "POST",
-                body: JSON.stringify(job),
-                headers: {
-                  "content-type": "application/json",
-                  "x-api-key": process.env.API_KEY ?? "",
-                },
-              }),
-            catch: (e) =>
-              new InsertJobError({
-                message: `insert job response failed.\n${String(e)}`,
-              }),
-          });
-          const data = yield* Effect.tryPromise({
-            try: () => res.json(),
-            catch: (e) =>
-              new InsertJobError({
-                message: `insert job transforming json failed.\n${String(e)}`,
-              }),
-          });
-          if (!res.ok) {
-            throw new InsertJobError({
-              message: `insert job failed.\nstatus=${res.status}\nstatusText=${res.statusText}\nmessage=${JSON.stringify(data, null, 2)}`,
-            });
-          }
-          yield* Effect.logDebug(
-            `response data. ${JSON.stringify(data, null, 2)}`,
-          );
-        }),
-    };
-  });
-}
-
-export function validateInsertJobSuccessResponse(val: unknown) {
-  return Effect.try({
-    try: () => {
-      v.parse(insertJobSuccessResponseSchema, val);
-    },
-    catch: (e) =>
-      new InsertJobSuccessResponseValidationError({
-        message: `validate inserted job success response error.\n${String(e)}`,
-      }),
-  });
-}

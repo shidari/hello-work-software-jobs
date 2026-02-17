@@ -1,21 +1,22 @@
 import {
+  companyNameSchema,
+  employmentTypeSchema,
   type JobDetailPage,
+  jobDescriptionSchema,
+  occupationSchema,
+  qualificationsSchema,
   RawEmployeeCountSchema,
   RawExpiryDateSchema,
   RawReceivedDateShema,
   RawWageSchema,
   RawWorkingHoursSchema,
-  companyNameSchema,
-  employmentTypeSchema,
-  jobDescriptionSchema,
-  occupationSchema,
-  qualificationsSchema,
   rawHomePageSchema,
   workPlaceSchema,
 } from "@sho/models";
 import { Effect } from "effect";
 import type { Page } from "playwright";
 import * as v from "valibot";
+import { issueToLogString } from "../../../util";
 import {
   CompanyNameValidationError,
   EmployeeCountValidationError,
@@ -31,7 +32,6 @@ import {
   WorkingHoursValidationError,
   WorkPlaceValidationError,
 } from "./error";
-import { issueToLogString } from "../../../core/util";
 
 export function validateCompanyName(val: unknown) {
   return Effect.gen(function* () {

@@ -1,13 +1,12 @@
-import { Effect } from "effect";
-
 import type { JobNumber, JobSearchCriteria, JobSearchPage } from "@sho/models";
+import { Effect } from "effect";
 import type { Page } from "playwright";
+import { fillJobCriteriaField, fillJobNumber } from "../form-fillings";
 import {
   GoToJobSearchPageError,
   SearchThenGotoFirstJobListPageError,
   SearchThenGotoJobListPageError,
 } from "./error";
-import { fillJobCriteriaField, fillJobNumber } from "../form-fillings";
 
 export function goToJobSearchPage(page: Page) {
   return Effect.tryPromise({
