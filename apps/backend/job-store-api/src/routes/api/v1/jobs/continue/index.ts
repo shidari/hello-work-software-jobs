@@ -45,7 +45,7 @@ app.get(
         return ok(result.output);
       })();
       const decodeResult = yield* ResultAsync.fromPromise(
-        verify(nextToken, jwtSecret),
+        verify(nextToken, jwtSecret, "HS256"),
         (error) =>
           createJWTVerificationError(
             `JWT verification failed.\n${error instanceof Error ? `error: ${error.name}, message: ${error.message}` : String(error)}`,
