@@ -1,5 +1,6 @@
 import type {
   InsertJobRequestBody,
+  JobDetailPage,
   JobListPage,
   JobNumber,
   JobOverViewList,
@@ -7,11 +8,19 @@ import type {
   transformedSchema,
 } from "@sho/models";
 import {
+  companyNameSchema,
+  employmentTypeSchema,
+  jobDescriptionSchema,
   jobNumberSchema,
+  occupationSchema,
+  qualificationsSchema,
   transformedEmployeeCountSchema,
+  transformedExpiryDateToISOStrSchema,
   transformedHomePageSchema,
+  transformedReceivedDateToISOStrSchema,
   transformedWageSchema,
   transformedWorkingHoursSchema,
+  workPlaceSchema,
 } from "@sho/models";
 import { format } from "date-fns";
 import { Config, Data, Effect } from "effect";
@@ -20,20 +29,6 @@ import type { Page } from "playwright";
 import type { InferOutput } from "valibot";
 import * as v from "valibot";
 import { PlaywrightChromiumPageResource } from "../browser";
-import {
-  transformExpiryDate,
-  transformReceivedDate,
-} from "../jobDetail/helpers/transformers";
-import {
-  validateCompanyName,
-  validateEmploymentType,
-  validateJobDescription,
-  validateJobDetailPage,
-  validateOccupation,
-  validateQualification,
-  validateWorkPlace,
-} from "../jobDetail/helpers/validators";
-import { JobNumberValidationError } from "../jobDetail/helpers/validators/error";
 import { issueToLogString } from "../util";
 
 // ============================================================
@@ -46,29 +41,6 @@ export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   readonly jobNumber: string;
   readonly currentUrl: string;
   readonly reason: string;
-}> {}
-
-export class WageTransformationError extends Data.TaggedError(
-  "WageTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class WorkingHoursTransformationError extends Data.TaggedError(
-  "WorkingHoursTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class EmployeeCountTransformationError extends Data.TaggedError(
-  "EmployeeCountTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class HomePageTransformationError extends Data.TaggedError(
-  "HomePageTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class InsertJobError extends Data.TaggedError("InsertJobError")<{
-  readonly reason: string;
-  readonly serializedPayload: string;
-  readonly responseStatus?: number;
-  readonly responseStatusMessage?: string;
 }> {}
 
 class GoToJobSearchPageError extends Data.TaggedError(
@@ -103,8 +75,71 @@ class ListJobsError extends Data.TaggedError("ListJobsError")<{
   readonly message: string;
 }> {}
 
+class JobDetailPageValidationError extends Data.TaggedError(
+  "JobDetailPageValidationError",
+)<{ readonly reason: string; readonly currentUrl: string }> {}
+
+class JobNumberValidationError extends Data.TaggedError(
+  "JobNumberValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class CompanyNameValidationError extends Data.TaggedError(
+  "CompanyNameValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class OccupationValidationError extends Data.TaggedError(
+  "OccupationValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class EmploymentTypeValidationError extends Data.TaggedError(
+  "EmploymentTypeValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class WorkPlaceValidationError extends Data.TaggedError(
+  "WorkPlaceValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class JobDescriptionValidationError extends Data.TaggedError(
+  "JobDescriptionValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class QualificationValidationError extends Data.TaggedError(
+  "QualificationValidationError",
+)<{ readonly detail: string; readonly serializedVal: string }> {}
+
+class ReceivedDateTransformationError extends Data.TaggedError(
+  "ReceivedDateTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+class ExpiryDateTransformationError extends Data.TaggedError(
+  "ExpiryDateTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+export class WageTransformationError extends Data.TaggedError(
+  "WageTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+export class WorkingHoursTransformationError extends Data.TaggedError(
+  "WorkingHoursTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+export class EmployeeCountTransformationError extends Data.TaggedError(
+  "EmployeeCountTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+export class HomePageTransformationError extends Data.TaggedError(
+  "HomePageTransformationError",
+)<{ readonly reason: string; serializedVal: string }> {}
+
+export class InsertJobError extends Data.TaggedError("InsertJobError")<{
+  readonly reason: string;
+  readonly serializedPayload: string;
+  readonly responseStatus?: number;
+  readonly responseStatusMessage?: string;
+}> {}
+
 // ============================================================
-// Page Operations (inlined from core/page/)
+// Page Operations
 // ============================================================
 
 function goToJobSearchPage(page: Page) {
@@ -248,9 +283,7 @@ function listJobOverviewElem(
     .pipe(
       Effect.flatMap((tables) =>
         tables.length === 0
-          ? Effect.fail(
-              new ListJobsError({ message: "jobOverList is empty." }),
-            )
+          ? Effect.fail(new ListJobsError({ message: "jobOverList is empty." }))
           : Effect.succeed(tables as JobOverViewList),
       ),
     )
@@ -303,6 +336,38 @@ function goToSingleJobDetailPage(page: JobListPage) {
   });
 }
 
+function validateJobDetailPage(
+  page: Page,
+): Effect.Effect<JobDetailPage, JobDetailPageValidationError, never> {
+  return Effect.gen(function* () {
+    const jobTitle = yield* Effect.tryPromise({
+      try: async () => {
+        const jobTitle = await page.locator("div.page_title").textContent();
+        return jobTitle;
+      },
+      catch: (e) =>
+        new JobDetailPageValidationError({
+          reason: `${e instanceof Error ? e.message : String(e)}`,
+          currentUrl: page.url(),
+        }),
+    }).pipe(
+      Effect.tap((jobTitle) => {
+        return Effect.logDebug(`extracted job title: ${jobTitle}`);
+      }),
+    );
+    if (jobTitle !== "求人情報")
+      throw new JobDetailPageValidationError({
+        reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
+        currentUrl: page.url(),
+      });
+    return page as unknown as JobDetailPage;
+  });
+}
+
+// ============================================================
+// Validators
+// ============================================================
+
 function validateJobNumber(val: unknown) {
   return Effect.gen(function* () {
     yield* Effect.logDebug(
@@ -321,9 +386,162 @@ function validateJobNumber(val: unknown) {
   });
 }
 
+function validateCompanyName(val: unknown) {
+  return Effect.gen(function* () {
+    const result = v.safeParse(companyNameSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new CompanyNameValidationError({
+          detail: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
+        }),
+      ).pipe(
+        Effect.tap(() => {
+          return Effect.logDebug(
+            `failed to validate companyName. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+          );
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
+}
+
+function validateOccupation(val: unknown) {
+  return Effect.gen(function* () {
+    yield* Effect.logDebug(
+      `calling validateOccupation. args=${JSON.stringify(val, null, 2)}`,
+    );
+    const result = v.safeParse(occupationSchema, val);
+    if (!result.success) {
+      yield* Effect.logDebug(
+        `failed to validate occupation. issues=${JSON.stringify(result.issues, null, 2)}`,
+      );
+      return yield* Effect.fail(
+        new OccupationValidationError({
+          detail: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
+        }),
+      );
+    }
+    yield* Effect.logDebug(
+      `succeeded to validate occupation. val=${JSON.stringify(result.output, null, 2)}`,
+    );
+    return yield* Effect.succeed(result.output);
+  });
+}
+
+function validateEmploymentType(val: unknown) {
+  return Effect.try({
+    try: () => v.parse(employmentTypeSchema, val),
+    catch: (e) =>
+      e instanceof v.ValiError
+        ? new EmploymentTypeValidationError({
+            detail: e.message,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
+        : new EmploymentTypeValidationError({
+            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
+  });
+}
+
+function validateWorkPlace(val: unknown) {
+  return Effect.try({
+    try: () => v.parse(workPlaceSchema, val),
+    catch: (e) =>
+      e instanceof v.ValiError
+        ? new WorkPlaceValidationError({
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
+        : new WorkPlaceValidationError({
+            detail: `unexpected error. \n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
+  }).pipe(
+    Effect.tap((workPlace) => {
+      return Effect.logDebug(
+        `succeeded to validate workPlace. val=${JSON.stringify(workPlace, null, 2)}`,
+      );
+    }),
+  );
+}
+
+function validateJobDescription(val: unknown) {
+  return Effect.try({
+    try: () => v.parse(jobDescriptionSchema, val),
+    catch: (e) =>
+      e instanceof v.ValiError
+        ? new JobDescriptionValidationError({
+            detail: `${e.issues.map(issueToLogString).join("\n")}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          })
+        : new JobDescriptionValidationError({
+            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
+            serializedVal: JSON.stringify(val, null, 2),
+          }),
+  }).pipe(
+    Effect.tap((jobDescription) => {
+      return Effect.logDebug(
+        `succeeded to validate jobDescription. val=${JSON.stringify(jobDescription, null, 2)}`,
+      );
+    }),
+  );
+}
+
+function validateQualification(
+  val: unknown,
+): Effect.Effect<
+  v.InferOutput<typeof qualificationsSchema>,
+  QualificationValidationError
+> {
+  const result = v.safeParse(qualificationsSchema, val);
+  if (!result.success) {
+    return Effect.fail(
+      new QualificationValidationError({
+        detail: `${result.issues.map(issueToLogString).join("\n")}`,
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  }
+  return Effect.succeed(result.output);
+}
+
 // ============================================================
-// Transformer Helpers
+// Transformers
 // ============================================================
+
+function transformReceivedDate(val: unknown) {
+  return Effect.gen(function* () {
+    const result = v.safeParse(transformedReceivedDateToISOStrSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new ReceivedDateTransformationError({
+          reason: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
+}
+
+function transformExpiryDate(val: unknown) {
+  return Effect.gen(function* () {
+    const result = v.safeParse(transformedExpiryDateToISOStrSchema, val);
+    if (!result.success) {
+      return yield* Effect.fail(
+        new ExpiryDateTransformationError({
+          reason: `${result.issues.map(issueToLogString).join("\n")}`,
+          serializedVal: JSON.stringify(val, null, 2),
+        }),
+      );
+    }
+    return yield* Effect.succeed(result.output);
+  });
+}
 
 const toTransformedWage = (val: unknown) => {
   const result = v.safeParse(transformedWageSchema, val);
