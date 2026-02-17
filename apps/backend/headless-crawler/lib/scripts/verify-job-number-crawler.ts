@@ -7,14 +7,19 @@ import {
 } from "../browser";
 import {
   HelloWorkCrawler,
+  JobListPageScraper,
   JobNumberCrawlerConfig,
 } from "../job-number-crawler/crawl";
+import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 
 async function main() {
   const devLayer = HelloWorkCrawler.DefaultWithoutDependencies.pipe(
     Layer.provide(
       Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
     ),
+    Layer.provide(JobListPageScraper.DefaultWithoutDependencies),
+    Layer.provide(FirstJobListPageNavigator.DefaultWithoutDependencies),
+    Layer.provide(JobSearchPageService.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumBrowseResource.DefaultWithoutDependencies),

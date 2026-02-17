@@ -10,12 +10,15 @@ import {
   JobDetailExtractor,
   JobDetailTransformer,
 } from "../job-detail-crawler/crawl";
+import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 
 async function main() {
   const devLayer = Layer.mergeAll(
     JobDetailExtractor.DefaultWithoutDependencies,
     JobDetailTransformer.Default,
   ).pipe(
+    Layer.provide(FirstJobListPageNavigator.DefaultWithoutDependencies),
+    Layer.provide(JobSearchPageService.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumBrowseResource.DefaultWithoutDependencies),

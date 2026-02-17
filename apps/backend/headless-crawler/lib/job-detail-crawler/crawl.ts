@@ -1,10 +1,6 @@
 import type {
   InsertJobRequestBody,
-  JobDetailPage,
-  JobListPage,
   JobNumber,
-  JobOverViewList,
-  JobSearchPage,
   transformedSchema,
 } from "@sho/models";
 import {
@@ -28,7 +24,7 @@ import { parseHTML } from "linkedom";
 import type { Page } from "playwright";
 import type { InferOutput } from "valibot";
 import * as v from "valibot";
-import { PlaywrightChromiumPageResource } from "../browser";
+import { FirstJobListPageNavigator } from "../page";
 import { issueToLogString } from "../util";
 
 // ============================================================
@@ -42,26 +38,6 @@ export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   readonly currentUrl: string;
   readonly reason: string;
 }> {}
-
-class GoToJobSearchPageError extends Data.TaggedError(
-  "GoToJobSearchPageError",
-)<{ readonly message: string }> {}
-
-class JobSearchPageValidationError extends Data.TaggedError(
-  "JobSearchPageValidationError",
-)<{ readonly message: string }> {}
-
-class SearchThenGotoFirstJobListPageError extends Data.TaggedError(
-  "SearchThenGotoFirstJobListPageError",
-)<{ readonly message: string }> {}
-
-class FillJobNumberError extends Data.TaggedError("FillJobNumberError")<{
-  readonly message: string;
-}> {}
-
-class JobListPageValidationError extends Data.TaggedError(
-  "JobListPageValidationError",
-)<{ readonly message: string }> {}
 
 class FromJobListToJobDetailPageError extends Data.TaggedError(
   "FromJobListToJobDetailPageError",
@@ -142,141 +118,9 @@ export class InsertJobError extends Data.TaggedError("InsertJobError")<{
 // Page Operations
 // ============================================================
 
-function goToJobSearchPage(page: Page) {
+function listJobOverviewElem(page: Page) {
   return Effect.tryPromise({
-    try: async () => {
-      await page.goto(
-        "https://www.hellowork.mhlw.go.jp/kensaku/GECA110010.do?action=initDisp&screenId=GECA110010",
-      );
-    },
-    catch: (e) =>
-      new GoToJobSearchPageError({
-        message: `unexpected error.\n${String(e)}`,
-      }),
-  }).pipe(
-    Effect.tap(() => {
-      return Effect.logDebug("navigated to job search page.");
-    }),
-  );
-}
-
-function validateJobSearchPage(page: Page) {
-  return Effect.gen(function* () {
-    const url = page.url();
-    if (!url.includes("kensaku"))
-      yield* Effect.fail(
-        new JobSearchPageValidationError({
-          message: `not on job search page.\nurl=${url}`,
-        }),
-      );
-    const jobSearchPage = yield* Effect.tryPromise({
-      try: async () => {
-        return page as JobSearchPage;
-      },
-      catch: (e) =>
-        new JobSearchPageValidationError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
-    }).pipe(
-      Effect.tap(() => {
-        return Effect.logDebug("succeeded to validate job search page.");
-      }),
-    );
-    return jobSearchPage;
-  });
-}
-
-function fillJobNumber(page: JobSearchPage, jobNumber: JobNumber) {
-  return Effect.tryPromise({
-    try: async () => {
-      const jobNumberSplits = jobNumber.split("-");
-      const firstJobNumber = jobNumberSplits.at(0);
-      const secondJobNumber = jobNumberSplits.at(1);
-      if (!firstJobNumber)
-        throw new FillJobNumberError({
-          message: `firstJobnumber undefined. jobNumber=${jobNumber}`,
-        });
-      if (!secondJobNumber)
-        throw new FillJobNumberError({
-          message: `secondJobNumber undefined. jobNumber=${jobNumber}`,
-        });
-      const firstJobNumberInput = page.locator("#ID_kJNoJo1");
-      const secondJobNumberInput = page.locator("#ID_kJNoGe1");
-      await firstJobNumberInput.fill(firstJobNumber);
-      await secondJobNumberInput.fill(secondJobNumber);
-    },
-    catch: (e) =>
-      new FillJobNumberError({
-        message: `unexpected error.\njobNumber=${jobNumber}\n${String(e)}`,
-      }),
-  }).pipe(
-    Effect.tap(() => {
-      return Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`);
-    }),
-  );
-}
-
-function searchNoThenGotoSingleJobListPage(
-  page: JobSearchPage,
-  jobNumber: JobNumber,
-) {
-  return Effect.gen(function* () {
-    yield* fillJobNumber(page, jobNumber);
-    yield* Effect.tryPromise({
-      try: async () => {
-        const searchNoBtn = page.locator("#ID_searchNoBtn");
-        await Promise.all([
-          page.waitForURL("**/kensaku/*.do"),
-          searchNoBtn.click(),
-        ]);
-      },
-      catch: (e) =>
-        new SearchThenGotoFirstJobListPageError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
-    }).pipe(
-      Effect.tap(() => {
-        return Effect.logDebug(
-          "navigated to job list page from job search page.",
-        );
-      }),
-    );
-  });
-}
-
-function validateJobListPage(page: Page) {
-  return Effect.tryPromise({
-    try: async () => {
-      return page.locator(".kyujin").count();
-    },
-    catch: (e) =>
-      new JobListPageValidationError({
-        message: `unexpected error. ${String(e)}`,
-      }),
-  })
-    .pipe(
-      Effect.flatMap((pageCount) =>
-        pageCount === 0
-          ? Effect.fail(
-              new JobListPageValidationError({
-                message: "job list is empty. maybe job not found.",
-              }),
-            )
-          : Effect.succeed(page as JobListPage),
-      ),
-    )
-    .pipe(
-      Effect.tap((_) => {
-        return Effect.logDebug("succeeded to validate job list page.");
-      }),
-    );
-}
-
-function listJobOverviewElem(
-  jobListPage: JobListPage,
-): Effect.Effect<JobOverViewList, ListJobsError, never> {
-  return Effect.tryPromise({
-    try: () => jobListPage.locator("table.kyujin.mt1.noborder").all(),
+    try: () => page.locator("table.kyujin.mt1.noborder").all(),
     catch: (e) =>
       new ListJobsError({ message: `unexpected error.\n${String(e)}` }),
   })
@@ -284,7 +128,7 @@ function listJobOverviewElem(
       Effect.flatMap((tables) =>
         tables.length === 0
           ? Effect.fail(new ListJobsError({ message: "jobOverList is empty." }))
-          : Effect.succeed(tables as JobOverViewList),
+          : Effect.succeed(tables),
       ),
     )
     .pipe(
@@ -296,7 +140,7 @@ function listJobOverviewElem(
     );
 }
 
-function assertSingleJobListed(page: JobListPage) {
+function assertSingleJobListed(page: Page) {
   return Effect.gen(function* () {
     const jobOverViewList = yield* listJobOverviewElem(page);
     if (jobOverViewList.length !== 1) {
@@ -312,13 +156,13 @@ function assertSingleJobListed(page: JobListPage) {
   });
 }
 
-function goToSingleJobDetailPage(page: JobListPage) {
+function goToSingleJobDetailPage(page: Page) {
   return Effect.gen(function* () {
     yield* assertSingleJobListed(page);
     yield* Effect.tryPromise({
       try: async () => {
         const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
-        showDetailBtn.evaluate((elm) => elm.removeAttribute("target"));
+        showDetailBtn.evaluate((elm: Element) => elm.removeAttribute("target"));
         await showDetailBtn.click();
       },
       catch: (e) =>
@@ -336,9 +180,7 @@ function goToSingleJobDetailPage(page: JobListPage) {
   });
 }
 
-function validateJobDetailPage(
-  page: Page,
-): Effect.Effect<JobDetailPage, JobDetailPageValidationError, never> {
+function validateJobDetailPage(page: Page) {
   return Effect.gen(function* () {
     const jobTitle = yield* Effect.tryPromise({
       try: async () => {
@@ -360,7 +202,7 @@ function validateJobDetailPage(
         reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
         currentUrl: page.url(),
       });
-    return page as unknown as JobDetailPage;
+    return page;
   });
 }
 
@@ -660,23 +502,15 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
   "JobDetailExtractor",
   {
     effect: Effect.gen(function* () {
-      const pageResource = yield* PlaywrightChromiumPageResource;
+      const firstJobListPage = yield* FirstJobListPageNavigator;
       const extractRawHtml = Effect.fn("extractRawHtml")(function* (
         jobNumber: JobNumber,
       ) {
-        const { page } = pageResource;
         yield* Effect.logInfo("start extracting raw job detail HTML...");
-        yield* Effect.logDebug("go to hello work search page.");
-        yield* goToJobSearchPage(page);
-        const searchPage = yield* validateJobSearchPage(page);
-        yield* Effect.logDebug(
-          "fill jobNumber then go to hello work search page.",
-        );
-        yield* searchNoThenGotoSingleJobListPage(searchPage, jobNumber);
-        const jobListPage = yield* validateJobListPage(searchPage);
+        const page = yield* firstJobListPage.byJobNumber(jobNumber);
         yield* Effect.logDebug("now on job List page.");
-        yield* goToSingleJobDetailPage(jobListPage);
-        const jobDetailPage = yield* validateJobDetailPage(jobListPage);
+        yield* goToSingleJobDetailPage(page);
+        const jobDetailPage = yield* validateJobDetailPage(page);
         const rawHtml = yield* Effect.tryPromise({
           try: () => jobDetailPage.content(),
           catch: (error) =>
@@ -690,7 +524,7 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
       });
       return { extractRawHtml };
     }),
-    dependencies: [PlaywrightChromiumPageResource.Default],
+    dependencies: [FirstJobListPageNavigator.Default],
   },
 ) {}
 
