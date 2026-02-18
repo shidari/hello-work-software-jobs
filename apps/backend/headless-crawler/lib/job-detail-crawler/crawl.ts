@@ -10,7 +10,7 @@ import {
   transformedExpiryDateToISOStrSchema,
   transformedHomePageSchema,
   transformedReceivedDateToISOStrSchema,
-  transformedSchema,
+  type transformedSchema,
   transformedWageSchema,
   transformedWorkingHoursSchema,
   workPlaceSchema,
