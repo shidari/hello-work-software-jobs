@@ -1,24 +1,24 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 import { ISODateSchema } from "./common";
 
-export const JobOverviewSchema = v.object({
-  jobNumber: v.string(),
-  companyName: v.optional(v.string()),
-  workPlace: v.string(),
-  jobTitle: v.string(),
-  employmentType: v.string(), // 後でもっと型を細かくする
-  employeeCount: v.number(),
+export const JobOverviewSchema = Schema.Struct({
+  jobNumber: Schema.String,
+  companyName: Schema.optional(Schema.String),
+  workPlace: Schema.String,
+  jobTitle: Schema.String,
+  employmentType: Schema.String, // 後でもっと型を細かくする
+  employeeCount: Schema.Number,
   receivedDate: ISODateSchema,
 });
 
-export const JobDetailSchema = v.object({
-  ...JobOverviewSchema.entries,
-  salary: v.string(),
-  jobDescription: v.string(),
-  expiryDate: v.string(),
-  workingHours: v.string(),
-  qualifications: v.optional(v.string()),
+export const JobDetailSchema = Schema.Struct({
+  ...JobOverviewSchema.fields,
+  salary: Schema.String,
+  jobDescription: Schema.String,
+  expiryDate: Schema.String,
+  workingHours: Schema.String,
+  qualifications: Schema.optional(Schema.String),
 });
 
-export type TJobOverview = v.InferOutput<typeof JobOverviewSchema>;
-export type TJobDetail = v.InferOutput<typeof JobDetailSchema>;
+export type TJobOverview = typeof JobOverviewSchema.Type;
+export type TJobDetail = typeof JobDetailSchema.Type;

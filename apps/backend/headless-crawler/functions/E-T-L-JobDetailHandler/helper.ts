@@ -1,8 +1,7 @@
-import type { JobNumber } from "../../lib/schemas";
 import type { SQSRecord } from "aws-lambda";
-import { Effect } from "effect";
-import * as v from "valibot";
-import { issueToLogString } from "../../lib/util";
+import { Effect, Either, Schema } from "effect";
+import type { JobNumber } from "../../lib/schemas";
+import { formatParseError } from "../../lib/util";
 import {
   FromExtractJobNumberJobQueueEventBodySchemaValidationError,
   JsonParseError,
@@ -12,18 +11,16 @@ import { fromExtractJobNumberHandlerJobQueueEventBodySchema } from "./schema";
 import type { TtoFirstRecord } from "./type";
 
 const safeParseFromExtractJobNumberJobQueueEventBodySchema = (val: unknown) => {
-  const result = v.safeParse(
+  const result = Schema.decodeUnknownEither(
     fromExtractJobNumberHandlerJobQueueEventBodySchema,
-    val,
-  );
-  if (!result.success) {
+  )(val);
+  if (Either.isLeft(result))
     return Effect.fail(
       new FromExtractJobNumberJobQueueEventBodySchemaValidationError({
-        message: `parse failed. detail: ${result.issues.map(issueToLogString).join("\n")}`,
+        message: `parse failed. detail: ${formatParseError(result.left)}`,
       }),
     );
-  }
-  return Effect.succeed(result.output);
+  return Effect.succeed(result.right);
 };
 
 const toFirstRecord: TtoFirstRecord = (records) => {

@@ -1,35 +1,35 @@
 import { jobNumberSchema } from "@sho/models";
-import * as v from "valibot";
+import { Schema } from "effect";
 
-export const partialWorkLocationSchema = v.object({
-  prefecture: v.literal("東京都"),
+export const partialWorkLocationSchema = Schema.Struct({
+  prefecture: Schema.Literal("東京都"),
 });
-export const partialEmploymentTypeSchema = v.union([
-  v.literal("RegularEmployee"),
-  v.literal("PartTimeWorker"),
-]);
-export const paritalEngineeringLabelSchema = v.literal(
+export const partialEmploymentTypeSchema = Schema.Union(
+  Schema.Literal("RegularEmployee"),
+  Schema.Literal("PartTimeWorker"),
+);
+export const paritalEngineeringLabelSchema = Schema.Literal(
   "ソフトウェア開発技術者、プログラマー",
 );
-export const searchPeriodSchema = v.union([
-  v.literal("all"),
-  v.literal("today"),
-  v.literal("week"),
-]);
-export const jobSearchCriteriaSchema = v.object({
-  jobNumber: v.optional(jobNumberSchema),
+export const searchPeriodSchema = Schema.Union(
+  Schema.Literal("all"),
+  Schema.Literal("today"),
+  Schema.Literal("week"),
+);
+export const jobSearchCriteriaSchema = Schema.Struct({
+  jobNumber: Schema.optional(jobNumberSchema),
   workLocation: partialWorkLocationSchema,
-  desiredOccupation: v.optional(
-    v.object({
-      occupationSelection: v.optional(paritalEngineeringLabelSchema),
+  desiredOccupation: Schema.optional(
+    Schema.Struct({
+      occupationSelection: Schema.optional(paritalEngineeringLabelSchema),
     }),
   ),
   employmentType: partialEmploymentTypeSchema,
   searchPeriod: searchPeriodSchema,
 });
 
-export const etCrawlerConfigWithoutBrowserConfigSchema = v.object({
-  roughMaxCount: v.number(),
-  nextPageDelayMs: v.number(),
+export const etCrawlerConfigWithoutBrowserConfigSchema = Schema.Struct({
+  roughMaxCount: Schema.Number,
+  nextPageDelayMs: Schema.Number,
   jobSearchCriteria: jobSearchCriteriaSchema,
 });

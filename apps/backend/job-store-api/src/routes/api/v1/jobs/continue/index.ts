@@ -1,25 +1,26 @@
-import { vValidator } from "@hono/valibot-validator";
+import { drizzle } from "drizzle-orm/d1";
+import { Either, Schema } from "effect";
+import { TreeFormatter } from "effect/ParseResult";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { sign, verify } from "hono/jwt";
+import { validator as effectValidator } from "hono-openapi";
+import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import { createJobStoreDBClientAdapter } from "../../../../../adapters";
+import { createFetchJobListError } from "../../../../../adapters/error";
+import { PAGE_SIZE } from "../../../../../common";
 import {
   type DecodedNextToken,
   decodedNextTokenSchema,
   type FetchJobsPageCommand,
   jobListContinueQuerySchema,
 } from "../../../../../schemas";
-import { drizzle } from "drizzle-orm/d1";
-import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
-import { sign, verify } from "hono/jwt";
-import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import * as v from "valibot";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
 import {
   createDecodeJWTPayloadError,
   createJWTVerificationError,
 } from "./error";
-import { createJobStoreDBClientAdapter } from "../../../../../adapters";
-import { createFetchJobListError } from "../../../../../adapters/error";
-import { PAGE_SIZE } from "../../../../../common";
 import { jobListContinueRoute } from "./routingSchema";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -27,7 +28,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.get(
   "/",
   jobListContinueRoute,
-  vValidator("query", jobListContinueQuerySchema),
+  effectValidator("query", Schema.standardSchemaV1(jobListContinueQuerySchema)),
   (c) => {
     const { nextToken } = c.req.valid("query");
     const db = drizzle(c.env.DB);
@@ -35,14 +36,14 @@ app.get(
 
     const result = safeTry(async function* () {
       const { JWT_SECRET: jwtSecret } = yield* (() => {
-        const result = v.safeParse(envSchema, c.env);
-        if (!result.success)
+        const result = Schema.decodeUnknownEither(envSchema)(c.env);
+        if (Either.isLeft(result))
           return err(
             createEnvError(
-              `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${String(result.issues)}`,
+              `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${TreeFormatter.formatErrorSync(result.left)}`,
             ),
           );
-        return ok(result.output);
+        return ok(result.right);
       })();
       const decodeResult = yield* ResultAsync.fromPromise(
         verify(nextToken, jwtSecret, "HS256"),
@@ -54,18 +55,17 @@ app.get(
 
       console.log("Decoded JWT payload:", decodeResult);
 
-      const payloadValidation = v.safeParse(
+      const payloadValidation = Schema.decodeUnknownEither(
         decodedNextTokenSchema,
-        decodeResult,
-      );
-      if (!payloadValidation.success) {
+      )(decodeResult);
+      if (Either.isLeft(payloadValidation)) {
         return err(
           createDecodeJWTPayloadError(
-            `Decoding JWT payload failed. received: ${JSON.stringify(decodeResult, null, 2)}\n${String(payloadValidation.issues.map((i) => i.message).join("\n"))}`,
+            `Decoding JWT payload failed. received: ${JSON.stringify(decodeResult, null, 2)}\n${TreeFormatter.formatErrorSync(payloadValidation.left)}`,
           ),
         );
       }
-      const validatedPayload = payloadValidation.output;
+      const validatedPayload = payloadValidation.right;
       const nextPage = validatedPayload.page + 1;
       // ジョブリスト取得
       const fetchJobListCommand: FetchJobsPageCommand = {

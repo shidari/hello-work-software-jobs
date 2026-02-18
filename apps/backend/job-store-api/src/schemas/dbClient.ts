@@ -1,34 +1,30 @@
-import {
-  array,
-  boolean,
-  integer,
-  isoDate,
-  literal,
-  number,
-  object,
-  optional,
-  pipe,
-  string,
-  union,
-} from "valibot";
+import { Schema } from "effect";
 import { jobSelectSchema } from "./drizzle";
 
-export const searchFilterSchema = object({
-  companyName: optional(string()),
-  employeeCountLt: optional(pipe(number(), integer())),
-  employeeCountGt: optional(pipe(number(), integer())),
-  jobDescription: optional(string()),
-  jobDescriptionExclude: optional(string()), // 除外キーワード
-  onlyNotExpired: optional(boolean()),
-  orderByReceiveDate: optional(union([literal("asc"), literal("desc")])),
-  addedSince: optional(pipe(string(), isoDate())),
-  addedUntil: optional(pipe(string(), isoDate())),
+export const searchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String), // 除外キーワード
+  onlyNotExpired: Schema.optional(Schema.Boolean),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  addedSince: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+  addedUntil: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
 });
 
 const { id, createdAt, updatedAt, status, ...jobSelectSchemaWithoutSome } =
-  jobSelectSchema.entries;
-export const JobListSchema = array(object({ ...jobSelectSchemaWithoutSome }));
+  jobSelectSchema.fields;
+export const JobListSchema = Schema.Array(
+  Schema.Struct({ ...jobSelectSchemaWithoutSome }),
+);
 
-// Valibotでomitはスプレッドで除外
-const { id: _, ...jobSelectSchemaWithoutId } = jobSelectSchema.entries;
-export const JobSchema = object({ ...jobSelectSchemaWithoutId });
+// id を除外
+const { id: _, ...jobSelectSchemaWithoutId } = jobSelectSchema.fields;
+export const JobSchema = Schema.Struct({ ...jobSelectSchemaWithoutId });

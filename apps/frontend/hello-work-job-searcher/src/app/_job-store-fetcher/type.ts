@@ -1,5 +1,4 @@
 import type { ResultAsync } from "neverthrow";
-import type { InferOutput } from "valibot";
 import type {
   JobListQuery,
   jobFetchSuccessResponseSchema,
@@ -16,7 +15,7 @@ export interface JobStoreClient {
   getInitialJobs(
     query?: JobListQuery,
   ): ResultAsync<
-    InferOutput<typeof jobListSuccessResponseSchema>,
+    typeof jobListSuccessResponseSchema.Type,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
 
@@ -27,14 +26,14 @@ export interface JobStoreClient {
   getContinuedJobs(
     nextToken: string,
   ): ResultAsync<
-    InferOutput<typeof jobListSuccessResponseSchema>,
+    typeof jobListSuccessResponseSchema.Type,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
 
   getJob(
     jobNumber: string,
   ): ResultAsync<
-    InferOutput<typeof jobFetchSuccessResponseSchema>,
+    typeof jobFetchSuccessResponseSchema.Type,
     EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError
   >;
 }

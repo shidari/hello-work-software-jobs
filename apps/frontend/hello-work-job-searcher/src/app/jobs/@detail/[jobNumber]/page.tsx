@@ -1,4 +1,4 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 import { JobDetail } from "@/app/_components/Job";
 import { jobFetchSuccessResponseSchema } from "@/schemas";
 
@@ -16,7 +16,9 @@ export default async function Page({ params }: PageProps) {
   const data = await fetch(`${endpoint}/jobs/${jobNumber}`).then((res) =>
     res.json(),
   );
-  const validatedData = v.parse(jobFetchSuccessResponseSchema, data);
+  const validatedData = Schema.decodeUnknownSync(jobFetchSuccessResponseSchema)(
+    data,
+  );
   const jobDetail = {
     ...validatedData,
     companyName: validatedData.companyName ?? "未記載",

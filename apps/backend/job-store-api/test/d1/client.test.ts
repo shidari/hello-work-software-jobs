@@ -1,9 +1,10 @@
 import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
+import { Schema } from "effect";
 import { expect, it } from "vitest";
 import { createJobStoreDBClientAdapter } from "../../src/adapters";
-import { parse } from "valibot";
 import { insertJobRequestBodySchema } from "../../src/schemas";
+
 declare module "cloudflare:test" {
   interface ProvidedEnv {
     DB: D1Database;
@@ -14,7 +15,7 @@ it("求人データを挿入できる", async () => {
   const db = drizzle(env.DB);
   const dbClient = createJobStoreDBClientAdapter(db);
   const jobNumber = "64455-10912";
-  const insertingJob = parse(insertJobRequestBodySchema, {
+  const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
     jobNumber,
     companyName: "Tech Corp",
     jobDescription: "ソフトウェアエンジニアの募集です。",

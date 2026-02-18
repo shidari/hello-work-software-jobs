@@ -1,17 +1,17 @@
 import { jobNumberSchema } from "@sho/models";
-import { object, string } from "valibot";
+import { Schema } from "effect";
 import { JobSchema } from "../dbClient";
 
-export const jobFetchParamSchema = object({
+export const jobFetchParamSchema = Schema.Struct({
   jobNumber: jobNumberSchema,
 });
 
 export const jobFetchSuccessResponseSchema = JobSchema;
 
-export const jobFetchClientErrorResponseSchema = object({
-  message: string(),
+export const jobFetchClientErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });
 
-export const jobFetchServerErrorSchema = object({
-  message: string(),
+export const jobFetchServerErrorSchema = Schema.Struct({
+  message: Schema.String,
 });

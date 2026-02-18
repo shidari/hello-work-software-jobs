@@ -1,4 +1,3 @@
-import type { JobNumber } from "../schemas";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 import {
   PlaywrightBrowserConfig,
@@ -11,6 +10,7 @@ import {
   JobDetailTransformer,
 } from "../job-detail-crawler/crawl";
 import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
+import type { JobNumber } from "../schemas";
 
 async function main() {
   const devLayer = Layer.mergeAll(

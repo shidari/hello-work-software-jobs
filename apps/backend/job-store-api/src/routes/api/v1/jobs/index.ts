@@ -1,17 +1,26 @@
-import { vValidator } from "@hono/valibot-validator";
+import { drizzle } from "drizzle-orm/d1";
+import { Either, Schema } from "effect";
+import { TreeFormatter } from "effect/ParseResult";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { sign } from "hono/jwt";
+import { validator as effectValidator } from "hono-openapi";
+import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import { createJobStoreDBClientAdapter } from "../../../../adapters";
+import {
+  createFetchJobError,
+  createFetchJobListError,
+  createInsertJobDuplicationError,
+  createInsertJobError,
+  createJobsCountError,
+} from "../../../../adapters/error";
+import { PAGE_SIZE } from "../../../../common";
 import {
   type DecodedNextToken,
   insertJobRequestBodySchema,
   jobFetchParamSchema,
   jobListQuerySchema,
 } from "../../../../schemas";
-import { drizzle } from "drizzle-orm/d1";
-import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
-import { sign } from "hono/jwt";
-import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import * as v from "valibot";
-import { safeParse } from "valibot";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
@@ -21,163 +30,162 @@ import {
 import { envSchema } from "../../../util";
 // continueが予約後っぽいので
 import continueRoute from "./continue";
-import { createJobStoreDBClientAdapter } from "../../../../adapters";
-import {
-  createFetchJobError,
-  createFetchJobListError,
-  createInsertJobDuplicationError,
-  createInsertJobError,
-  createJobsCountError,
-} from "../../../../adapters/error";
 import { createUnexpectedError } from "./error";
-import { PAGE_SIZE } from "../../../../common";
 import { jobFetchRoute, jobInsertRoute, jobListRoute } from "./routingSchema";
+
+const employeeCountSchema = Schema.Number.pipe(
+  Schema.int(),
+  Schema.greaterThanOrEqualTo(0),
+);
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/", jobListRoute, vValidator("query", jobListQuerySchema), (c) => {
-  const {
-    companyName: encodedCompanyName,
-    employeeCountGt: rawEmployeeCountGt,
-    employeeCountLt: rawEmployeeCountLt,
-    jobDescription: encodedJobDescription,
-    jobDescriptionExclude: encodedJobDescriptionExclude,
-    onlyNotExpired,
-    orderByReceiveDate,
-    addedSince,
-    addedUntil,
-  } = c.req.valid("query");
-  const companyName = encodedCompanyName
-    ? decodeURIComponent(encodedCompanyName)
-    : undefined;
-  const jobDescription = encodedJobDescription
-    ? decodeURIComponent(encodedJobDescription)
-    : undefined;
+app.get(
+  "/",
+  jobListRoute,
+  effectValidator("query", Schema.standardSchemaV1(jobListQuerySchema)),
+  (c) => {
+    const {
+      companyName: encodedCompanyName,
+      employeeCountGt: rawEmployeeCountGt,
+      employeeCountLt: rawEmployeeCountLt,
+      jobDescription: encodedJobDescription,
+      jobDescriptionExclude: encodedJobDescriptionExclude,
+      onlyNotExpired,
+      orderByReceiveDate,
+      addedSince,
+      addedUntil,
+    } = c.req.valid("query");
+    const companyName = encodedCompanyName
+      ? decodeURIComponent(encodedCompanyName)
+      : undefined;
+    const jobDescription = encodedJobDescription
+      ? decodeURIComponent(encodedJobDescription)
+      : undefined;
 
-  const jobDescriptionExclude = encodedJobDescriptionExclude
-    ? decodeURIComponent(encodedJobDescriptionExclude)
-    : undefined;
+    const jobDescriptionExclude = encodedJobDescriptionExclude
+      ? decodeURIComponent(encodedJobDescriptionExclude)
+      : undefined;
 
-  const db = drizzle(c.env.DB);
-  const dbClient = createJobStoreDBClientAdapter(db);
+    const db = drizzle(c.env.DB);
+    const dbClient = createJobStoreDBClientAdapter(db);
 
-  const result = safeTry(async function* () {
-    const employeeCountGt = yield* (() => {
-      if (rawEmployeeCountGt === undefined) return ok(undefined);
-      const result = safeParse(
-        v.pipe(v.number(), v.integer(), v.minValue(0)),
-        Number(rawEmployeeCountGt),
-      );
-      if (!result.success)
-        return err(
-          createEmployeeCountGtValidationError(
-            `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
-          ),
+    const result = safeTry(async function* () {
+      const employeeCountGt = yield* (() => {
+        if (rawEmployeeCountGt === undefined) return ok(undefined);
+        const result = Schema.decodeUnknownEither(employeeCountSchema)(
+          Number(rawEmployeeCountGt),
         );
-      return ok(result.output);
-    })();
-    const employeeCountLt = yield* (() => {
-      if (rawEmployeeCountLt === undefined) return ok(undefined);
-      const result = safeParse(
-        v.pipe(v.number(), v.integer(), v.minValue(0)),
-        Number(rawEmployeeCountLt),
-      );
-      if (!result.success)
-        return err(
-          createEmployeeCountLtValidationError(
-            `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
-          ),
+        if (Either.isLeft(result))
+          return err(
+            createEmployeeCountGtValidationError(
+              `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${TreeFormatter.formatErrorSync(result.left)}`,
+            ),
+          );
+        return ok(result.right);
+      })();
+      const employeeCountLt = yield* (() => {
+        if (rawEmployeeCountLt === undefined) return ok(undefined);
+        const result = Schema.decodeUnknownEither(employeeCountSchema)(
+          Number(rawEmployeeCountLt),
         );
-      return ok(result.output);
-    })();
-    const { JWT_SECRET: jwtSecret } = yield* (() => {
-      const result = v.safeParse(envSchema, c.env);
-      if (!result.success)
-        return err(
-          createEnvError(
-            `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${String(result.issues)}`,
-          ),
-        );
-      return ok(result.output);
-    })();
-    const jobListResult = yield* await ResultAsync.fromSafePromise(
-      dbClient.execute({
-        type: "FetchJobsPage",
-        options: {
-          page: 1,
-          filter: {
-            companyName,
-            employeeCountGt,
-            employeeCountLt,
-            jobDescription,
-            jobDescriptionExclude,
-            onlyNotExpired,
-            orderByReceiveDate,
-            addedSince,
-            addedUntil,
+        if (Either.isLeft(result))
+          return err(
+            createEmployeeCountLtValidationError(
+              `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${TreeFormatter.formatErrorSync(result.left)}`,
+            ),
+          );
+        return ok(result.right);
+      })();
+      const { JWT_SECRET: jwtSecret } = yield* (() => {
+        const result = Schema.decodeUnknownEither(envSchema)(c.env);
+        if (Either.isLeft(result))
+          return err(
+            createEnvError(
+              `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${TreeFormatter.formatErrorSync(result.left)}`,
+            ),
+          );
+        return ok(result.right);
+      })();
+      const jobListResult = yield* await ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "FetchJobsPage",
+          options: {
+            page: 1,
+            filter: {
+              companyName,
+              employeeCountGt,
+              employeeCountLt,
+              jobDescription,
+              jobDescriptionExclude,
+              onlyNotExpired,
+              orderByReceiveDate,
+              addedSince,
+              addedUntil,
+            },
           },
-        },
-      }),
-    );
-    if (!jobListResult.success) {
-      return err(createFetchJobListError("Failed to fetch job list"));
-    }
-    const { jobs, meta } = jobListResult;
+        }),
+      );
+      if (!jobListResult.success) {
+        return err(createFetchJobListError("Failed to fetch job list"));
+      }
+      const { jobs, meta } = jobListResult;
 
-    const restJobCountResult = yield* ResultAsync.fromSafePromise(
-      dbClient.execute({
-        type: "CountJobs",
-        options: {
+      const restJobCountResult = yield* ResultAsync.fromSafePromise(
+        dbClient.execute({
+          type: "CountJobs",
+          options: {
+            page: 1,
+            filter: meta.filter,
+          },
+        }),
+      );
+      if (!restJobCountResult.success) {
+        return err(createJobsCountError("Failed to count jobs"));
+      }
+
+      const { count: restJobCount } = restJobCountResult;
+
+      const nextToken = yield* (() => {
+        if (restJobCount <= PAGE_SIZE) return okAsync(undefined);
+        const validPayload: DecodedNextToken = {
+          exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
+          iss: "sho-hello-work-job-searcher",
+          iat: Math.floor(Date.now() / 1000),
+          nbf: Math.floor(Date.now() / 1000),
           page: 1,
           filter: meta.filter,
-        },
-      }),
+        };
+        const signResult = ResultAsync.fromPromise(
+          sign(validPayload, jwtSecret),
+          (error) =>
+            createJWTSignatureError(`JWT signing failed.\n${String(error)}`),
+        );
+        return signResult;
+      })();
+
+      return okAsync({ jobs, nextToken, meta });
+    });
+    return result.match(
+      ({ jobs, nextToken, meta }) => c.json({ jobs, nextToken, meta }),
+      (error) => {
+        console.error(error);
+        switch (error._tag) {
+          case "JWTSignatureError":
+          case "EnvError":
+            throw new HTTPException(500, { message: "internal server error" });
+          case "EmployeeCountGtValidationError":
+          case "EmployeeCountLtValidationError":
+            throw new HTTPException(400, {
+              message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
+            });
+          default:
+            throw new HTTPException(500, { message: "internal server error" });
+        }
+      },
     );
-    if (!restJobCountResult.success) {
-      return err(createJobsCountError("Failed to count jobs"));
-    }
-
-    const { count: restJobCount } = restJobCountResult;
-
-    const nextToken = yield* (() => {
-      if (restJobCount <= PAGE_SIZE) return okAsync(undefined);
-      const validPayload: DecodedNextToken = {
-        exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
-        iss: "sho-hello-work-job-searcher",
-        iat: Math.floor(Date.now() / 1000),
-        nbf: Math.floor(Date.now() / 1000),
-        page: 1,
-        filter: meta.filter,
-      };
-      const signResult = ResultAsync.fromPromise(
-        sign(validPayload, jwtSecret),
-        (error) =>
-          createJWTSignatureError(`JWT signing failed.\n${String(error)}`),
-      );
-      return signResult;
-    })();
-
-    return okAsync({ jobs, nextToken, meta });
-  });
-  return result.match(
-    ({ jobs, nextToken, meta }) => c.json({ jobs, nextToken, meta }),
-    (error) => {
-      console.error(error);
-      switch (error._tag) {
-        case "JWTSignatureError":
-        case "EnvError":
-          throw new HTTPException(500, { message: "internal server error" });
-        case "EmployeeCountGtValidationError":
-        case "EmployeeCountLtValidationError":
-          throw new HTTPException(400, {
-            message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
-          });
-        default:
-          throw new HTTPException(500, { message: "internal server error" });
-      }
-    },
-  );
-});
+  },
+);
 
 app.post(
   "/",
@@ -191,19 +199,20 @@ app.post(
     }
     return next();
   },
-  vValidator("json", insertJobRequestBodySchema, (result, c) => {
-    if (!result.success) {
-      console.log(
-        `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
-      );
-      return c.json(
-        {
-          message: `Invalid request body. detail: ${result.issues.map((issue) => `expected: ${issue.expected}, received: ${issue.received}, message: ${issue.message}`).join("\n")}`,
-        },
-        400,
-      );
-    }
-  }),
+  effectValidator(
+    "json",
+    Schema.standardSchemaV1(insertJobRequestBodySchema),
+    (result, c) => {
+      if (!result.success) {
+        const detail = result.error.map((issue) => issue.message).join("\n");
+        console.log(`Invalid request body. detail: ${detail}`);
+        return c.json(
+          { message: `Invalid request body. detail: ${detail}` },
+          400,
+        );
+      }
+    },
+  ),
   async (c) => {
     console.log("in job insert route");
     // throw new Error("test error");
@@ -266,7 +275,7 @@ app.route("/continue", continueRoute);
 app.get(
   "/:jobNumber",
   jobFetchRoute,
-  vValidator("param", jobFetchParamSchema),
+  effectValidator("param", Schema.standardSchemaV1(jobFetchParamSchema)),
   (c) => {
     const { jobNumber } = c.req.valid("param");
     const db = drizzle(c.env.DB);

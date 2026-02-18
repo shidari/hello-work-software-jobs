@@ -28,7 +28,7 @@ hello-work-software-jobs/
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
 | API | Cloudflare Workers, Hono, Drizzle ORM, D1 (SQLite) |
 | Crawler | AWS Lambda, CDK, Playwright, Effect |
-| Shared | TypeScript 5.8, Valibot, neverthrow |
+| Shared | TypeScript 5.8, Effect Schema, neverthrow |
 | Quality | Biome, Playwright/Vitest |
 
 ## Common Commands
@@ -72,13 +72,13 @@ Base: `/api/v1`
 
 ## Coding Conventions
 
-- **Formatting/Linting**: Use Biome
+- **Formatting/Linting**: Use Biome（staged ファイルのみ対象。プロジェクト全体への実行は禁止）
 - **Commits**: Conventional Commits format
   - Message in Japanese
   - Include scope (e.g., `feat(api): 求人検索フィルターを追加`)
   - Include body explaining the change
 - **Error Handling**: Use neverthrow Result types (no throwing exceptions)
-- **Validation**: Runtime validation with Valibot
+- **Validation**: Runtime validation with Effect Schema (`import { Schema } from "effect"`)
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
 - **コマンドが見つからない場合**: `command not found` になったら `devbox run <command>` で実行する。パッケージが足りなければ `devbox add` で追加する

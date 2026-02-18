@@ -13,7 +13,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "valibot": "^1.1.0"
+    "effect": "^3.16.5"
   },
   "devDependencies": {
     "tsdown": "^0.15.3",

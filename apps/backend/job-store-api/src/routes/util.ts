@@ -1,5 +1,5 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 
-export const envSchema = v.object({
-  JWT_SECRET: v.string(), // JWTSecret の zod schemaがあればそれを使う
+export const envSchema = Schema.Struct({
+  JWT_SECRET: Schema.String,
 });

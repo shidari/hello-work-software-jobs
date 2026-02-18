@@ -1,11 +1,11 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 import {
+  extractedJobSchema,
   RawEmployeeCountSchema,
   RawExpiryDateSchema,
   RawReceivedDateShema,
   RawWageSchema,
   RawWorkingHoursSchema,
-  extractedJobSchema,
   rawHomePageSchema,
 } from "./extractor";
 
@@ -19,104 +19,146 @@ export type TransformedExpiryDateToISOStr = string & { [e]: unknown };
 const ec = Symbol();
 export type TransformedEmployeeCount = number & { [ec]: unknown };
 
-export const transformedReceivedDateToISOStrSchema = v.pipe(
+export const transformedReceivedDateToISOStrSchema = Schema.transform(
   RawReceivedDateShema,
-  v.transform((value) => {
-    // "2025年7月23日" → "2025-07-23"
-    const dateStr = value
-      .replace("年", "-")
-      .replace("月", "-")
-      .replace("日", "");
-    const isoDate = new Date(dateStr).toISOString();
-    return isoDate;
-  }),
-  v.brand("TransformedReceivedDateToISOStr"),
+  Schema.String.pipe(Schema.brand("TransformedReceivedDateToISOStr")),
+  {
+    strict: true,
+    decode: (value) => {
+      // "2025年7月23日" → "2025-07-23"
+      const dateStr = value
+        .replace("年", "-")
+        .replace("月", "-")
+        .replace("日", "");
+      return new Date(dateStr).toISOString();
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
-export const transformedExpiryDateToISOStrSchema = v.pipe(
+export const transformedExpiryDateToISOStrSchema = Schema.transform(
   RawExpiryDateSchema,
-  v.transform((value) => {
-    // "2025年7月23日" → "2025-07-23"
-    const dateStr = value
-      .replace("年", "-")
-      .replace("月", "-")
-      .replace("日", "");
-    const isoDate = new Date(dateStr).toISOString();
-    return isoDate;
-  }),
-  v.brand("TransformedJSTExpiryDateToISOStr"),
+  Schema.String.pipe(Schema.brand("TransformedJSTExpiryDateToISOStr")),
+  {
+    strict: true,
+    decode: (value) => {
+      // "2025年7月23日" → "2025-07-23"
+      const dateStr = value
+        .replace("年", "-")
+        .replace("月", "-")
+        .replace("日", "");
+      return new Date(dateStr).toISOString();
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
 
-export const transformedWageSchema = v.pipe(
+export const transformedWageSchema = Schema.transform(
   RawWageSchema,
-  v.transform((value) => {
-    // 直接正規表現を使って上限と下限を抽出し、数値に変換
-    const match = value.match(
-      /^(\d{1,3}(?:,\d{3})*)円〜(\d{1,3}(?:,\d{3})*)円$/,
-    );
-
-    if (!match) {
-      throw new Error("Invalid wage format");
-    }
-
-    // 数字のカンマを削除してから数値に変換
-    const wageMin = Number.parseInt(match[1].replace(/,/g, ""), 10);
-    const wageMax = Number.parseInt(match[2].replace(/,/g, ""), 10);
-    return { wageMin, wageMax }; // 上限と下限の数値オブジェクトを返す
+  Schema.Struct({
+    wageMin: Schema.Number,
+    wageMax: Schema.Number,
   }),
-  v.check(
-    (wage) =>
-      !!v.parse(v.object({ wageMin: v.number(), wageMax: v.number() }), wage),
-  ),
-); // 後でもうちょっとまともにかく
+  {
+    strict: true,
+    decode: (value) => {
+      // 直接正規表現を使って上限と下限を抽出し、数値に変換
+      const match = value.match(
+        /^(\d{1,3}(?:,\d{3})*)円〜(\d{1,3}(?:,\d{3})*)円$/,
+      );
+      if (!match) {
+        throw new Error("Invalid wage format");
+      }
+      // 数字のカンマを削除してから数値に変換
+      const wageMin = Number.parseInt(match[1].replace(/,/g, ""), 10);
+      const wageMax = Number.parseInt(match[2].replace(/,/g, ""), 10);
+      return { wageMin, wageMax };
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
+);
 
-export const transformedWorkingHoursSchema = v.pipe(
+export const transformedWorkingHoursSchema = Schema.transform(
   RawWorkingHoursSchema,
-  v.transform((value) => {
-    const match = value.match(
-      /^(\d{1,2})時(\d{1,2})分〜(\d{1,2})時(\d{1,2})分$/,
-    );
-    if (!match) {
-      throw new Error("Invalid format, should be '9時00分〜18時00分'");
-    }
-
-    const [_, startH, startM, endH, endM] = match;
-
-    const workingStartTime = `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`;
-    const workingEndTime = `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`;
-
-    return { workingStartTime, workingEndTime };
+  Schema.Struct({
+    workingStartTime: Schema.String,
+    workingEndTime: Schema.String,
   }),
+  {
+    strict: true,
+    decode: (value) => {
+      const match = value.match(
+        /^(\d{1,2})時(\d{1,2})分〜(\d{1,2})時(\d{1,2})分$/,
+      );
+      if (!match) {
+        throw new Error("Invalid format, should be '9時00分〜18時00分'");
+      }
+      const [_, startH, startM, endH, endM] = match;
+      const workingStartTime = `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`;
+      const workingEndTime = `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`;
+      return { workingStartTime, workingEndTime };
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
 
-export const transformedEmployeeCountSchema = v.pipe(
+export const transformedEmployeeCountSchema = Schema.transform(
   RawEmployeeCountSchema,
-  v.transform((val) => {
-    const match = val.match(/\d+/);
-    if (!match) {
-      // ここも、後で直す
-      return undefined;
-    }
-    return Number(match[0]);
-  }),
-  v.number(),
-  v.brand("TransformedEmployeeCount"),
+  Schema.Number.pipe(Schema.brand("TransformedEmployeeCount")),
+  {
+    strict: true,
+    decode: (val) => {
+      const match = val.match(/\d+/);
+      if (!match) {
+        throw new Error("Invalid employee count format");
+      }
+      return Number(match[0]);
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
 
-export const transformedHomePageSchema = v.pipe(
+export const transformedHomePageSchema = Schema.transform(
   rawHomePageSchema,
-  v.transform((val) => val.trim()),
-  v.url("home page should be url"),
-  v.brand("homePage(transformed)"),
+  Schema.String.pipe(
+    Schema.filter((s) => URL.canParse(s), {
+      message: () => "home page should be url",
+    }),
+    Schema.brand("homePage(transformed)"),
+  ),
+  {
+    strict: true,
+    decode: (val) => val.trim(),
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
 
-export const transformedSchema = v.object({
-  ...v.omit(extractedJobSchema, ["wage", "workingHours", "homePage"]).entries,
-  homePage: v.optional(transformedHomePageSchema),
-  wageMin: v.number(),
-  wageMax: v.number(),
-  workingStartTime: v.string(),
-  workingEndTime: v.string(),
-  receivedDate: v.pipe(v.string(), v.regex(ISO8601)),
-  expiryDate: v.pipe(v.string(), v.regex(ISO8601)),
-  employeeCount: v.number(),
+const {
+  wage: _wage,
+  workingHours: _workingHours,
+  homePage: _homePage,
+  ...extractedWithoutTransformed
+} = extractedJobSchema.fields;
+
+export const transformedSchema = Schema.Struct({
+  ...extractedWithoutTransformed,
+  homePage: Schema.optional(transformedHomePageSchema),
+  wageMin: Schema.Number,
+  wageMax: Schema.Number,
+  workingStartTime: Schema.String,
+  workingEndTime: Schema.String,
+  receivedDate: Schema.String.pipe(Schema.pattern(ISO8601)),
+  expiryDate: Schema.String.pipe(Schema.pattern(ISO8601)),
+  employeeCount: Schema.Number,
 });

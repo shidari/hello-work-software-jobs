@@ -1,10 +1,18 @@
+import {
+  Chunk,
+  Config,
+  Data,
+  Effect,
+  Either,
+  Option,
+  Schema,
+  Stream,
+} from "effect";
+import type { Locator } from "playwright";
+import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 import type { etCrawlerConfig } from "../schemas";
 import { jobNumberSchema } from "../schemas";
-import { Chunk, Config, Data, Effect, Option, Stream } from "effect";
-import type { Locator } from "playwright";
-import * as v from "valibot";
-import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
-import { delay, issueToLogString } from "../util";
+import { delay, formatParseError } from "../util";
 
 // ============================================================
 // Errors
@@ -39,15 +47,14 @@ export class JobListPageScraper extends Effect.Service<JobListPageScraper>()(
         yield* Effect.logDebug(
           `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
         );
-        const result = v.safeParse(jobNumberSchema, val);
-        if (!result.success) {
+        const result = Schema.decodeUnknownEither(jobNumberSchema)(val);
+        if (Either.isLeft(result))
           return yield* Effect.fail(
             new JobListPageScraperError({
-              message: `job number validation failed. val=${JSON.stringify(val, null, 2)}\n${result.issues.map(issueToLogString).join("\n")}`,
+              message: `job number validation failed. val=${JSON.stringify(val, null, 2)}\n${formatParseError(result.left)}`,
             }),
           );
-        }
-        return result.output;
+        return result.right;
       });
 
       // ---- list page operations ----
