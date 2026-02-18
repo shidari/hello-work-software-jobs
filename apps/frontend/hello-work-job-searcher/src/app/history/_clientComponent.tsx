@@ -1,9 +1,9 @@
 "use client";
 
 import { hc } from "hono/client";
-import type { AppType } from "../api/[[...route]]/route";
-import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import type { AppType } from "../api/[[...route]]/route";
 
 export function ClientComponent({
   initialCount,

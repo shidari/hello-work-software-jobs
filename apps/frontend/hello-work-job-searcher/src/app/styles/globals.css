@@ -1,10 +1,35 @@
+:root {
+  --color-nav-bg: #4b5563;
+  --color-nav-bg-hover: #374151;
+  --color-nav-text: #f3f4f6;
+  --color-border: gainsboro;
+  --color-card-hover-bg: #e9ecef;
+  --color-card-hover-border: #adb5bd;
+  --color-favorite: #e0245e;
+  --color-favorite-hover: #f48fb1;
+  --color-badge: #ff5252;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-spinner: #1976d2;
+  --color-text-muted: #666;
+  --color-remove: #d32f2f;
+  --color-remove-hover: #b71c1c;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-pill: 999px;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-card-active: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+}
+
 html,
 body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 h1 {
-    margin: 0;
+  margin: 0;
 }

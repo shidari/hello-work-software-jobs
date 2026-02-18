@@ -2,7 +2,7 @@
   display: block;
 }
 
-.nav-link--disabled { /* 無効っぽく見せる */
+.nav-link--disabled {
   pointer-events: none;
   opacity: 0.5;
   cursor: default;
