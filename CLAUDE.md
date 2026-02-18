@@ -81,6 +81,7 @@ Base: `/api/v1`
 - **Validation**: Runtime validation with Valibot
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
+- **コマンドが見つからない場合**: `command not found` になったら `devbox run <command>` で実行する。パッケージが足りなければ `devbox add` で追加する
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`git commit` の前に以下を実行すること
   1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format)
   2. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
@@ -99,6 +100,6 @@ Base: `/api/v1`
 
 ## CI/CD
 
-- `pr-checks.yml` - Build, test, format on PRs
+- `pr-checks.yml` - Build, type check, test, lint on PRs
 - `deploy.yml` - AWS CDK deploy on push to main
 - `run-lambda-weekly-days.yml` - Weekly crawler execution

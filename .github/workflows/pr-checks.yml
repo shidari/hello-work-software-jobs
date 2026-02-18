@@ -5,9 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write # ← OIDCで必要
+  contents: read
 
 jobs:
   ci-cd:
@@ -17,13 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-
-      - name: Disable husky
-        run: git config core.hooksPath /dev/null
 
       - name: Setup Node.js
         uses: actions/setup-node@d02c89dce7e1ba9ef629ce0680989b3a1cc72edb
@@ -63,49 +54,5 @@ jobs:
         run: pnpm run test
         continue-on-error: false
         
-      - name: Format & Lint changed files
-        shell: bash
-        run: |
-          mapfile -t CHANGED_FILES < <(
-            git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '\.(js|ts|jsx|tsx)$'
-          )
-
-          if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
-            echo "Changed files: ${CHANGED_FILES[@]}"
-
-            pnpm exec biome format --write "${CHANGED_FILES[@]}"
-            pnpm exec biome lint --write --no-errors-on-unmatched "${CHANGED_FILES[@]}"
-            git add "${CHANGED_FILES[@]}"
-          else
-            echo "No JS/TS/JSX/TSX files changed"
-          fi
-
-      - name: Check if formatting or linting changed files
-        id: format-check
-        run: |
-          if git diff --cached --quiet; then
-            echo "formatted=false" >> $GITHUB_OUTPUT
-          else
-            echo "formatted=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Commit formatting & lint fixes
-        if: steps.format-check.outputs.formatted == 'true'
-        run: |
-          git config core.hooksPath /dev/null
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -m "style: auto-format and lint fixes [skip ci]"
-          git push
-
-      - name: Comment on PR if formatted
-        if: steps.format-check.outputs.formatted == 'true'
-        uses: actions/github-script@450193c5abd4cdb17ba9f3ffcfe8f635c4bb6c2a
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🎨 Code has been automatically formatted and linted.'
-            })
+      - name: Lint & Format check
+        run: pnpm exec biome check --no-errors-on-unmatched .
