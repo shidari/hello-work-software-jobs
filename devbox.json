@@ -5,7 +5,7 @@
     "awscli2@2.33.2",
     "aws-vault@latest",
     "pnpm@latest",
-    "gh@latest",
+    "gh@1.14.0",
     "pinact@latest"
   ],
   "shell": {
