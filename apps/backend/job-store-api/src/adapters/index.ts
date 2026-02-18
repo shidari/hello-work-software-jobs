@@ -1,3 +1,4 @@
+import { jobs } from "@sho/db";
 import type {
   CheckJobExistsCommand,
   CommandOutput,
@@ -8,10 +9,9 @@ import type {
   JobStoreCommand,
   JobStoreDBClient,
 } from "@sho/models";
-import { DateTime } from "luxon";
-import { and, asc, desc, eq, gt, like, lt, not, or } from "drizzle-orm";
+import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { jobs } from "../db/schema";
+import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
 import { PAGE_SIZE } from "../common";
 
@@ -185,7 +185,6 @@ async function handleCountJobs(
 ): Promise<CommandOutput<CountJobsCommand>> {
   const conditions = [];
   const { page, filter } = cmd.options;
-  const offset = (page - 1) * PAGE_SIZE;
   // Do not add any condition based on jobs.id and offset for counting
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));

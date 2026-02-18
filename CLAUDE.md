@@ -17,6 +17,7 @@ hello-work-software-jobs/
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
+│   ├── db/                          # Drizzle schema & migrations
 │   └── models/                      # Shared TypeScript types & schemas
 ```
 
@@ -28,7 +29,7 @@ hello-work-software-jobs/
 | API | Cloudflare Workers, Hono, Drizzle ORM, D1 (SQLite) |
 | Crawler | AWS Lambda, CDK, Playwright, Effect |
 | Shared | TypeScript 5.8, Valibot, neverthrow |
-| Quality | Biome, CommitLint, Playwright/Vitest |
+| Quality | Biome, Playwright/Vitest |
 
 ## Common Commands
 
@@ -66,8 +67,8 @@ Base: `/api/v1`
 
 - ORM: Drizzle ORM
 - DB: Cloudflare D1 (SQLite)
-- Schema: `apps/backend/job-store-api/src/db/schema.ts`
-- Migrations: `apps/backend/job-store-api/drizzle/`
+- Schema: `packages/db/src/schema.ts`
+- Migrations: `packages/db/drizzle/`
 
 ## Coding Conventions
 
@@ -83,7 +84,12 @@ Base: `/api/v1`
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`git commit` の前に以下を実行すること
   1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format)
   2. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
+  3. CLAUDE.md / README.md の内容が変更と整合しているか確認し、必要なら更新
   - 問題があれば修正してからコミットする
+- **コミット後の自動PR**: コミット完了後、以下を自動実行する
+  1. main ブランチ上なら、コミット内容に基づいたブランチ名（例: `feat/xxx`, `refactor/xxx`）を自動作成し、コミットをそのブランチに移動する
+  2. `git push -u origin <branch>` でリモートに push
+  3. そのブランチの PR が未作成なら `gh pr create` で PR を作成する（既存なら push のみ）
 
 ## Environment Variables
 
