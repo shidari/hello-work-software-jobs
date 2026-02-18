@@ -1,1 +1,1 @@
-export { jobs, raw_jobs } from "./schema";
+export { jobs } from "./schema";
