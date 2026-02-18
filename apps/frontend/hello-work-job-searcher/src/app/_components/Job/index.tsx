@@ -46,9 +46,7 @@ export function JobDetail(props: { jobDetail: TJobDetail }) {
   return (
     <article className={`${styles["layout-job-detail"]}`}>
       <h2>求人番号: {jobNumber}</h2>
-      <ul
-        className={`${styles["layout-job-detailList"]} ${styles["layout-job-detailList--primary"]}`}
-      >
+      <ul className={styles["layout-job-detailList"]}>
         <li data-label="company-name" data-value={companyName}>
           企業名: {companyName}
         </li>

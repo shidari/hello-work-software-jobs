@@ -1,103 +1,43 @@
 .removeButton {
-    position: absolute;
-    right: 1.2rem;
-    bottom: 1.2rem;
-    background: #fff0f0;
-    color: #d32f2f;
-    border: 1px solid #d32f2f;
-    border-radius: 4px;
-    padding: 0.3em 0.9em;
-    font-size: 0.95em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    z-index: 2;
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  background: #fff0f0;
+  color: var(--color-remove);
+  border: 1px solid var(--color-remove);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--transition-normal),
+    color var(--transition-normal);
+  z-index: 2;
 }
+
 .removeButton:hover {
-    background: #ffd6d6;
-    color: #b71c1c;
-    border-color: #b71c1c;
-}
-.jobOverviewRelative {
-    position: relative;
-}
-.jobLink {
-    flex: 1;
-    text-decoration: none;
-    color: inherit;
-}
-.newBadgeAbsolute {
-    position: absolute;
-    top: 0.8rem;
-    left: 0.5rem;
-    z-index: 1;
-    padding-top: 0.3rem;
-    padding-left: 0.2rem;
-}
-.newBadge {
-    background: #ff5252;
-    color: white;
-    border-radius: 0.5em;
-    font-size: 0.8em;
-    padding: 0.1em 0.6em;
-    font-weight: 700;
-    margin-left: 0.5rem;
-    display: inline-block;
+  background: #ffd6d6;
+  color: var(--color-remove-hover);
+  border-color: var(--color-remove-hover);
 }
 
 .sectionHeader {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .favoriteList {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-.jobOverview {
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border-radius: 8px;
-    border: 0.1em solid gainsboro;
-    padding: 2%;
-    position: relative;
-    min-width: 350px;
-    width: 95%;
-    max-width: 700px;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-/* ちょっと良くない気がする */
-.jobOverview a {
-    text-decoration: none;
-    /* 下線を消す */
-    color: inherit;
-    /* 親要素の文字色を継承する */
-}
-
-.jobOverview:hover {
-    background-color: #e9ecef;
-    /* より濃いグレー */
-    /* または以下のような色も選択肢 */
-    /* background-color: #dee2e6; さらに濃い */
-    /* background-color: #f1f3f4; Google風 */
-    /* background-color: #e3f2fd; 薄い青 */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-    border-color: #adb5bd;
-    /* ボーダーも少し濃く */
-}
-
-.jobOverview:active {
-    transform: translateY(0px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.loadingMessage {
-    text-align: center;
-    padding: 20px;
-    color: #666;
+.favoriteCard {
+  min-width: 350px;
+  width: 95%;
+  max-width: 700px;
+  box-sizing: border-box;
 }

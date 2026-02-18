@@ -1,13 +1,14 @@
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1em 2em;
+  gap: 1rem 2rem;
   align-items: start;
   justify-items: start;
-  max-width: 36em;
-  padding: 0.5em 1em 1.8em 0;
+  max-width: 36rem;
+  padding: 0.5rem 1rem 1.8rem 0;
 }
+
 .inputFull {
   width: 100%;
-  min-width: 8em;
+  min-width: 8rem;
 }

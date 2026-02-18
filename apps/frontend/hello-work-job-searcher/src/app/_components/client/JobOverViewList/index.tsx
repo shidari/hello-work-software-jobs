@@ -3,7 +3,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import Link from "next/link";
+
 import React, { useTransition } from "react";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
 import { JobOverview } from "@/app/_components/Job";
@@ -16,14 +16,11 @@ import {
   scrollRestorationByItemListAtom,
 } from "../../../_atom";
 import { ClientNavLink } from "../ClientNavLink";
+import cardStyles from "../jobCard.module.css";
 import styles from "./JobOverviewList.module.css";
 
 function NewBadge() {
-  return (
-    <span className={`${styles.newBadge} ${styles.newBadgeAbsolute}`}>
-      新着
-    </span>
-  );
+  return <span className={cardStyles.newBadge}>新着</span>;
 }
 export function JobOverviewList() {
   const { items, nextToken } = useAtomValue(JobOverviewListAtom);
@@ -85,9 +82,7 @@ export function JobOverviewList() {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <section
-                className={`${styles.jobOverview} ${styles.jobOverviewRelative}`}
-              >
+              <section className={cardStyles.card}>
                 {isNew && <NewBadge />}
                 <ClientNavLink
                   to={`/jobs/${item.jobNumber}`}

@@ -6,6 +6,7 @@ import * as v from "valibot";
 import { JobOverview } from "@/app/_components/Job";
 import { JobOverviewSchema } from "@/schemas";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "../../../_atom";
+import cardStyles from "../jobCard.module.css";
 import styles from "./index.module.css";
 
 export function FavoriteJobOverviewList() {
@@ -31,10 +32,13 @@ export function FavoriteJobOverviewList() {
       {items.map((item) => (
         <section
           key={item.jobNumber}
-          className={`${styles.jobOverview} ${styles.jobOverviewRelative}`}
+          className={`${cardStyles.card} ${styles.favoriteCard}`}
         >
           <div className={styles.sectionHeader}>
-            <Link href={`/jobs/${item.jobNumber}`} className={styles.jobLink}>
+            <Link
+              href={`/jobs/${item.jobNumber}`}
+              className={cardStyles.cardLink}
+            >
               <JobOverview
                 jobNumber={item.jobNumber}
                 companyName={item.companyName}
