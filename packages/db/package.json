@@ -1,0 +1,26 @@
+{
+	"name": "@sho/db",
+	"version": "1.0.0",
+	"private": true,
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "pnpm exec tsdown",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.44.2"
+	},
+	"devDependencies": {
+		"@types/node": "^22.19.8",
+		"dotenv": "^17.0.0",
+		"drizzle-kit": "^0.31.4",
+		"tsdown": "^0.15.3",
+		"typescript": "^5.8.3"
+	}
+}
