@@ -1,6 +1,6 @@
+import type { TJobDetail, TJobOverview } from "@/schemas";
 import { formatDate } from "../../util";
 import styles from "./index.module.css";
-import type { TJobDetail, TJobOverview } from "@sho/models";
 
 export function JobOverview({
   companyName,

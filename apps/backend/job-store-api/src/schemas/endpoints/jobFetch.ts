@@ -1,6 +1,6 @@
+import { jobNumberSchema } from "@sho/models";
 import { object, string } from "valibot";
 import { JobSchema } from "../dbClient";
-import { jobNumberSchema } from "../../headless-crawler";
 
 export const jobFetchParamSchema = object({
   jobNumber: jobNumberSchema,

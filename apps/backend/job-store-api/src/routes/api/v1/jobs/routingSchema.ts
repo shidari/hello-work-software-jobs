@@ -9,7 +9,7 @@ import {
   jobListClientErrorResponseSchema,
   jobListServerErrorSchema,
   jobListSuccessResponseSchema,
-} from "@sho/models";
+} from "../../../../schemas";
 import { describeRoute, resolver } from "hono-openapi";
 
 export const jobListRoute = describeRoute({

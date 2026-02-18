@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { expect, it } from "vitest";
 import { createJobStoreDBClientAdapter } from "../../src/adapters";
 import { parse } from "valibot";
-import { insertJobRequestBodySchema } from "@sho/models";
+import { insertJobRequestBodySchema } from "../../src/schemas";
 declare module "cloudflare:test" {
   interface ProvidedEnv {
     DB: D1Database;

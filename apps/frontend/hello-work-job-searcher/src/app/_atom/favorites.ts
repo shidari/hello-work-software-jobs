@@ -1,5 +1,5 @@
-import type { TJobOverview } from "@sho/models";
 import { atom } from "jotai";
+import type { TJobOverview } from "@/schemas";
 
 export const favoriteJobsAtom = atom<TJobOverview[]>([]);
 

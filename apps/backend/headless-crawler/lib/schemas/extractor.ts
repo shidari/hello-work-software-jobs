@@ -1,10 +1,8 @@
+import { jobNumberSchema } from "@sho/models";
 import * as v from "valibot";
 
-export const jobNumberSchema = v.pipe(
-  v.string(),
-  v.regex(/^\d{5}-\d{0,8}$/),
-  v.brand("jobNumber"),
-);
+export { jobNumberSchema };
+
 export const companyNameSchema = v.pipe(v.string(), v.brand("companyName"));
 
 export const rawHomePageSchema = v.pipe(v.string(), v.brand("homePage(raw)"));

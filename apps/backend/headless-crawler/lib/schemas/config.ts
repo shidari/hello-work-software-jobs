@@ -1,5 +1,5 @@
+import { jobNumberSchema } from "@sho/models";
 import * as v from "valibot";
-import { jobNumberSchema } from "../jobDetail";
 
 export const partialWorkLocationSchema = v.object({
   prefecture: v.literal("東京都"),

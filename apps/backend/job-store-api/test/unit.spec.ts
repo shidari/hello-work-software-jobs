@@ -8,7 +8,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
 import { parse } from "valibot";
-import { insertJobRequestBodySchema } from "@sho/models";
+import { insertJobRequestBodySchema } from "../src/schemas";
 import { createJobStoreDBClientAdapter } from "../src/adapters";
 const MOCK_ENV = {
   ...env,

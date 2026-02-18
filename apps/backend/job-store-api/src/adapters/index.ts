@@ -8,7 +8,7 @@ import type {
   InsertJobCommand,
   JobStoreCommand,
   JobStoreDBClient,
-} from "@sho/models";
+} from "../schemas";
 import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { DateTime } from "luxon";

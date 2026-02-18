@@ -1,6 +1,5 @@
 import * as v from "valibot";
-import { ISODateSchema } from "../common";
-export * from "./type";
+import { ISODateSchema } from "./common";
 
 export const JobOverviewSchema = v.object({
   jobNumber: v.string(),
@@ -20,3 +19,6 @@ export const JobDetailSchema = v.object({
   workingHours: v.string(),
   qualifications: v.optional(v.string()),
 });
+
+export type TJobOverview = v.InferOutput<typeof JobOverviewSchema>;
+export type TJobDetail = v.InferOutput<typeof JobDetailSchema>;

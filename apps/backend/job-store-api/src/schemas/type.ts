@@ -1,3 +1,4 @@
+import type { Job as DomainJob } from "@sho/models";
 import type { InferOutput } from "valibot";
 import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
 import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
@@ -41,7 +42,6 @@ export type JobStoreCommand =
   | CountJobsCommand;
 
 // --- コマンドtypeごとのoutput型マッピング ---
-// _tagは、実装側から追加してしまった、大変よろしくない
 export type SearchFilter = InferOutput<typeof searchFilterSchema>;
 export interface CommandOutputMap {
   InsertJob:

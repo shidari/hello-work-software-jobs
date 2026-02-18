@@ -1,6 +1,6 @@
-import { jobFetchSuccessResponseSchema } from "@sho/models";
 import * as v from "valibot";
 import { JobDetail } from "@/app/_components/Job";
+import { jobFetchSuccessResponseSchema } from "@/schemas";
 
 interface PageProps {
   params: Promise<{ jobNumber: string }>;

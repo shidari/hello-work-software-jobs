@@ -1,4 +1,4 @@
-import type { JobNumber } from "@sho/models";
+import type { JobNumber } from "../schemas";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 import {
   PlaywrightBrowserConfig,

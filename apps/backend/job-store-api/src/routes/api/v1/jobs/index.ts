@@ -4,7 +4,7 @@ import {
   insertJobRequestBodySchema,
   jobFetchParamSchema,
   jobListQuerySchema,
-} from "@sho/models";
+} from "../../../../schemas";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

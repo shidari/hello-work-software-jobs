@@ -1,8 +1,4 @@
-import type {
-  InsertJobRequestBody,
-  JobNumber,
-  transformedSchema,
-} from "@sho/models";
+import type { JobNumber } from "../schemas";
 import {
   companyNameSchema,
   employmentTypeSchema,
@@ -14,10 +10,11 @@ import {
   transformedExpiryDateToISOStrSchema,
   transformedHomePageSchema,
   transformedReceivedDateToISOStrSchema,
+  type transformedSchema,
   transformedWageSchema,
   transformedWorkingHoursSchema,
   workPlaceSchema,
-} from "@sho/models";
+} from "../schemas";
 import { format } from "date-fns";
 import { Config, Data, Effect } from "effect";
 import { parseHTML } from "linkedom";
@@ -445,7 +442,7 @@ function buildJobStoreClient() {
   return Effect.gen(function* () {
     const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
     return {
-      insertJob: (job: InsertJobRequestBody) =>
+      insertJob: (job: InferOutput<typeof transformedSchema>) =>
         Effect.gen(function* () {
           yield* Effect.logDebug(
             `executing insert job api. job=${JSON.stringify(job, null, 2)}`,

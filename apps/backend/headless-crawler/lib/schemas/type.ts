@@ -1,19 +1,16 @@
 import type { LaunchOptions, Locator, Page } from "playwright";
 import type * as v from "valibot";
 import type {
-  jobNumberSchema,
-  extractedJobSchema,
-  transformedSchema,
-} from "./jobDetail";
-import type { eventSchema } from "./jobNumber";
-import type {
   etCrawlerConfigWithoutBrowserConfigSchema,
   jobSearchCriteriaSchema,
   paritalEngineeringLabelSchema,
   partialEmploymentTypeSchema,
   partialWorkLocationSchema,
   searchPeriodSchema,
-} from "./jobNumber/config";
+} from "./config";
+import type { extractedJobSchema, jobNumberSchema } from "./extractor";
+import type { eventSchema } from "./lambdaEvent";
+import type { transformedSchema } from "./transformer";
 
 export type JobNumber = v.InferOutput<typeof jobNumberSchema>;
 
