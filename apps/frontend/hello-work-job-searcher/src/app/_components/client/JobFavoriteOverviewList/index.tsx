@@ -1,10 +1,10 @@
 "use client";
-import { JobOverviewSchema } from "@sho/models";
-import * as v from "valibot";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
+import * as v from "valibot";
 import { JobOverview } from "@/app/_components/Job";
+import { JobOverviewSchema } from "@/schemas";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "../../../_atom";
 import styles from "./index.module.css";
 

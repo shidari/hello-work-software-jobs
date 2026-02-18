@@ -1,4 +1,4 @@
-import type { JobNumber } from "@sho/models";
+import type { JobNumber } from "../../lib/schemas";
 import type { SQSRecord } from "aws-lambda";
 import { Effect } from "effect";
 import * as v from "valibot";

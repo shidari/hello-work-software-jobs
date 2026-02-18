@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import type { TJobDetail } from "@sho/models";
-import styles from "./page.module.css";
-import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
 import { Accordion } from "@/app/_components/client/Accordion";
-import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
 import { HydratedJobOverviewList } from "@/app/_components/client/JobOverViewList";
+import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
+import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
 import { jobStoreClientOnServer } from "@/app/_job-store-fetcher";
+import type { TJobDetail } from "@/schemas";
+import styles from "./page.module.css";
 
 export default async function Page() {
   // 一旦対応めんどいからunsafeUnwrapを使う

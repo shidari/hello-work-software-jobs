@@ -1,5 +1,5 @@
-import type { etCrawlerConfig } from "@sho/models";
-import { jobNumberSchema } from "@sho/models";
+import type { etCrawlerConfig } from "../schemas";
+import { jobNumberSchema } from "../schemas";
 import { Chunk, Config, Data, Effect, Option, Stream } from "effect";
 import type { Locator } from "playwright";
 import * as v from "valibot";

@@ -1,10 +1,10 @@
-import type {
-  jobFetchSuccessResponseSchema,
-  JobListQuery,
-  jobListSuccessResponseSchema,
-} from "@sho/models";
 import type { ResultAsync } from "neverthrow";
 import type { InferOutput } from "valibot";
+import type {
+  JobListQuery,
+  jobFetchSuccessResponseSchema,
+  jobListSuccessResponseSchema,
+} from "@/schemas";
 /**
  * 求人ストアクライアントの共通インターフェース
  */

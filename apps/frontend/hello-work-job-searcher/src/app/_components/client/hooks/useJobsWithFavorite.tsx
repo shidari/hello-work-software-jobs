@@ -1,6 +1,6 @@
 "use client";
-import type { TJobOverview } from "@sho/models";
 import { useAtomValue, useSetAtom } from "jotai";
+import type { TJobOverview } from "@/schemas";
 import {
   appendFavoriteJobAtom,
   favoriteJobsAtom,

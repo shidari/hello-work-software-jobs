@@ -1,13 +1,14 @@
+import type { VirtualItem } from "@tanstack/react-virtual";
+import { hc } from "hono/client";
+import { atom } from "jotai";
+import type { AppType } from "@/app/api/[[...route]]/route";
 import type {
   JobList,
   SearchFilter,
   TJobDetail,
   TJobOverview,
-} from "@sho/models";
-import type { VirtualItem } from "@tanstack/react-virtual";
-import { atom } from "jotai";
-import { hc } from "hono/client";
-import type { AppType } from "@/app/api/[[...route]]/route";
+} from "@/schemas";
+
 const client = hc<AppType>("/");
 
 export const jobListAtom = atom<{

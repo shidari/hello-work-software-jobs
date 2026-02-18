@@ -1,13 +1,13 @@
 "use client";
 
-import type { JobList } from "@sho/models";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import Link from "next/link";
 import React, { useTransition } from "react";
-import { JobOverview } from "@/app/_components/Job";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
+import { JobOverview } from "@/app/_components/Job";
+import type { JobList } from "@/schemas";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,
@@ -15,8 +15,8 @@ import {
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
 } from "../../../_atom";
-import styles from "./JobOverviewList.module.css";
 import { ClientNavLink } from "../ClientNavLink";
+import styles from "./JobOverviewList.module.css";
 
 function NewBadge() {
   return (

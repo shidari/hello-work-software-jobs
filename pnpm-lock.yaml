@@ -224,9 +224,6 @@ importers:
         specifier: ^1.1.0
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
-      playwright:
-        specifier: ^1.55.1
-        version: 1.57.0
       tsdown:
         specifier: ^0.15.3
         version: 0.15.12(typescript@5.9.3)(unrun@0.2.2)

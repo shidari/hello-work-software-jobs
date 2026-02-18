@@ -8,7 +8,7 @@ import type {
   EngineeringLabelSelectorRadioBtn,
   JobSearchCriteria,
   SearchPeriod,
-} from "@sho/models";
+} from "./schemas";
 import { Data, Effect } from "effect";
 import type { Page } from "playwright";
 import { PlaywrightChromiumPageResource } from "./browser";

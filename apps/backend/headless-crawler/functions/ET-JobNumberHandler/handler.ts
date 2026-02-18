@@ -1,4 +1,4 @@
-import { eventSchema } from "@sho/models";
+import { eventSchema } from "../../lib/schemas";
 import { Config, Effect, Exit, Logger, LogLevel } from "effect";
 import { safeParse } from "valibot";
 import { HelloWorkCrawler } from "../../lib/job-number-crawler/crawl";

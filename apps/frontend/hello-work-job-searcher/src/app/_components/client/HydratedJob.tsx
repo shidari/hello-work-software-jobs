@@ -1,9 +1,9 @@
 "use client";
 
-import type { TJobDetail } from "@sho/models";
-import { useHydrateAtoms } from "jotai/utils";
-import { jobAtom } from "../../_atom";
 import { useAtomValue } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
+import type { TJobDetail } from "@/schemas";
+import { jobAtom } from "../../_atom";
 import { JobDetail } from "../Job";
 
 export function HydratedJob({
