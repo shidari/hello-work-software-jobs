@@ -10,7 +10,7 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm exec tsdown",
+		"build": "pnpm exec tsdown src/index.ts --out-dir dist --dts --format cjs,esm --clean",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
