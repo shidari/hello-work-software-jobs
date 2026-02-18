@@ -4,7 +4,7 @@
     "nodejs@22",
     "awscli2@2.33.2",
     "aws-vault@latest",
-    "pnpm@latest",
+    "pnpm@9.15.3",
     "gh@1.14.0",
     "pinact@0.2.1"
   ],
