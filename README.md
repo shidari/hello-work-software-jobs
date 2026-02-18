@@ -63,4 +63,5 @@ pnpm build
 
 ## ドキュメント
 
-- [Next.jsからWakuへの移行コスト分析](./docs/waku-migration-cost-analysis.md) - フレームワーク移行の検討資料
+- [Waku移行コスト - サマリー](./docs/waku-migration-summary.md) - 移行コスト分析の要約（5分で読める）
+- [Next.jsからWakuへの移行コスト分析](./docs/waku-migration-cost-analysis.md) - 詳細な技術分析と推奨事項
