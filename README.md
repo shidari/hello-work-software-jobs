@@ -60,3 +60,7 @@ pnpm build
 ## 環境変数
 
 各プロジェクトで必要な環境変数は各ディレクトリのREADMEを参照してください。
+
+## ドキュメント
+
+- [Next.jsからWakuへの移行コスト分析](./docs/waku-migration-cost-analysis.md) - フレームワーク移行の検討資料
