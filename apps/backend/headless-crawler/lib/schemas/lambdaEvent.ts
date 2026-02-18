@@ -1,7 +1,7 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 
-export const eventSchema = v.partial(
-  v.object({
-    debugLog: v.boolean(),
+export const eventSchema = Schema.partial(
+  Schema.Struct({
+    debugLog: Schema.Boolean,
   }),
 );

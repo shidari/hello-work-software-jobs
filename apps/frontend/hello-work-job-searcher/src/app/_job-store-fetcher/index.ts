@@ -1,5 +1,6 @@
+import { Either, Schema } from "effect";
+import { TreeFormatter } from "effect/ParseResult";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import * as v from "valibot";
 import {
   type JobListQuery,
   jobFetchSuccessResponseSchema,
@@ -71,11 +72,12 @@ export const jobStoreClientOnServer: JobStoreClient = {
       const paramsObj = Object.fromEntries(searchParams.entries());
 
       yield* (() => {
-        const result = v.safeParse(jobListQuerySchema, paramsObj);
-        if (!result.success) {
+        const result =
+          Schema.decodeUnknownEither(jobListQuerySchema)(paramsObj);
+        if (Either.isLeft(result)) {
           return err(
             createValidateJobsError(
-              `Invalid job query. received:  ${JSON.stringify(paramsObj, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job query. received:  ${JSON.stringify(paramsObj, null, 2)}\n${TreeFormatter.formatErrorSync(result.left)}`,
             ),
           );
         }
@@ -100,15 +102,17 @@ export const jobStoreClientOnServer: JobStoreClient = {
       }
 
       const validatedData = yield* (() => {
-        const result = v.safeParse(jobListSuccessResponseSchema, data);
-        if (!result.success) {
+        const result = Schema.decodeUnknownEither(jobListSuccessResponseSchema)(
+          data,
+        );
+        if (Either.isLeft(result)) {
           return err(
             createValidateJobsError(
-              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${TreeFormatter.formatErrorSync(result.left)}`,
             ),
           );
         }
-        return ok(result.output);
+        return ok(result.right);
       })();
       return okAsync(validatedData);
     });
@@ -144,15 +148,17 @@ export const jobStoreClientOnServer: JobStoreClient = {
       }
 
       const validatedData = yield* (() => {
-        const result = v.safeParse(jobListSuccessResponseSchema, data);
-        if (!result.success) {
+        const result = Schema.decodeUnknownEither(jobListSuccessResponseSchema)(
+          data,
+        );
+        if (Either.isLeft(result)) {
           return err(
             createValidateJobsError(
-              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${TreeFormatter.formatErrorSync(result.left)}`,
             ),
           );
         }
-        return ok(result.output);
+        return ok(result.right);
       })();
       return okAsync(validatedData);
     });
@@ -186,15 +192,17 @@ export const jobStoreClientOnServer: JobStoreClient = {
       }
 
       const validatedData = yield* (() => {
-        const result = v.safeParse(jobFetchSuccessResponseSchema, data);
-        if (!result.success) {
+        const result = Schema.decodeUnknownEither(
+          jobFetchSuccessResponseSchema,
+        )(data);
+        if (Either.isLeft(result)) {
           return err(
             createValidateJobError(
-              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${result.issues.map((issue) => issue.message).join("\n")}`,
+              `Invalid job data. received: ${JSON.stringify(data, null, 2)}\n${TreeFormatter.formatErrorSync(result.left)}`,
             ),
           );
         }
-        return ok(result.output);
+        return ok(result.right);
       })();
       return okAsync(validatedData);
     });

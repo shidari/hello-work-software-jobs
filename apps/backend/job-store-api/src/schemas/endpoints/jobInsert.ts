@@ -1,26 +1,26 @@
 import { job } from "@sho/models";
-import { literal, object, string } from "valibot";
+import { Schema } from "effect";
 
 // ドメインモデルから id, status, timestamps を除いた insert 用スキーマ
-const { id, status, createdAt, updatedAt, ...insertFields } = job.entries;
-export const insertJobRequestBodySchema = object({ ...insertFields });
+const { id, status, createdAt, updatedAt, ...insertFields } = job.fields;
+export const insertJobRequestBodySchema = Schema.Struct({ ...insertFields });
 
 // API レスポンス用スキーマ
-export const insertJobSuccessResponseSchema = object({
-  success: literal(true),
-  result: object({
+export const insertJobSuccessResponseSchema = Schema.Struct({
+  success: Schema.Literal(true),
+  result: Schema.Struct({
     job: insertJobRequestBodySchema,
   }),
 });
 
-export const insertJobDuplicationErrorResponseSchema = object({
-  message: string(),
+export const insertJobDuplicationErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });
 
-export const insertJobGeneralClientErrorResponseSchema = object({
-  message: string(),
+export const insertJobGeneralClientErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });
 
-export const insertJobServerErrorResponseSchema = object({
-  message: string(),
+export const insertJobServerErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });

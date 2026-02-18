@@ -1,3 +1,8 @@
+import { format } from "date-fns";
+import { Config, Data, Effect, Either, Schema } from "effect";
+import { parseHTML } from "linkedom";
+import type { Page } from "playwright";
+import { FirstJobListPageNavigator } from "../page";
 import type { JobNumber } from "../schemas";
 import {
   companyNameSchema,
@@ -15,14 +20,7 @@ import {
   transformedWorkingHoursSchema,
   workPlaceSchema,
 } from "../schemas";
-import { format } from "date-fns";
-import { Config, Data, Effect } from "effect";
-import { parseHTML } from "linkedom";
-import type { Page } from "playwright";
-import type { InferOutput } from "valibot";
-import * as v from "valibot";
-import { FirstJobListPageNavigator } from "../page";
-import { issueToLogString } from "../util";
+import { formatParseError } from "../util";
 
 // ============================================================
 // Errors
@@ -204,234 +202,173 @@ function validateJobDetailPage(page: Page) {
 }
 
 // ============================================================
-// Validators
+// Validators (Schema.decodeUnknownEither + 条件分岐)
 // ============================================================
 
-function validateJobNumber(val: unknown) {
-  return Effect.gen(function* () {
-    yield* Effect.logDebug(
-      `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
+const validateJobNumber = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(jobNumberSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new JobNumberValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
     );
-    const result = v.safeParse(jobNumberSchema, val);
-    if (!result.success) {
-      return yield* Effect.fail(
-        new JobNumberValidationError({
-          detail: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
-      );
-    }
-    return yield* Effect.succeed(result.output);
-  });
-}
+  return Effect.succeed(result.right);
+};
 
-function validateCompanyName(val: unknown) {
-  return Effect.gen(function* () {
-    const result = v.safeParse(companyNameSchema, val);
-    if (!result.success) {
-      return yield* Effect.fail(
-        new CompanyNameValidationError({
-          detail: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
-      ).pipe(
-        Effect.tap(() => {
-          return Effect.logDebug(
-            `failed to validate companyName. detail: ${result.issues.map(issueToLogString).join("\n")}`,
-          );
-        }),
-      );
-    }
-    return yield* Effect.succeed(result.output);
-  });
-}
-
-function validateOccupation(val: unknown) {
-  return Effect.gen(function* () {
-    yield* Effect.logDebug(
-      `calling validateOccupation. args=${JSON.stringify(val, null, 2)}`,
+const validateCompanyName = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(companyNameSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new CompanyNameValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
     );
-    const result = v.safeParse(occupationSchema, val);
-    if (!result.success) {
-      yield* Effect.logDebug(
-        `failed to validate occupation. issues=${JSON.stringify(result.issues, null, 2)}`,
-      );
-      return yield* Effect.fail(
-        new OccupationValidationError({
-          detail: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
-      );
-    }
-    yield* Effect.logDebug(
-      `succeeded to validate occupation. val=${JSON.stringify(result.output, null, 2)}`,
+  return Effect.succeed(result.right);
+};
+
+const validateOccupation = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(occupationSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new OccupationValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
     );
-    return yield* Effect.succeed(result.output);
-  });
-}
+  return Effect.succeed(result.right);
+};
 
-function validateEmploymentType(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(employmentTypeSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new EmploymentTypeValidationError({
-            detail: e.message,
-            serializedVal: JSON.stringify(val, null, 2),
-          })
-        : new EmploymentTypeValidationError({
-            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          }),
-  });
-}
+const validateEmploymentType = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(employmentTypeSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new EmploymentTypeValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  return Effect.succeed(result.right);
+};
 
-function validateWorkPlace(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(workPlaceSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new WorkPlaceValidationError({
-            detail: `${e.issues.map(issueToLogString).join("\n")}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          })
-        : new WorkPlaceValidationError({
-            detail: `unexpected error. \n${e instanceof Error ? e.message : String(e)}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          }),
-  }).pipe(
-    Effect.tap((workPlace) => {
-      return Effect.logDebug(
-        `succeeded to validate workPlace. val=${JSON.stringify(workPlace, null, 2)}`,
-      );
-    }),
-  );
-}
+const validateWorkPlace = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(workPlaceSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new WorkPlaceValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  return Effect.succeed(result.right);
+};
 
-function validateJobDescription(val: unknown) {
-  return Effect.try({
-    try: () => v.parse(jobDescriptionSchema, val),
-    catch: (e) =>
-      e instanceof v.ValiError
-        ? new JobDescriptionValidationError({
-            detail: `${e.issues.map(issueToLogString).join("\n")}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          })
-        : new JobDescriptionValidationError({
-            detail: `unexpected error.\n${e instanceof Error ? e.message : String(e)}`,
-            serializedVal: JSON.stringify(val, null, 2),
-          }),
-  }).pipe(
-    Effect.tap((jobDescription) => {
-      return Effect.logDebug(
-        `succeeded to validate jobDescription. val=${JSON.stringify(jobDescription, null, 2)}`,
-      );
-    }),
-  );
-}
+const validateJobDescription = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(jobDescriptionSchema)(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new JobDescriptionValidationError({
+        detail: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  return Effect.succeed(result.right);
+};
 
-function validateQualification(
-  val: unknown,
-): Effect.Effect<
-  v.InferOutput<typeof qualificationsSchema>,
-  QualificationValidationError
-> {
-  const result = v.safeParse(qualificationsSchema, val);
-  if (!result.success) {
+const validateQualification = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(qualificationsSchema)(val);
+  if (Either.isLeft(result))
     return Effect.fail(
       new QualificationValidationError({
-        detail: `${result.issues.map(issueToLogString).join("\n")}`,
+        detail: formatParseError(result.left),
         serializedVal: JSON.stringify(val, null, 2),
       }),
     );
-  }
-  return Effect.succeed(result.output);
-}
+  return Effect.succeed(result.right);
+};
 
 // ============================================================
-// Transformers
+// Transformers (Schema.decodeUnknownEither + 条件分岐)
 // ============================================================
 
-function transformReceivedDate(val: unknown) {
-  return Effect.gen(function* () {
-    const result = v.safeParse(transformedReceivedDateToISOStrSchema, val);
-    if (!result.success) {
-      return yield* Effect.fail(
-        new ReceivedDateTransformationError({
-          reason: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
-      );
-    }
-    return yield* Effect.succeed(result.output);
-  });
-}
+const transformReceivedDate = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(
+    transformedReceivedDateToISOStrSchema,
+  )(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new ReceivedDateTransformationError({
+        reason: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  return Effect.succeed(result.right);
+};
 
-function transformExpiryDate(val: unknown) {
-  return Effect.gen(function* () {
-    const result = v.safeParse(transformedExpiryDateToISOStrSchema, val);
-    if (!result.success) {
-      return yield* Effect.fail(
-        new ExpiryDateTransformationError({
-          reason: `${result.issues.map(issueToLogString).join("\n")}`,
-          serializedVal: JSON.stringify(val, null, 2),
-        }),
-      );
-    }
-    return yield* Effect.succeed(result.output);
-  });
-}
+const transformExpiryDate = (val: unknown) => {
+  const result = Schema.decodeUnknownEither(
+    transformedExpiryDateToISOStrSchema,
+  )(val);
+  if (Either.isLeft(result))
+    return Effect.fail(
+      new ExpiryDateTransformationError({
+        reason: formatParseError(result.left),
+        serializedVal: JSON.stringify(val, null, 2),
+      }),
+    );
+  return Effect.succeed(result.right);
+};
 
 const toTransformedWage = (val: unknown) => {
-  const result = v.safeParse(transformedWageSchema, val);
-  if (!result.success) {
+  const result = Schema.decodeUnknownEither(transformedWageSchema)(val);
+  if (Either.isLeft(result))
     return Effect.fail(
       new WageTransformationError({
-        reason: ` ${result.issues.map(issueToLogString).join("\n")}`,
+        reason: formatParseError(result.left),
         serializedVal: JSON.stringify(val, null, 2),
       }),
     );
-  }
-  return Effect.succeed(result.output);
+  return Effect.succeed(result.right);
 };
 
 const toTransformedWorkingHours = (val: unknown) => {
-  const result = v.safeParse(transformedWorkingHoursSchema, val);
-  if (!result.success) {
+  const result = Schema.decodeUnknownEither(transformedWorkingHoursSchema)(val);
+  if (Either.isLeft(result))
     return Effect.fail(
       new WorkingHoursTransformationError({
-        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        reason: formatParseError(result.left),
         serializedVal: JSON.stringify(val, null, 2),
       }),
     );
-  }
-  return Effect.succeed(result.output);
+  return Effect.succeed(result.right);
 };
 
 const toTransformedEmployeeCount = (val: unknown) => {
-  const result = v.safeParse(transformedEmployeeCountSchema, val);
-  if (!result.success) {
+  const result = Schema.decodeUnknownEither(transformedEmployeeCountSchema)(
+    val,
+  );
+  if (Either.isLeft(result))
     return Effect.fail(
       new EmployeeCountTransformationError({
-        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        reason: formatParseError(result.left),
         serializedVal: JSON.stringify(val, null, 2),
       }),
     );
-  }
-  return Effect.succeed(result.output);
+  return Effect.succeed(result.right);
 };
 
 const toTransformedHomePage = (val: unknown) => {
-  const result = v.safeParse(transformedHomePageSchema, val);
-  if (!result.success) {
+  const result = Schema.decodeUnknownEither(transformedHomePageSchema)(val);
+  if (Either.isLeft(result))
     return Effect.fail(
       new HomePageTransformationError({
-        reason: `${result.issues.map(issueToLogString).join("\n")}`,
+        reason: formatParseError(result.left),
         serializedVal: JSON.stringify(val, null, 2),
       }),
     );
-  }
-  return Effect.succeed(result.output);
+  return Effect.succeed(result.right);
 };
 
 // ============================================================
@@ -442,7 +379,7 @@ function buildJobStoreClient() {
   return Effect.gen(function* () {
     const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
     return {
-      insertJob: (job: InferOutput<typeof transformedSchema>) =>
+      insertJob: (job: typeof transformedSchema.Type) =>
         Effect.gen(function* () {
           yield* Effect.logDebug(
             `executing insert job api. job=${JSON.stringify(job, null, 2)}`,
@@ -615,7 +552,7 @@ export class JobDetailLoader extends Effect.Service<JobDetailLoader>()(
   {
     effect: Effect.gen(function* () {
       return {
-        load: (data: InferOutput<typeof transformedSchema>) =>
+        load: (data: typeof transformedSchema.Type) =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading job detail...");
             const client = yield* buildJobStoreClient();

@@ -1,3 +1,5 @@
+import { Schema } from "effect";
+import { describeRoute, resolver } from "hono-openapi";
 import {
   insertJobDuplicationErrorResponseSchema,
   insertJobGeneralClientErrorResponseSchema,
@@ -10,7 +12,6 @@ import {
   jobListServerErrorSchema,
   jobListSuccessResponseSchema,
 } from "../../../../schemas";
-import { describeRoute, resolver } from "hono-openapi";
 
 export const jobListRoute = describeRoute({
   parameters: [
@@ -70,7 +71,9 @@ export const jobListRoute = describeRoute({
       description: "Successful response",
       content: {
         "application/json": {
-          schema: resolver(jobListSuccessResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(jobListSuccessResponseSchema),
+          ),
         },
       },
     },
@@ -78,7 +81,9 @@ export const jobListRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(jobListClientErrorResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(jobListClientErrorResponseSchema),
+          ),
         },
       },
     },
@@ -86,7 +91,7 @@ export const jobListRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(jobListServerErrorSchema),
+          schema: resolver(Schema.standardSchemaV1(jobListServerErrorSchema)),
         },
       },
     },
@@ -192,7 +197,9 @@ export const jobInsertRoute = describeRoute({
       description: "Successful response",
       content: {
         "application/json": {
-          schema: resolver(insertJobSuccessResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(insertJobSuccessResponseSchema),
+          ),
         },
       },
     },
@@ -200,7 +207,9 @@ export const jobInsertRoute = describeRoute({
       description: "duplication error response",
       content: {
         "application/json": {
-          schema: resolver(insertJobDuplicationErrorResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(insertJobDuplicationErrorResponseSchema),
+          ),
         },
       },
     },
@@ -208,7 +217,9 @@ export const jobInsertRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(insertJobGeneralClientErrorResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(insertJobGeneralClientErrorResponseSchema),
+          ),
         },
       },
     },
@@ -216,7 +227,9 @@ export const jobInsertRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(insertJobServerErrorResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(insertJobServerErrorResponseSchema),
+          ),
         },
       },
     },
@@ -229,7 +242,9 @@ export const jobFetchRoute = describeRoute({
       description: "Successful response",
       content: {
         "application/json": {
-          schema: resolver(jobFetchSuccessResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(jobFetchSuccessResponseSchema),
+          ),
         },
       },
     },
@@ -237,7 +252,9 @@ export const jobFetchRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(jobFetchClientErrorResponseSchema),
+          schema: resolver(
+            Schema.standardSchemaV1(jobFetchClientErrorResponseSchema),
+          ),
         },
       },
     },
@@ -245,7 +262,7 @@ export const jobFetchRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(jobFetchServerErrorSchema),
+          schema: resolver(Schema.standardSchemaV1(jobFetchServerErrorSchema)),
         },
       },
     },

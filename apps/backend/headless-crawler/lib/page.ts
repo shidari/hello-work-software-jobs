@@ -1,3 +1,6 @@
+import { Data, Effect } from "effect";
+import type { Page } from "playwright";
+import { PlaywrightChromiumPageResource } from "./browser";
 import type {
   DirtyWorkLocation,
   EmploymentType,
@@ -9,9 +12,6 @@ import type {
   JobSearchCriteria,
   SearchPeriod,
 } from "./schemas";
-import { Data, Effect } from "effect";
-import type { Page } from "playwright";
-import { PlaywrightChromiumPageResource } from "./browser";
 
 // ============================================================
 // Errors

@@ -12,6 +12,7 @@ apps/
   ├── job-store-api/            # Cloudflare Workers API
   └── headless-crawler/         # AWS Lambda クローラー
 packages/
+  ├── db/                       # Drizzle schema & migrations
   └── models/                   # 共通型定義
 ```
 
@@ -21,7 +22,7 @@ packages/
 - **フロントエンド**: Next.js 15, React 19, Jotai, Hono (RPC)
 - **API**: Cloudflare Workers, Hono, Drizzle ORM, D1
 - **クローラー**: AWS Lambda, Playwright, Effect, SQS
-- **型管理**: Valibot, @sho/models
+- **型管理**: Effect Schema, @sho/models
 
 ## セットアップ
 

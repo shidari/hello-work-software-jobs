@@ -1,5 +1,7 @@
-import * as v from "valibot";
+import { Schema } from "effect";
 
-export const fromExtractJobNumberHandlerJobQueueEventBodySchema = v.object({
-  jobNumber: v.string(),
-});
+export const fromExtractJobNumberHandlerJobQueueEventBodySchema = Schema.Struct(
+  {
+    jobNumber: Schema.String,
+  },
+);

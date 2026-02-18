@@ -1,5 +1,3 @@
-import type { Job as DomainJob } from "@sho/models";
-import type { InferOutput } from "valibot";
 import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
 import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
 import type { jobListQuerySchema } from "./endpoints/jobList";
@@ -42,7 +40,7 @@ export type JobStoreCommand =
   | CountJobsCommand;
 
 // --- コマンドtypeごとのoutput型マッピング ---
-export type SearchFilter = InferOutput<typeof searchFilterSchema>;
+export type SearchFilter = typeof searchFilterSchema.Type;
 export interface CommandOutputMap {
   InsertJob:
     | { success: true; jobNumber: string }
@@ -104,14 +102,12 @@ export type JobStoreDBClient = {
   execute: <T extends JobStoreCommand>(cmd: T) => Promise<CommandOutput<T>>;
 };
 
-export type Job = InferOutput<typeof JobSchema>;
+export type Job = typeof JobSchema.Type;
 
-export type InsertJobRequestBody = InferOutput<
-  typeof insertJobRequestBodySchema
->;
+export type InsertJobRequestBody = typeof insertJobRequestBodySchema.Type;
 
-export type JobList = InferOutput<typeof JobListSchema>;
+export type JobList = typeof JobListSchema.Type;
 
-export type JobListQuery = InferOutput<typeof jobListQuerySchema>;
+export type JobListQuery = typeof jobListQuerySchema.Type;
 
-export type DecodedNextToken = InferOutput<typeof decodedNextTokenSchema>;
+export type DecodedNextToken = typeof decodedNextTokenSchema.Type;

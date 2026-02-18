@@ -4,12 +4,13 @@ import {
   waitOnExecutionContext,
 } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
+import { Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
-import { parse } from "valibot";
-import { insertJobRequestBodySchema } from "../src/schemas";
 import { createJobStoreDBClientAdapter } from "../src/adapters";
+import { insertJobRequestBodySchema } from "../src/schemas";
+
 const MOCK_ENV = {
   ...env,
   API_KEY: "test-api-key",
@@ -107,7 +108,7 @@ describe("/api/v1/jobs", () => {
   });
   describe("POST 異常系", () => {
     const jobNumber = "52495-40218";
-    const insertingJob = parse(insertJobRequestBodySchema, {
+    const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
       jobNumber,
       companyName: "Tech Corp",
       jobDescription: "ソフトウェアエンジニアの募集です。",
@@ -195,23 +196,25 @@ describe("/api/v1/jobs/:jobNumber", () => {
     beforeAll(async () => {
       const db = drizzle(env.DB);
       const dbClient = createJobStoreDBClientAdapter(db);
-      const insertingJob = parse(insertJobRequestBodySchema, {
-        jobNumber,
-        companyName: "Tech Corp",
-        jobDescription: "ソフトウェアエンジニアの募集です。",
-        workPlace: "東京",
-        wageMin: 50000000,
-        wageMax: 80000000,
-        employmentType: "正社員",
-        workingStartTime: "09:00",
-        workingEndTime: "18:00",
-        receivedDate: "2024-06-01T12:34:56Z",
-        expiryDate: "2024-12-31T23:59:59Z",
-        employeeCount: 200,
-        occupation: "IT",
-        homePage: "https://techcorp.example.com",
-        qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-      });
+      const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)(
+        {
+          jobNumber,
+          companyName: "Tech Corp",
+          jobDescription: "ソフトウェアエンジニアの募集です。",
+          workPlace: "東京",
+          wageMin: 50000000,
+          wageMax: 80000000,
+          employmentType: "正社員",
+          workingStartTime: "09:00",
+          workingEndTime: "18:00",
+          receivedDate: "2024-06-01T12:34:56Z",
+          expiryDate: "2024-12-31T23:59:59Z",
+          employeeCount: 200,
+          occupation: "IT",
+          homePage: "https://techcorp.example.com",
+          qualifications: " コンピュータサイエンスの学位、3年以上の経験",
+        },
+      );
       await dbClient.execute({
         type: "InsertJob",
         payload: insertingJob,

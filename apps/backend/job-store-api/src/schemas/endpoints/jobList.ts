@@ -1,24 +1,24 @@
-import { number, object, optional, string } from "valibot";
+import { Schema } from "effect";
 import { JobListSchema, searchFilterSchema } from "../dbClient";
 
-export const jobListQuerySchema = object({
-  ...searchFilterSchema.entries,
-  employeeCountLt: optional(string()),
-  employeeCountGt: optional(string()),
+export const jobListQuerySchema = Schema.Struct({
+  ...searchFilterSchema.fields,
+  employeeCountLt: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
 });
 
-export const jobListSuccessResponseSchema = object({
+export const jobListSuccessResponseSchema = Schema.Struct({
   jobs: JobListSchema,
-  nextToken: optional(string()),
-  meta: object({
-    totalCount: number(),
+  nextToken: Schema.optional(Schema.String),
+  meta: Schema.Struct({
+    totalCount: Schema.Number,
   }),
 });
 
-export const jobListClientErrorResponseSchema = object({
-  message: string(),
+export const jobListClientErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });
 
-export const jobListServerErrorSchema = object({
-  message: string(),
+export const jobListServerErrorSchema = Schema.Struct({
+  message: Schema.String,
 });

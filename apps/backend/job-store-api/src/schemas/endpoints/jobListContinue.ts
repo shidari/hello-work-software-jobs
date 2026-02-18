@@ -1,23 +1,23 @@
-import { number, object, string } from "valibot";
+import { Schema } from "effect";
 import { searchFilterSchema } from "../dbClient";
 
-export const jobListContinueQuerySchema = object({
-  nextToken: string(),
+export const jobListContinueQuerySchema = Schema.Struct({
+  nextToken: Schema.String,
 });
 
-export const decodedNextTokenSchema = object({
-  iss: string(),
-  iat: number(),
-  nbf: number(),
-  exp: number(),
-  page: number(),
+export const decodedNextTokenSchema = Schema.Struct({
+  iss: Schema.String,
+  iat: Schema.Number,
+  nbf: Schema.Number,
+  exp: Schema.Number,
+  page: Schema.Number,
   filter: searchFilterSchema,
 });
 
-export const jobListContinueClientErrorResponseSchema = object({
-  message: string(),
+export const jobListContinueClientErrorResponseSchema = Schema.Struct({
+  message: Schema.String,
 });
 
-export const jobListContinueServerErrorSchema = object({
-  message: string(),
+export const jobListContinueServerErrorSchema = Schema.Struct({
+  message: Schema.String,
 });

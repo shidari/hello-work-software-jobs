@@ -1,8 +1,8 @@
 "use client";
+import { Schema } from "effect";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
-import * as v from "valibot";
 import { JobOverview } from "@/app/_components/Job";
 import { JobOverviewSchema } from "@/schemas";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "../../../_atom";
@@ -20,7 +20,9 @@ export function FavoriteJobOverviewList() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
-      const validated = parsed.map((item) => v.parse(JobOverviewSchema, item));
+      const validated = parsed.map((item) =>
+        Schema.decodeUnknownSync(JobOverviewSchema)(item),
+      );
       setFavoriteJobs(validated);
     } catch {
       // ignore
