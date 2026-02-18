@@ -185,7 +185,6 @@ async function handleCountJobs(
 ): Promise<CommandOutput<CountJobsCommand>> {
   const conditions = [];
   const { page, filter } = cmd.options;
-  const _offset = (page - 1) * PAGE_SIZE;
   // Do not add any condition based on jobs.id and offset for counting
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));
