@@ -1,4 +1,4 @@
-import type { TJobDetail, TJobOverview } from "@/schemas";
+import type { TJobDetail, TJobOverview } from "@/schemas/job";
 import { formatDate } from "../../util";
 import styles from "./index.module.css";
 

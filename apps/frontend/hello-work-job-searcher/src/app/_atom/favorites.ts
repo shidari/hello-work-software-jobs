@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import type { TJobOverview } from "@/schemas";
+import type { TJobOverview } from "@/schemas/job";
 
 export const favoriteJobsAtom = atom<TJobOverview[]>([]);
 

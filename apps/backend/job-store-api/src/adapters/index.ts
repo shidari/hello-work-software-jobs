@@ -1,19 +1,21 @@
 import { jobs } from "@sho/db";
 import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
+import { Schema } from "effect";
 import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
 import { PAGE_SIZE } from "../common";
-import type {
-  CheckJobExistsCommand,
-  CommandOutput,
-  CountJobsCommand,
-  FetchJobsPageCommand,
-  FindJobByNumberCommand,
-  InsertJobCommand,
-  JobStoreCommand,
-  JobStoreDBClient,
-} from "../schemas";
+import {
+  type CheckJobExistsCommand,
+  type CommandOutput,
+  type CountJobsCommand,
+  type FetchJobsPageCommand,
+  type FindJobByNumberCommand,
+  type InsertJobCommand,
+  JobSchema,
+  type JobStoreCommand,
+  type JobStoreDBClient,
+} from "../schemas/type";
 
 type DrizzleD1Client = DrizzleD1Database<Record<string, never>> & {
   $client: D1Database;
@@ -56,7 +58,8 @@ async function handleFindJobByNumber(
       .from(jobs)
       .where(eq(jobs.jobNumber, cmd.jobNumber))
       .limit(1);
-    return { success: true, job: data.length > 0 ? data[0] : null };
+    const decodeJob = Schema.decodeUnknownSync(JobSchema);
+    return { success: true, job: data.length > 0 ? decodeJob(data[0]) : null };
   } catch (error) {
     return {
       success: false,
@@ -139,9 +142,10 @@ async function handleFetchJobsPage(
       filterConditions.length > 0 ? and(...filterConditions) : undefined,
     );
 
+    const decodeJob = Schema.decodeUnknownSync(JobSchema);
     return {
       success: true,
-      jobs: jobList,
+      jobs: jobList.map((row) => decodeJob(row)),
       meta: {
         totalCount,
         filter,

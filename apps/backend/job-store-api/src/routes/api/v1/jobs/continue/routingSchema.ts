@@ -1,10 +1,10 @@
 import { Schema } from "effect";
 import { describeRoute, resolver } from "hono-openapi";
-import {
-  jobListContinueClientErrorResponseSchema,
-  jobListContinueServerErrorSchema,
-  jobListSuccessResponseSchema,
-} from "../../../../../schemas";
+import { jobListSuccessResponseSchema } from "../routingSchema";
+
+const messageErrorSchema = Schema.Struct({
+  message: Schema.String,
+});
 
 export const jobListContinueRoute = describeRoute({
   parameters: [
@@ -28,9 +28,7 @@ export const jobListContinueRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(jobListContinueClientErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -38,9 +36,7 @@ export const jobListContinueRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(jobListContinueServerErrorSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },

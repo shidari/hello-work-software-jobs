@@ -1,17 +1,30 @@
+import { Job } from "@sho/models";
 import { Schema } from "effect";
 import { describeRoute, resolver } from "hono-openapi";
-import {
-  insertJobDuplicationErrorResponseSchema,
-  insertJobGeneralClientErrorResponseSchema,
-  insertJobServerErrorResponseSchema,
-  insertJobSuccessResponseSchema,
-  jobFetchClientErrorResponseSchema,
-  jobFetchServerErrorSchema,
-  jobFetchSuccessResponseSchema,
-  jobListClientErrorResponseSchema,
-  jobListServerErrorSchema,
-  jobListSuccessResponseSchema,
-} from "../../../../schemas";
+import { JobSchema } from "../../../../schemas/type";
+
+// --- エラーレスポンススキーマ ---
+
+const messageErrorSchema = Schema.Struct({
+  message: Schema.String,
+});
+
+// --- 成功レスポンススキーマ ---
+
+export const jobListSuccessResponseSchema = Schema.Struct({
+  jobs: Schema.Array(Job),
+  nextToken: Schema.optional(Schema.String),
+  meta: Schema.Struct({
+    totalCount: Schema.Number,
+  }),
+});
+
+const insertJobSuccessResponseSchema = Schema.Struct({
+  success: Schema.Literal(true),
+  result: Schema.Struct({
+    job: Job,
+  }),
+});
 
 export const jobListRoute = describeRoute({
   parameters: [
@@ -81,9 +94,7 @@ export const jobListRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(jobListClientErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -91,7 +102,7 @@ export const jobListRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(Schema.standardSchemaV1(jobListServerErrorSchema)),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -207,9 +218,7 @@ export const jobInsertRoute = describeRoute({
       description: "duplication error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(insertJobDuplicationErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -217,9 +226,7 @@ export const jobInsertRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(insertJobGeneralClientErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -227,9 +234,7 @@ export const jobInsertRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(insertJobServerErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -242,9 +247,7 @@ export const jobFetchRoute = describeRoute({
       description: "Successful response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(jobFetchSuccessResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(JobSchema)),
         },
       },
     },
@@ -252,9 +255,7 @@ export const jobFetchRoute = describeRoute({
       description: "client error response",
       content: {
         "application/json": {
-          schema: resolver(
-            Schema.standardSchemaV1(jobFetchClientErrorResponseSchema),
-          ),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },
@@ -262,7 +263,7 @@ export const jobFetchRoute = describeRoute({
       description: "internal server error response",
       content: {
         "application/json": {
-          schema: resolver(Schema.standardSchemaV1(jobFetchServerErrorSchema)),
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
         },
       },
     },

@@ -1,3 +1,4 @@
+import { Job, JobNumber } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
@@ -15,12 +16,8 @@ import {
   createJobsCountError,
 } from "../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../common";
-import {
-  type DecodedNextToken,
-  insertJobRequestBodySchema,
-  jobFetchParamSchema,
-  jobListQuerySchema,
-} from "../../../../schemas";
+import type { DecodedNextToken } from "../../../../schemas/type";
+import { searchFilterSchema } from "../../../../schemas/type";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
@@ -32,6 +29,18 @@ import { envSchema } from "../../../util";
 import continueRoute from "./continue";
 import { createUnexpectedError } from "./error";
 import { jobFetchRoute, jobInsertRoute, jobListRoute } from "./routingSchema";
+
+const jobFetchParamSchema = Schema.Struct({
+  jobNumber: JobNumber,
+});
+
+const jobListQuerySchema = Schema.Struct({
+  ...searchFilterSchema.fields,
+  employeeCountLt: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
+});
+
+const insertJobRequestBodySchema = Job;
 
 const employeeCountSchema = Schema.Number.pipe(
   Schema.int(),

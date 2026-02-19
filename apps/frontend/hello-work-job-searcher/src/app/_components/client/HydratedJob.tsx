@@ -2,7 +2,7 @@
 
 import { useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import type { TJobDetail } from "@/schemas";
+import type { TJobDetail } from "@/schemas/job";
 import { jobAtom } from "../../_atom";
 import { JobDetail } from "../Job";
 

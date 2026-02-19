@@ -1,6 +1,6 @@
 "use client";
 import { useAtomValue, useSetAtom } from "jotai";
-import type { TJobOverview } from "@/schemas";
+import type { TJobOverview } from "@/schemas/job";
 import {
   appendFavoriteJobAtom,
   favoriteJobsAtom,

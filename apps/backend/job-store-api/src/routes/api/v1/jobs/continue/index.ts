@@ -11,10 +11,9 @@ import { createFetchJobListError } from "../../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../../common";
 import {
   type DecodedNextToken,
-  decodedNextTokenSchema,
   type FetchJobsPageCommand,
-  jobListContinueQuerySchema,
-} from "../../../../../schemas";
+  searchFilterSchema,
+} from "../../../../../schemas/type";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
 import {
@@ -22,6 +21,19 @@ import {
   createJWTVerificationError,
 } from "./error";
 import { jobListContinueRoute } from "./routingSchema";
+
+const jobListContinueQuerySchema = Schema.Struct({
+  nextToken: Schema.String,
+});
+
+const decodedNextTokenSchema = Schema.Struct({
+  iss: Schema.String,
+  iat: Schema.Number,
+  nbf: Schema.Number,
+  exp: Schema.Number,
+  page: Schema.Number,
+  filter: searchFilterSchema,
+});
 
 const app = new Hono<{ Bindings: Env }>();
 

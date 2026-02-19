@@ -7,7 +7,7 @@ import { useHydrateAtoms } from "jotai/utils";
 import React, { useTransition } from "react";
 import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
 import { JobOverview } from "@/app/_components/Job";
-import type { JobList } from "@/schemas";
+import type { JobList } from "@/app/_job-store-fetcher";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,

@@ -4,7 +4,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
 import { JobOverview } from "@/app/_components/Job";
-import { JobOverviewSchema } from "@/schemas";
+import { JobOverviewSchema } from "@/schemas/job";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "../../../_atom";
 import cardStyles from "../jobCard.module.css";
 import styles from "./index.module.css";

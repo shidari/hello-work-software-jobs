@@ -1,9 +1,9 @@
 import type { ResultAsync } from "neverthrow";
 import type {
+  JobFetchSuccessResponse,
   JobListQuery,
-  jobFetchSuccessResponseSchema,
-  jobListSuccessResponseSchema,
-} from "@/schemas";
+  JobListSuccessResponse,
+} from "./index";
 /**
  * 求人ストアクライアントの共通インターフェース
  */
@@ -15,7 +15,7 @@ export interface JobStoreClient {
   getInitialJobs(
     query?: JobListQuery,
   ): ResultAsync<
-    typeof jobListSuccessResponseSchema.Type,
+    JobListSuccessResponse,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
 
@@ -26,14 +26,14 @@ export interface JobStoreClient {
   getContinuedJobs(
     nextToken: string,
   ): ResultAsync<
-    typeof jobListSuccessResponseSchema.Type,
+    JobListSuccessResponse,
     EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
   >;
 
   getJob(
     jobNumber: string,
   ): ResultAsync<
-    typeof jobFetchSuccessResponseSchema.Type,
+    JobFetchSuccessResponse,
     EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError
   >;
 }

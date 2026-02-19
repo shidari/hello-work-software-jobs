@@ -1,7 +1,47 @@
-import type { JobListSchema, JobSchema, searchFilterSchema } from "./dbClient";
-import type { insertJobRequestBodySchema } from "./endpoints/jobInsert";
-import type { jobListQuerySchema } from "./endpoints/jobList";
-import type { decodedNextTokenSchema } from "./endpoints/jobListContinue";
+import { Job as DomainJob, type Job as DomainJobType } from "@sho/models";
+import { Schema } from "effect";
+
+// --- 共有スキーマ (adapters / routes で使用) ---
+
+export const searchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.Boolean),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  addedSince: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+  addedUntil: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+});
+
+export const JobSchema = Schema.Struct({
+  ...DomainJob.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});
+
+// --- 型エイリアス ---
+
+export type SearchFilter = typeof searchFilterSchema.Type;
+export type Job = typeof JobSchema.Type;
+export type InsertJobRequestBody = DomainJobType;
+export type JobList = readonly Job[];
+export type DecodedNextToken = {
+  readonly iss: string;
+  readonly iat: number;
+  readonly nbf: number;
+  readonly exp: number;
+  readonly page: number;
+  readonly filter: SearchFilter;
+};
 
 // --- コマンド型 ---
 export type InsertJobCommand = {
@@ -40,7 +80,6 @@ export type JobStoreCommand =
   | CountJobsCommand;
 
 // --- コマンドtypeごとのoutput型マッピング ---
-export type SearchFilter = typeof searchFilterSchema.Type;
 export interface CommandOutputMap {
   InsertJob:
     | { success: true; jobNumber: string }
@@ -101,13 +140,3 @@ export type CommandOutput<T extends JobStoreCommand> = T extends {
 export type JobStoreDBClient = {
   execute: <T extends JobStoreCommand>(cmd: T) => Promise<CommandOutput<T>>;
 };
-
-export type Job = typeof JobSchema.Type;
-
-export type InsertJobRequestBody = typeof insertJobRequestBodySchema.Type;
-
-export type JobList = typeof JobListSchema.Type;
-
-export type JobListQuery = typeof jobListQuerySchema.Type;
-
-export type DecodedNextToken = typeof decodedNextTokenSchema.Type;

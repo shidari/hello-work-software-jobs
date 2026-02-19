@@ -5,7 +5,7 @@ import { HydratedJobOverviewList } from "@/app/_components/client/JobOverViewLis
 import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
 import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
 import { jobStoreClientOnServer } from "@/app/_job-store-fetcher";
-import type { TJobDetail } from "@/schemas";
+import type { TJobDetail } from "@/schemas/job";
 import styles from "./page.module.css";
 
 export default async function Page() {
