@@ -1,19 +1,134 @@
 import { jobs } from "@sho/db";
+import { Job as DomainJob, type Job as DomainJobType } from "@sho/models";
 import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
+import { Schema } from "effect";
 import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
 import { PAGE_SIZE } from "../common";
-import type {
-  CheckJobExistsCommand,
-  CommandOutput,
-  CountJobsCommand,
-  FetchJobsPageCommand,
-  FindJobByNumberCommand,
-  InsertJobCommand,
-  JobStoreCommand,
-  JobStoreDBClient,
-} from "../schemas";
+
+// --- スキーマ ---
+
+export const JobSchema = Schema.Struct({
+  ...DomainJob.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});
+
+// --- 型定義 ---
+
+export type SearchFilter = {
+  companyName?: string;
+  employeeCountLt?: number;
+  employeeCountGt?: number;
+  jobDescription?: string;
+  jobDescriptionExclude?: string;
+  onlyNotExpired?: boolean;
+  orderByReceiveDate?: "asc" | "desc";
+  addedSince?: string;
+  addedUntil?: string;
+};
+
+export type Job = typeof JobSchema.Type;
+export type InsertJobRequestBody = DomainJobType;
+
+// --- コマンド型 ---
+
+export type InsertJobCommand = {
+  type: "InsertJob";
+  payload: InsertJobRequestBody;
+};
+export type FindJobByNumberCommand = {
+  type: "FindJobByNumber";
+  jobNumber: string;
+};
+export type FetchJobsPageCommand = {
+  type: "FetchJobsPage";
+  options: {
+    page: number;
+    filter: SearchFilter;
+  };
+};
+export type CheckJobExistsCommand = {
+  type: "CheckJobExists";
+  jobNumber: string;
+};
+export type CountJobsCommand = {
+  type: "CountJobs";
+  options: {
+    page: number;
+    filter: SearchFilter;
+  };
+};
+
+export type JobStoreCommand =
+  | InsertJobCommand
+  | FindJobByNumberCommand
+  | FetchJobsPageCommand
+  | CheckJobExistsCommand
+  | CountJobsCommand;
+
+export interface CommandOutputMap {
+  InsertJob:
+    | { success: true; jobNumber: string }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "InsertJobFailed";
+      };
+  FindJobByNumber:
+    | { success: true; job: Job | null }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FindJobByNumberFailed";
+      };
+  FetchJobsPage:
+    | {
+        success: true;
+        jobs: Job[];
+        meta: { totalCount: number; filter: SearchFilter; page: number };
+      }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "FetchJobsPageFailed";
+      };
+  CheckJobExists:
+    | { success: true; exists: boolean }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CheckJobExistsFailed";
+      };
+  CountJobs:
+    | { success: true; count: number }
+    | {
+        success: false;
+        reason: "unknown";
+        error: Error;
+        _tag: "CountJobsFailed";
+      };
+}
+
+export type CommandOutput<T extends JobStoreCommand> = T extends {
+  type: infer U;
+}
+  ? U extends keyof CommandOutputMap
+    ? CommandOutputMap[U]
+    : never
+  : never;
+
+export type JobStoreDBClient = {
+  execute: <T extends JobStoreCommand>(cmd: T) => Promise<CommandOutput<T>>;
+};
+
+// --- 実装 ---
 
 type DrizzleD1Client = DrizzleD1Database<Record<string, never>> & {
   $client: D1Database;
@@ -56,7 +171,8 @@ async function handleFindJobByNumber(
       .from(jobs)
       .where(eq(jobs.jobNumber, cmd.jobNumber))
       .limit(1);
-    return { success: true, job: data.length > 0 ? data[0] : null };
+    const decodeJob = Schema.decodeUnknownSync(JobSchema);
+    return { success: true, job: data.length > 0 ? decodeJob(data[0]) : null };
   } catch (error) {
     return {
       success: false,
@@ -139,9 +255,10 @@ async function handleFetchJobsPage(
       filterConditions.length > 0 ? and(...filterConditions) : undefined,
     );
 
+    const decodeJob = Schema.decodeUnknownSync(JobSchema);
     return {
       success: true,
-      jobs: jobList,
+      jobs: jobList.map((row) => decodeJob(row)),
       meta: {
         totalCount,
         filter,

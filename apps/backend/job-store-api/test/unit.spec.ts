@@ -3,13 +3,13 @@ import {
   env,
   waitOnExecutionContext,
 } from "cloudflare:test";
+import { Job as insertJobRequestBodySchema } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
 import { createJobStoreDBClientAdapter } from "../src/adapters";
-import { insertJobRequestBodySchema } from "../src/schemas";
 
 const MOCK_ENV = {
   ...env,

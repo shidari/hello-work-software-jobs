@@ -1,9 +1,9 @@
 import { env } from "cloudflare:test";
+import { Job as insertJobRequestBodySchema } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Schema } from "effect";
 import { expect, it } from "vitest";
 import { createJobStoreDBClientAdapter } from "../../src/adapters";
-import { insertJobRequestBodySchema } from "../../src/schemas";
 
 declare module "cloudflare:test" {
   interface ProvidedEnv {

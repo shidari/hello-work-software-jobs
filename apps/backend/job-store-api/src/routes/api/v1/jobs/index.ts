@@ -1,12 +1,17 @@
+import { Job, JobNumber } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "hono/jwt";
-import { validator as effectValidator } from "hono-openapi";
+import {
+  describeRoute,
+  validator as effectValidator,
+  resolver,
+} from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import { createJobStoreDBClientAdapter } from "../../../../adapters";
+import { createJobStoreDBClientAdapter, JobSchema } from "../../../../adapters";
 import {
   createFetchJobError,
   createFetchJobListError,
@@ -15,28 +20,300 @@ import {
   createJobsCountError,
 } from "../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../common";
-import {
-  type DecodedNextToken,
-  insertJobRequestBodySchema,
-  jobFetchParamSchema,
-  jobListQuerySchema,
-} from "../../../../schemas";
-import {
-  createEmployeeCountGtValidationError,
-  createEmployeeCountLtValidationError,
-  createEnvError,
-  createJWTSignatureError,
-} from "../../../error";
-import { envSchema } from "../../../util";
 // continueが予約後っぽいので
-import continueRoute from "./continue";
-import { createUnexpectedError } from "./error";
-import { jobFetchRoute, jobInsertRoute, jobListRoute } from "./routingSchema";
+import continueRoute, { type DecodedNextToken } from "./continue";
+
+// --- エラー型 ---
+
+type EmployeeCountGtValidationError = {
+  readonly _tag: "EmployeeCountGtValidationError";
+  readonly message: string;
+};
+
+const createEmployeeCountGtValidationError = (
+  message: string,
+): EmployeeCountGtValidationError => ({
+  _tag: "EmployeeCountGtValidationError",
+  message,
+});
+
+type EmployeeCountLtValidationError = {
+  readonly _tag: "EmployeeCountLtValidationError";
+  readonly message: string;
+};
+
+const createEmployeeCountLtValidationError = (
+  message: string,
+): EmployeeCountLtValidationError => ({
+  _tag: "EmployeeCountLtValidationError",
+  message,
+});
+
+type EnvError = {
+  readonly _tag: "EnvError";
+  readonly message: string;
+};
+
+const createEnvError = (message: string): EnvError => ({
+  _tag: "EnvError",
+  message,
+});
+
+type JWTSignatureError = {
+  readonly _tag: "JWTSignatureError";
+  readonly message: string;
+};
+
+const createJWTSignatureError = (message: string): JWTSignatureError => ({
+  _tag: "JWTSignatureError",
+  message,
+});
+
+type UnexpectedError = {
+  readonly _tag: "UnexpectedError";
+  readonly message: string;
+  readonly errorType: "server";
+};
+
+const createUnexpectedError = (message: string): UnexpectedError => ({
+  _tag: "UnexpectedError",
+  message,
+  errorType: "server",
+});
+
+// --- スキーマ ---
+
+const envSchema = Schema.Struct({
+  JWT_SECRET: Schema.String,
+});
+
+const searchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.Boolean),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  addedSince: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+  addedUntil: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+});
+
+const jobFetchParamSchema = Schema.Struct({
+  jobNumber: JobNumber,
+});
+
+const jobListQuerySchema = Schema.Struct({
+  ...searchFilterSchema.fields,
+  employeeCountLt: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
+});
+
+const insertJobRequestBodySchema = Job;
 
 const employeeCountSchema = Schema.Number.pipe(
   Schema.int(),
   Schema.greaterThanOrEqualTo(0),
 );
+
+// --- ルーティングスキーマ ---
+
+const messageErrorSchema = Schema.Struct({
+  message: Schema.String,
+});
+
+const errorResponses = {
+  "400": {
+    description: "client error response",
+    content: {
+      "application/json": {
+        schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
+      },
+    },
+  },
+  "500": {
+    description: "internal server error response",
+    content: {
+      "application/json": {
+        schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
+      },
+    },
+  },
+} as const;
+
+const jobListSuccessResponseSchema = Schema.Struct({
+  jobs: Schema.Array(Job),
+  nextToken: Schema.optional(Schema.String),
+  meta: Schema.Struct({
+    totalCount: Schema.Number,
+  }),
+});
+
+const insertJobSuccessResponseSchema = Schema.Struct({
+  success: Schema.Literal(true),
+  result: Schema.Struct({
+    job: Job,
+  }),
+});
+
+const jobListRoute = describeRoute({
+  parameters: [
+    { name: "companyName", in: "query", required: false },
+    { name: "employeeCountGt", in: "query", required: false },
+    { name: "employeeCountLt", in: "query", required: false },
+    { name: "jobDescription", in: "query", required: false },
+    { name: "jobDescriptionExclude", in: "query", required: false },
+    { name: "onlyNotExpired", in: "query", required: false },
+    {
+      name: "orderByReceiveDate",
+      in: "query",
+      required: false,
+      example: "desc",
+    },
+    {
+      name: "addedSince",
+      in: "query",
+      description: "追加された日時（ISO形式）",
+      example: "2025-10-17",
+      required: false,
+    },
+    {
+      name: "addedUntil",
+      in: "query",
+      description: "追加された日時（ISO形式）",
+      example: "2025-10-17",
+      required: false,
+    },
+  ],
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(
+            Schema.standardSchemaV1(jobListSuccessResponseSchema),
+          ),
+        },
+      },
+    },
+    ...errorResponses,
+  },
+});
+
+const jobInsertRoute = describeRoute({
+  security: [{ ApiKeyAuth: [] }],
+  requestBody: {
+    description: "Job insert request body",
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            wageMin: { type: "number", description: "最低賃金" },
+            wageMax: { type: "number", description: "最高賃金" },
+            workingStartTime: { type: "string", description: "勤務開始時間" },
+            workingEndTime: { type: "string", description: "勤務終了時間" },
+            receivedDate: {
+              type: "string",
+              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              description: "受信日時（ISO形式）",
+            },
+            expiryDate: {
+              type: "string",
+              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              description: "有効期限（ISO形式）",
+            },
+            employeeCount: { type: "number", description: "従業員数" },
+            jobNumber: {
+              type: "string",
+              pattern: "^[0-9]+$",
+              description: "求人番号",
+            },
+            companyName: { type: "string", description: "会社名" },
+            homePage: {
+              type: "string",
+              description: "ホームページURL（任意）",
+            },
+            occupation: {
+              type: "string",
+              minLength: 1,
+              description: "職業",
+            },
+            employmentType: { type: "string", description: "雇用形態" },
+            workPlace: { type: "string", description: "勤務地" },
+            jobDescription: {
+              type: "string",
+              description: "求人内容・仕事内容",
+            },
+            qualifications: {
+              type: "string",
+              description: "必要な資格・経験（任意）",
+            },
+          },
+          required: [
+            "wageMin",
+            "wageMax",
+            "workingStartTime",
+            "workingEndTime",
+            "receivedDate",
+            "expiryDate",
+            "employeeCount",
+            "jobNumber",
+            "companyName",
+            "occupation",
+            "employmentType",
+            "workPlace",
+            "jobDescription",
+          ],
+        },
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(
+            Schema.standardSchemaV1(insertJobSuccessResponseSchema),
+          ),
+        },
+      },
+    },
+    "409": {
+      description: "duplication error response",
+      content: {
+        "application/json": {
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
+        },
+      },
+    },
+    ...errorResponses,
+  },
+});
+
+const jobFetchRoute = describeRoute({
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(Schema.standardSchemaV1(JobSchema)),
+        },
+      },
+    },
+    ...errorResponses,
+  },
+});
+
+// --- ルートハンドラ ---
 
 const app = new Hono<{ Bindings: Env }>();
 

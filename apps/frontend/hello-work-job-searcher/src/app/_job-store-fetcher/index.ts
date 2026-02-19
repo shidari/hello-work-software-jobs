@@ -1,12 +1,7 @@
+import { Job } from "@sho/models";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import {
-  type JobListQuery,
-  jobFetchSuccessResponseSchema,
-  jobListQuerySchema,
-  jobListSuccessResponseSchema,
-} from "@/schemas";
 import {
   createEndPointNotFoundError,
   createFetchJobError,
@@ -16,6 +11,53 @@ import {
   createValidateJobsError,
   type JobStoreClient,
 } from "./type";
+
+// --- スキーマ定義 ---
+
+const searchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.Boolean),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  addedSince: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+  addedUntil: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+});
+export type SearchFilter = typeof searchFilterSchema.Type;
+
+export type JobList = readonly Job[];
+
+const jobListQuerySchema = Schema.Struct({
+  ...searchFilterSchema.fields,
+  employeeCountLt: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
+});
+export type JobListQuery = typeof jobListQuerySchema.Type;
+
+const jobListSuccessResponseSchema = Schema.Struct({
+  jobs: Schema.Array(Job),
+  nextToken: Schema.optional(Schema.String),
+  meta: Schema.Struct({
+    totalCount: Schema.Number,
+  }),
+});
+export type JobListSuccessResponse = typeof jobListSuccessResponseSchema.Type;
+
+const jobFetchSuccessResponseSchema = Schema.Struct({
+  ...Job.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});
+export type JobFetchSuccessResponse = typeof jobFetchSuccessResponseSchema.Type;
 
 const j = Symbol();
 type JobEndPoint = { [j]: unknown } & string;

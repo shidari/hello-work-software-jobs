@@ -4,8 +4,8 @@ import { Accordion } from "@/app/_components/client/Accordion";
 import { HydratedJobOverviewList } from "@/app/_components/client/JobOverViewList";
 import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
 import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
+import type { TJobDetail } from "@/app/_components/Job";
 import { jobStoreClientOnServer } from "@/app/_job-store-fetcher";
-import type { TJobDetail } from "@/schemas";
 import styles from "./page.module.css";
 
 export default async function Page() {

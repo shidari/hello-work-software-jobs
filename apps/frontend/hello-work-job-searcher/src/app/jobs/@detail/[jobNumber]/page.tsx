@@ -1,6 +1,13 @@
+import { Job } from "@sho/models";
 import { Schema } from "effect";
 import { JobDetail } from "@/app/_components/Job";
-import { jobFetchSuccessResponseSchema } from "@/schemas";
+
+const jobFetchSuccessResponseSchema = Schema.Struct({
+  ...Job.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});
 
 interface PageProps {
   params: Promise<{ jobNumber: string }>;

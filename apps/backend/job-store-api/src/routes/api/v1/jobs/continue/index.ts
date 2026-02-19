@@ -1,27 +1,156 @@
+import { Job } from "@sho/models";
 import { drizzle } from "drizzle-orm/d1";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { sign, verify } from "hono/jwt";
-import { validator as effectValidator } from "hono-openapi";
+import {
+  describeRoute,
+  validator as effectValidator,
+  resolver,
+} from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import type { FetchJobsPageCommand } from "../../../../../adapters";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
 import { createFetchJobListError } from "../../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../../common";
-import {
-  type DecodedNextToken,
-  decodedNextTokenSchema,
-  type FetchJobsPageCommand,
-  jobListContinueQuerySchema,
-} from "../../../../../schemas";
-import { createEnvError, createJWTSignatureError } from "../../../../error";
-import { envSchema } from "../../../../util";
-import {
-  createDecodeJWTPayloadError,
-  createJWTVerificationError,
-} from "./error";
-import { jobListContinueRoute } from "./routingSchema";
+
+// --- エラー型 ---
+
+type EnvError = {
+  readonly _tag: "EnvError";
+  readonly message: string;
+};
+
+const createEnvError = (message: string): EnvError => ({
+  _tag: "EnvError",
+  message,
+});
+
+type JWTSignatureError = {
+  readonly _tag: "JWTSignatureError";
+  readonly message: string;
+};
+
+const createJWTSignatureError = (message: string): JWTSignatureError => ({
+  _tag: "JWTSignatureError",
+  message,
+});
+
+type JWTVerificationError = {
+  readonly _tag: "JWTVerificationError";
+  readonly message: string;
+};
+
+const createJWTVerificationError = (message: string): JWTVerificationError => ({
+  _tag: "JWTVerificationError",
+  message,
+});
+
+type DecodeJWTPayloadError = {
+  readonly _tag: "DecodeJWTPayloadError";
+  readonly message: string;
+};
+
+const createDecodeJWTPayloadError = (
+  message: string,
+): DecodeJWTPayloadError => ({
+  _tag: "DecodeJWTPayloadError",
+  message,
+});
+
+// --- スキーマ ---
+
+const envSchema = Schema.Struct({
+  JWT_SECRET: Schema.String,
+});
+
+const searchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.Boolean),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  addedSince: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+  addedUntil: Schema.optional(
+    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
+  ),
+});
+
+const jobListContinueQuerySchema = Schema.Struct({
+  nextToken: Schema.String,
+});
+
+const decodedNextTokenSchema = Schema.Struct({
+  iss: Schema.String,
+  iat: Schema.Number,
+  nbf: Schema.Number,
+  exp: Schema.Number,
+  page: Schema.Number,
+  filter: searchFilterSchema,
+});
+
+export type DecodedNextToken = typeof decodedNextTokenSchema.Type;
+
+// --- ルーティングスキーマ ---
+
+const messageErrorSchema = Schema.Struct({
+  message: Schema.String,
+});
+
+const jobListSuccessResponseSchema = Schema.Struct({
+  jobs: Schema.Array(Job),
+  nextToken: Schema.optional(Schema.String),
+  meta: Schema.Struct({
+    totalCount: Schema.Number,
+  }),
+});
+
+const jobListContinueRoute = describeRoute({
+  parameters: [
+    {
+      name: "nextToken",
+      in: "query",
+    },
+  ],
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(
+            Schema.standardSchemaV1(jobListSuccessResponseSchema),
+          ),
+        },
+      },
+    },
+    "400": {
+      description: "client error response",
+      content: {
+        "application/json": {
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
+        },
+      },
+    },
+    "500": {
+      description: "internal server error response",
+      content: {
+        "application/json": {
+          schema: resolver(Schema.standardSchemaV1(messageErrorSchema)),
+        },
+      },
+    },
+  },
+});
+
+// --- ルートハンドラ ---
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -32,7 +161,7 @@ app.get(
   (c) => {
     const { nextToken } = c.req.valid("query");
     const db = drizzle(c.env.DB);
-    const dbClient = createJobStoreDBClientAdapter(db); // DrizzleをJobStoreDBClientに変換
+    const dbClient = createJobStoreDBClientAdapter(db);
 
     const result = safeTry(async function* () {
       const { JWT_SECRET: jwtSecret } = yield* (() => {
