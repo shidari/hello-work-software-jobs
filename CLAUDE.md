@@ -43,7 +43,6 @@ pnpm format            # Format
 # Frontend (apps/frontend/hello-work-job-searcher)
 pnpm dev               # Dev server (port 9002)
 pnpm build             # Build
-pnpm test              # Playwright E2E tests
 
 # API (apps/backend/job-store-api)
 pnpm dev               # Wrangler dev server (port 8787)
