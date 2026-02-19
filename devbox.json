@@ -2,11 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
     "nodejs@22",
-    "awscli2@latest",
+    "awscli2@2.33.2",
     "aws-vault@latest",
-    "pnpm@latest",
-    "gh@latest",
-    "pinact@latest"
+    "pnpm@9.15.3",
+    "gh@1.14.0",
+    "pinact@0.2.1"
   ],
   "shell": {
     "init_hook": [

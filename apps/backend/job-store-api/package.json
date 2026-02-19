@@ -17,12 +17,12 @@
 		"@cloudflare/vitest-pool-workers": "^0.12.0",
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.0.15",
-		"drizzle-orm": "^0.44.2",
+		"drizzle-orm": "^0.45.0",
 		"tsdown": "^0.15.3",
 		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.4",
-		"wrangler": "4.59.2"
+		"wrangler": "4.64.0"
 	},
 	"dependencies": {
 		"@hono/standard-validator": "^0.2.0",
