@@ -4,12 +4,13 @@
 
 .mainSection {
   padding: 2rem 0;
-  background: #f8f9fa;
+  background: var(--color-bg-page);
   min-height: 100vh;
 }
 
 .layoutContainer {
   max-width: 900px;
+  margin: 0 auto;
   padding: 0 1rem;
 }
 
