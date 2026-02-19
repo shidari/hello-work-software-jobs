@@ -1,4 +1,4 @@
-import { EmploymentTypeValue, JobNumber } from "@sho/models";
+import { EmploymentType, JobNumber } from "@sho/models";
 import { Schema } from "effect";
 
 export { JobNumber };
@@ -14,7 +14,7 @@ export const occupationSchema = Schema.String.pipe(
   Schema.minLength(1, { message: () => "occupation should not be empty." }),
   Schema.brand("occupation"),
 );
-export const employmentTypeSchema = EmploymentTypeValue;
+export const employmentTypeSchema = EmploymentType;
 
 export const RawReceivedDateShema = Schema.String.pipe(
   Schema.pattern(/^\d{4}年\d{1,2}月\d{1,2}日$/, {

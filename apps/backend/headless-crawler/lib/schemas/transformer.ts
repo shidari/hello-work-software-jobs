@@ -1,9 +1,10 @@
 import {
   EmployeeCount,
+  ExpiryDate,
   HomePageUrl,
-  ISODate,
-  Wage,
-  WorkingTime,
+  ReceivedDate,
+  WageRange,
+  WorkingHours,
 } from "@sho/models";
 import { Schema } from "effect";
 import {
@@ -18,7 +19,7 @@ import {
 
 export const transformedReceivedDateToISOStrSchema = Schema.transform(
   RawReceivedDateShema,
-  ISODate,
+  ReceivedDate,
   {
     strict: true,
     decode: (value) => {
@@ -36,7 +37,7 @@ export const transformedReceivedDateToISOStrSchema = Schema.transform(
 );
 export const transformedExpiryDateToISOStrSchema = Schema.transform(
   RawExpiryDateSchema,
-  ISODate,
+  ExpiryDate,
   {
     strict: true,
     decode: (value) => {
@@ -55,10 +56,7 @@ export const transformedExpiryDateToISOStrSchema = Schema.transform(
 
 export const transformedWageSchema = Schema.transform(
   RawWageSchema,
-  Schema.Struct({
-    wageMin: Wage,
-    wageMax: Wage,
-  }),
+  WageRange,
   {
     strict: true,
     decode: (value) => {
@@ -70,9 +68,9 @@ export const transformedWageSchema = Schema.transform(
         throw new Error("Invalid wage format");
       }
       // 数字のカンマを削除してから数値に変換
-      const wageMin = Number.parseInt(match[1].replace(/,/g, ""), 10);
-      const wageMax = Number.parseInt(match[2].replace(/,/g, ""), 10);
-      return { wageMin, wageMax };
+      const min = Number.parseInt(match[1].replace(/,/g, ""), 10);
+      const max = Number.parseInt(match[2].replace(/,/g, ""), 10);
+      return { min, max };
     },
     encode: () => {
       throw new Error("encode not supported");
@@ -82,10 +80,7 @@ export const transformedWageSchema = Schema.transform(
 
 export const transformedWorkingHoursSchema = Schema.transform(
   RawWorkingHoursSchema,
-  Schema.Struct({
-    workingStartTime: WorkingTime,
-    workingEndTime: WorkingTime,
-  }),
+  WorkingHours,
   {
     strict: true,
     decode: (value) => {
@@ -96,9 +91,9 @@ export const transformedWorkingHoursSchema = Schema.transform(
         throw new Error("Invalid format, should be '9時00分〜18時00分'");
       }
       const [_, startH, startM, endH, endM] = match;
-      const workingStartTime = `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`;
-      const workingEndTime = `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`;
-      return { workingStartTime, workingEndTime };
+      const start = `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`;
+      const end = `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`;
+      return { start, end };
     },
     encode: () => {
       throw new Error("encode not supported");
@@ -146,11 +141,9 @@ const {
 export const transformedSchema = Schema.Struct({
   ...extractedWithoutTransformed,
   homePage: Schema.optional(transformedHomePageSchema),
-  wageMin: Wage,
-  wageMax: Wage,
-  workingStartTime: WorkingTime,
-  workingEndTime: WorkingTime,
-  receivedDate: ISODate,
-  expiryDate: ISODate,
+  wage: WageRange,
+  workingHours: WorkingHours,
+  receivedDate: ReceivedDate,
+  expiryDate: ExpiryDate,
   employeeCount: EmployeeCount,
 });

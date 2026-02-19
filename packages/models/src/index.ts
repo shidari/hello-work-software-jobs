@@ -15,11 +15,17 @@ export const JobNumber = Schema.String.pipe(
 });
 export type JobNumber = typeof JobNumber.Type;
 
-export const ISODate = Schema.String.pipe(
+export const ReceivedDate = Schema.String.pipe(
   Schema.pattern(ISO8601),
-  Schema.brand("ISODate"),
+  Schema.brand("ReceivedDate"),
 );
-export type ISODate = typeof ISODate.Type;
+export type ReceivedDate = typeof ReceivedDate.Type;
+
+export const ExpiryDate = Schema.String.pipe(
+  Schema.pattern(ISO8601),
+  Schema.brand("ExpiryDate"),
+);
+export type ExpiryDate = typeof ExpiryDate.Type;
 
 export const HomePageUrl = Schema.String.pipe(
   Schema.filter((s) => URL.canParse(s), {
@@ -29,25 +35,37 @@ export const HomePageUrl = Schema.String.pipe(
 );
 export type HomePageUrl = typeof HomePageUrl.Type;
 
-export const EmploymentTypeValue = Schema.Union(
+export const EmploymentType = Schema.Union(
   Schema.Literal("正社員"),
   Schema.Literal("パート労働者"),
   Schema.Literal("正社員以外"),
   Schema.Literal("有期雇用派遣労働者"),
 )
-  .pipe(Schema.brand("EmploymentTypeValue"))
+  .pipe(Schema.brand("EmploymentType"))
   .annotations({
-    identifier: "EmploymentTypeValue",
+    identifier: "EmploymentType",
     title: "雇用形態",
     description: "ハローワーク求人に記載される雇用形態の種別",
   });
-export type EmploymentTypeValue = typeof EmploymentTypeValue.Type;
+export type EmploymentType = typeof EmploymentType.Type;
 
 export const Wage = Schema.Number.pipe(Schema.brand("Wage"));
 export type Wage = typeof Wage.Type;
 
+export const WageRange = Schema.Struct({
+  min: Wage,
+  max: Wage,
+});
+export type WageRange = typeof WageRange.Type;
+
 export const WorkingTime = Schema.String.pipe(Schema.brand("WorkingTime"));
 export type WorkingTime = typeof WorkingTime.Type;
+
+export const WorkingHours = Schema.Struct({
+  start: Schema.NullOr(WorkingTime),
+  end: Schema.NullOr(WorkingTime),
+});
+export type WorkingHours = typeof WorkingHours.Type;
 
 export const EmployeeCount = Schema.Number.pipe(Schema.brand("EmployeeCount"));
 export type EmployeeCount = typeof EmployeeCount.Type;
@@ -57,15 +75,13 @@ export type EmployeeCount = typeof EmployeeCount.Type;
 export const Job = Schema.Struct({
   jobNumber: JobNumber,
   companyName: Schema.String,
-  receivedDate: ISODate,
-  expiryDate: ISODate,
+  receivedDate: ReceivedDate,
+  expiryDate: ExpiryDate,
   homePage: Schema.NullOr(HomePageUrl),
   occupation: Schema.String,
-  employmentType: EmploymentTypeValue,
-  wageMin: Wage,
-  wageMax: Wage,
-  workingStartTime: Schema.NullOr(WorkingTime),
-  workingEndTime: Schema.NullOr(WorkingTime),
+  employmentType: EmploymentType,
+  wage: WageRange,
+  workingHours: WorkingHours,
   employeeCount: EmployeeCount,
   workPlace: Schema.NullOr(Schema.String),
   jobDescription: Schema.NullOr(Schema.String),

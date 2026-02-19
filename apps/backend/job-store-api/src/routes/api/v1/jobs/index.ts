@@ -11,7 +11,7 @@ import {
   resolver,
 } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import { createJobStoreDBClientAdapter, JobSchema } from "../../../../adapters";
+import { createJobStoreDBClientAdapter } from "../../../../adapters";
 import {
   createFetchJobError,
   createFetchJobListError,
@@ -19,7 +19,7 @@ import {
   createInsertJobError,
   createJobsCountError,
 } from "../../../../adapters/error";
-import { PAGE_SIZE } from "../../../../common";
+import { PAGE_SIZE } from "../../../../constant";
 // continueが予約後っぽいので
 import continueRoute, { type DecodedNextToken } from "./continue";
 
@@ -216,37 +216,40 @@ const jobInsertRoute = describeRoute({
         schema: {
           type: "object",
           properties: {
-            wageMin: { type: "number", description: "最低賃金" },
-            wageMax: { type: "number", description: "最高賃金" },
-            workingStartTime: { type: "string", description: "勤務開始時間" },
-            workingEndTime: { type: "string", description: "勤務終了時間" },
-            receivedDate: {
-              type: "string",
-              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-              description: "受信日時（ISO形式）",
-            },
-            expiryDate: {
-              type: "string",
-              pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-              description: "有効期限（ISO形式）",
-            },
-            employeeCount: { type: "number", description: "従業員数" },
             jobNumber: {
               type: "string",
-              pattern: "^[0-9]+$",
+              pattern: "^\\d{5}-\\d{0,8}$",
               description: "求人番号",
             },
             companyName: { type: "string", description: "会社名" },
+            receivedDate: {
+              type: "string",
+              description: "受信日時（ISO形式）",
+            },
+            expiryDate: { type: "string", description: "有効期限（ISO形式）" },
             homePage: {
               type: "string",
               description: "ホームページURL（任意）",
             },
-            occupation: {
-              type: "string",
-              minLength: 1,
-              description: "職業",
-            },
+            occupation: { type: "string", description: "職業" },
             employmentType: { type: "string", description: "雇用形態" },
+            wage: {
+              type: "object",
+              properties: {
+                min: { type: "number", description: "最低賃金" },
+                max: { type: "number", description: "最高賃金" },
+              },
+              required: ["min", "max"],
+            },
+            workingHours: {
+              type: "object",
+              properties: {
+                start: { type: "string", description: "勤務開始時間" },
+                end: { type: "string", description: "勤務終了時間" },
+              },
+              required: ["start", "end"],
+            },
+            employeeCount: { type: "number", description: "従業員数" },
             workPlace: { type: "string", description: "勤務地" },
             jobDescription: {
               type: "string",
@@ -258,19 +261,15 @@ const jobInsertRoute = describeRoute({
             },
           },
           required: [
-            "wageMin",
-            "wageMax",
-            "workingStartTime",
-            "workingEndTime",
-            "receivedDate",
-            "expiryDate",
-            "employeeCount",
             "jobNumber",
             "companyName",
+            "receivedDate",
+            "expiryDate",
             "occupation",
             "employmentType",
-            "workPlace",
-            "jobDescription",
+            "wage",
+            "workingHours",
+            "employeeCount",
           ],
         },
       },
@@ -305,7 +304,7 @@ const jobFetchRoute = describeRoute({
       description: "Successful response",
       content: {
         "application/json": {
-          schema: resolver(Schema.standardSchemaV1(JobSchema)),
+          schema: resolver(Schema.standardSchemaV1(Job)),
         },
       },
     },

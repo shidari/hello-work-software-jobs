@@ -2,15 +2,94 @@ import { Job } from "@sho/models";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import {
-  createEndPointNotFoundError,
-  createFetchJobError,
-  createFetchJobsError,
-  createParseJsonError,
-  createValidateJobError,
-  createValidateJobsError,
-  type JobStoreClient,
-} from "./type";
+
+// --- エラー型 ---
+
+export type EndpointNotFoundError = {
+  readonly _tag: "EndpointNotFoundError";
+  readonly message: string;
+};
+
+export type FetchJobsError = {
+  readonly _tag: "FetchJobsError";
+  readonly message: string;
+};
+
+export type FetchJobError = {
+  readonly _tag: "FetchJobError";
+  readonly message: string;
+};
+
+export type ValidateJobError = {
+  readonly _tag: "ValidateJobError";
+  readonly message: string;
+};
+export type ParseJsonError = {
+  readonly _tag: "ParseJsonError";
+  readonly message: string;
+};
+
+export type ValidateJobsError = {
+  readonly _tag: "ValidateJobsError";
+  readonly message: string;
+};
+
+const createValidateJobsError = (message: string): ValidateJobsError => ({
+  _tag: "ValidateJobsError",
+  message,
+});
+
+const createValidateJobError = (message: string): ValidateJobError => ({
+  _tag: "ValidateJobError",
+  message,
+});
+
+const createParseJsonError = (message: string): ParseJsonError => ({
+  _tag: "ParseJsonError",
+  message,
+});
+
+const createFetchJobsError = (message: string): FetchJobsError => ({
+  _tag: "FetchJobsError",
+  message,
+});
+
+const createFetchJobError = (message: string): FetchJobError => ({
+  _tag: "FetchJobError",
+  message,
+});
+
+const createEndPointNotFoundError = (
+  message: string,
+): EndpointNotFoundError => ({
+  _tag: "EndpointNotFoundError",
+  message,
+});
+
+// --- クライアントインターフェース ---
+
+export interface JobStoreClient {
+  getInitialJobs(
+    query?: JobListQuery,
+  ): ResultAsync<
+    JobListSuccessResponse,
+    EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
+  >;
+
+  getContinuedJobs(
+    nextToken: string,
+  ): ResultAsync<
+    JobListSuccessResponse,
+    EndpointNotFoundError | FetchJobsError | ParseJsonError | ValidateJobsError
+  >;
+
+  getJob(
+    jobNumber: string,
+  ): ResultAsync<
+    JobFetchSuccessResponse,
+    EndpointNotFoundError | FetchJobError | ParseJsonError | ValidateJobError
+  >;
+}
 
 // --- スキーマ定義 ---
 
@@ -58,6 +137,8 @@ const jobFetchSuccessResponseSchema = Schema.Struct({
   updatedAt: Schema.String,
 });
 export type JobFetchSuccessResponse = typeof jobFetchSuccessResponseSchema.Type;
+
+// --- 実装 ---
 
 const j = Symbol();
 type JobEndPoint = { [j]: unknown } & string;

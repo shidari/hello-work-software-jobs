@@ -498,10 +498,11 @@ export class JobDetailTransformer extends Effect.Service<JobDetailTransformer>()
             const employmentType =
               yield* validateEmploymentType(rawEmplomentType);
             const rawWage = document.querySelector("#ID_chgn")?.textContent;
-            const { wageMax, wageMin } = yield* toTransformedWage(rawWage);
+            const { min: wageMin, max: wageMax } =
+              yield* toTransformedWage(rawWage);
             const rawWorkingHours =
               document.querySelector("#ID_shgJn1")?.textContent;
-            const { workingEndTime, workingStartTime } =
+            const { start: workingStartTime, end: workingEndTime } =
               yield* toTransformedWorkingHours(rawWorkingHours);
             const rawEmployeeCount = document.querySelector(
               "#ID_jgisKigyoZentai",
@@ -527,10 +528,8 @@ export class JobDetailTransformer extends Effect.Service<JobDetailTransformer>()
               homePage,
               occupation,
               employmentType,
-              wageMax,
-              wageMin,
-              workingEndTime,
-              workingStartTime,
+              wage: { min: wageMin, max: wageMax },
+              workingHours: { start: workingStartTime, end: workingEndTime },
               employeeCount,
               workPlace,
               jobDescription,

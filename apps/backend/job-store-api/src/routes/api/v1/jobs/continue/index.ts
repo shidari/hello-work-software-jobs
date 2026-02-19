@@ -14,7 +14,7 @@ import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import type { FetchJobsPageCommand } from "../../../../../adapters";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
 import { createFetchJobListError } from "../../../../../adapters/error";
-import { PAGE_SIZE } from "../../../../../common";
+import { PAGE_SIZE } from "../../../../../constant";
 
 // --- エラー型 ---
 

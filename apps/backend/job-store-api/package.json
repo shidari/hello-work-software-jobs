@@ -6,7 +6,7 @@
 		"deploy": "pnpm build && pnpm exec wrangler deploy",
 		"no-main-deploy": "wrangler versions upload",
 		"build": "tsdown",
-		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs;DROP TABLE IF EXISTS raw_jobs;\" && pnpm exec wrangler d1 execute job-store --file=database.sql && pnpm exec wrangler dev",
+		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs;\" && pnpm exec wrangler d1 execute job-store --file=database.sql && pnpm exec wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",

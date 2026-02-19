@@ -29,9 +29,9 @@ export default async function Page({ params }: PageProps) {
   const jobDetail = {
     ...validatedData,
     companyName: validatedData.companyName ?? "未記載",
-    workingHours: `${validatedData.workingStartTime}〜${validatedData.workingEndTime}`,
+    workingHours: `${validatedData.workingHours.start}〜${validatedData.workingHours.end}`,
     jobTitle: validatedData.occupation,
-    salary: `${validatedData.wageMin}円〜${validatedData.wageMax}円`,
+    salary: `${validatedData.wage.min}円〜${validatedData.wage.max}円`,
     workPlace: validatedData.workPlace ?? "未記載",
     jobDescription: validatedData.jobDescription ?? "未記載",
     qualifications: validatedData.qualifications ?? "未記載",
