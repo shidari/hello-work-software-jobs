@@ -6,16 +6,13 @@ import { HTTPException } from "hono/http-exception";
 import { sign, verify } from "hono/jwt";
 import { validator as effectValidator } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
+import type { FetchJobsPageCommand } from "../../../../../adapters";
 import { createJobStoreDBClientAdapter } from "../../../../../adapters";
 import { createFetchJobListError } from "../../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../../common";
-import {
-  type DecodedNextToken,
-  type FetchJobsPageCommand,
-  searchFilterSchema,
-} from "../../../../../schemas/type";
 import { createEnvError, createJWTSignatureError } from "../../../../error";
 import { envSchema } from "../../../../util";
+import { searchFilterSchema } from "../searchFilter";
 import {
   createDecodeJWTPayloadError,
   createJWTVerificationError,
@@ -34,6 +31,8 @@ const decodedNextTokenSchema = Schema.Struct({
   page: Schema.Number,
   filter: searchFilterSchema,
 });
+
+export type DecodedNextToken = typeof decodedNextTokenSchema.Type;
 
 const app = new Hono<{ Bindings: Env }>();
 

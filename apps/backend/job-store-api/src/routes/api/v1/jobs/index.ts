@@ -16,8 +16,6 @@ import {
   createJobsCountError,
 } from "../../../../adapters/error";
 import { PAGE_SIZE } from "../../../../common";
-import type { DecodedNextToken } from "../../../../schemas/type";
-import { searchFilterSchema } from "../../../../schemas/type";
 import {
   createEmployeeCountGtValidationError,
   createEmployeeCountLtValidationError,
@@ -26,9 +24,10 @@ import {
 } from "../../../error";
 import { envSchema } from "../../../util";
 // continueが予約後っぽいので
-import continueRoute from "./continue";
+import continueRoute, { type DecodedNextToken } from "./continue";
 import { createUnexpectedError } from "./error";
 import { jobFetchRoute, jobInsertRoute, jobListRoute } from "./routingSchema";
+import { searchFilterSchema } from "./searchFilter";
 
 const jobFetchParamSchema = Schema.Struct({
   jobNumber: JobNumber,

@@ -1,6 +1,34 @@
-import type { TJobDetail, TJobOverview } from "@/schemas/job";
+import { Schema } from "effect";
 import { formatDate } from "../../util";
 import styles from "./index.module.css";
+
+const ISODateSchema = Schema.String.pipe(
+  Schema.pattern(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/,
+  ),
+);
+
+export const JobOverviewSchema = Schema.Struct({
+  jobNumber: Schema.String,
+  companyName: Schema.optional(Schema.String),
+  workPlace: Schema.String,
+  jobTitle: Schema.String,
+  employmentType: Schema.String,
+  employeeCount: Schema.Number,
+  receivedDate: ISODateSchema,
+});
+
+export const JobDetailSchema = Schema.Struct({
+  ...JobOverviewSchema.fields,
+  salary: Schema.String,
+  jobDescription: Schema.String,
+  expiryDate: Schema.String,
+  workingHours: Schema.String,
+  qualifications: Schema.optional(Schema.String),
+});
+
+export type TJobOverview = typeof JobOverviewSchema.Type;
+export type TJobDetail = typeof JobDetailSchema.Type;
 
 export function JobOverview({
   companyName,

@@ -1,7 +1,7 @@
 import { Job } from "@sho/models";
 import { Schema } from "effect";
 import { describeRoute, resolver } from "hono-openapi";
-import { JobSchema } from "../../../../schemas/type";
+import { JobSchema } from "../../../../adapters";
 
 // --- エラーレスポンススキーマ ---
 
