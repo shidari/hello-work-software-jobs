@@ -1,4 +1,4 @@
-import { job } from "@sho/models";
+import { Job } from "@sho/models";
 import { Schema } from "effect";
 
 // 検索フィルター
@@ -22,14 +22,17 @@ export const searchFilterSchema = Schema.Struct({
 
 export type SearchFilter = typeof searchFilterSchema.Type;
 
-// Job リスト用スキーマ (id, createdAt, updatedAt, status を除外)
-const { id, createdAt, updatedAt, status, ...jobListFields } = job.fields;
-export const JobListSchema = Schema.Array(Schema.Struct({ ...jobListFields }));
+// Job リスト用スキーマ (ドメインモデルそのまま)
+export const JobListSchema = Schema.Array(Job);
 export type JobList = typeof JobListSchema.Type;
 
-// Job 詳細用スキーマ (id を除外)
-const { id: _id, ...jobWithoutId } = job.fields;
-export const JobSchema = Schema.Struct({ ...jobWithoutId });
+// Job 詳細用スキーマ (ドメインモデル + DB メタ情報)
+export const JobSchema = Schema.Struct({
+  ...Job.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});
 
 // URL クエリパラメータ用 (数値は文字列として受け取る)
 export const jobListQuerySchema = Schema.Struct({

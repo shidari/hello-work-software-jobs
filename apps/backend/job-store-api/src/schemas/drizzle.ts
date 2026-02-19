@@ -1,4 +1,10 @@
-import { job } from "@sho/models";
+import { Job } from "@sho/models";
+import { Schema } from "effect";
 
-// ドメインモデルの job をそのまま使用
-export const jobSelectSchema = job;
+export const jobSelectSchema = Schema.Struct({
+  id: Schema.Number,
+  ...Job.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});

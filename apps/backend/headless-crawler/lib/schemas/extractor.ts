@@ -1,7 +1,7 @@
-import { jobNumberSchema } from "@sho/models";
+import { EmploymentTypeValue, JobNumber } from "@sho/models";
 import { Schema } from "effect";
 
-export { jobNumberSchema };
+export { JobNumber };
 
 export const companyNameSchema = Schema.String.pipe(
   Schema.brand("companyName"),
@@ -14,12 +14,7 @@ export const occupationSchema = Schema.String.pipe(
   Schema.minLength(1, { message: () => "occupation should not be empty." }),
   Schema.brand("occupation"),
 );
-export const employmentTypeSchema = Schema.Union(
-  Schema.Literal("正社員"),
-  Schema.Literal("パート労働者"),
-  Schema.Literal("正社員以外"),
-  Schema.Literal("有期雇用派遣労働者"),
-).pipe(Schema.brand("employmentType"));
+export const employmentTypeSchema = EmploymentTypeValue;
 
 export const RawReceivedDateShema = Schema.String.pipe(
   Schema.pattern(/^\d{4}年\d{1,2}月\d{1,2}日$/, {
@@ -62,7 +57,7 @@ export const RawEmployeeCountSchema = Schema.String.pipe(
 );
 
 export const extractedJobSchema = Schema.Struct({
-  jobNumber: jobNumberSchema,
+  jobNumber: JobNumber,
   companyName: companyNameSchema,
   receivedDate: RawReceivedDateShema,
   expiryDate: RawExpiryDateSchema,

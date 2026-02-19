@@ -3,12 +3,11 @@ import { Config, Data, Effect, Either, Schema } from "effect";
 import { parseHTML } from "linkedom";
 import type { Page } from "playwright";
 import { FirstJobListPageNavigator } from "../page";
-import type { JobNumber } from "../schemas";
 import {
   companyNameSchema,
   employmentTypeSchema,
+  JobNumber,
   jobDescriptionSchema,
-  jobNumberSchema,
   occupationSchema,
   qualificationsSchema,
   transformedEmployeeCountSchema,
@@ -206,7 +205,7 @@ function validateJobDetailPage(page: Page) {
 // ============================================================
 
 const validateJobNumber = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(jobNumberSchema)(val);
+  const result = Schema.decodeUnknownEither(JobNumber)(val);
   if (Either.isLeft(result))
     return Effect.fail(
       new JobNumberValidationError({

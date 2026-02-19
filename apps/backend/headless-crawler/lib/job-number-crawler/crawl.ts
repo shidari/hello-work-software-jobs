@@ -11,7 +11,7 @@ import {
 import type { Locator } from "playwright";
 import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 import type { etCrawlerConfig } from "../schemas";
-import { jobNumberSchema } from "../schemas";
+import { JobNumber } from "../schemas";
 import { delay, formatParseError } from "../util";
 
 // ============================================================
@@ -47,7 +47,7 @@ export class JobListPageScraper extends Effect.Service<JobListPageScraper>()(
         yield* Effect.logDebug(
           `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
         );
-        const result = Schema.decodeUnknownEither(jobNumberSchema)(val);
+        const result = Schema.decodeUnknownEither(JobNumber)(val);
         if (Either.isLeft(result))
           return yield* Effect.fail(
             new JobListPageScraperError({
