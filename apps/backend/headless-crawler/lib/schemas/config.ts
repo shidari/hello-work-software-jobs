@@ -1,4 +1,4 @@
-import { jobNumberSchema } from "@sho/models";
+import { JobNumber } from "@sho/models";
 import { Schema } from "effect";
 
 export const partialWorkLocationSchema = Schema.Struct({
@@ -17,7 +17,7 @@ export const searchPeriodSchema = Schema.Union(
   Schema.Literal("week"),
 );
 export const jobSearchCriteriaSchema = Schema.Struct({
-  jobNumber: Schema.optional(jobNumberSchema),
+  jobNumber: Schema.optional(JobNumber),
   workLocation: partialWorkLocationSchema,
   desiredOccupation: Schema.optional(
     Schema.Struct({

@@ -1,15 +1,13 @@
-import { job } from "@sho/models";
+import { Job } from "@sho/models";
 import { Schema } from "effect";
 
-// ドメインモデルから id, status, timestamps を除いた insert 用スキーマ
-const { id, status, createdAt, updatedAt, ...insertFields } = job.fields;
-export const insertJobRequestBodySchema = Schema.Struct({ ...insertFields });
+export const insertJobRequestBodySchema = Job;
 
 // API レスポンス用スキーマ
 export const insertJobSuccessResponseSchema = Schema.Struct({
   success: Schema.Literal(true),
   result: Schema.Struct({
-    job: insertJobRequestBodySchema,
+    job: Job,
   }),
 });
 

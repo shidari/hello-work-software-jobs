@@ -24,7 +24,5 @@ pnpm type-check
 ```
 
 ```typescript
-// TypeScript
-import type { TJobDetail, JobListQuery } from '@sho/models';
-import { insertJobRequestBodySchema, jobsTable } from '@sho/models';
+import { Job, JobNumber, Wage, EmploymentTypeValue } from '@sho/models';
 ```

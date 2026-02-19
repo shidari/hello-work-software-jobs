@@ -7,11 +7,11 @@ import type {
   partialWorkLocationSchema,
   searchPeriodSchema,
 } from "./config";
-import type { extractedJobSchema, jobNumberSchema } from "./extractor";
+import type { extractedJobSchema, JobNumber } from "./extractor";
 import type { eventSchema } from "./lambdaEvent";
 import type { transformedSchema } from "./transformer";
 
-export type JobNumber = typeof jobNumberSchema.Type;
+export type { JobNumber };
 
 export type JobMetadata = {
   jobNumber: JobNumber;

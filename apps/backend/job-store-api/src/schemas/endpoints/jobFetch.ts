@@ -1,9 +1,9 @@
-import { jobNumberSchema } from "@sho/models";
+import { JobNumber } from "@sho/models";
 import { Schema } from "effect";
 import { JobSchema } from "../dbClient";
 
 export const jobFetchParamSchema = Schema.Struct({
-  jobNumber: jobNumberSchema,
+  jobNumber: JobNumber,
 });
 
 export const jobFetchSuccessResponseSchema = JobSchema;

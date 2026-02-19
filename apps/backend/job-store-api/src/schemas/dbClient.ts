@@ -1,5 +1,5 @@
+import { Job } from "@sho/models";
 import { Schema } from "effect";
-import { jobSelectSchema } from "./drizzle";
 
 export const searchFilterSchema = Schema.Struct({
   companyName: Schema.optional(Schema.String),
@@ -19,12 +19,11 @@ export const searchFilterSchema = Schema.Struct({
   ),
 });
 
-const { id, createdAt, updatedAt, status, ...jobSelectSchemaWithoutSome } =
-  jobSelectSchema.fields;
-export const JobListSchema = Schema.Array(
-  Schema.Struct({ ...jobSelectSchemaWithoutSome }),
-);
+export const JobListSchema = Schema.Array(Job);
 
-// id を除外
-const { id: _, ...jobSelectSchemaWithoutId } = jobSelectSchema.fields;
-export const JobSchema = Schema.Struct({ ...jobSelectSchemaWithoutId });
+export const JobSchema = Schema.Struct({
+  ...Job.fields,
+  status: Schema.String,
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
+});

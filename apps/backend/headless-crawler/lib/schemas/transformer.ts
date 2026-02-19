@@ -1,3 +1,10 @@
+import {
+  EmployeeCount,
+  HomePageUrl,
+  ISODate,
+  Wage,
+  WorkingTime,
+} from "@sho/models";
 import { Schema } from "effect";
 import {
   extractedJobSchema,
@@ -9,19 +16,9 @@ import {
   rawHomePageSchema,
 } from "./extractor";
 
-export const ISO8601 =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
-
-const r = Symbol();
-export type TransformedReceivedDateToISOStr = string & { [r]: unknown };
-const e = Symbol();
-export type TransformedExpiryDateToISOStr = string & { [e]: unknown };
-const ec = Symbol();
-export type TransformedEmployeeCount = number & { [ec]: unknown };
-
 export const transformedReceivedDateToISOStrSchema = Schema.transform(
   RawReceivedDateShema,
-  Schema.String.pipe(Schema.brand("TransformedReceivedDateToISOStr")),
+  ISODate,
   {
     strict: true,
     decode: (value) => {
@@ -39,7 +36,7 @@ export const transformedReceivedDateToISOStrSchema = Schema.transform(
 );
 export const transformedExpiryDateToISOStrSchema = Schema.transform(
   RawExpiryDateSchema,
-  Schema.String.pipe(Schema.brand("TransformedJSTExpiryDateToISOStr")),
+  ISODate,
   {
     strict: true,
     decode: (value) => {
@@ -59,8 +56,8 @@ export const transformedExpiryDateToISOStrSchema = Schema.transform(
 export const transformedWageSchema = Schema.transform(
   RawWageSchema,
   Schema.Struct({
-    wageMin: Schema.Number,
-    wageMax: Schema.Number,
+    wageMin: Wage,
+    wageMax: Wage,
   }),
   {
     strict: true,
@@ -86,8 +83,8 @@ export const transformedWageSchema = Schema.transform(
 export const transformedWorkingHoursSchema = Schema.transform(
   RawWorkingHoursSchema,
   Schema.Struct({
-    workingStartTime: Schema.String,
-    workingEndTime: Schema.String,
+    workingStartTime: WorkingTime,
+    workingEndTime: WorkingTime,
   }),
   {
     strict: true,
@@ -111,7 +108,7 @@ export const transformedWorkingHoursSchema = Schema.transform(
 
 export const transformedEmployeeCountSchema = Schema.transform(
   RawEmployeeCountSchema,
-  Schema.Number.pipe(Schema.brand("TransformedEmployeeCount")),
+  EmployeeCount,
   {
     strict: true,
     decode: (val) => {
@@ -129,12 +126,7 @@ export const transformedEmployeeCountSchema = Schema.transform(
 
 export const transformedHomePageSchema = Schema.transform(
   rawHomePageSchema,
-  Schema.String.pipe(
-    Schema.filter((s) => URL.canParse(s), {
-      message: () => "home page should be url",
-    }),
-    Schema.brand("homePage(transformed)"),
-  ),
+  HomePageUrl,
   {
     strict: true,
     decode: (val) => val.trim(),
@@ -154,11 +146,11 @@ const {
 export const transformedSchema = Schema.Struct({
   ...extractedWithoutTransformed,
   homePage: Schema.optional(transformedHomePageSchema),
-  wageMin: Schema.Number,
-  wageMax: Schema.Number,
-  workingStartTime: Schema.String,
-  workingEndTime: Schema.String,
-  receivedDate: Schema.String.pipe(Schema.pattern(ISO8601)),
-  expiryDate: Schema.String.pipe(Schema.pattern(ISO8601)),
-  employeeCount: Schema.Number,
+  wageMin: Wage,
+  wageMax: Wage,
+  workingStartTime: WorkingTime,
+  workingEndTime: WorkingTime,
+  receivedDate: ISODate,
+  expiryDate: ISODate,
+  employeeCount: EmployeeCount,
 });
