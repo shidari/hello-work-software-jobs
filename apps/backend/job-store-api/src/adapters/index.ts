@@ -1,20 +1,67 @@
 import { jobs } from "@sho/db";
-import { Job as DomainJob, type Job as DomainJobType } from "@sho/models";
+import type { Job as DomainJobType } from "@sho/models";
 import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { Schema } from "effect";
 import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
-import { PAGE_SIZE } from "../common";
+import { PAGE_SIZE } from "../constant";
 
 // --- スキーマ ---
 
-export const JobSchema = Schema.Struct({
-  ...DomainJob.fields,
+// DB行はフラット構造（wageMin, wageMax, workingStartTime, workingEndTime）
+const DbJobRowSchema = Schema.Struct({
+  jobNumber: Schema.String,
+  companyName: Schema.String,
+  receivedDate: Schema.String,
+  expiryDate: Schema.String,
+  homePage: Schema.NullOr(Schema.String),
+  occupation: Schema.String,
+  employmentType: Schema.String,
+  wageMin: Schema.Number,
+  wageMax: Schema.Number,
+  workingStartTime: Schema.NullOr(Schema.String),
+  workingEndTime: Schema.NullOr(Schema.String),
+  employeeCount: Schema.Number,
+  workPlace: Schema.NullOr(Schema.String),
+  jobDescription: Schema.NullOr(Schema.String),
+  qualifications: Schema.NullOr(Schema.String),
   status: Schema.String,
   createdAt: Schema.String,
   updatedAt: Schema.String,
 });
+
+type DbJobRow = typeof DbJobRowSchema.Type;
+
+// DB行 → ドメインモデル（ネスト構造）に変換
+function dbRowToJob(row: DbJobRow): Job {
+  return {
+    ...row,
+    wage: { min: row.wageMin, max: row.wageMax },
+    workingHours: { start: row.workingStartTime, end: row.workingEndTime },
+  } as Job;
+}
+
+// ドメインモデル → DB行（フラット構造）に変換
+function domainJobToDbValues(payload: InsertJobRequestBody) {
+  return {
+    jobNumber: payload.jobNumber,
+    companyName: payload.companyName,
+    receivedDate: payload.receivedDate,
+    expiryDate: payload.expiryDate,
+    homePage: payload.homePage,
+    occupation: payload.occupation,
+    employmentType: payload.employmentType,
+    wageMin: payload.wage.min,
+    wageMax: payload.wage.max,
+    workingStartTime: payload.workingHours.start,
+    workingEndTime: payload.workingHours.end,
+    employeeCount: payload.employeeCount,
+    workPlace: payload.workPlace,
+    jobDescription: payload.jobDescription,
+    qualifications: payload.qualifications,
+  };
+}
 
 // --- 型定義 ---
 
@@ -30,7 +77,10 @@ export type SearchFilter = {
   addedUntil?: string;
 };
 
-export type Job = typeof JobSchema.Type;
+export type Job = DbJobRow & {
+  wage: { min: number; max: number };
+  workingHours: { start: string | null; end: string | null };
+};
 export type InsertJobRequestBody = DomainJobType;
 
 // --- コマンド型 ---
@@ -140,7 +190,7 @@ async function handleInsertJob(
 ): Promise<CommandOutput<InsertJobCommand>> {
   const now = new Date();
   const insertingValues = {
-    ...cmd.payload,
+    ...domainJobToDbValues(cmd.payload),
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
     status: "active" as const,
@@ -164,15 +214,17 @@ async function handleFindJobByNumber(
   drizzle: DrizzleD1Client,
   cmd: FindJobByNumberCommand,
 ): Promise<CommandOutput<FindJobByNumberCommand>> {
-  // ちょっとResutyAsyncの書き方わからなかったので、try-catchで
   try {
     const data = await drizzle
       .select()
       .from(jobs)
       .where(eq(jobs.jobNumber, cmd.jobNumber))
       .limit(1);
-    const decodeJob = Schema.decodeUnknownSync(JobSchema);
-    return { success: true, job: data.length > 0 ? decodeJob(data[0]) : null };
+    const decodeDbRow = Schema.decodeUnknownSync(DbJobRowSchema);
+    return {
+      success: true,
+      job: data.length > 0 ? dbRowToJob(decodeDbRow(data[0])) : null,
+    };
   } catch (error) {
     return {
       success: false,
@@ -255,10 +307,10 @@ async function handleFetchJobsPage(
       filterConditions.length > 0 ? and(...filterConditions) : undefined,
     );
 
-    const decodeJob = Schema.decodeUnknownSync(JobSchema);
+    const decodeDbRow = Schema.decodeUnknownSync(DbJobRowSchema);
     return {
       success: true,
-      jobs: jobList.map((row) => decodeJob(row)),
+      jobs: jobList.map((row) => dbRowToJob(decodeDbRow(row))),
       meta: {
         totalCount,
         filter,
@@ -301,8 +353,7 @@ async function handleCountJobs(
   cmd: CountJobsCommand,
 ): Promise<CommandOutput<CountJobsCommand>> {
   const conditions = [];
-  const { page, filter } = cmd.options;
-  // Do not add any condition based on jobs.id and offset for counting
+  const { filter } = cmd.options;
   if (filter.companyName) {
     conditions.push(like(jobs.companyName, `%${filter.companyName}%`));
   }

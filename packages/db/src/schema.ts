@@ -21,11 +21,3 @@ export const jobs = sqliteTable("jobs", {
   createdAt: text("createdAt").notNull(),
   updatedAt: text("updatedAt").notNull(),
 });
-
-export const raw_jobs = sqliteTable("raw_jobs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  jobNumber: text("jobNumber").notNull().unique(),
-  rawHTML: text("rawHTML").notNull(),
-  createdAt: text("createdAt").notNull(),
-  updatedAt: text("updatedAt").notNull(),
-});
