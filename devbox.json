@@ -14,7 +14,8 @@
     ],
     "scripts": {
       "logs:errors": "aws-vault exec cdk-deploy -- ./scripts/crawler-logs.sh",
-      "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh"
+      "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh",
+      "logs:job-detail": "aws-vault exec cdk-deploy -- ./scripts/job-detail-logs.sh"
     }
   }
 }
