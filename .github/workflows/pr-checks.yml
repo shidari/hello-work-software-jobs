@@ -38,20 +38,6 @@ jobs:
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
       
-      - name: Cache Playwright browsers
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            playwright-browsers-${{ runner.os }}-
-
-      - name: Install Playwright Chromium (browsers + deps)
-        run: |
-          # Run the installer from the package that has Playwright as a dependency
-          cd apps/frontend/hello-work-job-searcher
-          pnpm exec playwright install --with-deps chromium
-
       - name: Run tests
         run: pnpm run test
         continue-on-error: false
