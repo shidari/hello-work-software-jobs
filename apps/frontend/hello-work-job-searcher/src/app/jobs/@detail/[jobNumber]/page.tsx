@@ -1,6 +1,6 @@
 import { Job } from "@sho/models";
 import { Schema } from "effect";
-import { JobDetail } from "@/app/_components/Job";
+import { JobDetail } from "@/components/features/JobDetail/JobDetail";
 
 const jobFetchSuccessResponseSchema = Schema.Struct({
   ...Job.fields,

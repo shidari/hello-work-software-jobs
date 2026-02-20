@@ -1,6 +1,6 @@
 import { Schema } from "effect";
-import { formatDate } from "../../util";
-import styles from "./index.module.css";
+import { formatDate } from "@/util";
+import styles from "./JobDetail.module.css";
 
 const ISODateSchema = Schema.String.pipe(
   Schema.pattern(

@@ -1,11 +1,11 @@
 "use client";
 import { useAtomValue, useSetAtom } from "jotai";
-import type { TJobOverview } from "@/app/_components/Job";
 import {
   appendFavoriteJobAtom,
   favoriteJobsAtom,
   removeFavoriteJobAtom,
-} from "../../../_atom";
+} from "@/atom";
+import type { TJobOverview } from "@/components/features/JobDetail/JobDetail";
 import styles from "./useJobsWithFavoriteButton.module.css";
 
 export function useJobsWithFavorite(items: TJobOverview[]) {

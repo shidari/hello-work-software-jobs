@@ -3,7 +3,7 @@
 import { useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import { Suspense } from "react";
-import { JobtotalCountAtom } from "../../_atom";
+import { JobtotalCountAtom } from "@/atom";
 
 function TotalCountValue() {
   const totalCount = useAtomValue(JobtotalCountAtom);
