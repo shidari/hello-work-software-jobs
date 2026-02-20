@@ -171,9 +171,6 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@playwright/test':
-        specifier: ^1.55.0
-        version: 1.58.2
       '@types/node':
         specifier: 24.10.13
         version: 24.10.13
@@ -4255,6 +4252,7 @@ snapshots:
   '@playwright/test@1.58.2':
     dependencies:
       playwright: 1.58.2
+    optional: true
 
   '@poppinss/colors@4.1.6':
     dependencies:
@@ -5419,7 +5417,8 @@ snapshots:
 
   playwright-core@1.57.0: {}
 
-  playwright-core@1.58.2: {}
+  playwright-core@1.58.2:
+    optional: true
 
   playwright@1.57.0:
     dependencies:
@@ -5432,6 +5431,7 @@ snapshots:
       playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
+    optional: true
 
   postcss@8.4.31:
     dependencies:

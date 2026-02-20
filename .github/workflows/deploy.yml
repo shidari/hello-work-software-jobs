@@ -9,6 +9,10 @@ permissions:
   id-token: write # ← OIDCで必要
   contents: read # ← checkoutに必要
 
+concurrency:
+  group: deploy-cdk
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
