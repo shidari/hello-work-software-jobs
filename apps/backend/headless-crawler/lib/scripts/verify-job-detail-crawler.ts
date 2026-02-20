@@ -21,10 +21,8 @@ async function main() {
     Layer.provide(JobSearchPageService.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
-    Layer.provide(PlaywrightChromiumBrowseResource.DefaultWithoutDependencies),
-    Layer.provide(
-      Layer.succeed(PlaywrightBrowserConfig, PlaywrightBrowserConfig.dev),
-    ),
+    Layer.provide(PlaywrightChromiumBrowseResource.Default),
+    Layer.provide(PlaywrightBrowserConfig.dev),
   );
   const program = Effect.gen(function* () {
     const extractor = yield* JobDetailExtractor;

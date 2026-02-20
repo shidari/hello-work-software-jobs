@@ -1,21 +1,35 @@
-import { Data, Effect } from "effect";
+import { Context, Data, Effect, Layer } from "effect";
 import { chromium, type LaunchOptions } from "playwright";
 
 // Config
-export class PlaywrightBrowserConfig extends Effect.Service<PlaywrightBrowserConfig>()(
+export class PlaywrightBrowserConfig extends Context.Tag(
   "PlaywrightBrowserConfig",
-  {
-    effect: Effect.sync(() => {
-      const options: LaunchOptions = {};
-      return { options };
-    }),
-  },
-) {
-  static dev = new PlaywrightBrowserConfig({
-    options: {
-      headless: false,
-    },
+)<PlaywrightBrowserConfig, { readonly options: LaunchOptions }>() {
+  static dev = Layer.succeed(PlaywrightBrowserConfig, {
+    options: { headless: false },
   });
+
+  static lambda = Layer.effect(
+    PlaywrightBrowserConfig,
+    Effect.gen(function* () {
+      const chromiumModule = yield* Effect.tryPromise({
+        try: () => import("@sparticuz/chromium").then((m) => m.default),
+        catch: (e) =>
+          new Error(`Failed to import @sparticuz/chromium: ${String(e)}`),
+      });
+      const executablePath = yield* Effect.tryPromise({
+        try: () => chromiumModule.executablePath(),
+        catch: (e) =>
+          new Error(`Failed to get chromium executable path: ${String(e)}`),
+      });
+      return {
+        options: {
+          args: chromiumModule.args,
+          executablePath,
+        },
+      };
+    }),
+  );
 }
 
 // Browser
@@ -47,7 +61,6 @@ export class PlaywrightChromiumBrowseResource extends Effect.Service<PlaywrightC
       );
       return { browser };
     }),
-    dependencies: [PlaywrightBrowserConfig.Default],
   },
 ) {}
 

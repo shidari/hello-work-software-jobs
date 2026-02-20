@@ -1,4 +1,4 @@
-import type { LaunchOptions, Locator, Page } from "playwright";
+import type { Locator, Page } from "playwright";
 import type {
   etCrawlerConfigWithoutBrowserConfigSchema,
   jobSearchCriteriaSchema,
@@ -77,6 +77,4 @@ export type EngineeringLabel = typeof paritalEngineeringLabelSchema.Type;
 export type SearchPeriod = typeof searchPeriodSchema.Type;
 
 export type etCrawlerConfig =
-  typeof etCrawlerConfigWithoutBrowserConfigSchema.Type & {
-    browserConfig: Pick<LaunchOptions, "headless" | "executablePath" | "args">;
-  };
+  typeof etCrawlerConfigWithoutBrowserConfigSchema.Type;

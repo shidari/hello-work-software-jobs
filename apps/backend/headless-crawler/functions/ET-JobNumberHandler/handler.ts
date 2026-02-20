@@ -1,4 +1,5 @@
 import { Config, Effect, Either, Exit, Logger, LogLevel, Schema } from "effect";
+import { PlaywrightBrowserConfig } from "../../lib/browser";
 import { HelloWorkCrawler } from "../../lib/job-number-crawler/crawl";
 import { eventSchema } from "../../lib/schemas";
 import { formatParseError } from "../../lib/util";
@@ -27,7 +28,11 @@ export const handler = async (event: unknown) => {
       sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
     );
     return jobs;
-  }).pipe(Effect.provide(HelloWorkCrawler.Default), Effect.scoped);
+  }).pipe(
+    Effect.provide(HelloWorkCrawler.Default),
+    Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.scoped,
+  );
   const exit = await Effect.runPromiseExit(program);
   if (Exit.isSuccess(exit)) {
     console.log("handler succeeded", JSON.stringify(exit.value, null, 2));
