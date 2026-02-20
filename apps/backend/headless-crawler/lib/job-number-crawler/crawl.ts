@@ -1,13 +1,4 @@
-import {
-  Chunk,
-  Config,
-  Data,
-  Effect,
-  Either,
-  Option,
-  Schema,
-  Stream,
-} from "effect";
+import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
 import type { Locator } from "playwright";
 import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 import type { etCrawlerConfig } from "../schemas";
@@ -20,13 +11,6 @@ import { delay, formatParseError } from "../util";
 
 class JobListPageScraperError extends Data.TaggedError(
   "JobListPageScraperError",
-)<{ readonly message: string }> {}
-
-class ImportChromiumError extends Data.TaggedError("ImportChromiumError")<{
-  readonly message: string;
-}> {}
-class GetExecutablePathError extends Data.TaggedError(
-  "GetExecutablePathError",
 )<{ readonly message: string }> {}
 
 // ============================================================
@@ -202,37 +186,8 @@ export class JobListPageScraper extends Effect.Service<JobListPageScraper>()(
 export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfig>()(
   "JobNumberCrawlerConfig",
   {
-    effect: Effect.gen(function* () {
-      const AWS_LAMBDA_FUNCTION_NAME = yield* Config.string(
-        "AWS_LAMBDA_FUNCTION_NAME",
-      ).pipe(Config.withDefault(""));
-      const isLambda = !!AWS_LAMBDA_FUNCTION_NAME;
-      const chromiumOrNull = yield* Effect.tryPromise({
-        try: () =>
-          isLambda
-            ? import("@sparticuz/chromium").then((mod) => mod.default)
-            : Promise.resolve(null),
-        catch: (error) =>
-          new ImportChromiumError({
-            message: `Failed to import chromium: ${String(error)}`,
-          }),
-      });
-      const args = chromiumOrNull ? chromiumOrNull.args : [];
-      const executablePath = chromiumOrNull
-        ? yield* Effect.tryPromise({
-            try: () => chromiumOrNull.executablePath(),
-            catch: (error) =>
-              new GetExecutablePathError({
-                message: `Failed to get chromium executable path: ${String(error)}`,
-              }),
-          })
-        : undefined;
-      const config: etCrawlerConfig = {
-        browserConfig: {
-          headless: false,
-          args,
-          executablePath: executablePath ?? undefined,
-        },
+    effect: Effect.succeed({
+      config: {
         nextPageDelayMs: 3000,
         jobSearchCriteria: {
           workLocation: { prefecture: "東京都" },
@@ -243,18 +198,12 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
           searchPeriod: "today",
         },
         roughMaxCount: 1600,
-      };
-      return { config };
+      } satisfies etCrawlerConfig,
     }),
   },
 ) {
   static dev = new JobNumberCrawlerConfig({
     config: {
-      browserConfig: {
-        headless: false,
-        args: [],
-        executablePath: undefined,
-      },
       nextPageDelayMs: 3000,
       jobSearchCriteria: {
         workLocation: { prefecture: "東京都" },
