@@ -25,7 +25,8 @@ export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
       timeout: Duration.seconds(30),
       layers: [props.playwrightLayer],
       bundling: {
-        externalModules: ["@sparticuz/chromium"], // Layer に含めるモジュールは除外
+        externalModules: ["@sparticuz/chromium", "playwright-core"],
+        nodeModules: ["playwright-core"],
       },
       environment: {
         JOB_STORE_ENDPOINT: process.env.JOB_STORE_ENDPOINT || "",
