@@ -1,7 +1,7 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "aws-vault@latest": {
+    "aws-vault@7.9.4": {
       "last_modified": "2026-02-11T03:47:03Z",
       "resolved": "github:NixOS/nixpkgs/c05d2232d2feaa4c7a07f1168606917402868195#aws-vault",
       "source": "devbox-search",
