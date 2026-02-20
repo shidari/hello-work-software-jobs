@@ -4,11 +4,9 @@ import { Duration } from "aws-cdk-lib";
 import { Alarm, Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Topic } from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
-import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
 export class JobNumberExtractAndTransformConstruct extends Construct {
@@ -30,9 +28,7 @@ export class JobNumberExtractAndTransformConstruct extends Construct {
       },
       layers: [props.playwrightLayer],
       bundling: {
-        externalModules: [
-          "@sparticuz/chromium",
-        ], // Layer に含めるモジュールは除外
+        externalModules: ["@sparticuz/chromium"], // Layer に含めるモジュールは除外
       },
     });
 
