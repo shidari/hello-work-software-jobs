@@ -28,7 +28,8 @@ export class JobNumberExtractAndTransformConstruct extends Construct {
       },
       layers: [props.playwrightLayer],
       bundling: {
-        externalModules: ["@sparticuz/chromium"], // Layer に含めるモジュールは除外
+        externalModules: ["@sparticuz/chromium", "playwright-core"],
+        nodeModules: ["playwright-core"],
       },
     });
 
