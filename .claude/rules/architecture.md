@@ -76,9 +76,7 @@ AWS Lambda + Effect サービスパターン。
 ### インフラ (CDK)
 
 - Lambda x2 + Playwright レイヤー
-- SQS キュー（リトライ 3回 → DLQ）
-- DLQ 監視 Lambda → GitHub Issues + SNS メール
-- CloudWatch アラーム
+- SQS キュー
 
 ---
 
