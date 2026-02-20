@@ -26,12 +26,7 @@ export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
       layers: [props.playwrightLayer],
       bundling: {
         externalModules: [
-          "chromium-bidi/lib/cjs/bidiMapper/BidiMapper",
-          "chromium-bidi/lib/cjs/cdp/CdpConnection",
           "@sparticuz/chromium",
-          "./chromium/appIcon.png",
-          "./loader",
-          "playwright-core",
         ], // Layer に含めるモジュールは除外
       },
       environment: {
