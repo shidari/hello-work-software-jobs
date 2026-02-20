@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@hono/swagger-ui':
         specifier: ^0.5.2
-        version: 0.5.3(hono@4.11.9)
+        version: 0.5.3(hono@4.11.10)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.0.6
@@ -28,8 +28,8 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/models
       aws-cdk-lib:
-        specifier: 2.237.1
-        version: 2.237.1(constructs@10.4.2)
+        specifier: 2.238.0
+        version: 2.238.0(constructs@10.4.2)
       constructs:
         specifier: ^10.0.0
         version: 10.4.2
@@ -65,8 +65,8 @@ importers:
         specifier: 24.10.13
         version: 24.10.13
       aws-cdk:
-        specifier: 2.1030.0
-        version: 2.1030.0
+        specifier: 2.1106.0
+        version: 2.1106.0
       esbuild:
         specifier: ^0.25.5
         version: 0.25.12
@@ -84,10 +84,10 @@ importers:
     dependencies:
       '@hono/standard-validator':
         specifier: ^0.2.0
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.9)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)
       '@hono/swagger-ui':
         specifier: ^0.5.2
-        version: 0.5.3(hono@4.11.9)
+        version: 0.5.3(hono@4.11.10)
       '@sho/db':
         specifier: workspace:*
         version: link:../../../packages/db
@@ -102,10 +102,10 @@ importers:
         version: 3.19.16
       hono:
         specifier: ^4.11.9
-        version: 4.11.9
+        version: 4.11.10
       hono-openapi:
         specifier: ^1.0.8
-        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.9))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.19.16)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.11.9)(openapi-types@12.1.3)
+        version: 1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.19.16)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.11.10)(openapi-types@12.1.3)
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -154,7 +154,7 @@ importers:
         version: 3.19.16
       hono:
         specifier: ^4.8.3
-        version: 4.10.7
+        version: 4.11.10
       jotai:
         specifier: ^2.13.1
         version: 2.17.1(@types/react@19.2.14)(react@19.2.4)
@@ -2081,13 +2081,14 @@ packages:
     resolution: {integrity: sha512-TH+b3Lv6pUjy/Nu0m6A2JULtdzLpmqF9x1Dhj00ZoEiML8qvVA9j1flkzTKNYgdEhWrjDwtWNpyyCUbfQe514g==}
     engines: {node: '>=20.19.0'}
 
-  aws-cdk-lib@2.237.1:
-    resolution: {integrity: sha512-RH8mWHLBtc14stkeUF0gFLaWdS5iS2AHUHnoT5B5LLZfEkYP9G43LjJs0AMmpdlQ5/ZQVvCZ+VB83Q9vLxILRw==}
+  aws-cdk-lib@2.238.0:
+    resolution: {integrity: sha512-lmS7DEGcEjNhnl88Z7SynPA1UHdCOkx2pNSGiiBQG5I2jH8H2nnWnr6cZRWmxV2GyNeBmmd9wHdEcSBpkow53Q==}
     engines: {node: '>= 18.0.0'}
     peerDependencies:
       constructs: ^10.0.0
     bundledDependencies:
       - '@balena/dockerignore'
+      - '@aws-cdk/cloud-assembly-api'
       - case
       - fs-extra
       - ignore
@@ -2099,8 +2100,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1030.0:
-    resolution: {integrity: sha512-jYgOy1Hqx8cOTWW9On9xpypXLecjOqSZ4X2q5U0Gzd14xI+HLmpaRJV5ILJ8vYrLKVbqjhiog0pdxAC7vwF9uQ==}
+  aws-cdk@2.1106.0:
+    resolution: {integrity: sha512-1tyQNnuCnH3nc0QpOL84UNhr+y73fyS75nwSnuy5z7XtRwdsOuqyqcDxd6tvCXkUBA7fdgu8p1FR3hkqrW0GWA==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -2519,12 +2520,8 @@ packages:
       hono:
         optional: true
 
-  hono@4.10.7:
-    resolution: {integrity: sha512-icXIITfw/07Q88nLSkB9aiUrd8rYzSweK681Kjo/TSggaGbOX4RRyxxm71v+3PC8C/j+4rlxGeoTRxQDkaJkUw==}
-    engines: {node: '>=16.9.0'}
-
-  hono@4.11.9:
-    resolution: {integrity: sha512-Eaw2YTGM6WOxA6CXbckaEvslr2Ne4NFsKrvc0v97JD5awbmeBLO5w9Ho9L9kmKonrwF9RJlW6BxT1PVv/agBHQ==}
+  hono@4.11.10:
+    resolution: {integrity: sha512-kyWP5PAiMooEvGrA9jcD3IXF7ATu8+o7B3KCbPXid5se52NPqnOpM/r9qeW2heMnOekF4kqR1fXJqCYeCLKrZg==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -3907,14 +3904,14 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.9)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.11.9
+      hono: 4.11.10
 
-  '@hono/swagger-ui@0.5.3(hono@4.11.9)':
+  '@hono/swagger-ui@0.5.3(hono@4.11.10)':
     dependencies:
-      hono: 4.11.9
+      hono: 4.11.10
 
   '@img/colour@1.0.0': {}
 
@@ -4893,16 +4890,14 @@ snapshots:
       '@babel/parser': 7.28.5
       pathe: 2.0.3
 
-  aws-cdk-lib@2.237.1(constructs@10.4.2):
+  aws-cdk-lib@2.238.0(constructs@10.4.2):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.263
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
       '@aws-cdk/cloud-assembly-schema': 48.20.0
       constructs: 10.4.2
 
-  aws-cdk@2.1030.0:
-    optionalDependencies:
-      fsevents: 2.3.2
+  aws-cdk@2.1106.0: {}
 
   b4a@1.6.7: {}
 
@@ -5222,19 +5217,17 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono-openapi@1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.9))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.19.16)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.11.9)(openapi-types@12.1.3):
+  hono-openapi@1.2.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-community/standard-openapi@0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.19.16)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@types/json-schema@7.0.15)(hono@4.11.10)(openapi-types@12.1.3):
     dependencies:
       '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
       '@standard-community/standard-openapi': 0.2.8(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(@valibot/to-json-schema@1.5.0(valibot@1.2.0(typescript@5.9.3)))(effect@3.19.16)(quansync@0.2.11)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76))(@standard-schema/spec@1.1.0)(effect@3.19.16)(openapi-types@12.1.3)(valibot@1.2.0(typescript@5.9.3))(zod@3.25.76)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.9)
-      hono: 4.11.9
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.11.10)
+      hono: 4.11.10
 
-  hono@4.10.7: {}
-
-  hono@4.11.9: {}
+  hono@4.11.10: {}
 
   hookable@5.5.3: {}
 
