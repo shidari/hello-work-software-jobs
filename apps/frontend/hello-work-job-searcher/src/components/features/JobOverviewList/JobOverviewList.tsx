@@ -5,17 +5,17 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 
 import React, { useTransition } from "react";
-import { useJobsWithFavorite } from "@/app/_components/client/hooks/useJobsWithFavorite";
-import { JobOverview } from "@/app/_components/Job";
-import type { JobList } from "@/app/_job-store-fetcher";
+import { ClientNavLink } from "@/app/jobs/@search/ClientNavLink/ClientNavLink";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,
   jobListAtom,
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
-} from "../../../_atom";
-import { ClientNavLink } from "../ClientNavLink";
+} from "@/atom";
+import { useJobsWithFavorite } from "@/components/features/hooks/useJobsWithFavorite";
+import { JobOverview } from "@/components/features/JobDetail/JobDetail";
+import type { JobList } from "@/job-store-fetcher";
 import cardStyles from "../jobCard.module.css";
 import styles from "./JobOverviewList.module.css";
 

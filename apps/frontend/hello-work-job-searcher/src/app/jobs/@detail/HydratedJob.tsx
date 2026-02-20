@@ -2,9 +2,9 @@
 
 import { useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import type { TJobDetail } from "@/app/_components/Job";
-import { jobAtom } from "../../_atom";
-import { JobDetail } from "../Job";
+import { jobAtom } from "@/atom";
+import type { TJobDetail } from "@/components/features/JobDetail/JobDetail";
+import { JobDetail } from "@/components/features/JobDetail/JobDetail";
 
 export function HydratedJob({
   initialDataFromServer,

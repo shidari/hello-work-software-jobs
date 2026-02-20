@@ -10,9 +10,6 @@ export const NavHeader = () => {
       <Link href="/favorites" className={styles.navLink}>
         お気に入り一覧
       </Link>
-      <Link href="/history" className={styles.navLink}>
-        データ追加履歴
-      </Link>
     </nav>
   );
 };

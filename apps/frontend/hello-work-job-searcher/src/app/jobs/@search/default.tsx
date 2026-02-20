@@ -1,11 +1,11 @@
 export const dynamic = "force-dynamic";
 
-import { Accordion } from "@/app/_components/client/Accordion";
-import { HydratedJobOverviewList } from "@/app/_components/client/JobOverViewList";
-import { JobsSearchfilter } from "@/app/_components/client/JobsSearchfilter";
-import { JobtotalCount } from "@/app/_components/client/JobTotalCount";
-import type { TJobDetail } from "@/app/_components/Job";
-import { jobStoreClientOnServer } from "@/app/_job-store-fetcher";
+import type { TJobDetail } from "@/components/features/JobDetail/JobDetail";
+import { HydratedJobOverviewList } from "@/components/features/JobOverviewList/JobOverviewList";
+import { JobsSearchfilter } from "@/components/features/JobSearchFilter/JobSearchFilter";
+import { JobtotalCount } from "@/components/features/JobTotalCount";
+import { Accordion } from "@/components/ui/Accordion";
+import { jobStoreClientOnServer } from "@/job-store-fetcher";
 import styles from "./page.module.css";
 
 export default async function Page() {

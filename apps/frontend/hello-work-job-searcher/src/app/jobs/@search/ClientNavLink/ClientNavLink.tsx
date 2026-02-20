@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import styles from "./index.module.css";
+import styles from "./ClientNavLink.module.css";
 export function ClientNavLink(props: {
   to: string;
   children?: React.ReactNode;

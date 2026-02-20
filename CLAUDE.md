@@ -81,10 +81,11 @@ Base: `/api/v1`
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
 - **コマンドが見つからない場合**: `command not found` になったら `devbox run <command>` で実行する。パッケージが足りなければ `devbox add` で追加する
+- **修正作業の開始前**: コードの修正・追加を始める前に、まず `git pull --rebase` で最新の状態にすること
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`git commit` の前に以下を実行すること
   1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format)
-  2. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
-  3. CLAUDE.md / README.md の内容が変更と整合しているか確認し、必要なら更新
+  3. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
+  4. CLAUDE.md / README.md の内容が変更と整合しているか確認し、必要なら更新
   - 問題があれば修正してからコミットする
 - **コミット後の自動PR**: コミット完了後、以下を自動実行する
   1. main ブランチ上なら、コミット内容に基づいたブランチ名（例: `feat/xxx`, `refactor/xxx`）を自動作成し、コミットをそのブランチに移動する

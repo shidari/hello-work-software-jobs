@@ -3,10 +3,13 @@ import { Schema } from "effect";
 import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
-import { JobOverview, JobOverviewSchema } from "@/app/_components/Job";
-import { favoriteJobsAtom, removeFavoriteJobAtom } from "../../../_atom";
+import { favoriteJobsAtom, removeFavoriteJobAtom } from "@/atom";
+import {
+  JobOverview,
+  JobOverviewSchema,
+} from "@/components/features/JobDetail/JobDetail";
 import cardStyles from "../jobCard.module.css";
-import styles from "./index.module.css";
+import styles from "./JobFavoriteList.module.css";
 
 export function FavoriteJobOverviewList() {
   const items = useAtomValue(favoriteJobsAtom);
