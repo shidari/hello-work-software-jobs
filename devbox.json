@@ -13,9 +13,9 @@
       "echo 'devbox ready' > /dev/null"
     ],
     "scripts": {
-      "logs:errors": "aws-vault exec cdk-deploy -- ./scripts/crawler-logs.sh",
+      "logs:errors": "aws-vault exec crawler-debug -- ./scripts/crawler-logs.sh",
       "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh",
-      "logs:job-detail": "aws-vault exec cdk-deploy -- ./scripts/job-detail-logs.sh"
+      "logs:job-detail": "aws-vault exec crawler-debug -- ./scripts/job-detail-logs.sh"
     }
   }
 }
