@@ -13,7 +13,8 @@
       "echo 'devbox ready' > /dev/null"
     ],
     "scripts": {
-      "logs:errors": "aws-vault exec cdk-deploy -- ./scripts/crawler-logs.sh"
+      "logs:errors": "aws-vault exec cdk-deploy -- ./scripts/crawler-logs.sh",
+      "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh"
     }
   }
 }
