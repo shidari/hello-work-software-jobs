@@ -1,73 +1,44 @@
-import { EmploymentType, JobNumber } from "@sho/models";
-import { Schema } from "effect";
+import { JobNumber } from "@sho/models";
 
 export { JobNumber };
 
-export const companyNameSchema = Schema.String.pipe(
-  Schema.brand("companyName"),
-);
+// ── DOM セレクタマップ ──
 
-export const rawHomePageSchema = Schema.String.pipe(
-  Schema.brand("homePage(raw)"),
-);
-export const occupationSchema = Schema.String.pipe(
-  Schema.minLength(1, { message: () => "occupation should not be empty." }),
-  Schema.brand("occupation"),
-);
-export const employmentTypeSchema = EmploymentType;
+const jobDetailSelectors = {
+  jobNumber: "#ID_kjNo",
+  companyName: "#ID_jgshMei",
+  receivedDate: "#ID_uktkYmd",
+  expiryDate: "#ID_shkiKigenHi",
+  homePage: "#ID_hp",
+  occupation: "#ID_sksu",
+  employmentType: "#ID_koyoKeitai",
+  wage: "#ID_chgn",
+  workingHours: "#ID_shgJn1",
+  employeeCount: "#ID_jgisKigyoZentai",
+  workPlace: "#ID_shgBsJusho",
+  jobDescription: "#ID_shigotoNy",
+  qualifications: "#ID_hynaMenkyoSkku",
+} as const;
 
-export const RawReceivedDateShema = Schema.String.pipe(
-  Schema.pattern(/^\d{4}年\d{1,2}月\d{1,2}日$/, {
-    message: () => "received date format invalid. should be yyyy年mm月dd日",
-  }),
-  Schema.brand("receivedDate(raw)"),
-);
+// ── DOM → Raw 抽出 ──
 
-export const RawExpiryDateSchema = Schema.String.pipe(
-  Schema.pattern(/^\d{4}年\d{1,2}月\d{1,2}日$/, {
-    message: () => "expiry date format invalid. should be yyyy年mm月dd日",
-  }),
-  Schema.brand("expiryDate(raw)"),
-);
+export function extractRawFieldsFromDocument(document: Document) {
+  const text = (selector: string) =>
+    document.querySelector(selector)?.textContent?.trim() || undefined;
 
-export const RawWageSchema = Schema.String.pipe(
-  Schema.minLength(1, { message: () => "wage should not be empty" }),
-  Schema.brand("wage(raw)"),
-);
-
-export const RawWorkingHoursSchema = Schema.String.pipe(
-  Schema.minLength(1, {
-    message: () => "workingHours should not be empty.",
-  }),
-  Schema.brand("workingHours(raw)"),
-);
-
-export const workPlaceSchema = Schema.String.pipe(Schema.brand("workPlace"));
-
-export const jobDescriptionSchema = Schema.String.pipe(
-  Schema.brand("jobDescription"),
-);
-
-export const qualificationsSchema = Schema.UndefinedOr(Schema.String).pipe(
-  Schema.brand("qualifications"),
-);
-
-export const RawEmployeeCountSchema = Schema.String.pipe(
-  Schema.brand("employeeCount(raw)"),
-);
-
-export const extractedJobSchema = Schema.Struct({
-  jobNumber: JobNumber,
-  companyName: companyNameSchema,
-  receivedDate: RawReceivedDateShema,
-  expiryDate: RawExpiryDateSchema,
-  homePage: Schema.NullOr(rawHomePageSchema),
-  occupation: occupationSchema,
-  employmentType: employmentTypeSchema,
-  employeeCount: RawEmployeeCountSchema,
-  wage: RawWageSchema,
-  workingHours: RawWorkingHoursSchema,
-  workPlace: workPlaceSchema,
-  jobDescription: jobDescriptionSchema,
-  qualifications: Schema.NullOr(qualificationsSchema),
-});
+  return {
+    jobNumber: text(jobDetailSelectors.jobNumber),
+    companyName: text(jobDetailSelectors.companyName),
+    receivedDate: text(jobDetailSelectors.receivedDate),
+    expiryDate: text(jobDetailSelectors.expiryDate),
+    homePage: text(jobDetailSelectors.homePage) || null,
+    occupation: text(jobDetailSelectors.occupation),
+    employmentType: text(jobDetailSelectors.employmentType),
+    wage: text(jobDetailSelectors.wage),
+    workingHours: text(jobDetailSelectors.workingHours),
+    employeeCount: text(jobDetailSelectors.employeeCount),
+    workPlace: text(jobDetailSelectors.workPlace),
+    jobDescription: text(jobDetailSelectors.jobDescription),
+    qualifications: text(jobDetailSelectors.qualifications),
+  };
+}

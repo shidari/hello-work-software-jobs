@@ -4,20 +4,10 @@ import { parseHTML } from "linkedom";
 import type { Page } from "playwright";
 import { FirstJobListPageNavigator } from "../page";
 import {
-  companyNameSchema,
-  employmentTypeSchema,
-  JobNumber,
-  jobDescriptionSchema,
-  occupationSchema,
-  qualificationsSchema,
-  transformedEmployeeCountSchema,
-  transformedExpiryDateToISOStrSchema,
-  transformedHomePageSchema,
-  transformedReceivedDateToISOStrSchema,
-  type transformedSchema,
-  transformedWageSchema,
-  transformedWorkingHoursSchema,
-  workPlaceSchema,
+  extractRawFieldsFromDocument,
+  type JobNumber,
+  RawJobToDomainJob,
+  type TransformedJob,
 } from "../schemas";
 import { formatParseError } from "../util";
 
@@ -49,57 +39,12 @@ class JobDetailPageValidationError extends Data.TaggedError(
   "JobDetailPageValidationError",
 )<{ readonly reason: string; readonly currentUrl: string }> {}
 
-class JobNumberValidationError extends Data.TaggedError(
-  "JobNumberValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class CompanyNameValidationError extends Data.TaggedError(
-  "CompanyNameValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class OccupationValidationError extends Data.TaggedError(
-  "OccupationValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class EmploymentTypeValidationError extends Data.TaggedError(
-  "EmploymentTypeValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class WorkPlaceValidationError extends Data.TaggedError(
-  "WorkPlaceValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class JobDescriptionValidationError extends Data.TaggedError(
-  "JobDescriptionValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class QualificationValidationError extends Data.TaggedError(
-  "QualificationValidationError",
-)<{ readonly detail: string; readonly serializedVal: string }> {}
-
-class ReceivedDateTransformationError extends Data.TaggedError(
-  "ReceivedDateTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-class ExpiryDateTransformationError extends Data.TaggedError(
-  "ExpiryDateTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class WageTransformationError extends Data.TaggedError(
-  "WageTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class WorkingHoursTransformationError extends Data.TaggedError(
-  "WorkingHoursTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class EmployeeCountTransformationError extends Data.TaggedError(
-  "EmployeeCountTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
-
-export class HomePageTransformationError extends Data.TaggedError(
-  "HomePageTransformationError",
-)<{ readonly reason: string; serializedVal: string }> {}
+export class JobDetailTransformError extends Data.TaggedError(
+  "JobDetailTransformError",
+)<{
+  readonly reason: string;
+  readonly rawFields: string;
+}> {}
 
 export class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly reason: string;
@@ -201,176 +146,6 @@ function validateJobDetailPage(page: Page) {
 }
 
 // ============================================================
-// Validators (Schema.decodeUnknownEither + 条件分岐)
-// ============================================================
-
-const validateJobNumber = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(JobNumber)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new JobNumberValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateCompanyName = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(companyNameSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new CompanyNameValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateOccupation = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(occupationSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new OccupationValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateEmploymentType = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(employmentTypeSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new EmploymentTypeValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateWorkPlace = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(workPlaceSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new WorkPlaceValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateJobDescription = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(jobDescriptionSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new JobDescriptionValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const validateQualification = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(qualificationsSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new QualificationValidationError({
-        detail: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-// ============================================================
-// Transformers (Schema.decodeUnknownEither + 条件分岐)
-// ============================================================
-
-const transformReceivedDate = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(
-    transformedReceivedDateToISOStrSchema,
-  )(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new ReceivedDateTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const transformExpiryDate = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(
-    transformedExpiryDateToISOStrSchema,
-  )(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new ExpiryDateTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const toTransformedWage = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(transformedWageSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new WageTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const toTransformedWorkingHours = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(transformedWorkingHoursSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new WorkingHoursTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const toTransformedEmployeeCount = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(transformedEmployeeCountSchema)(
-    val,
-  );
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new EmployeeCountTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-const toTransformedHomePage = (val: unknown) => {
-  const result = Schema.decodeUnknownEither(transformedHomePageSchema)(val);
-  if (Either.isLeft(result))
-    return Effect.fail(
-      new HomePageTransformationError({
-        reason: formatParseError(result.left),
-        serializedVal: JSON.stringify(val, null, 2),
-      }),
-    );
-  return Effect.succeed(result.right);
-};
-
-// ============================================================
 // Loader Helper
 // ============================================================
 
@@ -378,7 +153,7 @@ function buildJobStoreClient() {
   return Effect.gen(function* () {
     const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
     return {
-      insertJob: (job: typeof transformedSchema.Type) =>
+      insertJob: (job: TransformedJob) =>
         Effect.gen(function* () {
           yield* Effect.logDebug(
             `executing insert job api. job=${JSON.stringify(job, null, 2)}`,
@@ -474,67 +249,22 @@ export class JobDetailTransformer extends Effect.Service<JobDetailTransformer>()
           Effect.gen(function* () {
             yield* Effect.logInfo("start transforming job detail...");
             const { document } = parseHTML(rawHtml);
-            const rawJobNumber =
-              document.querySelector("#ID_kjNo")?.textContent;
-            const jobNumber = yield* validateJobNumber(rawJobNumber);
-            const rawCompanyName =
-              document.querySelector("#ID_jgshMei")?.textContent;
-            const companyName = yield* validateCompanyName(rawCompanyName);
-            const rawReceivedDate =
-              document.querySelector("#ID_uktkYmd")?.textContent;
-            const receivedDate = yield* transformReceivedDate(rawReceivedDate);
-            const rawExpiryDate =
-              document.querySelector("#ID_shkiKigenHi")?.textContent;
-            const expiryDate = yield* transformExpiryDate(rawExpiryDate);
-            const rawHomePage = document.querySelector("#ID_hp")?.textContent;
-            const homePage = rawHomePage
-              ? yield* toTransformedHomePage(rawHomePage)
-              : undefined;
-            const rawOccupation =
-              document.querySelector("#ID_sksu")?.textContent;
-            const occupation = yield* validateOccupation(rawOccupation);
-            const rawEmplomentType =
-              document.querySelector("#ID_koyoKeitai")?.textContent;
-            const employmentType =
-              yield* validateEmploymentType(rawEmplomentType);
-            const rawWage = document.querySelector("#ID_chgn")?.textContent;
-            const { min: wageMin, max: wageMax } =
-              yield* toTransformedWage(rawWage);
-            const rawWorkingHours =
-              document.querySelector("#ID_shgJn1")?.textContent;
-            const { start: workingStartTime, end: workingEndTime } =
-              yield* toTransformedWorkingHours(rawWorkingHours);
-            const rawEmployeeCount = document.querySelector(
-              "#ID_jgisKigyoZentai",
-            )?.textContent;
-            const employeeCount =
-              yield* toTransformedEmployeeCount(rawEmployeeCount);
-            const rawWorkPlace =
-              document.querySelector("#ID_shgBsJusho")?.textContent;
-            const workPlace = yield* validateWorkPlace(rawWorkPlace);
-            const rawJobDescription =
-              document.querySelector("#ID_shigotoNy")?.textContent;
-            const jobDescription =
-              yield* validateJobDescription(rawJobDescription);
-            const rawQualifications =
-              document.querySelector("#ID_hynaMenkyoSkku")?.textContent;
-            const qualifications =
-              yield* validateQualification(rawQualifications);
-            return {
-              jobNumber,
-              companyName,
-              receivedDate,
-              expiryDate,
-              homePage,
-              occupation,
-              employmentType,
-              wage: { min: wageMin, max: wageMax },
-              workingHours: { start: workingStartTime, end: workingEndTime },
-              employeeCount,
-              workPlace,
-              jobDescription,
-              qualifications,
-            };
+
+            // Stage 1: DOM → Raw
+            const rawFields = extractRawFieldsFromDocument(document);
+
+            // Stage 2: Raw → Domain
+            const result =
+              Schema.decodeUnknownEither(RawJobToDomainJob)(rawFields);
+            if (Either.isLeft(result)) {
+              return yield* Effect.fail(
+                new JobDetailTransformError({
+                  reason: formatParseError(result.left),
+                  rawFields: JSON.stringify(rawFields, null, 2),
+                }),
+              );
+            }
+            return result.right;
           }),
       };
     }),
@@ -550,7 +280,7 @@ export class JobDetailLoader extends Effect.Service<JobDetailLoader>()(
   {
     effect: Effect.gen(function* () {
       return {
-        load: (data: typeof transformedSchema.Type) =>
+        load: (data: TransformedJob) =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading job detail...");
             const client = yield* buildJobStoreClient();
