@@ -2,7 +2,7 @@ name: Run Lambda on Weekdays Midnight JST
 
 on:
   schedule:
-    - cron: "0 15 * * 1-5" # 月〜金のJST 0時
+    - cron: "0 15 * * 1" # 毎週月曜 JST 0時
 permissions:
   id-token: write # ← OIDCで必要
   contents: read # ← checkoutに必要
