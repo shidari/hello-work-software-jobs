@@ -102,4 +102,3 @@ Base: `/api/v1`
 
 - `pr-checks.yml` - Build, type check, test, lint on PRs
 - `deploy.yml` - AWS CDK deploy on push to main
-- `run-lambda-weekly-days.yml` - Weekly crawler execution
