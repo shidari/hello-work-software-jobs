@@ -1,4 +1,4 @@
-import Loading from "../_components/Loading";
+import Loading from "@/components/ui/Loading";
 
 export default function Page() {
   // Or a custom loading skeleton component

@@ -21,18 +21,12 @@ export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
       entry: "functions/E-T-L-JobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
-      memorySize: 1024,
+      memorySize: 512,
       timeout: Duration.seconds(30),
       layers: [props.playwrightLayer],
       bundling: {
-        externalModules: [
-          "chromium-bidi/lib/cjs/bidiMapper/BidiMapper",
-          "chromium-bidi/lib/cjs/cdp/CdpConnection",
-          "@sparticuz/chromium",
-          "./chromium/appIcon.png",
-          "./loader",
-          "playwright-core",
-        ], // Layer に含めるモジュールは除外
+        externalModules: ["@sparticuz/chromium", "playwright-core"],
+        nodeModules: ["playwright-core"],
       },
       environment: {
         JOB_STORE_ENDPOINT: process.env.JOB_STORE_ENDPOINT || "",

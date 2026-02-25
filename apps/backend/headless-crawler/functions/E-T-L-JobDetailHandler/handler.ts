@@ -1,5 +1,6 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
+import { PlaywrightBrowserConfig } from "../../lib/browser";
 import { JobDetailCrawler } from "../../lib/job-detail-crawler/crawl";
 import { fromEventToFirstRecord } from "./helper";
 
@@ -8,7 +9,11 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     const crawler = yield* JobDetailCrawler;
     const jobNumber = yield* fromEventToFirstRecord(event);
     yield* crawler.processJob(jobNumber);
-  }).pipe(Effect.provide(JobDetailCrawler.Default), Effect.scoped);
+  }).pipe(
+    Effect.provide(JobDetailCrawler.Default),
+    Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.scoped,
+  );
   const result = await Effect.runPromiseExit(program);
 
   if (Exit.isSuccess(result)) {

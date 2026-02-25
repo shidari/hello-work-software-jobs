@@ -14,10 +14,10 @@
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@sparticuz/chromium": "^138.0.0",
+    "@sparticuz/chromium": "^143.0.0",
     "@types/aws-lambda": "^8.10.149",
     "@types/jest": "^29.5.14",
-    "@types/node": "24.10.13",
+    "@types/node": "22.19.11",
     "aws-cdk": "2.1106.0",
     "esbuild": "^0.25.5",
     "ts-node": "^10.9.2",
@@ -34,6 +34,6 @@
     "effect": "^3.16.5",
     "linkedom": "0.18.12",
     "octokit": "^5.0.3",
-    "playwright": "^1.55.1"
+    "playwright": "^1.58.2"
   }
 }

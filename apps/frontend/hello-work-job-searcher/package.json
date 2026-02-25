@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "test": "pnpm exec playwright test"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@sho/models": "workspace:*",
@@ -22,7 +21,6 @@
     "effect": "^3.16.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
     "@types/node": "24.10.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",

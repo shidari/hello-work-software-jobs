@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
+  "packageManager": "pnpm@10.29.3",
   "main": "index.js",
   "scripts": {
     "test": "pnpm -r test",

@@ -1,0 +1,61 @@
+.moreJobsButtonWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1.2rem;
+}
+
+.moreJobsButton {
+  padding: 0.6rem 2rem;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    var(--color-accent-light) 100%
+  );
+  color: var(--color-bg-surface);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  cursor: pointer;
+  font-size: 1rem;
+  transition:
+    background var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform 0.1s;
+  min-width: 10rem;
+  max-width: 90vw;
+  width: fit-content;
+}
+
+@media (max-width: 600px) {
+  .moreJobsButtonWrapper {
+    padding-top: 1.5rem;
+  }
+
+  .moreJobsButton {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+    min-width: 7rem;
+  }
+}
+
+.moreJobsButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.moreJobsButton:hover:not(:disabled) {
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-hover) 0%,
+    var(--color-accent) 100%
+  );
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.moreJobsButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

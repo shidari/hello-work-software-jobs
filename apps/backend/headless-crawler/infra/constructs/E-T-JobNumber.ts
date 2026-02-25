@@ -4,11 +4,9 @@ import { Duration } from "aws-cdk-lib";
 import { Alarm, Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Topic } from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
-import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
 export class JobNumberExtractAndTransformConstruct extends Construct {
@@ -23,21 +21,15 @@ export class JobNumberExtractAndTransformConstruct extends Construct {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: "functions/ET-JobNumberHandler/handler.ts",
       handler: "handler",
-      memorySize: 1024,
+      memorySize: 512,
       timeout: Duration.seconds(480),
       environment: {
         QUEUE_URL: process.env.QUEUE_URL || "",
       },
       layers: [props.playwrightLayer],
       bundling: {
-        externalModules: [
-          "chromium-bidi/lib/cjs/bidiMapper/BidiMapper",
-          "chromium-bidi/lib/cjs/cdp/CdpConnection",
-          "@sparticuz/chromium",
-          "./chromium/appIcon.png",
-          "./loader",
-          "playwright-core",
-        ], // Layer に含めるモジュールは除外
+        externalModules: ["@sparticuz/chromium", "playwright-core"],
+        nodeModules: ["playwright-core"],
       },
     });
 
