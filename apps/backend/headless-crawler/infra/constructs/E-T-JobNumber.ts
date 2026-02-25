@@ -21,7 +21,7 @@ export class JobNumberExtractAndTransformConstruct extends Construct {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: "functions/ET-JobNumberHandler/handler.ts",
       handler: "handler",
-      memorySize: 1024,
+      memorySize: 512,
       timeout: Duration.seconds(480),
       environment: {
         QUEUE_URL: process.env.QUEUE_URL || "",

@@ -21,7 +21,7 @@ export class JobDetailExtractThenTransformThenLoadConstruct extends Construct {
       entry: "functions/E-T-L-JobDetailHandler/handler.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
-      memorySize: 1024,
+      memorySize: 512,
       timeout: Duration.seconds(30),
       layers: [props.playwrightLayer],
       bundling: {

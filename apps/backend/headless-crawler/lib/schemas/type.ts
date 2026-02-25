@@ -7,9 +7,8 @@ import type {
   partialWorkLocationSchema,
   searchPeriodSchema,
 } from "./config";
-import type { extractedJobSchema, JobNumber } from "./extractor";
+import type { JobNumber } from "./extractor";
 import type { eventSchema } from "./lambdaEvent";
-import type { transformedSchema } from "./transformer";
 
 export type { JobNumber };
 
@@ -21,10 +20,6 @@ export type NewJobOpeningsFilter = "TodayYesterday" | "Within1Week";
 
 const jobDetailPage = Symbol();
 export type JobDetailPage = Page & { [jobDetailPage]: unknown };
-
-export type extractedJob = typeof extractedJobSchema.Type;
-
-export type TransformedJob = typeof transformedSchema.Type;
 
 const jobSearchPage = Symbol();
 
