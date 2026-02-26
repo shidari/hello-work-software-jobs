@@ -6,6 +6,7 @@ import { useHydrateAtoms } from "jotai/utils";
 
 import React, { useTransition } from "react";
 import { ClientNavLink } from "@/app/jobs/@search/ClientNavLink/ClientNavLink";
+import type { JobList } from "@/atom";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,
@@ -15,7 +16,6 @@ import {
 } from "@/atom";
 import { useJobsWithFavorite } from "@/components/features/favorites/useJobsWithFavorite";
 import { Item } from "@/components/ui/Item";
-import type { JobList } from "@/job-store-fetcher";
 import { JobOverview } from "./JobOverview";
 import styles from "./JobOverviewList.module.css";
 import cardStyles from "./jobCard.module.css";

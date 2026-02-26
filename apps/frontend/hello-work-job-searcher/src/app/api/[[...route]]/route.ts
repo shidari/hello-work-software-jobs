@@ -1,6 +1,15 @@
+import type { AppType as BackendAppType } from "@sho/job-store-api/types";
 import { Hono } from "hono";
+import { hc } from "hono/client";
 import { handle } from "hono/vercel";
-import { jobStoreClient } from "@/job-store-fetcher";
+
+function createBackendClient() {
+  const endpoint = process.env.JOB_STORE_ENDPOINT;
+  if (!endpoint) throw new Error("JOB_STORE_ENDPOINT is not defined");
+  return hc<BackendAppType>(endpoint);
+}
+
+export const jobStoreClient = createBackendClient();
 
 const app = new Hono().basePath("/api");
 

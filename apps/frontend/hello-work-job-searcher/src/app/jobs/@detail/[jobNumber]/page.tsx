@@ -1,5 +1,5 @@
+import { jobStoreClient } from "@/app/api/[[...route]]/route";
 import { JobDetail } from "@/components/features/detail/JobDetail";
-import { jobStoreClient } from "@/job-store-fetcher";
 
 interface PageProps {
   params: Promise<{ jobNumber: string }>;
