@@ -4,7 +4,20 @@ import { hc } from "hono/client";
 import { atom } from "jotai";
 import type { AppType } from "@/app/api/[[...route]]/route";
 import type { JobOverview } from "@/components/features/list/JobOverview";
-import type { JobList, SearchFilter } from "@/job-store-fetcher";
+
+export type JobList = Unbrand<Job>[];
+
+export type SearchFilter = {
+  companyName?: string;
+  employeeCountLt?: string;
+  employeeCountGt?: string;
+  jobDescription?: string;
+  jobDescriptionExclude?: string;
+  onlyNotExpired?: boolean;
+  orderByReceiveDate?: "asc" | "desc";
+  addedSince?: string;
+  addedUntil?: string;
+};
 
 const client = hc<AppType>("/");
 

@@ -1,10 +1,10 @@
 export const dynamic = "force-dynamic";
 
+import { jobStoreClient } from "@/app/api/[[...route]]/route";
 import { HydratedJobOverviewList } from "@/components/features/list/JobOverviewList";
 import { JobsSearchfilter } from "@/components/features/list/JobSearchFilter";
 import { JobtotalCount } from "@/components/features/list/JobTotalCount";
 import { Accordion } from "@/components/ui/Accordion";
-import { jobStoreClient } from "@/job-store-fetcher";
 import styles from "./page.module.css";
 
 export default async function Page() {
