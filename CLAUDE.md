@@ -51,6 +51,11 @@ pnpm test              # Vitest tests
 
 # Crawler (apps/backend/headless-crawler)
 pnpm deploy            # AWS CDK deploy
+
+# Ops (devbox scripts)
+devbox run cost        # AWS cost report
+devbox run sqs:status  # SQS queue status
+devbox run sqs:purge   # Purge SQS queue
 ```
 
 ## API Endpoints

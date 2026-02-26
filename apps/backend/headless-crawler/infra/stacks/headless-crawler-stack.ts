@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
-import * as iam from "aws-cdk-lib/aws-iam";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
@@ -37,11 +36,19 @@ export class HeadlessCrawlerStack extends cdk.Stack {
         },
       );
 
+    const jobDetailDLQ = new sqs.Queue(this, "JobDetailDLQ", {
+      retentionPeriod: cdk.Duration.days(14),
+    });
+
     const toJobDetailExtractThenTransformThenLoadQueue = new sqs.Queue(
       this,
       "ToJobDetailExtractThenTransformThenLoadQueue",
       {
         visibilityTimeout: cdk.Duration.seconds(300),
+        deadLetterQueue: {
+          queue: jobDetailDLQ,
+          maxReceiveCount: 3,
+        },
       },
     );
 
@@ -63,6 +70,7 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     jobDetailExtractThenTransformThenLoadConstruct.extractThenTransformThenLoader.addEventSource(
       new SqsEventSource(toJobDetailExtractThenTransformThenLoadQueue, {
         batchSize: 1,
+        maxConcurrency: 5,
       }),
     );
     rule.addTarget(
@@ -75,67 +83,5 @@ export class HeadlessCrawlerStack extends cdk.Stack {
     queueForJobDetailRawHtmlExtractor.grantSendMessages(
       jobNumberExtractorConstruct.extractor,
     );
-
-    // デバッグ用ロール（読み取り専用、スタック内リソースに限定）
-    new iam.Role(this, "DebugRole", {
-      roleName: "crawler-debug-role",
-      assumedBy: new iam.AccountRootPrincipal(),
-      maxSessionDuration: cdk.Duration.hours(1),
-      inlinePolicies: {
-        debug: new iam.PolicyDocument({
-          statements: [
-            // SQS: リスト系は resource 制限不可
-            new iam.PolicyStatement({
-              actions: ["sqs:ListQueues"],
-              resources: ["*"],
-            }),
-            new iam.PolicyStatement({
-              actions: [
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-                "sqs:ListDeadLetterSourceQueues",
-              ],
-              resources: [
-                toJobDetailExtractThenTransformThenLoadQueue.queueArn,
-                queueForJobDetailRawHtmlExtractor.queueArn,
-              ],
-            }),
-            // Lambda: リスト系は resource 制限不可
-            new iam.PolicyStatement({
-              actions: ["lambda:ListFunctions"],
-              resources: ["*"],
-            }),
-            new iam.PolicyStatement({
-              actions: [
-                "lambda:GetFunction",
-                "lambda:GetFunctionConfiguration",
-              ],
-              resources: [
-                jobNumberExtractorConstruct.extractor.functionArn,
-                jobDetailExtractThenTransformThenLoadConstruct
-                  .extractThenTransformThenLoader.functionArn,
-              ],
-            }),
-            // CloudWatch Logs: スタック内 Lambda のログに限定
-            new iam.PolicyStatement({
-              actions: ["logs:DescribeLogGroups"],
-              resources: ["*"],
-            }),
-            new iam.PolicyStatement({
-              actions: [
-                "logs:FilterLogEvents",
-                "logs:GetLogEvents",
-                "logs:StartQuery",
-                "logs:GetQueryResults",
-              ],
-              resources: [
-                `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${jobNumberExtractorConstruct.extractor.functionName}:*`,
-                `arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${jobDetailExtractThenTransformThenLoadConstruct.extractThenTransformThenLoader.functionName}:*`,
-              ],
-            }),
-          ],
-        }),
-      },
-    });
   }
 }
