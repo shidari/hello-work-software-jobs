@@ -58,12 +58,12 @@ export class HeadlessCrawlerStack extends cdk.Stack {
       {},
     );
 
-    // EventBridgeルール(Cron)を作成（例: 毎日午前1時に実行）
+    // EventBridgeルール(Cron)を作成（平日毎日午前1時に実行）
     const rule = new events.Rule(this, "CrawlerScheduleRule", {
       schedule: events.Schedule.cron({
         minute: "0",
         hour: "1",
-        weekDay: "MON",
+        weekDay: "MON-FRI",
       }),
     });
 
