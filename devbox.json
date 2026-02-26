@@ -15,7 +15,10 @@
     "scripts": {
       "logs:errors": "aws-vault exec crawler-debug -- ./scripts/crawler-logs.sh",
       "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh",
-      "logs:job-detail": "aws-vault exec crawler-debug -- ./scripts/job-detail-logs.sh \"$@\""
+      "logs:job-detail": "aws-vault exec crawler-debug -- ./scripts/job-detail-logs.sh \"$@\"",
+      "cost": "aws-vault exec crawler-debug -- ./scripts/cost-report.sh",
+      "sqs:status": "aws-vault exec crawler-debug -- ./scripts/sqs-status.sh",
+      "sqs:purge": "aws-vault exec crawler-debug -- ./scripts/sqs-purge.sh"
     }
   }
 }
