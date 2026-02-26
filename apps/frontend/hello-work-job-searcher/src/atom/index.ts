@@ -1,4 +1,4 @@
-import type { Job } from "@sho/models";
+import type { Job, Unbrand } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { hc } from "hono/client";
 import { atom } from "jotai";
@@ -129,7 +129,7 @@ export const continuousJobOverviewListWriterAtom = atom<
   }));
 });
 
-export const jobAtom = atom<Job | undefined>();
+export const jobAtom = atom<Unbrand<Job> | undefined>();
 export const jobWriterAtom = atom<null, [string], Promise<void>>(
   null,
   async (_get, set, jobNumber) => {

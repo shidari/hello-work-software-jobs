@@ -152,9 +152,7 @@ const jobListContinueRoute = describeRoute({
 
 // --- ルートハンドラ ---
 
-const app = new Hono<{ Bindings: Env }>();
-
-app.get(
+const app = new Hono<{ Bindings: Env }>().get(
   "/",
   jobListContinueRoute,
   effectValidator("query", Schema.standardSchemaV1(jobListContinueQuerySchema)),

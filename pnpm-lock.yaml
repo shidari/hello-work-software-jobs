@@ -143,6 +143,9 @@ importers:
 
   apps/frontend/hello-work-job-searcher:
     dependencies:
+      '@sho/job-store-api':
+        specifier: workspace:*
+        version: link:../../backend/job-store-api
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models

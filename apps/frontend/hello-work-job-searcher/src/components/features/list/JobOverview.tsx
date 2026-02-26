@@ -1,4 +1,4 @@
-import { Job } from "@sho/models";
+import { Job, type Unbrand } from "@sho/models";
 
 export const JobOverviewSchema = Job.pick(
   "jobNumber",
@@ -9,7 +9,7 @@ export const JobOverviewSchema = Job.pick(
   "employeeCount",
   "receivedDate",
 );
-export type JobOverview = typeof JobOverviewSchema.Type;
+export type JobOverview = Unbrand<typeof JobOverviewSchema.Type>;
 
 export function JobOverview(props: JobOverview) {
   const { companyName, occupation, employmentType, workPlace, employeeCount } =

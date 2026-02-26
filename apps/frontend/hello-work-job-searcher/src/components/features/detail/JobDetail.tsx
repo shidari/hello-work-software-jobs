@@ -1,10 +1,10 @@
-import type { Job } from "@sho/models";
+import type { Job, Unbrand } from "@sho/models";
 import { Item } from "@/components/ui/Item";
 import { ItemGroup } from "@/components/ui/ItemGroup";
 import { formatDate } from "@/util";
 import styles from "./JobDetail.module.css";
 
-export function JobDetail(props: { jobDetail: Job }) {
+export function JobDetail(props: { jobDetail: Unbrand<Job> }) {
   const {
     jobNumber,
     companyName,
