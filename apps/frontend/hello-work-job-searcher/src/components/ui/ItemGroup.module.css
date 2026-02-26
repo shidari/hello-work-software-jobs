@@ -1,0 +1,15 @@
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  gap: 1rem;
+}
+
+.list {
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}

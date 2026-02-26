@@ -15,6 +15,7 @@ import {
 } from "@/atom";
 import { useJobsWithFavorite } from "@/components/features/hooks/useJobsWithFavorite";
 import { JobOverview } from "@/components/features/JobDetail/JobDetail";
+import { Item } from "@/components/ui/Item";
 import type { JobList } from "@/job-store-fetcher";
 import cardStyles from "../jobCard.module.css";
 import styles from "./JobOverviewList.module.css";
@@ -82,7 +83,7 @@ export function JobOverviewList() {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <section className={cardStyles.card}>
+              <Item>
                 {isNew && <NewBadge />}
                 <ClientNavLink
                   to={`/jobs/${item.jobNumber}`}
@@ -99,7 +100,7 @@ export function JobOverviewList() {
                   />
                 </ClientNavLink>
                 <JobFavoriteButton />
-              </section>
+              </Item>
               {virtualItem.index === lastItem.index && (
                 <div className={styles.moreJobsButtonWrapper}>
                   <button

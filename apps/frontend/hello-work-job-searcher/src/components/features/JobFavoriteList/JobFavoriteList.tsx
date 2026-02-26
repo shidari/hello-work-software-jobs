@@ -8,6 +8,8 @@ import {
   JobOverview,
   JobOverviewSchema,
 } from "@/components/features/JobDetail/JobDetail";
+import { Item } from "@/components/ui/Item";
+import { ItemGroup } from "@/components/ui/ItemGroup";
 import cardStyles from "../jobCard.module.css";
 import styles from "./JobFavoriteList.module.css";
 
@@ -32,12 +34,9 @@ export function FavoriteJobOverviewList() {
   }, [setFavoriteJobs]);
 
   return (
-    <div className={styles.favoriteList}>
+    <ItemGroup>
       {items.map((item) => (
-        <section
-          key={item.jobNumber}
-          className={`${cardStyles.card} ${styles.favoriteCard}`}
-        >
+        <Item key={item.jobNumber} className={styles.favoriteCard}>
           <div className={styles.sectionHeader}>
             <Link
               href={`/jobs/${item.jobNumber}`}
@@ -61,8 +60,8 @@ export function FavoriteJobOverviewList() {
           >
             お気に入り解除
           </button>
-        </section>
+        </Item>
       ))}
-    </div>
+    </ItemGroup>
   );
 }
