@@ -6,7 +6,7 @@ import {
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
 } from "@/atom";
-import styles from "./JobsSearchfilter.module.css";
+import styles from "./JobSearchFilter.module.css";
 
 export const JobsSearchfilter = () => {
   const formRef = useRef<HTMLFormElement>(null);

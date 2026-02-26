@@ -1,6 +1,6 @@
 import { Job } from "@sho/models";
 import { Schema } from "effect";
-import { JobDetail } from "@/components/features/JobDetail/JobDetail";
+import { JobDetail } from "@/components/features/detail/JobDetail";
 
 const jobFetchSuccessResponseSchema = Schema.Struct({
   ...Job.fields,
@@ -26,16 +26,6 @@ export default async function Page({ params }: PageProps) {
   const validatedData = Schema.decodeUnknownSync(jobFetchSuccessResponseSchema)(
     data,
   );
-  const jobDetail = {
-    ...validatedData,
-    companyName: validatedData.companyName ?? "未記載",
-    workingHours: `${validatedData.workingHours.start}〜${validatedData.workingHours.end}`,
-    jobTitle: validatedData.occupation,
-    salary: `${validatedData.wage.min}円〜${validatedData.wage.max}円`,
-    workPlace: validatedData.workPlace ?? "未記載",
-    jobDescription: validatedData.jobDescription ?? "未記載",
-    qualifications: validatedData.qualifications ?? "未記載",
-  };
 
-  return <JobDetail jobDetail={jobDetail} />;
+  return <JobDetail jobDetail={validatedData} />;
 }
