@@ -5,10 +5,10 @@ import {
   favoriteJobsAtom,
   removeFavoriteJobAtom,
 } from "@/atom";
-import type { TJobOverview } from "@/components/features/JobDetail/JobDetail";
-import styles from "./useJobsWithFavoriteButton.module.css";
+import type { JobOverview } from "@/components/features/list/JobOverview";
+import styles from "./useJobsWithFavorite.module.css";
 
-export function useJobsWithFavorite(items: TJobOverview[]) {
+export function useJobsWithFavorite(items: JobOverview[]) {
   const favoriteJobs = useAtomValue(favoriteJobsAtom);
   const appendFavoriteJob = useSetAtom(appendFavoriteJobAtom);
   const removeFavoriteJob = useSetAtom(removeFavoriteJobAtom);

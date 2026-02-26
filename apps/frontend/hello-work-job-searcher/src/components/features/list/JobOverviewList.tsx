@@ -13,12 +13,12 @@ import {
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
 } from "@/atom";
-import { useJobsWithFavorite } from "@/components/features/hooks/useJobsWithFavorite";
-import { JobOverview } from "@/components/features/JobDetail/JobDetail";
+import { useJobsWithFavorite } from "@/components/features/favorites/useJobsWithFavorite";
 import { Item } from "@/components/ui/Item";
 import type { JobList } from "@/job-store-fetcher";
-import cardStyles from "../jobCard.module.css";
+import { JobOverview } from "./JobOverview";
 import styles from "./JobOverviewList.module.css";
+import cardStyles from "./jobCard.module.css";
 
 function NewBadge() {
   return <span className={cardStyles.newBadge}>新着</span>;
@@ -92,7 +92,7 @@ export function JobOverviewList() {
                   <JobOverview
                     jobNumber={item.jobNumber}
                     companyName={item.companyName}
-                    jobTitle={item.jobTitle}
+                    occupation={item.occupation}
                     employmentType={item.employmentType}
                     workPlace={item.workPlace}
                     employeeCount={item.employeeCount}
