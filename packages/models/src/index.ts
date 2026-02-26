@@ -70,6 +70,35 @@ export type WorkingHours = typeof WorkingHours.Type;
 export const EmployeeCount = Schema.Number.pipe(Schema.brand("EmployeeCount"));
 export type EmployeeCount = typeof EmployeeCount.Type;
 
+// ── ユーティリティ型 ──
+
+/**
+ * ブランデッド型を再帰的に剥がし、JSON シリアライズ後の plain 型を返す。
+ * Hono RPC の `res.json()` レスポンス型と合致させるために使う。
+ * Kysely の `Selectable<T>` に類似。
+ *
+ * @example
+ * ```ts
+ * type PlainJob = Unbrand<Job>;
+ * // { readonly jobNumber: string; readonly companyName: string; ... }
+ * ```
+ */
+export type Unbrand<T> = T extends null
+  ? null
+  : T extends undefined
+    ? undefined
+    : T extends readonly (infer U)[]
+      ? Unbrand<U>[]
+      : T extends string
+        ? string
+        : T extends number
+          ? number
+          : T extends boolean
+            ? boolean
+            : T extends object
+              ? { [K in keyof T]: Unbrand<T[K]> }
+              : T;
+
 // ── ドメインモデル ──
 
 export const Job = Schema.Struct({

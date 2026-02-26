@@ -1,6 +1,6 @@
 "use client";
 
-import type { Job } from "@sho/models";
+import type { Job, Unbrand } from "@sho/models";
 import { useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import { jobAtom } from "@/atom";
@@ -9,7 +9,7 @@ import { JobDetail } from "@/components/features/detail/JobDetail";
 export function HydratedJob({
   initialDataFromServer,
 }: {
-  initialDataFromServer: Job;
+  initialDataFromServer: Unbrand<Job>;
 }) {
   useHydrateAtoms([[jobAtom, initialDataFromServer]]);
   return <ClientJobDetail />;

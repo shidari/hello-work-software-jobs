@@ -1,7 +1,10 @@
 {
-	"name": "job-store-api",
+	"name": "@sho/job-store-api",
 	"version": "0.0.0",
 	"private": true,
+	"exports": {
+		"./types": "./src/types.ts"
+	},
 	"scripts": {
 		"deploy": "pnpm build && pnpm exec wrangler deploy",
 		"no-main-deploy": "wrangler versions upload",

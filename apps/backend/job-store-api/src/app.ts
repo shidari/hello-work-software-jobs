@@ -6,18 +6,18 @@ import api from "./routes/api";
 const j = Symbol();
 type JWTSecret = string & { [j]: unknown };
 
-const app = new Hono();
-app.use("*", async (c, next) => {
-  const start = Date.now();
+const app = new Hono()
+  .use("*", async (c, next) => {
+    const start = Date.now();
 
-  console.log(`📥 ${c.req.method} ${c.req.url}`);
+    console.log(`📥 ${c.req.method} ${c.req.url}`);
 
-  await next();
+    await next();
 
-  const duration = Date.now() - start;
-  console.log(`📤 ${c.res.status} (${duration}ms)`);
-});
-app.route("/api", api);
+    const duration = Date.now() - start;
+    console.log(`📤 ${c.res.status} (${duration}ms)`);
+  })
+  .route("/api", api);
 app.get(
   "/openapi",
   openAPIRouteHandler(app, {

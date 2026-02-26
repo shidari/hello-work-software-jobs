@@ -1,13 +1,11 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { jobStoreClientOnServer } from "@/job-store-fetcher";
+import { jobStoreClient } from "@/job-store-fetcher";
 
 const app = new Hono().basePath("/api");
 
 const jobsApp = new Hono().get("/", async (c) => {
   try {
-    const queries = c.req.queries();
-    console.log("Received queries:", JSON.stringify(queries, null, 2));
     const companyName = c.req.query("companyName");
     const employeeCountGt = c.req.query("employeeCountGt");
     const employeeCountLt = c.req.query("employeeCountLt");
@@ -16,7 +14,7 @@ const jobsApp = new Hono().get("/", async (c) => {
     const addedSince = c.req.query("addedSince");
     const addedUntil = c.req.query("addedUntil");
 
-    const filter = {
+    const query = {
       ...(companyName ? { companyName } : {}),
       ...(jobDescription ? { jobDescription } : {}),
       ...(jobDescriptionExclude ? { jobDescriptionExclude } : {}),
@@ -24,24 +22,13 @@ const jobsApp = new Hono().get("/", async (c) => {
       ...(employeeCountLt ? { employeeCountLt } : {}),
       ...(addedSince ? { addedSince } : {}),
       ...(addedUntil ? { addedUntil } : {}),
-      onlyNotExpired: true,
+      onlyNotExpired: "true",
       orderByReceiveDate: "desc" as const,
     };
 
-    const result = await jobStoreClientOnServer.getInitialJobs(filter);
-
-    return result.match(
-      (validatedData) => {
-        return c.json({ ...validatedData, success: true });
-      },
-      (error) => {
-        console.error("Error fetching job data:", error);
-        return c.json(
-          { message: "internal server error", success: false },
-          { status: 500 },
-        );
-      },
-    );
+    const res = await jobStoreClient.api.v1.jobs.$get({ query });
+    const data = await res.json();
+    return c.json({ ...data, success: true });
   } catch (error) {
     console.error("Error fetching job data:", error);
     return c.json({ message: "internal server error", success: false }, 500);
@@ -57,19 +44,14 @@ const jobApp = new Hono().get("/:jobNumber", async (c) => {
         { status: 400 },
       );
     }
-    const result = await jobStoreClientOnServer.getJob(jobNumber);
-    return result.match(
-      (validatedData) => {
-        return c.json({ ...validatedData, success: true });
-      },
-      (error) => {
-        console.error("Error fetching job data:", error);
-        return c.json(
-          { message: "internal server error", success: false },
-          { status: 500 },
-        );
-      },
-    );
+    const res = await jobStoreClient.api.v1.jobs[":jobNumber"].$get({
+      param: { jobNumber },
+    });
+    const data = await res.json();
+    if (!data) {
+      return c.json({ message: "Job not found", success: false as const }, 404);
+    }
+    return c.json({ ...data, success: true as const });
   } catch (error) {
     console.error("Error fetching job data:", error);
     return c.json({ message: "internal server error", success: false }, 500);
@@ -85,20 +67,11 @@ const jobsContinueApp = new Hono().get("/", async (c) => {
         { status: 400 },
       );
     }
-    const result = await jobStoreClientOnServer.getContinuedJobs(nextToken);
-
-    return result.match(
-      (validatedData) => {
-        return c.json({ ...validatedData, success: true });
-      },
-      (error) => {
-        console.error("Error fetching job data:", error);
-        return c.json(
-          { message: "internal server error", success: false },
-          { status: 500 },
-        );
-      },
-    );
+    const res = await jobStoreClient.api.v1.jobs.continue.$get({
+      query: { nextToken },
+    });
+    const data = await res.json();
+    return c.json({ ...data, success: true });
   } catch (error) {
     console.error("Error fetching job data:", error);
     return c.json({ message: "internal server error", success: false }, 500);

@@ -1,13 +1,5 @@
-import { Job } from "@sho/models";
-import { Schema } from "effect";
 import { JobDetail } from "@/components/features/detail/JobDetail";
-
-const jobFetchSuccessResponseSchema = Schema.Struct({
-  ...Job.fields,
-  status: Schema.String,
-  createdAt: Schema.String,
-  updatedAt: Schema.String,
-});
+import { jobStoreClient } from "@/job-store-fetcher";
 
 interface PageProps {
   params: Promise<{ jobNumber: string }>;
@@ -16,16 +8,13 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { jobNumber } = await params;
 
-  const endpoint = process.env.JOB_STORE_ENDPOINT;
-  if (!endpoint) {
-    throw new Error("JOB_STORE_ENDPOINT is not defined");
+  const res = await jobStoreClient.api.v1.jobs[":jobNumber"].$get({
+    param: { jobNumber },
+  });
+  const data = await res.json();
+  if (!data) {
+    return <div>求人情報が見つかりませんでした。</div>;
   }
-  const data = await fetch(`${endpoint}/jobs/${jobNumber}`).then((res) =>
-    res.json(),
-  );
-  const validatedData = Schema.decodeUnknownSync(jobFetchSuccessResponseSchema)(
-    data,
-  );
 
-  return <JobDetail jobDetail={validatedData} />;
+  return <JobDetail jobDetail={data} />;
 }

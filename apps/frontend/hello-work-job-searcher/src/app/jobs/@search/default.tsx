@@ -4,18 +4,18 @@ import { HydratedJobOverviewList } from "@/components/features/list/JobOverviewL
 import { JobsSearchfilter } from "@/components/features/list/JobSearchFilter";
 import { JobtotalCount } from "@/components/features/list/JobTotalCount";
 import { Accordion } from "@/components/ui/Accordion";
-import { jobStoreClientOnServer } from "@/job-store-fetcher";
+import { jobStoreClient } from "@/job-store-fetcher";
 import styles from "./page.module.css";
 
 export default async function Page() {
-  // 一旦対応めんどいからunsafeUnwrapを使う
-  const result = await jobStoreClientOnServer.getInitialJobs();
-  if (result.isErr()) {
-    // エラーハンドリング
-    console.error(result.error);
+  const res = await jobStoreClient.api.v1.jobs.$get({
+    query: { orderByReceiveDate: "desc" },
+  });
+  if (!res.ok) {
+    console.error("Failed to fetch jobs:", res.status);
     return <div>求人情報の取得に失敗しました。</div>;
   }
-  const data = result.value;
+  const data = await res.json();
   return (
     <div className={styles["layout-search"]}>
       <div className={styles["layout-search-header"]}>
