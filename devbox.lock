@@ -1,51 +1,51 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "aws-vault@latest": {
-      "last_modified": "2026-02-11T03:47:03Z",
-      "resolved": "github:NixOS/nixpkgs/c05d2232d2feaa4c7a07f1168606917402868195#aws-vault",
+    "aws-vault@7.9.5": {
+      "last_modified": "2026-02-23T15:40:43Z",
+      "resolved": "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97#aws-vault",
       "source": "devbox-search",
-      "version": "7.9.4",
+      "version": "7.9.5",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/yna3vpdradbvc8zchsk0swhrzjczjiln-aws-vault-7.9.4",
+              "path": "/nix/store/j1p4hjh24clpnxnlkfqp63m5x8dv8p1m-aws-vault-7.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/yna3vpdradbvc8zchsk0swhrzjczjiln-aws-vault-7.9.4"
+          "store_path": "/nix/store/j1p4hjh24clpnxnlkfqp63m5x8dv8p1m-aws-vault-7.9.5"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cbysmn9ipm7705xddcxjbxr0505ryr2h-aws-vault-7.9.4",
+              "path": "/nix/store/f4lb7fq7gziss0958pabrdbfb5vd068q-aws-vault-7.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cbysmn9ipm7705xddcxjbxr0505ryr2h-aws-vault-7.9.4"
+          "store_path": "/nix/store/f4lb7fq7gziss0958pabrdbfb5vd068q-aws-vault-7.9.5"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/96dspby9fd3f57kp0bqzxp2w5gzg0jb2-aws-vault-7.9.4",
+              "path": "/nix/store/2ikirm6b049s0kl4isfi9ij8gp1crb07-aws-vault-7.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/96dspby9fd3f57kp0bqzxp2w5gzg0jb2-aws-vault-7.9.4"
+          "store_path": "/nix/store/2ikirm6b049s0kl4isfi9ij8gp1crb07-aws-vault-7.9.5"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/56iaphj9xqlvggzrw8nnq2w1nq9dl6qi-aws-vault-7.9.4",
+              "path": "/nix/store/gvcyy8478m3q3xkgij2ffs2ark65q4ja-aws-vault-7.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/56iaphj9xqlvggzrw8nnq2w1nq9dl6qi-aws-vault-7.9.4"
+          "store_path": "/nix/store/gvcyy8478m3q3xkgij2ffs2ark65q4ja-aws-vault-7.9.5"
         }
       }
     },
