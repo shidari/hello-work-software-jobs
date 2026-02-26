@@ -3,7 +3,7 @@
   "packages": [
     "nodejs@22",
     "awscli2@2.33.2",
-    "aws-vault@latest",
+    "aws-vault@7.9.5",
     "pnpm@10.28.0",
     "gh@2.86.0",
     "pinact@3.8.0"
