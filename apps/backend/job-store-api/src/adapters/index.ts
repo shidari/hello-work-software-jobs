@@ -12,17 +12,17 @@ import { PAGE_SIZE } from "../constant";
 // DB行はフラット構造（wageMin, wageMax, workingStartTime, workingEndTime）
 const DbJobRowSchema = Schema.Struct({
   jobNumber: Schema.String,
-  companyName: Schema.String,
+  companyName: Schema.NullOr(Schema.String),
   receivedDate: Schema.String,
   expiryDate: Schema.String,
   homePage: Schema.NullOr(Schema.String),
   occupation: Schema.String,
   employmentType: Schema.String,
-  wageMin: Schema.Number,
-  wageMax: Schema.Number,
+  wageMin: Schema.NullOr(Schema.Number),
+  wageMax: Schema.NullOr(Schema.Number),
   workingStartTime: Schema.NullOr(Schema.String),
   workingEndTime: Schema.NullOr(Schema.String),
-  employeeCount: Schema.Number,
+  employeeCount: Schema.NullOr(Schema.Number),
   workPlace: Schema.NullOr(Schema.String),
   jobDescription: Schema.NullOr(Schema.String),
   qualifications: Schema.NullOr(Schema.String),
@@ -37,8 +37,14 @@ type DbJobRow = typeof DbJobRowSchema.Type;
 function dbRowToJob(row: DbJobRow): Job {
   return {
     ...row,
-    wage: { min: row.wageMin, max: row.wageMax },
-    workingHours: { start: row.workingStartTime, end: row.workingEndTime },
+    wage:
+      row.wageMin != null && row.wageMax != null
+        ? { min: row.wageMin, max: row.wageMax }
+        : null,
+    workingHours:
+      row.workingStartTime != null || row.workingEndTime != null
+        ? { start: row.workingStartTime, end: row.workingEndTime }
+        : null,
   } as Job;
 }
 
@@ -52,10 +58,10 @@ function domainJobToDbValues(payload: InsertJobRequestBody) {
     homePage: payload.homePage,
     occupation: payload.occupation,
     employmentType: payload.employmentType,
-    wageMin: payload.wage.min,
-    wageMax: payload.wage.max,
-    workingStartTime: payload.workingHours.start,
-    workingEndTime: payload.workingHours.end,
+    wageMin: payload.wage?.min ?? null,
+    wageMax: payload.wage?.max ?? null,
+    workingStartTime: payload.workingHours?.start ?? null,
+    workingEndTime: payload.workingHours?.end ?? null,
     employeeCount: payload.employeeCount,
     workPlace: payload.workPlace,
     jobDescription: payload.jobDescription,
@@ -78,8 +84,8 @@ export type SearchFilter = {
 };
 
 export type Job = DbJobRow & {
-  wage: { min: number; max: number };
-  workingHours: { start: string | null; end: string | null };
+  wage: { min: number; max: number } | null;
+  workingHours: { start: string | null; end: string | null } | null;
 };
 export type InsertJobRequestBody = DomainJobType;
 

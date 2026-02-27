@@ -50,6 +50,7 @@ pnpm deploy            # Deploy to Cloudflare
 pnpm test              # Vitest tests
 
 # Crawler (apps/backend/headless-crawler)
+pnpm test              # Vitest tests (PBT)
 pnpm deploy            # AWS CDK deploy
 
 # Ops (devbox scripts)
