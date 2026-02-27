@@ -11,6 +11,7 @@
     "verify:job-detail-extractor": "ts-node lib/jobDetail/extractor/playground/index.ts",
     "verify:transform-jobDetail": "ts-node lib/T-jobDetail/playground/index.ts",
     "verify:job-number-crawler": "ts-node lib/scripts/verify-job-number-crawler.ts",
+    "test": "vitest",
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
@@ -22,7 +23,8 @@
     "esbuild": "^0.25.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "~3.2.4"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.840.0",
