@@ -21,8 +21,12 @@ export function JobDetail(props: { jobDetail: Unbrand<Job> }) {
     <article className={`${styles["layout-job-detail"]}`}>
       <h2>求人番号: {jobNumber}</h2>
       <ItemGroup variant="list">
-        <Item variant="list" data-label="company-name" data-value={companyName}>
-          企業名: {companyName}
+        <Item
+          variant="list"
+          data-label="company-name"
+          data-value={companyName ?? "未記載"}
+        >
+          企業名: {companyName ?? "未記載"}
         </Item>
         <Item variant="list" data-label="occupation" data-value={occupation}>
           職種: {occupation}
@@ -44,9 +48,9 @@ export function JobDetail(props: { jobDetail: Unbrand<Job> }) {
         <Item
           variant="list"
           data-label="wage"
-          data-value={`${wage.min}〜${wage.max}`}
+          data-value={wage ? `${wage.min}〜${wage.max}` : "未記載"}
         >
-          賃金: {wage.min}円〜{wage.max}円
+          賃金: {wage ? `${wage.min}円〜${wage.max}円` : "未記載"}
         </Item>
         <Item
           variant="list"
@@ -61,9 +65,16 @@ export function JobDetail(props: { jobDetail: Unbrand<Job> }) {
         <Item
           variant="list"
           data-label="working-hours"
-          data-value={`${workingHours.start}〜${workingHours.end}`}
+          data-value={
+            workingHours
+              ? `${workingHours.start}〜${workingHours.end}`
+              : "未記載"
+          }
         >
-          勤務時間: {workingHours.start ?? "?"}〜{workingHours.end ?? "?"}
+          勤務時間:{" "}
+          {workingHours
+            ? `${workingHours.start ?? "?"}〜${workingHours.end ?? "?"}`
+            : "未記載"}
         </Item>
         <Item
           variant="list"
