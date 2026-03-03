@@ -14,7 +14,7 @@ apps/
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
-  ├── db/                           # Kysely types & migrations
+  ├── db/                           # Kysely types (generated from schema.sql)
   └── models/                       # 共通型定義
 ```
 
