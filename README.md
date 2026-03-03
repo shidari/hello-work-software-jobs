@@ -8,18 +8,20 @@
 
 ```
 apps/
-  ├── hello-work-job-searcher/  # Next.js フロントエンド
-  ├── job-store-api/            # Cloudflare Workers API
-  └── headless-crawler/         # AWS Lambda クローラー
+  ├── backend/
+  │   ├── job-store-api/            # Cloudflare Workers API (Hono + D1)
+  │   └── headless-crawler/         # AWS Lambda クローラー (Playwright)
+  └── frontend/
+      └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
-  ├── db/                       # Drizzle schema & migrations
-  └── models/                   # 共通型定義
+  ├── db/                           # Drizzle schema & migrations
+  └── models/                       # 共通型定義
 ```
 
 ## 技術スタック
 
 - **共通**: TypeScript, pnpm workspace
-- **フロントエンド**: Next.js 15, React 19, Jotai, Hono (RPC)
+- **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
 - **API**: Cloudflare Workers, Hono, Drizzle ORM, D1
 - **クローラー**: AWS Lambda, Playwright, Effect, SQS
 - **型管理**: Effect Schema, @sho/models
@@ -31,11 +33,11 @@ packages/
 pnpm install
 
 # 各パッケージの開発サーバー起動
-cd apps/hello-work-job-searcher && pnpm dev      # フロントエンド (port 9002)
-cd apps/job-store-api && pnpm dev                # API (port 8787)
+cd apps/frontend/hello-work-job-searcher && pnpm dev   # フロントエンド (port 9002)
+cd apps/backend/job-store-api && pnpm dev              # API (port 8787)
 
 # クローラー検証
-cd apps/headless-crawler
+cd apps/backend/headless-crawler
 pnpm exec playwright install chromium
 pnpm verify:e-t-crawler
 pnpm verify:job-detail-extractor
@@ -45,16 +47,16 @@ pnpm verify:job-detail-extractor
 
 ```bash
 # クローラー (AWS Lambda)
-cd apps/headless-crawler
+cd apps/backend/headless-crawler
 pnpm bootstrap  # 初回のみ
 pnpm deploy
 
 # API (Cloudflare Workers)
-cd apps/job-store-api
+cd apps/backend/job-store-api
 pnpm deploy
 
 # フロントエンド (Vercel)
-cd apps/hello-work-job-searcher
+cd apps/frontend/hello-work-job-searcher
 pnpm build
 ```
 
