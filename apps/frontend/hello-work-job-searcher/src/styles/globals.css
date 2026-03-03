@@ -37,6 +37,11 @@
   --radius-pill: 999px;
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-card-active: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-accent-sm: 0 2px 8px rgba(59, 130, 246, 0.15);
+  --shadow-accent-lg: 0 4px 16px rgba(59, 130, 246, 0.25);
+  --ring-accent: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  --color-accent-subtle: rgba(59, 130, 246, 0.08);
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
 }
@@ -50,4 +55,23 @@ body {
 
 h1 {
   margin: 0;
+}
+
+input,
+select {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-input-focus);
+  box-shadow: var(--ring-accent);
 }

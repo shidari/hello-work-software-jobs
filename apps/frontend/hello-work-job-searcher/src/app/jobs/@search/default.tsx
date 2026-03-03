@@ -4,7 +4,7 @@ import { jobStoreClient } from "@/app/api/[[...route]]/route";
 import { HydratedJobOverviewList } from "@/components/features/list/JobOverviewList";
 import { JobsSearchfilter } from "@/components/features/list/JobSearchFilter";
 import { JobtotalCount } from "@/components/features/list/JobTotalCount";
-import { Accordion } from "@/components/ui/Accordion";
+import { Collapsible } from "@/components/ui/Collapsible";
 import styles from "./page.module.css";
 
 export default async function Page() {
@@ -25,9 +25,9 @@ export default async function Page() {
           求人情報一覧
         </h1>
         <JobtotalCount initialDataFromServer={data.meta.totalCount} />
-        <Accordion title="絞り込み">
+        <Collapsible title="絞り込み">
           <JobsSearchfilter />
-        </Accordion>
+        </Collapsible>
       </div>
 
       <div className={styles["layout-search-list"]}>

@@ -7,7 +7,7 @@
   transition: color var(--transition-normal);
   padding: 2px 6px;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   position: absolute;
   bottom: 0.5rem;
   right: 0.5rem;
