@@ -37,7 +37,7 @@ Job = {
 
 ## `packages/db`
 
-Kysely 型定義 + マイグレーション。D1 (SQLite) 向け。
+Kysely 型定義。D1 (SQLite) 向け。
 
 - `schema.sql` が DDL の Source of Truth
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
