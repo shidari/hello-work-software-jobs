@@ -14,7 +14,7 @@ apps/
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
-  ├── db/                           # Drizzle schema & migrations
+  ├── db/                           # Kysely types & migrations
   └── models/                       # 共通型定義
 ```
 
@@ -22,7 +22,7 @@ packages/
 
 - **共通**: TypeScript, pnpm workspace
 - **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
-- **API**: Cloudflare Workers, Hono, Drizzle ORM, D1
+- **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: AWS Lambda, Playwright, Effect, SQS
 - **型管理**: Effect Schema, @sho/models
 
