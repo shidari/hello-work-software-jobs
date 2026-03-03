@@ -28,7 +28,7 @@
   );
   color: var(--color-bg-surface);
   border-radius: var(--radius-pill);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--shadow-accent-sm);
 }
 
 .primary:hover:not(:disabled) {
@@ -37,7 +37,7 @@
     var(--color-accent-hover) 0%,
     var(--color-accent) 100%
   );
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-accent-lg);
   transform: translateY(-2px) scale(1.03);
 }
 
@@ -50,7 +50,7 @@
 }
 
 .outline:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.08);
+  background: var(--color-accent-subtle);
 }
 
 /* variant: danger */

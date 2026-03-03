@@ -16,7 +16,7 @@
   font-weight: bold;
   border: none;
   border-radius: var(--radius-pill);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--shadow-accent-sm);
   cursor: pointer;
   font-size: 1rem;
   transition:
@@ -51,7 +51,7 @@
     var(--color-accent-hover) 0%,
     var(--color-accent) 100%
   );
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-accent-lg);
   transform: translateY(-2px) scale(1.03);
 }
 
