@@ -8,7 +8,7 @@ import { Collapsible } from "@/components/ui/Collapsible";
 import styles from "./page.module.css";
 
 export default async function Page() {
-  const res = await jobStoreClient.api.v1.jobs.$get({
+  const res = await jobStoreClient.api.jobs.$get({
     query: { orderByReceiveDate: "desc" },
   });
   if (!res.ok) {

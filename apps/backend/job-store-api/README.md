@@ -9,10 +9,10 @@ GET  /                        # ドキュメントへリダイレクト
 GET  /docs                    # Swagger UI
 GET  /openapi                 # OpenAPI仕様書 JSON
 
-POST /api/v1/jobs/            # 求人登録 (要APIキー)
-GET  /api/v1/jobs/:jobNumber  # 求人詳細取得
-GET  /api/v1/jobs/            # 求人一覧取得 (フィルタ対応)
-GET  /api/v1/jobs/continue    # ページネーション継続
+POST /api/jobs/            # 求人登録 (要APIキー)
+GET  /api/jobs/:jobNumber  # 求人詳細取得
+GET  /api/jobs/            # 求人一覧取得 (フィルタ対応)
+GET  /api/jobs/continue    # ページネーション継続
 ```
 
 ## コマンド

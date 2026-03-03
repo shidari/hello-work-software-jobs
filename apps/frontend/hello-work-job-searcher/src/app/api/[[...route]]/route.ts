@@ -35,7 +35,7 @@ const jobsApp = new Hono().get("/", async (c) => {
       orderByReceiveDate: "desc" as const,
     };
 
-    const res = await jobStoreClient.api.v1.jobs.$get({ query });
+    const res = await jobStoreClient.api.jobs.$get({ query });
     const data = await res.json();
     return c.json({ ...data, success: true });
   } catch (error) {
@@ -53,7 +53,7 @@ const jobApp = new Hono().get("/:jobNumber", async (c) => {
         { status: 400 },
       );
     }
-    const res = await jobStoreClient.api.v1.jobs[":jobNumber"].$get({
+    const res = await jobStoreClient.api.jobs[":jobNumber"].$get({
       param: { jobNumber },
     });
     const data = await res.json();
@@ -76,7 +76,7 @@ const jobsContinueApp = new Hono().get("/", async (c) => {
         { status: 400 },
       );
     }
-    const res = await jobStoreClient.api.v1.jobs.continue.$get({
+    const res = await jobStoreClient.api.jobs.continue.$get({
       query: { nextToken },
     });
     const data = await res.json();

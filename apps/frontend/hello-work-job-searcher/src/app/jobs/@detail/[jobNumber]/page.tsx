@@ -8,7 +8,7 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { jobNumber } = await params;
 
-  const res = await jobStoreClient.api.v1.jobs[":jobNumber"].$get({
+  const res = await jobStoreClient.api.jobs[":jobNumber"].$get({
     param: { jobNumber },
   });
   const data = await res.json();

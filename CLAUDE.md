@@ -61,7 +61,7 @@ devbox run sqs:purge   # Purge SQS queue
 
 ## API Endpoints
 
-Base: `/api/v1`
+Base: `/api`
 
 - `GET /jobs` - List jobs (with filters)
 - `GET /jobs/{jobNumber}` - Get job details
