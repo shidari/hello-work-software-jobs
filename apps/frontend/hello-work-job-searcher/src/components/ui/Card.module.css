@@ -30,6 +30,35 @@
   box-shadow: var(--shadow-card-active);
 }
 
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.content {
+  padding-top: 0.75rem;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  padding-top: 0.75rem;
+}
+
 .group {
   display: flex;
   flex-direction: column;
