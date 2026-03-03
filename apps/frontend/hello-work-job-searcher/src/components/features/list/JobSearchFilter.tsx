@@ -6,6 +6,8 @@ import {
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
 } from "@/atom";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import styles from "./JobSearchFilter.module.css";
 
 export const JobsSearchfilter = () => {
@@ -73,28 +75,28 @@ export const JobsSearchfilter = () => {
 
   return (
     <form ref={formRef} className={styles.formGrid}>
-      <input
+      <Input
         type="text"
         placeholder="会社名を検索"
         name="companyName"
         onChange={handleChange}
         className={styles.inputFull}
       />
-      <input
+      <Input
         type="text"
         placeholder="求人内容をキーワード検索"
         name="jobDescription"
         onChange={handleChange}
         className={styles.inputFull}
       />
-      <input
+      <Input
         type="text"
         placeholder="求人内容をキーワード除外検索"
         name="jobDescriptionExclude"
         onChange={handleChange}
         className={styles.inputFull}
       />
-      <select
+      <Select
         name="employeeCountRange"
         defaultValue=""
         onChange={handleChange}
@@ -105,7 +107,7 @@ export const JobsSearchfilter = () => {
         <option value="10-30">10~30人</option>
         <option value="30-100">30~100人</option>
         <option value="100+">100人以上</option>
-      </select>
+      </Select>
     </form>
   );
 };

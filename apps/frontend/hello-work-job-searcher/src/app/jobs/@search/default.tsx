@@ -24,7 +24,9 @@ export default async function Page() {
         >
           求人情報一覧
         </h1>
-        <JobtotalCount initialDataFromServer={data.meta.totalCount} />
+        <div className={styles.totalCount}>
+          <JobtotalCount initialDataFromServer={data.meta.totalCount} />
+        </div>
         <Collapsible title="絞り込み">
           <JobsSearchfilter />
         </Collapsible>
