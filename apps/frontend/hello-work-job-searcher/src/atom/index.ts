@@ -2,8 +2,8 @@ import type { Job, Unbrand } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { hc } from "hono/client";
 import { atom } from "jotai";
-import type { AppType } from "@/app/api/[[...route]]/route";
 import type { JobOverview } from "@/components/features/list/JobOverview";
+import type { AppType } from "@/lib/backend-client";
 
 export type JobList = Unbrand<Job>[];
 
@@ -99,12 +99,13 @@ export const initializeJobListWriterAtom = atom<
   const res = await client.api.jobs.$get({
     query: {
       ...searchFilter,
+      onlyNotExpired: searchFilter.onlyNotExpired ? "true" : undefined,
     },
   });
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(data.message);
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
   }
+  const data = await res.json();
   const {
     jobs,
     nextToken,
@@ -126,10 +127,10 @@ export const continuousJobOverviewListWriterAtom = atom<
   const res = await client.api.jobs.continue.$get({
     query: { nextToken },
   });
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(data.message);
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
   }
+  const data = await res.json();
   const {
     jobs,
     nextToken: newNextToken,
@@ -149,11 +150,11 @@ export const jobWriterAtom = atom<null, [string], Promise<void>>(
     const res = await client.api.jobs[":jobNumber"].$get({
       param: { jobNumber },
     });
-    const data = await res.json();
-    if (!data.success) {
-      throw new Error(data.message);
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status}`);
     }
-    set(jobAtom, data);
+    const data = await res.json();
+    set(jobAtom, data ?? undefined);
   },
 );
 
