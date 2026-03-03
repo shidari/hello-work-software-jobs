@@ -160,7 +160,7 @@ function buildJobStoreClient() {
           );
           const res = yield* Effect.tryPromise({
             try: async () =>
-              fetch(`${endpoint}/job`, {
+              fetch(`${endpoint}/api/jobs`, {
                 method: "POST",
                 body: JSON.stringify(job),
                 headers: {
