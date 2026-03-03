@@ -15,7 +15,7 @@ import {
   scrollRestorationByItemListAtom,
 } from "@/atom";
 import { useJobsWithFavorite } from "@/components/features/favorites/useJobsWithFavorite";
-import { Item } from "@/components/ui/Item";
+import { Card } from "@/components/ui/Card";
 import { JobOverview } from "./JobOverview";
 import styles from "./JobOverviewList.module.css";
 import cardStyles from "./jobCard.module.css";
@@ -83,7 +83,7 @@ export function JobOverviewList() {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <Item>
+              <Card>
                 {isNew && <NewBadge />}
                 <ClientNavLink
                   to={`/jobs/${item.jobNumber}`}
@@ -100,7 +100,7 @@ export function JobOverviewList() {
                   />
                 </ClientNavLink>
                 <JobFavoriteButton />
-              </Item>
+              </Card>
               {virtualItem.index === lastItem.index && (
                 <div className={styles.moreJobsButtonWrapper}>
                   <button

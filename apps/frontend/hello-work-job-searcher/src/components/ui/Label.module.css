@@ -1,0 +1,16 @@
+.label {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.label:last-child {
+  border-bottom: none;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
