@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "@/atom";
 import { JobOverviewSchema } from "@/components/features/list/JobOverview";
-import { Item } from "@/components/ui/Item";
-import { ItemGroup } from "@/components/ui/ItemGroup";
+import { Card, CardGroup } from "@/components/ui/Card";
 import cardStyles from "../list/jobCard.module.css";
 import styles from "./JobFavoriteList.module.css";
 import { JobOverview } from "./JobOverview";
@@ -32,9 +31,9 @@ export function FavoriteJobOverviewList() {
   }, [setFavoriteJobs]);
 
   return (
-    <ItemGroup>
+    <CardGroup>
       {items.map((item) => (
-        <Item key={item.jobNumber} className={styles.favoriteCard}>
+        <Card key={item.jobNumber} className={styles.favoriteCard}>
           <div className={styles.sectionHeader}>
             <Link
               href={`/jobs/${item.jobNumber}`}
@@ -58,8 +57,8 @@ export function FavoriteJobOverviewList() {
           >
             お気に入り解除
           </button>
-        </Item>
+        </Card>
       ))}
-    </ItemGroup>
+    </CardGroup>
   );
 }

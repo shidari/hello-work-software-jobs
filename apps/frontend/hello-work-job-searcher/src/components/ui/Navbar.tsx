@@ -1,17 +1,13 @@
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 
-type NavItem = {
-  label: string;
-  href: string;
-};
-
-type NavbarProps = {
+export function Navbar({
+  brand,
+  items,
+}: {
   brand: string;
-  items: NavItem[];
-};
-
-export function Navbar({ brand, items }: NavbarProps) {
+  items: { label: string; href: string }[];
+}) {
   return (
     <header className={styles.navbar}>
       <nav className={styles.navbarInner}>
