@@ -29,10 +29,10 @@ describe("/", () => {
     });
   });
 });
-describe("/api/v1", () => {
+describe("/api", () => {
   describe("GET 正常系", () => {
     it("302リダイレクトとlocationを確認し、/docで200を確認する", async () => {
-      const request = new Request("http://localhost:8787/api/v1");
+      const request = new Request("http://localhost:8787/api");
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);
@@ -43,11 +43,11 @@ describe("/api/v1", () => {
   });
 });
 
-describe("/api/v1/jobs", () => {
+describe("/api/jobs", () => {
   describe("GET 異常系", () => {
     it("with invalid query should fail", async () => {
       const request = new Request(
-        "http://localhost:8787/api/v1/jobs?employeeCountGt=notanumber",
+        "http://localhost:8787/api/jobs?employeeCountGt=notanumber",
       );
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
@@ -57,7 +57,7 @@ describe("/api/v1/jobs", () => {
     });
     it("with negative employeeCountGt should fail", async () => {
       const request = new Request(
-        "http://localhost:8787/api/v1/jobs?employeeCountGt=-1",
+        "http://localhost:8787/api/jobs?employeeCountGt=-1",
       );
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
@@ -66,7 +66,7 @@ describe("/api/v1/jobs", () => {
     });
     it("with invalid orderByReceiveDate should fail", async () => {
       const request = new Request(
-        "http://localhost:8787/api/v1/jobs?orderByReceiveDate=invalid",
+        "http://localhost:8787/api/jobs?orderByReceiveDate=invalid",
       );
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
@@ -76,7 +76,7 @@ describe("/api/v1/jobs", () => {
   });
   describe("POST 正常系", () => {
     it("POST データを挿入できる", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs", {
+      const request = new Request("http://localhost:8787/api/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +130,7 @@ describe("/api/v1/jobs", () => {
       });
     });
     it("with duplicate jobNumber insertion failed.", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs", {
+      const request = new Request("http://localhost:8787/api/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +144,7 @@ describe("/api/v1/jobs", () => {
       expect(response.status).toBe(409);
     });
     it("with invalid API key should return 401", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs", {
+      const request = new Request("http://localhost:8787/api/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -158,7 +158,7 @@ describe("/api/v1/jobs", () => {
       expect(response.status).toBe(401);
     });
     it("with valid API key but invalid body should return 400", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs", {
+      const request = new Request("http://localhost:8787/api/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,10 +174,10 @@ describe("/api/v1/jobs", () => {
   });
 });
 
-describe("/api/v1/jobs/continue", () => {
+describe("/api/jobs/continue", () => {
   describe("GET 異常系", () => {
     it("without nextToken should fail", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs/continue");
+      const request = new Request("http://localhost:8787/api/jobs/continue");
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);
@@ -186,7 +186,7 @@ describe("/api/v1/jobs/continue", () => {
   });
 });
 
-describe("/api/v1/jobs/:jobNumber", () => {
+describe("/api/jobs/:jobNumber", () => {
   describe("GET 正常系", () => {
     const jobNumber = "24455-10912";
     beforeAll(async () => {
@@ -216,7 +216,7 @@ describe("/api/v1/jobs/:jobNumber", () => {
     });
     it("jobNumberでデータを取得できる", async () => {
       const request = new Request(
-        `http://localhost:8787/api/v1/jobs/${jobNumber}`,
+        `http://localhost:8787/api/jobs/${jobNumber}`,
         {
           method: "GET",
         },
@@ -229,7 +229,7 @@ describe("/api/v1/jobs/:jobNumber", () => {
   });
   describe("GET 異常系", () => {
     it("with too short format should fail", async () => {
-      const request = new Request("http://localhost:8787/api/v1/jobs/123-1");
+      const request = new Request("http://localhost:8787/api/jobs/123-1");
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);

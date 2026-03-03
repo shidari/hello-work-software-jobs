@@ -11,15 +11,15 @@ import {
   resolver,
 } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import { createJobStoreDBClientAdapter } from "../../../../adapters";
+import { createJobStoreDBClientAdapter } from "../../../adapters";
 import {
   createFetchJobError,
   createFetchJobListError,
   createInsertJobDuplicationError,
   createInsertJobError,
   createJobsCountError,
-} from "../../../../adapters/error";
-import { PAGE_SIZE } from "../../../../constant";
+} from "../../../adapters/error";
+import { PAGE_SIZE } from "../../../constant";
 // continueが予約後っぽいので
 import continueRoute, { type DecodedNextToken } from "./continue";
 
