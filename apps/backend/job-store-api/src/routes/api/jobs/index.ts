@@ -1,5 +1,5 @@
+import type { DB } from "@sho/db";
 import { Job, JobNumber } from "@sho/models";
-import { drizzle } from "drizzle-orm/d1";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
@@ -10,6 +10,8 @@ import {
   validator as effectValidator,
   resolver,
 } from "hono-openapi";
+import { Kysely } from "kysely";
+import { D1Dialect } from "kysely-d1";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import { createJobStoreDBClientAdapter } from "../../../adapters";
 import {
@@ -342,7 +344,9 @@ const app = new Hono<{ Bindings: Env }>()
         ? decodeURIComponent(encodedJobDescriptionExclude)
         : undefined;
 
-      const db = drizzle(c.env.DB);
+      const db = new Kysely<DB>({
+        dialect: new D1Dialect({ database: c.env.DB }),
+      });
       const dbClient = createJobStoreDBClientAdapter(db);
 
       const result = safeTry(async function* () {
@@ -495,7 +499,9 @@ const app = new Hono<{ Bindings: Env }>()
       console.log("in job insert route");
       // throw new Error("test error");
       const body = c.req.valid("json");
-      const db = drizzle(c.env.DB);
+      const db = new Kysely<DB>({
+        dialect: new D1Dialect({ database: c.env.DB }),
+      });
       const dbClient = createJobStoreDBClientAdapter(db);
       const result = await safeTry(async function* () {
         const duplicateResult = yield* await ResultAsync.fromSafePromise(
@@ -554,7 +560,9 @@ const app = new Hono<{ Bindings: Env }>()
     effectValidator("param", Schema.standardSchemaV1(jobFetchParamSchema)),
     (c) => {
       const { jobNumber } = c.req.valid("param");
-      const db = drizzle(c.env.DB);
+      const db = new Kysely<DB>({
+        dialect: new D1Dialect({ database: c.env.DB }),
+      });
       const dbClient = createJobStoreDBClientAdapter(db);
       const result = safeTry(async function* () {
         const jobResult = yield* await ResultAsync.fromSafePromise(

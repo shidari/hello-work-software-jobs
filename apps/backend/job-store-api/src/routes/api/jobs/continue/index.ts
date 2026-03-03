@@ -1,5 +1,5 @@
+import type { DB } from "@sho/db";
 import { Job } from "@sho/models";
-import { drizzle } from "drizzle-orm/d1";
 import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
@@ -10,6 +10,8 @@ import {
   validator as effectValidator,
   resolver,
 } from "hono-openapi";
+import { Kysely } from "kysely";
+import { D1Dialect } from "kysely-d1";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
 import type { FetchJobsPageCommand } from "../../../../adapters";
 import { createJobStoreDBClientAdapter } from "../../../../adapters";
@@ -158,7 +160,9 @@ const app = new Hono<{ Bindings: Env }>().get(
   effectValidator("query", Schema.standardSchemaV1(jobListContinueQuerySchema)),
   (c) => {
     const { nextToken } = c.req.valid("query");
-    const db = drizzle(c.env.DB);
+    const db = new Kysely<DB>({
+      dialect: new D1Dialect({ database: c.env.DB }),
+    });
     const dbClient = createJobStoreDBClientAdapter(db);
 
     const result = safeTry(async function* () {

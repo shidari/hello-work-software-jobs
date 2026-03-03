@@ -1,1 +1,1 @@
-export { jobs } from "./schema";
+export type { DB } from "./generated/types";
