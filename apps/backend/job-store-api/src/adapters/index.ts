@@ -1,8 +1,7 @@
-import { jobs } from "@sho/db";
+import type { DB } from "@sho/db";
 import type { Job as DomainJobType } from "@sho/models";
-import { and, asc, desc, eq, gt, like, lt, not } from "drizzle-orm";
-import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { Schema } from "effect";
+import type { Kysely } from "kysely";
 import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
 import { PAGE_SIZE } from "../constant";
@@ -186,12 +185,10 @@ export type JobStoreDBClient = {
 
 // --- 実装 ---
 
-type DrizzleD1Client = DrizzleD1Database<Record<string, never>> & {
-  $client: D1Database;
-};
+type KyselyD1Client = Kysely<DB>;
 
 async function handleInsertJob(
-  drizzle: DrizzleD1Client,
+  db: KyselyD1Client,
   cmd: InsertJobCommand,
 ): Promise<CommandOutput<InsertJobCommand>> {
   const now = new Date();
@@ -202,7 +199,7 @@ async function handleInsertJob(
     status: "active" as const,
   };
   const result = await ResultAsync.fromPromise(
-    drizzle.insert(jobs).values(insertingValues).run(),
+    db.insertInto("jobs").values(insertingValues).execute(),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   );
   if (result.isErr()) {
@@ -217,15 +214,16 @@ async function handleInsertJob(
 }
 
 async function handleFindJobByNumber(
-  drizzle: DrizzleD1Client,
+  db: KyselyD1Client,
   cmd: FindJobByNumberCommand,
 ): Promise<CommandOutput<FindJobByNumberCommand>> {
   try {
-    const data = await drizzle
-      .select()
-      .from(jobs)
-      .where(eq(jobs.jobNumber, cmd.jobNumber))
-      .limit(1);
+    const data = await db
+      .selectFrom("jobs")
+      .selectAll()
+      .where("jobNumber", "=", cmd.jobNumber)
+      .limit(1)
+      .execute();
     const decodeDbRow = Schema.decodeUnknownSync(DbJobRowSchema);
     return {
       success: true,
@@ -242,76 +240,117 @@ async function handleFindJobByNumber(
 }
 
 async function handleFetchJobsPage(
-  drizzle: DrizzleD1Client,
+  db: KyselyD1Client,
   cmd: FetchJobsPageCommand,
 ): Promise<CommandOutput<FetchJobsPageCommand>> {
   try {
     const { page, filter } = cmd.options;
-
     const offset = (page - 1) * PAGE_SIZE;
-
-    const filterConditions = [
-      ...(filter.companyName
-        ? [like(jobs.companyName, `%${filter.companyName}%`)]
-        : []),
-      ...(filter.employeeCountGt
-        ? [gt(jobs.employeeCount, filter.employeeCountGt)]
-        : []),
-      ...(filter.employeeCountLt
-        ? [lt(jobs.employeeCount, filter.employeeCountLt)]
-        : []),
-      ...(filter.jobDescription
-        ? [like(jobs.jobDescription, `%${filter.jobDescription}%`)]
-        : []),
-      ...(filter.jobDescriptionExclude
-        ? [not(like(jobs.jobDescription, `%${filter.jobDescriptionExclude}%`))]
-        : []),
-      ...(filter.onlyNotExpired
-        ? [gt(jobs.expiryDate, new Date().toISOString())]
-        : []),
-      ...(filter.addedSince
-        ? (() => {
-            const result = DateTime.fromISO(filter.addedSince, {
-              zone: "Asia/Tokyo",
-            })
-              .startOf("day")
-              .toUTC()
-              .toISO();
-            return result ? [gt(jobs.createdAt, result)] : [];
-          })()
-        : []),
-      ...(filter.addedUntil
-        ? (() => {
-            const result = DateTime.fromISO(filter.addedUntil, {
-              zone: "Asia/Tokyo",
-            })
-              .endOf("day")
-              .toUTC()
-              .toISO();
-            return result ? [lt(jobs.createdAt, result)] : [];
-          })()
-        : []),
-    ];
 
     const order =
       filter.orderByReceiveDate === undefined ||
       filter.orderByReceiveDate === "asc"
-        ? asc(jobs.receivedDate)
-        : desc(jobs.receivedDate);
-    const query = drizzle.select().from(jobs).orderBy(order);
+        ? ("asc" as const)
+        : ("desc" as const);
 
-    const jobList =
-      filterConditions.length > 0
-        ? await query
-            .where(and(...filterConditions))
-            .limit(PAGE_SIZE)
-            .offset(offset)
-        : await query.limit(PAGE_SIZE).offset(offset);
+    let query = db
+      .selectFrom("jobs")
+      .selectAll()
+      .orderBy("receivedDate", order);
 
-    const totalCount = await drizzle.$count(
-      jobs,
-      filterConditions.length > 0 ? and(...filterConditions) : undefined,
-    );
+    query = query
+      .$if(!!filter.companyName, (qb) =>
+        qb.where("companyName", "like", `%${filter.companyName}%`),
+      )
+      .$if(filter.employeeCountGt !== undefined, (qb) =>
+        qb.where("employeeCount", ">", filter.employeeCountGt!),
+      )
+      .$if(filter.employeeCountLt !== undefined, (qb) =>
+        qb.where("employeeCount", "<", filter.employeeCountLt!),
+      )
+      .$if(!!filter.jobDescription, (qb) =>
+        qb.where("jobDescription", "like", `%${filter.jobDescription}%`),
+      )
+      .$if(!!filter.jobDescriptionExclude, (qb) =>
+        qb.where(
+          "jobDescription",
+          "not like",
+          `%${filter.jobDescriptionExclude}%`,
+        ),
+      )
+      .$if(!!filter.onlyNotExpired, (qb) =>
+        qb.where("expiryDate", ">", new Date().toISOString()),
+      )
+      .$if(!!filter.addedSince, (qb) => {
+        const result = DateTime.fromISO(filter.addedSince!, {
+          zone: "Asia/Tokyo",
+        })
+          .startOf("day")
+          .toUTC()
+          .toISO();
+        return result ? qb.where("createdAt", ">", result) : qb;
+      })
+      .$if(!!filter.addedUntil, (qb) => {
+        const result = DateTime.fromISO(filter.addedUntil!, {
+          zone: "Asia/Tokyo",
+        })
+          .endOf("day")
+          .toUTC()
+          .toISO();
+        return result ? qb.where("createdAt", "<", result) : qb;
+      });
+
+    const jobList = await query.limit(PAGE_SIZE).offset(offset).execute();
+
+    // count クエリも同じフィルタを適用
+    let countQuery = db
+      .selectFrom("jobs")
+      .select((eb) => eb.fn.countAll<number>().as("count"));
+
+    countQuery = countQuery
+      .$if(!!filter.companyName, (qb) =>
+        qb.where("companyName", "like", `%${filter.companyName}%`),
+      )
+      .$if(filter.employeeCountGt !== undefined, (qb) =>
+        qb.where("employeeCount", ">", filter.employeeCountGt!),
+      )
+      .$if(filter.employeeCountLt !== undefined, (qb) =>
+        qb.where("employeeCount", "<", filter.employeeCountLt!),
+      )
+      .$if(!!filter.jobDescription, (qb) =>
+        qb.where("jobDescription", "like", `%${filter.jobDescription}%`),
+      )
+      .$if(!!filter.jobDescriptionExclude, (qb) =>
+        qb.where(
+          "jobDescription",
+          "not like",
+          `%${filter.jobDescriptionExclude}%`,
+        ),
+      )
+      .$if(!!filter.onlyNotExpired, (qb) =>
+        qb.where("expiryDate", ">", new Date().toISOString()),
+      )
+      .$if(!!filter.addedSince, (qb) => {
+        const result = DateTime.fromISO(filter.addedSince!, {
+          zone: "Asia/Tokyo",
+        })
+          .startOf("day")
+          .toUTC()
+          .toISO();
+        return result ? qb.where("createdAt", ">", result) : qb;
+      })
+      .$if(!!filter.addedUntil, (qb) => {
+        const result = DateTime.fromISO(filter.addedUntil!, {
+          zone: "Asia/Tokyo",
+        })
+          .endOf("day")
+          .toUTC()
+          .toISO();
+        return result ? qb.where("createdAt", "<", result) : qb;
+      });
+
+    const countResult = await countQuery.executeTakeFirstOrThrow();
+    const totalCount = countResult.count;
 
     const decodeDbRow = Schema.decodeUnknownSync(DbJobRowSchema);
     return {
@@ -334,15 +373,16 @@ async function handleFetchJobsPage(
 }
 
 async function handleCheckJobExists(
-  drizzle: DrizzleD1Client,
+  db: KyselyD1Client,
   cmd: CheckJobExistsCommand,
 ): Promise<CommandOutput<CheckJobExistsCommand>> {
   try {
-    const rows = await drizzle
-      .select()
-      .from(jobs)
-      .where(eq(jobs.jobNumber, cmd.jobNumber))
-      .limit(1);
+    const rows = await db
+      .selectFrom("jobs")
+      .selectAll()
+      .where("jobNumber", "=", cmd.jobNumber)
+      .limit(1)
+      .execute();
     return { success: true, exists: rows.length > 0 };
   } catch (error) {
     return {
@@ -355,31 +395,38 @@ async function handleCheckJobExists(
 }
 
 async function handleCountJobs(
-  drizzle: DrizzleD1Client,
+  db: KyselyD1Client,
   cmd: CountJobsCommand,
 ): Promise<CommandOutput<CountJobsCommand>> {
-  const conditions = [];
   const { filter } = cmd.options;
-  if (filter.companyName) {
-    conditions.push(like(jobs.companyName, `%${filter.companyName}%`));
-  }
-  if (filter.employeeCountGt !== undefined) {
-    conditions.push(gt(jobs.employeeCount, filter.employeeCountGt));
-  }
-  if (filter.employeeCountLt !== undefined) {
-    conditions.push(lt(jobs.employeeCount, filter.employeeCountLt));
-  }
-  if (filter.jobDescription !== undefined) {
-    conditions.push(like(jobs.jobDescription, `%${filter.jobDescription}%`));
-  }
-  if (filter.jobDescriptionExclude !== undefined) {
-    conditions.push(
-      not(like(jobs.jobDescription, `%${filter.jobDescriptionExclude}%`)),
-    );
-  }
   try {
-    const resCount = await drizzle.$count(jobs, and(...conditions));
-    return { success: true, count: resCount };
+    let query = db
+      .selectFrom("jobs")
+      .select((eb) => eb.fn.countAll<number>().as("count"));
+
+    query = query
+      .$if(!!filter.companyName, (qb) =>
+        qb.where("companyName", "like", `%${filter.companyName}%`),
+      )
+      .$if(filter.employeeCountGt !== undefined, (qb) =>
+        qb.where("employeeCount", ">", filter.employeeCountGt!),
+      )
+      .$if(filter.employeeCountLt !== undefined, (qb) =>
+        qb.where("employeeCount", "<", filter.employeeCountLt!),
+      )
+      .$if(!!filter.jobDescription, (qb) =>
+        qb.where("jobDescription", "like", `%${filter.jobDescription}%`),
+      )
+      .$if(!!filter.jobDescriptionExclude, (qb) =>
+        qb.where(
+          "jobDescription",
+          "not like",
+          `%${filter.jobDescriptionExclude}%`,
+        ),
+      );
+
+    const result = await query.executeTakeFirstOrThrow();
+    return { success: true, count: result.count };
   } catch (error) {
     return {
       success: false,
@@ -392,7 +439,7 @@ async function handleCountJobs(
 
 // --- アダプタ本体 ---
 export const createJobStoreDBClientAdapter = (
-  drizzleClient: DrizzleD1Client,
+  db: KyselyD1Client,
 ): JobStoreDBClient => ({
   execute: async <T extends JobStoreCommand>(
     cmd: T,
@@ -400,27 +447,27 @@ export const createJobStoreDBClientAdapter = (
     switch (cmd.type) {
       case "InsertJob":
         return (await handleInsertJob(
-          drizzleClient,
+          db,
           cmd as InsertJobCommand,
         )) as CommandOutput<T>;
       case "FindJobByNumber":
         return (await handleFindJobByNumber(
-          drizzleClient,
+          db,
           cmd as FindJobByNumberCommand,
         )) as CommandOutput<T>;
       case "FetchJobsPage":
         return (await handleFetchJobsPage(
-          drizzleClient,
+          db,
           cmd as FetchJobsPageCommand,
         )) as CommandOutput<T>;
       case "CheckJobExists":
         return (await handleCheckJobExists(
-          drizzleClient,
+          db,
           cmd as CheckJobExistsCommand,
         )) as CommandOutput<T>;
       case "CountJobs":
         return (await handleCountJobs(
-          drizzleClient,
+          db,
           cmd as CountJobsCommand,
         )) as CommandOutput<T>;
       default: {

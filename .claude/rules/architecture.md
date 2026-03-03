@@ -37,10 +37,13 @@ Job = {
 
 ## `packages/db`
 
-Drizzle ORM スキーマ。D1 (SQLite) 向け。
+Kysely 型定義 + マイグレーション。D1 (SQLite) 向け。
 
-DB はフラット構造（`wageMin`, `wageMax`, `workingStartTime`, `workingEndTime`）。
-ドメインモデルとの変換は `job-store-api/src/adapters/index.ts` で行う。
+- `schema.sql` が DDL の Source of Truth
+- `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
+- エクスポートは `DB` 型のみ（ランタイムコードなし）
+- DB はフラット構造（`wageMin`, `wageMax`, `workingStartTime`, `workingEndTime`）
+- ドメインモデルとの変換は `job-store-api/src/adapters/index.ts` で行う
 
 ---
 
