@@ -9,7 +9,7 @@ import { Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
-import { createJobStoreDBClientAdapter } from "../src/adapters";
+import { createJobStoreDBClientAdapter } from "../src/lib/adapters";
 
 const MOCK_ENV = {
   ...env,
