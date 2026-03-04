@@ -217,9 +217,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
-      vitest:
-        specifier: ~3.2.4
-        version: 3.2.4(@types/node@24.10.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/models:
     dependencies:
