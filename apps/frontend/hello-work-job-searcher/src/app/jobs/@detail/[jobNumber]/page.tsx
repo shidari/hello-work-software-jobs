@@ -11,10 +11,10 @@ export default async function Page({ params }: PageProps) {
   const res = await jobStoreClient.api.jobs[":jobNumber"].$get({
     param: { jobNumber },
   });
-  const data = await res.json();
-  if (!data) {
+  if (!res.ok) {
     return <div>求人情報が見つかりませんでした。</div>;
   }
+  const data = await res.json();
 
   return <JobDetail jobDetail={data} />;
 }
