@@ -1,61 +1,38 @@
 import { createD1DB } from "@sho/db";
 import { Job, JobNumber } from "@sho/models";
-import { Either, Schema } from "effect";
+import { Data, Effect, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import {
   describeRoute,
   validator as effectValidator,
   resolver,
 } from "hono-openapi";
-import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import { createJobStoreDBClientAdapter } from "../../../lib/adapters";
+import { PAGE_SIZE } from "../../../constant";
+import { JobStoreDB } from "../../../cqrs";
 import {
-  createFetchJobError,
-  createFetchJobListError,
-  createInsertJobDuplicationError,
-  createInsertJobError,
-} from "../../../lib/adapters/error";
-import { PAGE_SIZE } from "../../../lib/constant";
+  InsertJobCommand,
+  InsertJobDuplicationError,
+} from "../../../cqrs/commands";
+import {
+  FetchJobError,
+  FetchJobsPageQuery,
+  FindJobByNumberQuery,
+} from "../../../cqrs/queries";
 
-// --- エラー型 ---
+// --- ローカルエラー型 ---
 
-type EmployeeCountGtValidationError = {
-  readonly _tag: "EmployeeCountGtValidationError";
+class EmployeeCountGtValidationError extends Data.TaggedError(
+  "EmployeeCountGtValidationError",
+)<{
   readonly message: string;
-};
+}> {}
 
-const createEmployeeCountGtValidationError = (
-  message: string,
-): EmployeeCountGtValidationError => ({
-  _tag: "EmployeeCountGtValidationError",
-  message,
-});
-
-type EmployeeCountLtValidationError = {
-  readonly _tag: "EmployeeCountLtValidationError";
+class EmployeeCountLtValidationError extends Data.TaggedError(
+  "EmployeeCountLtValidationError",
+)<{
   readonly message: string;
-};
-
-const createEmployeeCountLtValidationError = (
-  message: string,
-): EmployeeCountLtValidationError => ({
-  _tag: "EmployeeCountLtValidationError",
-  message,
-});
-
-type UnexpectedError = {
-  readonly _tag: "UnexpectedError";
-  readonly message: string;
-  readonly errorType: "server";
-};
-
-const createUnexpectedError = (message: string): UnexpectedError => ({
-  _tag: "UnexpectedError",
-  message,
-  errorType: "server",
-});
+}> {}
 
 // --- スキーマ ---
 
@@ -313,7 +290,6 @@ const app = new Hono<{ Bindings: Env }>()
       const jobDescription = encodedJobDescription
         ? decodeURIComponent(encodedJobDescription)
         : undefined;
-
       const jobDescriptionExclude = encodedJobDescriptionExclude
         ? decodeURIComponent(encodedJobDescriptionExclude)
         : undefined;
@@ -324,89 +300,84 @@ const app = new Hono<{ Bindings: Env }>()
         : Math.max(1, Math.floor(parsedPage));
 
       const db = createD1DB(c.env.DB);
-      const dbClient = createJobStoreDBClientAdapter(db);
 
-      const result = safeTry(async function* () {
-        const employeeCountGt = yield* (() => {
-          if (rawEmployeeCountGt === undefined) return ok(undefined);
-          const result = Schema.decodeUnknownEither(employeeCountSchema)(
-            Number(rawEmployeeCountGt),
-          );
-          if (Either.isLeft(result))
-            return err(
-              createEmployeeCountGtValidationError(
-                `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${TreeFormatter.formatErrorSync(result.left)}`,
-              ),
-            );
-          return ok(result.right);
-        })();
-        const employeeCountLt = yield* (() => {
-          if (rawEmployeeCountLt === undefined) return ok(undefined);
-          const result = Schema.decodeUnknownEither(employeeCountSchema)(
-            Number(rawEmployeeCountLt),
-          );
-          if (Either.isLeft(result))
-            return err(
-              createEmployeeCountLtValidationError(
-                `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${TreeFormatter.formatErrorSync(result.left)}`,
-              ),
-            );
-          return ok(result.right);
-        })();
-        const jobListResult = yield* await ResultAsync.fromSafePromise(
-          dbClient.execute({
-            type: "FetchJobsPage",
-            options: {
-              page,
-              filter: {
-                companyName,
-                employeeCountGt,
-                employeeCountLt,
-                jobDescription,
-                jobDescriptionExclude,
-                onlyNotExpired,
-                orderByReceiveDate,
-                addedSince,
-                addedUntil,
-              },
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const employeeCountGt =
+            rawEmployeeCountGt !== undefined
+              ? yield* Schema.decode(employeeCountSchema)(
+                  Number(rawEmployeeCountGt),
+                ).pipe(
+                  Effect.mapError(
+                    (parseError) =>
+                      new EmployeeCountGtValidationError({
+                        message: `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${TreeFormatter.formatErrorSync(parseError)}`,
+                      }),
+                  ),
+                )
+              : undefined;
+          const employeeCountLt =
+            rawEmployeeCountLt !== undefined
+              ? yield* Schema.decode(employeeCountSchema)(
+                  Number(rawEmployeeCountLt),
+                ).pipe(
+                  Effect.mapError(
+                    (parseError) =>
+                      new EmployeeCountLtValidationError({
+                        message: `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${TreeFormatter.formatErrorSync(parseError)}`,
+                      }),
+                  ),
+                )
+              : undefined;
+
+          const query = yield* FetchJobsPageQuery;
+          const { jobs, meta } = yield* query.run({
+            page,
+            filter: {
+              companyName,
+              employeeCountGt,
+              employeeCountLt,
+              jobDescription,
+              jobDescriptionExclude,
+              onlyNotExpired,
+              orderByReceiveDate,
+              addedSince,
+              addedUntil,
+            },
+          });
+          const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);
+          return {
+            jobs,
+            meta: { totalCount: meta.totalCount, page, totalPages },
+          };
+        }).pipe(
+          Effect.provide(FetchJobsPageQuery.Default),
+          Effect.provideService(JobStoreDB, db),
+          Effect.match({
+            onSuccess: (data) => c.json(data),
+            onFailure: (error) => {
+              console.error(error);
+              switch (error._tag) {
+                case "EmployeeCountGtValidationError":
+                case "EmployeeCountLtValidationError":
+                  return c.json(
+                    {
+                      message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
+                    },
+                    400,
+                  );
+                default:
+                  return c.json({ message: "internal server error" }, 500);
+              }
             },
           }),
-        );
-        if (!jobListResult.success) {
-          return err(createFetchJobListError("Failed to fetch job list"));
-        }
-        const { jobs, meta } = jobListResult;
-
-        const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);
-
-        return okAsync({
-          jobs,
-          meta: { totalCount: meta.totalCount, page, totalPages },
-        });
-      });
-      return result.match(
-        ({ jobs, meta }) => c.json({ jobs, meta }),
-        (error) => {
-          console.error(error);
-          switch (error._tag) {
-            case "EmployeeCountGtValidationError":
-            case "EmployeeCountLtValidationError":
-              throw new HTTPException(400, {
-                message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
-              });
-            default:
-              throw new HTTPException(500, {
-                message: "internal server error",
-              });
-          }
-        },
+        ),
       );
     },
   )
   .post(
     "/",
     jobInsertRoute,
-    // APIキー認証ミドルウェア
     (c, next) => {
       const apiKey = c.req.header("x-api-key");
       const validApiKey = c.env.API_KEY;
@@ -431,57 +402,42 @@ const app = new Hono<{ Bindings: Env }>()
     ),
     async (c) => {
       console.log("in job insert route");
-      // throw new Error("test error");
       const body = c.req.valid("json");
       const db = createD1DB(c.env.DB);
-      const dbClient = createJobStoreDBClientAdapter(db);
-      const result = await safeTry(async function* () {
-        const duplicateResult = yield* await ResultAsync.fromSafePromise(
-          dbClient.execute({
-            type: "FindJobByNumber",
-            jobNumber: body.jobNumber,
-          }),
-        );
-        if (!duplicateResult.success) {
-          return err(createUnexpectedError("Failed to check duplication"));
-        }
-        console.log(JSON.stringify(duplicateResult, null, 2));
-        if (duplicateResult.job !== null) {
-          return err(
-            createInsertJobDuplicationError(
-              "Job with the same jobNumber already exists",
-            ),
-          );
-        }
-        const jobResult = yield* ResultAsync.fromSafePromise(
-          dbClient.execute({
-            type: "InsertJob",
-            payload: body,
-          }),
-        );
-        if (!jobResult.success) {
-          return err(createInsertJobError("Failed to insert job"));
-        }
-        const job = jobResult;
-        return okAsync(job);
-      });
-      return result.match(
-        (job) => c.json(job),
-        (error) => {
-          console.error(error);
-          switch (error._tag) {
-            case "InsertJobError":
-              return c.json({ message: error.message }, 500);
-            case "InsertJobDuplicationError":
-              return c.json({ message: error.message }, 409);
-            case "UnexpectedError":
-              return c.json({ message: error.message }, 500);
-            default: {
-              const _exhaustiveCheck: never = error;
-              return c.json({ message: "Unknown error occurred" }, 500);
-            }
+
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const find = yield* FindJobByNumberQuery;
+          const existing = yield* find.run(body.jobNumber);
+          if (existing !== null) {
+            return yield* new InsertJobDuplicationError({
+              message: "Job with the same jobNumber already exists",
+              errorType: "client",
+            });
           }
-        },
+          const insert = yield* InsertJobCommand;
+          return yield* insert.run(body);
+        }).pipe(
+          Effect.provide(InsertJobCommand.Default),
+          Effect.provide(FindJobByNumberQuery.Default),
+          Effect.provideService(JobStoreDB, db),
+          Effect.match({
+            onSuccess: (job) => c.json(job),
+            onFailure: (error) => {
+              console.error(error);
+              switch (error._tag) {
+                case "InsertJobDuplicationError":
+                  return c.json({ message: error.message }, 409);
+                case "InsertJobError":
+                  return c.json({ message: error.message }, 500);
+                case "FetchJobError":
+                  return c.json({ message: error.message }, 500);
+                default:
+                  return c.json({ message: "internal server error" }, 500);
+              }
+            },
+          }),
+        ),
       );
     },
   )
@@ -492,34 +448,34 @@ const app = new Hono<{ Bindings: Env }>()
     (c) => {
       const { jobNumber } = c.req.valid("param");
       const db = createD1DB(c.env.DB);
-      const dbClient = createJobStoreDBClientAdapter(db);
-      const result = safeTry(async function* () {
-        const jobResult = yield* await ResultAsync.fromSafePromise(
-          dbClient.execute({
-            type: "FindJobByNumber",
-            jobNumber,
-          }),
-        );
-        if (!jobResult.success) {
-          return err(createFetchJobError("Failed to fetch job"));
-        }
-        const job = jobResult.job;
-        return okAsync(job);
-      });
-      return result.match(
-        (job) => c.json(job),
-        (error) => {
-          console.error(error);
 
-          switch (error._tag) {
-            case "FetchJobError":
-              throw new HTTPException(404, { message: "Job not found" });
-            default:
-              throw new HTTPException(500, {
-                message: "internal server error",
-              });
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const query = yield* FindJobByNumberQuery;
+          const job = yield* query.run(jobNumber);
+          if (job === null) {
+            return yield* new FetchJobError({
+              message: "Job not found",
+              errorType: "client",
+            });
           }
-        },
+          return job;
+        }).pipe(
+          Effect.provide(FindJobByNumberQuery.Default),
+          Effect.provideService(JobStoreDB, db),
+          Effect.match({
+            onSuccess: (job) => c.json(job),
+            onFailure: (error) => {
+              console.error(error);
+              switch (error._tag) {
+                case "FetchJobError":
+                  return c.json({ message: "Job not found" }, 404);
+                default:
+                  return c.json({ message: "internal server error" }, 500);
+              }
+            },
+          }),
+        ),
       );
     },
   );

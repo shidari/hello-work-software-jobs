@@ -115,9 +115,6 @@ importers:
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
-      neverthrow:
-        specifier: ^8.2.0
-        version: 8.2.0
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.12.0
@@ -192,6 +189,9 @@ importers:
 
   packages/db:
     dependencies:
+      effect:
+        specifier: ^3.16.5
+        version: 3.19.19
       kysely:
         specifier: ^0.27.6
         version: 0.27.6

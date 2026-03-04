@@ -5,11 +5,11 @@ import {
 } from "cloudflare:test";
 import { createD1DB } from "@sho/db";
 import { Job as insertJobRequestBodySchema } from "@sho/models";
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
-// Import your worker so you can unit test it
 import worker from "../src";
-import { createJobStoreDBClientAdapter } from "../src/lib/adapters";
+import { JobStoreDB } from "../src/cqrs";
+import { InsertJobCommand } from "../src/cqrs/commands";
 
 const MOCK_ENV = {
   ...env,
@@ -52,7 +52,6 @@ describe("/api/jobs", () => {
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);
-      // バリデーションエラー時は400
       expect(response.status).toBe(400);
     });
     it("with negative employeeCountGt should fail", async () => {
@@ -123,11 +122,15 @@ describe("/api/jobs", () => {
     });
     beforeAll(async () => {
       const db = createD1DB(env.DB);
-      const dbClient = createJobStoreDBClientAdapter(db);
-      await dbClient.execute({
-        type: "InsertJob",
-        payload: insertingJob,
-      });
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const cmd = yield* InsertJobCommand;
+          return yield* cmd.run(insertingJob);
+        }).pipe(
+          Effect.provide(InsertJobCommand.Default),
+          Effect.provideService(JobStoreDB, db),
+        ),
+      );
     });
     it("with duplicate jobNumber insertion failed.", async () => {
       const request = new Request("http://localhost:8787/api/jobs", {
@@ -218,7 +221,6 @@ describe("/api/jobs/:jobNumber", () => {
     const jobNumber = "24455-10912";
     beforeAll(async () => {
       const db = createD1DB(env.DB);
-      const dbClient = createJobStoreDBClientAdapter(db);
       const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)(
         {
           jobNumber,
@@ -236,10 +238,15 @@ describe("/api/jobs/:jobNumber", () => {
           qualifications: " コンピュータサイエンスの学位、3年以上の経験",
         },
       );
-      await dbClient.execute({
-        type: "InsertJob",
-        payload: insertingJob,
-      });
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const cmd = yield* InsertJobCommand;
+          return yield* cmd.run(insertingJob);
+        }).pipe(
+          Effect.provide(InsertJobCommand.Default),
+          Effect.provideService(JobStoreDB, db),
+        ),
+      );
     });
     it("jobNumberでデータを取得できる", async () => {
       const request = new Request(
