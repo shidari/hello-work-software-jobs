@@ -16,7 +16,7 @@
     "effect": "^3.16.5"
   },
   "devDependencies": {
-    "tsdown": "^0.15.3",
+    "tsdown": "^0.20.0",
     "typescript": "^5.8.3"
   }
 }
