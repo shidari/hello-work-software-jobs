@@ -7,9 +7,9 @@ EventBridge (平日)
   → 求人番号抽出 Lambda (Playwright)
   → SQS キュー
   → 求人詳細 ETL Lambda (Playwright + linkedom)
-  → POST /api/jobs
+  → POST /jobs
   → Job Store API (Cloudflare Workers + D1)
-  → GET /api/jobs
+  → GET /jobs
   → フロントエンド (Next.js 16)
 ```
 
@@ -54,9 +54,9 @@ Cloudflare Workers + Hono。
 
 | メソッド | パス | 認証 | 概要 |
 |---------|------|------|------|
-| GET | `/api/jobs` | - | 一覧取得（フィルター + ページネーション） |
-| POST | `/api/jobs` | x-api-key | 登録 |
-| GET | `/api/jobs/:jobNumber` | - | 個別取得 |
+| GET | `/jobs` | - | 一覧取得（フィルター + ページネーション） |
+| POST | `/jobs` | x-api-key | 登録 |
+| GET | `/jobs/:jobNumber` | - | 個別取得 |
 
 ### 設計
 

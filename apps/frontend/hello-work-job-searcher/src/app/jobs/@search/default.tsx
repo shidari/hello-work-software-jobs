@@ -8,7 +8,7 @@ import { jobStoreClient } from "@/lib/backend-client";
 import styles from "./page.module.css";
 
 export default async function Page() {
-  const res = await jobStoreClient.api.jobs.$get({
+  const res = await jobStoreClient.jobs.$get({
     query: { orderByReceiveDate: "desc" },
   });
   if (!res.ok) {
