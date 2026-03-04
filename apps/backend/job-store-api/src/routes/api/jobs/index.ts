@@ -4,7 +4,6 @@ import { Either, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { sign } from "hono/jwt";
 import {
   describeRoute,
   validator as effectValidator,
@@ -17,11 +16,8 @@ import {
   createFetchJobListError,
   createInsertJobDuplicationError,
   createInsertJobError,
-  createJobsCountError,
 } from "../../../adapters/error";
 import { PAGE_SIZE } from "../../../constant";
-// continueが予約後っぽいので
-import continueRoute, { type DecodedNextToken } from "./continue";
 
 // --- エラー型 ---
 
@@ -49,26 +45,6 @@ const createEmployeeCountLtValidationError = (
   message,
 });
 
-type EnvError = {
-  readonly _tag: "EnvError";
-  readonly message: string;
-};
-
-const createEnvError = (message: string): EnvError => ({
-  _tag: "EnvError",
-  message,
-});
-
-type JWTSignatureError = {
-  readonly _tag: "JWTSignatureError";
-  readonly message: string;
-};
-
-const createJWTSignatureError = (message: string): JWTSignatureError => ({
-  _tag: "JWTSignatureError",
-  message,
-});
-
 type UnexpectedError = {
   readonly _tag: "UnexpectedError";
   readonly message: string;
@@ -83,14 +59,14 @@ const createUnexpectedError = (message: string): UnexpectedError => ({
 
 // --- スキーマ ---
 
-const envSchema = Schema.Struct({
-  JWT_SECRET: Schema.String,
+const jobFetchParamSchema = Schema.Struct({
+  jobNumber: JobNumber,
 });
 
-const searchFilterSchema = Schema.Struct({
+const jobListQuerySchema = Schema.Struct({
   companyName: Schema.optional(Schema.String),
-  employeeCountLt: Schema.optional(Schema.Number.pipe(Schema.int())),
-  employeeCountGt: Schema.optional(Schema.Number.pipe(Schema.int())),
+  employeeCountLt: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
   jobDescription: Schema.optional(Schema.String),
   jobDescriptionExclude: Schema.optional(Schema.String),
   onlyNotExpired: Schema.optional(Schema.Boolean),
@@ -103,16 +79,7 @@ const searchFilterSchema = Schema.Struct({
   addedUntil: Schema.optional(
     Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
   ),
-});
-
-const jobFetchParamSchema = Schema.Struct({
-  jobNumber: JobNumber,
-});
-
-const jobListQuerySchema = Schema.Struct({
-  ...searchFilterSchema.fields,
-  employeeCountLt: Schema.optional(Schema.String),
-  employeeCountGt: Schema.optional(Schema.String),
+  page: Schema.optional(Schema.String),
 });
 
 const insertJobRequestBodySchema = Job;
@@ -149,9 +116,10 @@ const errorResponses = {
 
 const jobListSuccessResponseSchema = Schema.Struct({
   jobs: Schema.Array(Job),
-  nextToken: Schema.optional(Schema.String),
   meta: Schema.Struct({
     totalCount: Schema.Number,
+    page: Schema.Number,
+    totalPages: Schema.Number,
   }),
 });
 
@@ -188,6 +156,13 @@ const jobListRoute = describeRoute({
       in: "query",
       description: "追加された日時（ISO形式）",
       example: "2025-10-17",
+      required: false,
+    },
+    {
+      name: "page",
+      in: "query",
+      description: "ページ番号（1始まり）",
+      example: "1",
       required: false,
     },
   ],
@@ -330,6 +305,7 @@ const app = new Hono<{ Bindings: Env }>()
         orderByReceiveDate,
         addedSince,
         addedUntil,
+        page: rawPage,
       } = c.req.valid("query");
       const companyName = encodedCompanyName
         ? decodeURIComponent(encodedCompanyName)
@@ -341,6 +317,11 @@ const app = new Hono<{ Bindings: Env }>()
       const jobDescriptionExclude = encodedJobDescriptionExclude
         ? decodeURIComponent(encodedJobDescriptionExclude)
         : undefined;
+
+      const parsedPage = rawPage ? Number(rawPage) : 1;
+      const page = Number.isNaN(parsedPage)
+        ? 1
+        : Math.max(1, Math.floor(parsedPage));
 
       const db = createD1DB(c.env.DB);
       const dbClient = createJobStoreDBClientAdapter(db);
@@ -372,21 +353,11 @@ const app = new Hono<{ Bindings: Env }>()
             );
           return ok(result.right);
         })();
-        const { JWT_SECRET: jwtSecret } = yield* (() => {
-          const result = Schema.decodeUnknownEither(envSchema)(c.env);
-          if (Either.isLeft(result))
-            return err(
-              createEnvError(
-                `Environment variable validation failed. received: ${JSON.stringify(c.env)}\n${TreeFormatter.formatErrorSync(result.left)}`,
-              ),
-            );
-          return ok(result.right);
-        })();
         const jobListResult = yield* await ResultAsync.fromSafePromise(
           dbClient.execute({
             type: "FetchJobsPage",
             options: {
-              page: 1,
+              page,
               filter: {
                 companyName,
                 employeeCountGt,
@@ -406,51 +377,18 @@ const app = new Hono<{ Bindings: Env }>()
         }
         const { jobs, meta } = jobListResult;
 
-        const restJobCountResult = yield* ResultAsync.fromSafePromise(
-          dbClient.execute({
-            type: "CountJobs",
-            options: {
-              page: 1,
-              filter: meta.filter,
-            },
-          }),
-        );
-        if (!restJobCountResult.success) {
-          return err(createJobsCountError("Failed to count jobs"));
-        }
+        const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);
 
-        const { count: restJobCount } = restJobCountResult;
-
-        const nextToken = yield* (() => {
-          if (restJobCount <= PAGE_SIZE) return okAsync(undefined);
-          const validPayload: DecodedNextToken = {
-            exp: Math.floor(Date.now() / 1000) + 60 * 15, // 15分後の有効期限
-            iss: "sho-hello-work-job-searcher",
-            iat: Math.floor(Date.now() / 1000),
-            nbf: Math.floor(Date.now() / 1000),
-            page: 1,
-            filter: meta.filter,
-          };
-          const signResult = ResultAsync.fromPromise(
-            sign(validPayload, jwtSecret),
-            (error) =>
-              createJWTSignatureError(`JWT signing failed.\n${String(error)}`),
-          );
-          return signResult;
-        })();
-
-        return okAsync({ jobs, nextToken, meta });
+        return okAsync({
+          jobs,
+          meta: { totalCount: meta.totalCount, page, totalPages },
+        });
       });
       return result.match(
-        ({ jobs, nextToken, meta }) => c.json({ jobs, nextToken, meta }),
+        ({ jobs, meta }) => c.json({ jobs, meta }),
         (error) => {
           console.error(error);
           switch (error._tag) {
-            case "JWTSignatureError":
-            case "EnvError":
-              throw new HTTPException(500, {
-                message: "internal server error",
-              });
             case "EmployeeCountGtValidationError":
             case "EmployeeCountLtValidationError":
               throw new HTTPException(400, {
@@ -547,7 +485,6 @@ const app = new Hono<{ Bindings: Env }>()
       );
     },
   )
-  .route("/continue", continueRoute)
   .get(
     "/:jobNumber",
     jobFetchRoute,

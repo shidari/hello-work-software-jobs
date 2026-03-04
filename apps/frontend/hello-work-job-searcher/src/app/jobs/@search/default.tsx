@@ -36,7 +36,8 @@ export default async function Page() {
         <HydratedJobOverviewList
           initialDataFromServer={{
             jobs: data.jobs,
-            nextToken: data.nextToken,
+            page: data.meta.page,
+            totalPages: data.meta.totalPages,
             totalCount: data.meta.totalCount,
           }}
         />
