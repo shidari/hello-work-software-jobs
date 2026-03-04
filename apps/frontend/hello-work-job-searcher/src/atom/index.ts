@@ -19,7 +19,7 @@ export type SearchFilter = {
   addedUntil?: string;
 };
 
-const client = hc<AppType>("/");
+const client = hc<AppType>("/api");
 
 // --- favorites ---
 
@@ -103,7 +103,7 @@ export const initializeJobListWriterAtom = atom<
   Promise<void>
 >(null, async (_, set, searchFilter) => {
   set(searchFilterAtom, searchFilter);
-  const res = await client.api.jobs.$get({
+  const res = await client.jobs.$get({
     query: {
       ...searchFilter,
       onlyNotExpired: searchFilter.onlyNotExpired ? "true" : undefined,
@@ -134,7 +134,7 @@ export const continuousJobOverviewListWriterAtom = atom<
   const currentState = get(jobListAtom);
   const searchFilter = get(searchFilterAtom);
   const nextPage = currentState.page + 1;
-  const res = await client.api.jobs.$get({
+  const res = await client.jobs.$get({
     query: {
       ...searchFilter,
       onlyNotExpired: searchFilter.onlyNotExpired ? "true" : undefined,
@@ -161,7 +161,7 @@ export const jobAtom = atom<Unbrand<Job> | undefined>();
 export const jobWriterAtom = atom<null, [string], Promise<void>>(
   null,
   async (_get, set, jobNumber) => {
-    const res = await client.api.jobs[":jobNumber"].$get({
+    const res = await client.jobs[":jobNumber"].$get({
       param: { jobNumber },
     });
     if (!res.ok) {
