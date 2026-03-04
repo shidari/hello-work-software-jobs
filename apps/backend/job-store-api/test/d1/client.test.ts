@@ -1,9 +1,7 @@
 import { env } from "cloudflare:test";
-import type { DB } from "@sho/db";
+import { createD1DB } from "@sho/db";
 import { Job as insertJobRequestBodySchema } from "@sho/models";
 import { Schema } from "effect";
-import { Kysely } from "kysely";
-import { D1Dialect } from "kysely-d1";
 import { expect, it } from "vitest";
 import { createJobStoreDBClientAdapter } from "../../src/adapters";
 
@@ -14,7 +12,7 @@ declare module "cloudflare:test" {
 }
 
 it("求人データを挿入できる", async () => {
-  const db = new Kysely<DB>({ dialect: new D1Dialect({ database: env.DB }) });
+  const db = createD1DB(env.DB);
   const dbClient = createJobStoreDBClientAdapter(db);
   const jobNumber = "64455-10912";
   const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
