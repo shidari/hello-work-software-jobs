@@ -17,7 +17,7 @@ hello-work-software-jobs/
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
-│   ├── db/                          # Kysely + D1 client factory & types
+│   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
 │   └── models/                      # Shared TypeScript types & schemas
 ```
 

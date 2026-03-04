@@ -1,41 +1,8 @@
-import type { createD1DB } from "@sho/db";
-import type { Job as DomainJobType } from "@sho/models";
+import { type createD1DB, DbJobRowSchema } from "@sho/db";
 import { Context, Schema } from "effect";
 
-// --- DB 注入 ---
+// --- DB行 ↔ ドメインモデル 変換スキーマ ---
 
-export type KyselyD1Client = ReturnType<typeof createD1DB>;
-
-export class JobStoreDB extends Context.Tag("JobStoreDB")<
-  JobStoreDB,
-  KyselyD1Client
->() {}
-
-// --- スキーマ ---
-
-// DB行（フラット構造）
-const DbJobRowSchema = Schema.Struct({
-  jobNumber: Schema.String,
-  companyName: Schema.NullOr(Schema.String),
-  receivedDate: Schema.String,
-  expiryDate: Schema.String,
-  homePage: Schema.NullOr(Schema.String),
-  occupation: Schema.String,
-  employmentType: Schema.String,
-  wageMin: Schema.NullOr(Schema.Number),
-  wageMax: Schema.NullOr(Schema.Number),
-  workingStartTime: Schema.NullOr(Schema.String),
-  workingEndTime: Schema.NullOr(Schema.String),
-  employeeCount: Schema.NullOr(Schema.Number),
-  workPlace: Schema.NullOr(Schema.String),
-  jobDescription: Schema.NullOr(Schema.String),
-  qualifications: Schema.NullOr(Schema.String),
-  status: Schema.String,
-  createdAt: Schema.String,
-  updatedAt: Schema.String,
-});
-
-// ドメインモデル（ネスト構造）
 const JobSchema = Schema.Struct({
   jobNumber: Schema.String,
   companyName: Schema.NullOr(Schema.String),
@@ -62,7 +29,6 @@ const JobSchema = Schema.Struct({
   updatedAt: Schema.String,
 });
 
-// DB行 ↔ ドメインモデル の変換
 export const DbJobSchema = Schema.transform(DbJobRowSchema, JobSchema, {
   strict: true,
   decode: (row) => ({
@@ -111,9 +77,18 @@ export const DbJobSchema = Schema.transform(DbJobRowSchema, JobSchema, {
   }),
 });
 
-// --- 型定義 ---
-
 export type Job = typeof DbJobSchema.Type;
+
+// --- DB 注入 ---
+
+export type KyselyD1Client = ReturnType<typeof createD1DB>;
+
+export class JobStoreDB extends Context.Tag("JobStoreDB")<
+  JobStoreDB,
+  KyselyD1Client
+>() {}
+
+// --- 型定義 ---
 
 export type SearchFilter = {
   companyName?: string;
@@ -126,5 +101,3 @@ export type SearchFilter = {
   addedSince?: string;
   addedUntil?: string;
 };
-
-export type InsertJobRequestBody = DomainJobType;

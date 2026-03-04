@@ -1,5 +1,6 @@
+import type { Job } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
-import { DbJobSchema, type InsertJobRequestBody, JobStoreDB } from ".";
+import { DbJobSchema, JobStoreDB } from ".";
 
 // --- エラー ---
 
@@ -23,7 +24,7 @@ export class InsertJobCommand extends Effect.Service<InsertJobCommand>()(
     effect: Effect.gen(function* () {
       const db = yield* JobStoreDB;
       return {
-        run: (payload: InsertJobRequestBody) =>
+        run: (payload: Job) =>
           Effect.tryPromise({
             try: async () => {
               const now = new Date().toISOString();
