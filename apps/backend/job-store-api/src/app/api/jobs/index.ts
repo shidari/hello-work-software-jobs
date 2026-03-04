@@ -10,14 +10,14 @@ import {
   resolver,
 } from "hono-openapi";
 import { err, ok, okAsync, ResultAsync, safeTry } from "neverthrow";
-import { createJobStoreDBClientAdapter } from "../../../adapters";
+import { createJobStoreDBClientAdapter } from "../../../lib/adapters";
 import {
   createFetchJobError,
   createFetchJobListError,
   createInsertJobDuplicationError,
   createInsertJobError,
-} from "../../../adapters/error";
-import { PAGE_SIZE } from "../../../constant";
+} from "../../../lib/adapters/error";
+import { PAGE_SIZE } from "../../../lib/constant";
 
 // --- エラー型 ---
 

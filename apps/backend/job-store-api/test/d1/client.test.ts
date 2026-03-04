@@ -3,7 +3,7 @@ import { createD1DB } from "@sho/db";
 import { Job as insertJobRequestBodySchema } from "@sho/models";
 import { Schema } from "effect";
 import { expect, it } from "vitest";
-import { createJobStoreDBClientAdapter } from "../../src/adapters";
+import { createJobStoreDBClientAdapter } from "../../src/lib/adapters";
 
 declare module "cloudflare:test" {
   interface ProvidedEnv {

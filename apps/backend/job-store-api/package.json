@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"exports": {
-		"./types": "./src/types.ts"
+		"./types": "./src/app/types.ts"
 	},
 	"scripts": {
 		"deploy": "pnpm build && pnpm exec wrangler deploy",
