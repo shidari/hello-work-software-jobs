@@ -24,7 +24,7 @@ function NewBadge() {
   return <span className={cardStyles.newBadge}>新着</span>;
 }
 export function JobOverviewList() {
-  const { items, nextToken } = useAtomValue(JobOverviewListAtom);
+  const { items, page, totalPages } = useAtomValue(JobOverviewListAtom);
   const wrappedItems = useJobsWithFavorite(items);
   const fetchNextPage = useSetAtom(continuousJobOverviewListWriterAtom);
   const parentRef = React.useRef<HTMLDivElement>(null);
@@ -106,10 +106,10 @@ export function JobOverviewList() {
                   <button
                     type="button"
                     className={styles.moreJobsButton}
-                    disabled={!nextToken || isPending}
+                    disabled={page >= totalPages || isPending}
                     onClick={() => {
                       startTransition(async () => {
-                        nextToken && (await fetchNextPage(nextToken));
+                        await fetchNextPage();
                       });
                     }}
                   >
@@ -130,7 +130,8 @@ export function HydratedJobOverviewList({
 }: {
   initialDataFromServer: {
     jobs: JobList;
-    nextToken: string | undefined;
+    page: number;
+    totalPages: number;
     totalCount: number;
   };
 }) {

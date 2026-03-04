@@ -49,13 +49,17 @@ export const removeFavoriteJobAtom = atom<null, [string], void>(
 
 // --- jobs ---
 
+export const searchFilterAtom = atom<SearchFilter>({});
+
 export const jobListAtom = atom<{
   jobs: JobList;
-  nextToken: string | undefined;
+  page: number;
+  totalPages: number;
   totalCount: number;
 }>({
   jobs: [],
-  nextToken: undefined,
+  page: 1,
+  totalPages: 0,
   totalCount: 0,
 });
 
@@ -74,9 +78,10 @@ export const JobtotalCountAtom = atom(
 
 export const JobOverviewListAtom = atom<{
   items: JobOverview[];
-  nextToken: string | undefined;
+  page: number;
+  totalPages: number;
 }>((get) => {
-  const { jobs, nextToken } = get(jobListAtom);
+  const { jobs, page, totalPages } = get(jobListAtom);
   return {
     items: jobs.map((job) => ({
       jobNumber: job.jobNumber,
@@ -87,7 +92,8 @@ export const JobOverviewListAtom = atom<{
       employeeCount: job.employeeCount,
       receivedDate: job.receivedDate,
     })),
-    nextToken,
+    page,
+    totalPages,
   };
 });
 
@@ -96,6 +102,7 @@ export const initializeJobListWriterAtom = atom<
   [SearchFilter],
   Promise<void>
 >(null, async (_, set, searchFilter) => {
+  set(searchFilterAtom, searchFilter);
   const res = await client.api.jobs.$get({
     query: {
       ...searchFilter,
@@ -108,24 +115,31 @@ export const initializeJobListWriterAtom = atom<
   const data = await res.json();
   const {
     jobs,
-    nextToken,
-    meta: { totalCount },
+    meta: { totalCount, page, totalPages },
   } = data;
   set(jobListAtom, {
     jobs,
-    nextToken,
+    page,
+    totalPages,
     totalCount,
   });
 });
 
-// 書き込み専用atom: getContinuedJobsを叩いてリストを更新
+// 書き込み専用atom: 次ページを取得してリストに追加
 export const continuousJobOverviewListWriterAtom = atom<
   null,
-  [string],
+  [],
   Promise<void>
->(null, async (_get, set, nextToken) => {
-  const res = await client.api.jobs.continue.$get({
-    query: { nextToken },
+>(null, async (get, set) => {
+  const currentState = get(jobListAtom);
+  const searchFilter = get(searchFilterAtom);
+  const nextPage = currentState.page + 1;
+  const res = await client.api.jobs.$get({
+    query: {
+      ...searchFilter,
+      onlyNotExpired: searchFilter.onlyNotExpired ? "true" : undefined,
+      page: String(nextPage),
+    },
   });
   if (!res.ok) {
     throw new Error(`API error: ${res.status}`);
@@ -133,13 +147,13 @@ export const continuousJobOverviewListWriterAtom = atom<
   const data = await res.json();
   const {
     jobs,
-    nextToken: newNextToken,
-    meta: { totalCount },
+    meta: { totalCount, page, totalPages },
   } = data;
   set(jobListAtom, (prev) => ({
     jobs: [...prev.jobs, ...jobs],
-    nextToken: newNextToken,
-    totalCount: totalCount,
+    page,
+    totalPages,
+    totalCount,
   }));
 });
 

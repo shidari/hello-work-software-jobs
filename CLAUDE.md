@@ -63,10 +63,9 @@ devbox run sqs:purge   # Purge SQS queue
 
 Base: `/api`
 
-- `GET /jobs` - List jobs (with filters)
+- `GET /jobs` - List jobs (with filters, page-number pagination)
 - `GET /jobs/{jobNumber}` - Get job details
 - `POST /jobs` - Create job
-- `GET /jobs/continue` - Pagination continuation
 
 ## Database
 
@@ -106,7 +105,7 @@ Base: `/api`
 ## Environment Variables
 
 - Frontend: `JOB_STORE_ENDPOINT`
-- API: `JWT_SECRET`, Cloudflare credentials
+- API: Cloudflare credentials
 - Crawler: AWS credentials, queue URLs
 
 ## CI/CD

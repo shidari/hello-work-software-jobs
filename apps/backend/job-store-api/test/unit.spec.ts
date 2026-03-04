@@ -174,14 +174,41 @@ describe("/api/jobs", () => {
   });
 });
 
-describe("/api/jobs/continue", () => {
-  describe("GET 異常系", () => {
-    it("without nextToken should fail", async () => {
-      const request = new Request("http://localhost:8787/api/jobs/continue");
+describe("/api/jobs?page=N", () => {
+  describe("GET 正常系", () => {
+    it("page=1でデータを取得できる", async () => {
+      const request = new Request("http://localhost:8787/api/jobs?page=1");
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.meta).toBeDefined();
+      expect(data.meta.page).toBe(1);
+      expect(data.meta.totalPages).toBeGreaterThanOrEqual(0);
+      expect(data.meta.totalCount).toBeGreaterThanOrEqual(0);
+    });
+  });
+  describe("GET 異常系", () => {
+    it("page=0は1として扱われる", async () => {
+      const request = new Request("http://localhost:8787/api/jobs?page=0");
+      const ctx = createExecutionContext();
+      const response = await worker.fetch(request, MOCK_ENV, ctx);
+      await waitOnExecutionContext(ctx);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.meta.page).toBe(1);
+    });
+    it("page=notanumberは1として扱われる", async () => {
+      const request = new Request(
+        "http://localhost:8787/api/jobs?page=notanumber",
+      );
+      const ctx = createExecutionContext();
+      const response = await worker.fetch(request, MOCK_ENV, ctx);
+      await waitOnExecutionContext(ctx);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.meta.page).toBe(1);
     });
   });
 });
