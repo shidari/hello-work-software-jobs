@@ -3,11 +3,9 @@ import {
   env,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import type { DB } from "@sho/db";
+import { createD1DB } from "@sho/db";
 import { Job as insertJobRequestBodySchema } from "@sho/models";
 import { Schema } from "effect";
-import { Kysely } from "kysely";
-import { D1Dialect } from "kysely-d1";
 import { beforeAll, describe, expect, it } from "vitest";
 // Import your worker so you can unit test it
 import worker from "../src";
@@ -124,9 +122,7 @@ describe("/api/jobs", () => {
       qualifications: " コンピュータサイエンスの学位、3年以上の経験",
     });
     beforeAll(async () => {
-      const db = new Kysely<DB>({
-        dialect: new D1Dialect({ database: env.DB }),
-      });
+      const db = createD1DB(env.DB);
       const dbClient = createJobStoreDBClientAdapter(db);
       await dbClient.execute({
         type: "InsertJob",
@@ -194,9 +190,7 @@ describe("/api/jobs/:jobNumber", () => {
   describe("GET 正常系", () => {
     const jobNumber = "24455-10912";
     beforeAll(async () => {
-      const db = new Kysely<DB>({
-        dialect: new D1Dialect({ database: env.DB }),
-      });
+      const db = createD1DB(env.DB);
       const dbClient = createJobStoreDBClientAdapter(db);
       const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)(
         {

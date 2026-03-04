@@ -1,7 +1,6 @@
-import type { DB } from "@sho/db";
+import type { createD1DB } from "@sho/db";
 import type { Job as DomainJobType } from "@sho/models";
 import { Schema } from "effect";
-import type { Kysely } from "kysely";
 import { DateTime } from "luxon";
 import { ResultAsync } from "neverthrow";
 import { PAGE_SIZE } from "../constant";
@@ -185,7 +184,7 @@ export type JobStoreDBClient = {
 
 // --- 実装 ---
 
-type KyselyD1Client = Kysely<DB>;
+type KyselyD1Client = ReturnType<typeof createD1DB>;
 
 async function handleInsertJob(
   db: KyselyD1Client,
