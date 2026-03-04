@@ -43,7 +43,7 @@ Kysely 型定義。D1 (SQLite) 向け。
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
 - エクスポートは `DB` 型のみ（ランタイムコードなし）
 - DB はフラット構造（`wageMin`, `wageMax`, `workingStartTime`, `workingEndTime`）
-- ドメインモデルとの変換は `job-store-api/src/adapters/index.ts` で行う
+- ドメインモデルとの変換は `job-store-api/src/cqrs/index.ts` の `DbJobSchema`（`Schema.transform`）で行う
 
 ---
 
@@ -58,12 +58,12 @@ Cloudflare Workers + Hono。
 | GET | `/api/jobs` | - | 一覧取得（フィルター + ページネーション） |
 | POST | `/api/jobs` | x-api-key | 登録 |
 | GET | `/api/jobs/:jobNumber` | - | 個別取得 |
-| GET | `/api/jobs/continue` | - | ページネーション継続 |
 
 ### 設計
 
-- **アダプタ**: コマンドパターン。`InsertJob`, `FindJobByNumber`, `FetchJobsPage`, `CheckJobExists`, `CountJobs` の 5 コマンド。型に応じた結果型が推論される。
-- **ページネーション**: JWT にページ番号とフィルターを埋め込み（15分有効、HS256）。セッション不要。
+- **CQRS**: 各操作が独立した `Effect.Service`。コマンド（`InsertJobCommand`）とクエリ（`FindJobByNumberQuery`, `FetchJobsPageQuery`）に分離。
+- **エラー**: `Data.TaggedError` で型安全なエラーハンドリング。コントローラーで `Effect.match` により分岐。
+- **ページネーション**: ページ番号方式。
 
 ---
 

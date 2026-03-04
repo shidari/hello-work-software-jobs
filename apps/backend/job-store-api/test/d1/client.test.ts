@@ -1,9 +1,11 @@
 import { env } from "cloudflare:test";
 import { createD1DB } from "@sho/db";
 import { Job as insertJobRequestBodySchema } from "@sho/models";
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { expect, it } from "vitest";
-import { createJobStoreDBClientAdapter } from "../../src/lib/adapters";
+import { JobStoreDB } from "../../src/cqrs";
+import { InsertJobCommand } from "../../src/cqrs/commands";
+import { FindJobByNumberQuery } from "../../src/cqrs/queries";
 
 declare module "cloudflare:test" {
   interface ProvidedEnv {
@@ -13,7 +15,6 @@ declare module "cloudflare:test" {
 
 it("求人データを挿入できる", async () => {
   const db = createD1DB(env.DB);
-  const dbClient = createJobStoreDBClientAdapter(db);
   const jobNumber = "64455-10912";
   const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
     jobNumber,
@@ -30,18 +31,27 @@ it("求人データを挿入できる", async () => {
     homePage: "https://techcorp.example.com",
     qualifications: " コンピュータサイエンスの学位、3年以上の経験",
   });
-  const result = await dbClient.execute({
-    type: "InsertJob",
-    payload: insertingJob,
-  });
-  expect(result.success).toBe(true);
-  const result2 = await dbClient.execute({
-    type: "FindJobByNumber",
-    jobNumber,
-  });
-  expect(result2.success).toBe(true);
-  if (result2.success) {
-    const returnedJobNumber = result2.job?.jobNumber;
-    expect(returnedJobNumber).toEqual(jobNumber);
-  }
+
+  const result = await Effect.runPromise(
+    Effect.gen(function* () {
+      const cmd = yield* InsertJobCommand;
+      return yield* cmd.run(insertingJob);
+    }).pipe(
+      Effect.provide(InsertJobCommand.Default),
+      Effect.provideService(JobStoreDB, db),
+    ),
+  );
+  expect(result.jobNumber).toEqual(jobNumber);
+
+  const result2 = await Effect.runPromise(
+    Effect.gen(function* () {
+      const query = yield* FindJobByNumberQuery;
+      return yield* query.run(jobNumber);
+    }).pipe(
+      Effect.provide(FindJobByNumberQuery.Default),
+      Effect.provideService(JobStoreDB, db),
+    ),
+  );
+  expect(result2).not.toBeNull();
+  expect(result2?.jobNumber).toEqual(jobNumber);
 });

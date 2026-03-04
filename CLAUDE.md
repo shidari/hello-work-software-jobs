@@ -26,9 +26,9 @@ hello-work-software-jobs/
 | Layer | Technologies |
 |-------|--------------|
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
-| API | Cloudflare Workers, Hono, Kysely, D1 (SQLite) |
+| API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
 | Crawler | AWS Lambda, CDK, Playwright, Effect |
-| Shared | TypeScript 5.8, Effect Schema, neverthrow |
+| Shared | TypeScript 5.8, Effect Schema |
 | Quality | Biome, Playwright/Vitest |
 
 ## Common Commands
@@ -81,7 +81,7 @@ Base: `/api`
   - Message in Japanese
   - Include scope (e.g., `feat(api): 求人検索フィルターを追加`)
   - Include body explaining the change
-- **Error Handling**: Use neverthrow Result types (no throwing exceptions)
+- **Error Handling**: Use Effect (`Data.TaggedError`, `Effect.match`) for error handling (no throwing exceptions)
 - **Validation**: Runtime validation with Effect Schema (`import { Schema } from "effect"`)
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと

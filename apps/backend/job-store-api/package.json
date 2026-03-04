@@ -36,7 +36,6 @@
 		"hono": "^4.11.9",
 		"hono-openapi": "^1.0.8",
 		"kysely": "^0.27.6",
-		"luxon": "^3.7.2",
-		"neverthrow": "^8.2.0"
+		"luxon": "^3.7.2"
 	}
 }
