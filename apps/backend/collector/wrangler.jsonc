@@ -3,6 +3,11 @@
   "main": "functions/index.ts",
   "compatibility_date": "2025-01-01",
   "compatibility_flags": ["nodejs_compat"],
+  // dev mode 用の regular playwright をバンドルから除外
+  "build": {
+    "define": {},
+    "external": ["playwright"]
+  },
   "browser": {
     "binding": "MYBROWSER"
   },
