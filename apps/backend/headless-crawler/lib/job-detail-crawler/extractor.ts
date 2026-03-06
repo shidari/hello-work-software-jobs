@@ -1,6 +1,23 @@
-import { JobNumber } from "@sho/models";
+import { Schema } from "effect";
 
-export { JobNumber };
+// ── RawJob スキーマ: DOM から抽出した生テキスト ──
+
+export const RawJob = Schema.Struct({
+  jobNumber: Schema.optional(Schema.String),
+  companyName: Schema.optional(Schema.String),
+  receivedDate: Schema.optional(Schema.String),
+  expiryDate: Schema.optional(Schema.String),
+  homePage: Schema.NullOr(Schema.String),
+  occupation: Schema.optional(Schema.String),
+  employmentType: Schema.optional(Schema.String),
+  wage: Schema.optional(Schema.String),
+  workingHours: Schema.optional(Schema.String),
+  employeeCount: Schema.optional(Schema.String),
+  workPlace: Schema.optional(Schema.String),
+  jobDescription: Schema.optional(Schema.String),
+  qualifications: Schema.optional(Schema.String),
+});
+export type RawJob = typeof RawJob.Type;
 
 // ── DOM セレクタマップ ──
 
@@ -20,9 +37,9 @@ const jobDetailSelectors = {
   qualifications: "#ID_hynaMenkyoSkku",
 } as const;
 
-// ── DOM → Raw 抽出 ──
+// ── DOM → RawJob 抽出 ──
 
-export function extractRawFieldsFromDocument(document: Document) {
+export function extractRawFieldsFromDocument(document: Document): RawJob {
   const text = (selector: string) =>
     document.querySelector(selector)?.textContent?.trim() || undefined;
 

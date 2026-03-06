@@ -1,6 +1,6 @@
+import type { JobNumber } from "@sho/models";
 import type { SQSRecord } from "aws-lambda";
 import { Effect, Either, Schema } from "effect";
-import type { JobNumber } from "../../lib/schemas";
 import { formatParseError } from "../../lib/util";
 import {
   FromExtractJobNumberJobQueueEventBodySchemaValidationError,

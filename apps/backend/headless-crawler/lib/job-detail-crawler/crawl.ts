@@ -1,15 +1,12 @@
+import type { JobNumber } from "@sho/models";
 import { format } from "date-fns";
 import { Config, Data, Effect, Either, Schema } from "effect";
 import { parseHTML } from "linkedom";
 import type { Page } from "playwright";
 import { FirstJobListPageNavigator } from "../page";
-import {
-  extractRawFieldsFromDocument,
-  type JobNumber,
-  RawJobToDomainJob,
-  type TransformedJob,
-} from "../schemas";
 import { formatParseError } from "../util";
+import { extractRawFieldsFromDocument } from "./extractor";
+import { RawJobToDomainJob, type TransformedJob } from "./transformer";
 
 // ============================================================
 // Errors
