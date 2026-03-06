@@ -9,3 +9,13 @@
   margin-bottom: 1rem;
   border-bottom: 2px solid var(--color-accent);
 }
+
+@media (max-width: 768px) {
+  .layout-job-detail {
+    padding: 1rem;
+  }
+
+  .layout-job-detail h2 {
+    font-size: 1.1rem;
+  }
+}

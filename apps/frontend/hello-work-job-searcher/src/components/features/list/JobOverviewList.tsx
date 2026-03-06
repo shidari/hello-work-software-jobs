@@ -79,6 +79,7 @@ export function JobOverviewList({ onJobSelect }: { onJobSelect?: () => void }) {
                 width: "100%",
                 height: `${virtualItem.size}px`,
                 transform: `translateY(${virtualItem.start}px)`,
+                padding: "0.25rem 0.5rem",
               }}
             >
               <Card>
