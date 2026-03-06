@@ -12,7 +12,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 hello-work-software-jobs/
 ├── apps/
 │   ├── backend/
-│   │   ├── job-store-api/          # Cloudflare Workers REST API (Hono + D1)
+│   │   ├── api/          # Cloudflare Workers REST API (Hono + D1)
 │   │   └── headless-crawler/       # AWS Lambda crawler (Playwright)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
@@ -44,7 +44,7 @@ pnpm format            # Format
 pnpm dev               # Dev server (port 9002)
 pnpm build             # Build
 
-# API (apps/backend/job-store-api)
+# API (apps/backend/api)
 pnpm dev               # Wrangler dev server (port 8787)
 pnpm deploy            # Deploy to Cloudflare
 pnpm test              # Vitest tests

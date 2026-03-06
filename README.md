@@ -9,7 +9,7 @@
 ```
 apps/
   ├── backend/
-  │   ├── job-store-api/            # Cloudflare Workers API (Hono + D1)
+  │   ├── api/                      # Cloudflare Workers API (Hono + D1)
   │   └── headless-crawler/         # AWS Lambda クローラー (Playwright)
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
@@ -34,7 +34,7 @@ pnpm install
 
 # 各パッケージの開発サーバー起動
 cd apps/frontend/hello-work-job-searcher && pnpm dev   # フロントエンド (port 9002)
-cd apps/backend/job-store-api && pnpm dev              # API (port 8787)
+cd apps/backend/api && pnpm dev                        # API (port 8787)
 
 # クローラー検証
 cd apps/backend/headless-crawler

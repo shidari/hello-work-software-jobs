@@ -42,11 +42,11 @@ Kysely 型定義 + DB行スキーマ。D1 (SQLite) 向け。
 - `schema.sql` が DDL の Source of Truth
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
 - `src/schema.ts` に `DbJobRowSchema`（フラットDB行スキーマ）を定義。型レベルチェックで Kysely 生成型との整合性を保証
-- ドメインモデルへの変換（`DbJobSchema`）は `job-store-api/src/cqrs/index.ts` で行う
+- ドメインモデルへの変換（`DbJobSchema`）は `api/src/cqrs/index.ts` で行う
 
 ---
 
-## `apps/backend/job-store-api`
+## `apps/backend/api`
 
 Cloudflare Workers + Hono。
 
