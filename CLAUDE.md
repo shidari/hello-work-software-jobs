@@ -105,4 +105,4 @@ pnpm deploy            # Wrangler deploy to Cloudflare
 ## CI/CD
 
 - `pr-checks.yml` - Build, type check, test, lint on PRs
-- `deploy.yml` - Wrangler deploy collector on push to main
+- Collector deploy: Cloudflare Workers Builds（GitHub連携で自動デプロイ）
