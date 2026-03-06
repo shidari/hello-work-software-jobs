@@ -2,6 +2,7 @@
   "name": "collector",
   "version": "0.1.0",
   "scripts": {
+    "build": "tsdown",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "verify:job-number-crawler": "ts-node lib/scripts/verify-job-number-crawler.ts",
@@ -14,6 +15,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250214.0",
     "@types/node": "24.10.13",
+    "tsdown": "^0.20.0",
     "playwright": "^1.58.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
