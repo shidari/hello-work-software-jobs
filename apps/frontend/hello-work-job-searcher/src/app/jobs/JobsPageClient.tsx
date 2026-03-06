@@ -6,6 +6,7 @@ import { JobOverviewList } from "@/components/features/list/JobOverviewList";
 import { JobsSearchfilter } from "@/components/features/list/JobSearchFilter";
 import { JobtotalCount } from "@/components/features/list/JobTotalCount";
 import { Collapsible } from "@/components/ui/Collapsible";
+import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/Item";
 import styles from "./JobsPageClient.module.css";
 
 const MOBILE_BREAKPOINT = 768;
@@ -48,15 +49,27 @@ export function JobsPageClient({
       )}
       <Activity mode={open ? "visible" : "hidden"}>
         <aside className={`${styles.sidebar} ${isMobile ? styles.mobile : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <h1 className={styles.title}>求人情報一覧</h1>
-            <div className={styles.totalCount}>
-              <JobtotalCount initialDataFromServer={initialTotalCount} />
-            </div>
-            <Collapsible title="絞り込み">
-              <JobsSearchfilter />
-            </Collapsible>
-          </div>
+          <ItemGroup className={styles.sidebarHeader}>
+            <Item>
+              <ItemContent>
+                <ItemTitle>
+                  <h1 className={styles.title}>求人情報一覧</h1>
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+            <Item>
+              <ItemContent>
+                <JobtotalCount initialDataFromServer={initialTotalCount} />
+              </ItemContent>
+            </Item>
+            <Item>
+              <ItemContent>
+                <Collapsible title="絞り込み">
+                  <JobsSearchfilter />
+                </Collapsible>
+              </ItemContent>
+            </Item>
+          </ItemGroup>
           <div className={styles.sidebarContent}>
             <JobOverviewList onJobSelect={handleJobSelect} />
           </div>
