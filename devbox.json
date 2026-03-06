@@ -2,8 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
     "nodejs@22",
-    "awscli2@2.33.2",
-    "aws-vault@7.9.5",
     "pnpm@10.30.0",
     "gh@2.87.2",
     "pinact@3.8.0"
@@ -12,13 +10,6 @@
     "init_hook": [
       "echo 'devbox ready' > /dev/null"
     ],
-    "scripts": {
-      "logs:errors": "aws-vault exec crawler-debug -- ./scripts/crawler-logs.sh",
-      "invoke:crawler": "aws-vault exec cdk-deploy -- ./scripts/invoke-crawler.sh",
-      "logs:job-detail": "aws-vault exec crawler-debug -- ./scripts/job-detail-logs.sh \"$@\"",
-      "cost": "aws-vault exec crawler-debug -- ./scripts/cost-report.sh",
-      "sqs:status": "aws-vault exec crawler-debug -- ./scripts/sqs-status.sh",
-      "sqs:purge": "aws-vault exec crawler-debug -- ./scripts/sqs-purge.sh"
-    }
+    "scripts": {}
   }
 }
