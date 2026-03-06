@@ -13,9 +13,11 @@ export default defineConfig({
       name: "stub-playwright-core",
       resolveId(id) {
         if (id === "playwright-core") return id;
+        return undefined;
       },
       load(id) {
         if (id === "playwright-core") return "export default {};";
+        return undefined;
       },
     },
   ],
