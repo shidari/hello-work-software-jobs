@@ -8,7 +8,19 @@ import {
   WageRange,
   WorkingHours,
 } from "@sho/models";
-import { Schema } from "effect";
+import { Data, Effect, Either, Schema } from "effect";
+import { parseHTML } from "linkedom";
+import { formatParseError } from "../util";
+import { extractRawFieldsFromDocument } from "./extractor";
+
+// ── エラー ──
+
+export class JobDetailTransformError extends Data.TaggedError(
+  "JobDetailTransformError",
+)<{
+  readonly reason: string;
+  readonly rawFields: string;
+}> {}
 
 // ── フィールド単位の transform ──
 
@@ -89,7 +101,7 @@ const employeeCountTransform = Schema.transform(Schema.String, EmployeeCount, {
   },
 });
 
-// ── 集約: Raw → Domain ──
+// ── 集約: RawJob → Domain Job ──
 
 export const RawJobToDomainJob = Schema.Struct({
   jobNumber: JobNumber,
@@ -108,3 +120,36 @@ export const RawJobToDomainJob = Schema.Struct({
 });
 
 export type TransformedJob = typeof RawJobToDomainJob.Type;
+
+// ── Transformer サービス ──
+
+export class JobDetailTransformer extends Effect.Service<JobDetailTransformer>()(
+  "JobDetailTransformer",
+  {
+    effect: Effect.gen(function* () {
+      return {
+        transform: (rawHtml: string) =>
+          Effect.gen(function* () {
+            yield* Effect.logInfo("start transforming job detail...");
+            const { document } = parseHTML(rawHtml);
+
+            // Stage 1: DOM → RawJob
+            const rawFields = extractRawFieldsFromDocument(document);
+
+            // Stage 2: RawJob → Domain Job
+            const result =
+              Schema.decodeUnknownEither(RawJobToDomainJob)(rawFields);
+            if (Either.isLeft(result)) {
+              return yield* Effect.fail(
+                new JobDetailTransformError({
+                  reason: formatParseError(result.left),
+                  rawFields: JSON.stringify(rawFields, null, 2),
+                }),
+              );
+            }
+            return result.right;
+          }),
+      };
+    }),
+  },
+) {}

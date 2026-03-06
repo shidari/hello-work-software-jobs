@@ -9,7 +9,7 @@ import {
 import {
   JobDetailExtractor,
   JobDetailTransformer,
-} from "../job-detail-crawler/crawl";
+} from "../job-detail-crawler";
 import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 
 async function main() {
