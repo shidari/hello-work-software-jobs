@@ -13,7 +13,7 @@ hello-work-software-jobs/
 ├── apps/
 │   ├── backend/
 │   │   ├── api/          # Cloudflare Workers REST API (Hono + D1)
-│   │   └── headless-crawler/       # AWS Lambda crawler (Playwright)
+│   │   └── collector/              # AWS Lambda crawler (Playwright)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
@@ -49,7 +49,7 @@ pnpm dev               # Wrangler dev server (port 8787)
 pnpm deploy            # Deploy to Cloudflare
 pnpm test              # Vitest tests
 
-# Crawler (apps/backend/headless-crawler)
+# Crawler (apps/backend/collector)
 pnpm test              # Vitest tests (PBT)
 pnpm deploy            # AWS CDK deploy
 
