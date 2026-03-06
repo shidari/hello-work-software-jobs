@@ -1,4 +1,4 @@
-name: Deploy CDK
+name: Deploy Collector
 
 on:
   push:
@@ -6,11 +6,10 @@ on:
       - main
 
 permissions:
-  id-token: write # ← OIDCで必要
-  contents: read # ← checkoutに必要
+  contents: read
 
 jobs:
-  deploy:
+  deploy-collector:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -20,31 +19,15 @@ jobs:
         with:
           node-version: 24
 
-
-      - name: Check pnpm version
-        run: pnpm --version
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build models and scripts packages 
+      - name: Build shared packages
         run: |
-          pnpm -r --filter='!hello-work-job-searcher' --filter='!@sho/api' build
-      # 👇 OIDCによるAssumeRole
-      - name: Configure AWS CDK Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
-        with:
-          role-to-assume: ${{ secrets.CDK_DEPLOY_ROLE_ARN }}
-          role-session-name: github-actions-oidc
-          aws-region: ap-northeast-1
+          pnpm -r --filter='!hello-work-job-searcher' --filter='!@sho/api' --filter='!collector' build
 
-      - name: Deploy AWS CDK
+      - name: Deploy Collector to Cloudflare Workers
         working-directory: ./apps/backend/collector
         env:
-          JOB_STORE_ENDPOINT: ${{ secrets.JOB_STORE_ENDPOINT }}
-          MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
-          QUEUE_URL: ${{ secrets.QUEUE_URL }}
-          RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL: ${{ secrets.RAW_JOB_DETAIL_EXTRACTOR_QUEUE_URL }}
-          API_KEY: ${{ secrets.API_KEY }}
-          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
-        run: |
-          pnpm exec cdk deploy --all --require-approval never
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: pnpm exec wrangler deploy

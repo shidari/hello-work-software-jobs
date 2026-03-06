@@ -13,7 +13,7 @@ hello-work-software-jobs/
 ├── apps/
 │   ├── backend/
 │   │   ├── api/          # Cloudflare Workers REST API (Hono + D1)
-│   │   └── collector/              # AWS Lambda crawler (Playwright)
+│   │   └── collector/              # Cloudflare Workers crawler (Browser Rendering + Queues)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
@@ -27,7 +27,7 @@ hello-work-software-jobs/
 |-------|--------------|
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
-| Crawler | AWS Lambda, CDK, Playwright, Effect |
+| Crawler | Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
 | Quality | Biome, Playwright/Vitest |
 
@@ -50,13 +50,9 @@ pnpm deploy            # Deploy to Cloudflare
 pnpm test              # Vitest tests
 
 # Crawler (apps/backend/collector)
+pnpm dev               # Wrangler dev server
 pnpm test              # Vitest tests (PBT)
-pnpm deploy            # AWS CDK deploy
-
-# Ops (devbox scripts)
-devbox run cost        # AWS cost report
-devbox run sqs:status  # SQS queue status
-devbox run sqs:purge   # Purge SQS queue
+pnpm deploy            # Wrangler deploy to Cloudflare
 ```
 
 ## API Endpoints
@@ -104,9 +100,9 @@ devbox run sqs:purge   # Purge SQS queue
 
 - Frontend: `JOB_STORE_ENDPOINT`
 - API: Cloudflare credentials
-- Crawler: AWS credentials, queue URLs
+- Crawler: `CLOUDFLARE_API_TOKEN`, `JOB_STORE_ENDPOINT`, `API_KEY` (wrangler secrets)
 
 ## CI/CD
 
 - `pr-checks.yml` - Build, type check, test, lint on PRs
-- `deploy.yml` - AWS CDK deploy on push to main
+- `deploy.yml` - Wrangler deploy collector on push to main

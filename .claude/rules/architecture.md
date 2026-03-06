@@ -3,12 +3,12 @@
 ## データフロー
 
 ```
-EventBridge (平日)
-  → 求人番号抽出 Lambda (Playwright)
-  → SQS キュー
-  → 求人詳細 ETL Lambda (Playwright + linkedom)
+Cron Trigger (平日 01:00)
+  → 求人番号抽出 Worker (@cloudflare/playwright)
+  → Cloudflare Queue
+  → 求人詳細 ETL Worker (@cloudflare/playwright + linkedom)
   → POST /jobs
-  → Job Store API (Cloudflare Workers + D1)
+  → API (Cloudflare Workers + D1)
   → GET /jobs
   → フロントエンド (Next.js 16)
 ```
@@ -68,17 +68,18 @@ Cloudflare Workers + Hono。
 
 ## `apps/backend/collector`
 
-AWS Lambda + Effect サービスパターン。
+Cloudflare Workers + Browser Rendering + Queues + Effect サービスパターン。
 
 ### パイプライン
 
-1. **求人番号抽出** — EventBridge → Lambda (480s) → Playwright で検索ページ走査 → SQS 送信
-2. **求人詳細 ETL** — SQS → Lambda (30s) → Playwright で HTML 取得 → linkedom でパース → API に POST
+1. **求人番号抽出** — Cron Trigger → Worker → @cloudflare/playwright で検索ページ走査 → Queue 送信
+2. **求人詳細 ETL** — Queue → Worker → @cloudflare/playwright で HTML 取得 → linkedom でパース → API に POST
 
-### インフラ (CDK)
+### インフラ (wrangler.jsonc)
 
-- Lambda x2 + Playwright レイヤー
-- SQS キュー
+- Worker (scheduled + queue handler)
+- Browser Rendering binding
+- Cloudflare Queues (job-detail-queue + DLQ)
 
 ---
 

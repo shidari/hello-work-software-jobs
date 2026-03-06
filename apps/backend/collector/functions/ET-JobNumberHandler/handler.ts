@@ -1,41 +1,23 @@
-import { Config, Effect, Either, Exit, Logger, LogLevel, Schema } from "effect";
+import { ConfigProvider, Effect, Exit, Layer } from "effect";
 import { PlaywrightBrowserConfig } from "../../lib/browser";
 import { HelloWorkCrawler } from "../../lib/job-number-crawler/crawl";
-import { formatParseError } from "../../lib/util";
-import { sendMessageToQueue } from "../helpers/helper";
-import { EventSchemaValidationError } from "./error";
+import type { Env } from "../index";
 
-const eventSchema = Schema.partial(
-  Schema.Struct({
-    debugLog: Schema.Boolean,
-  }),
-);
-
-// Handler
-export const handler = async (event: unknown) => {
+export const handleScheduled = async (env: Env) => {
   const program = Effect.gen(function* () {
-    const QUEUE_URL = yield* Config.string("QUEUE_URL");
-    const eventResult = Schema.decodeUnknownEither(eventSchema)(event);
-    if (Either.isLeft(eventResult))
-      return yield* Effect.fail(
-        new EventSchemaValidationError({
-          message: `detail: ${formatParseError(eventResult.left)}`,
-        }),
-      );
-    const { debugLog } = eventResult.right;
     const crawler = yield* HelloWorkCrawler;
-    const jobs = yield* crawler
-      .crawlJobLinks()
-      .pipe(
-        Logger.withMinimumLogLevel(debugLog ? LogLevel.Debug : LogLevel.Info),
-      );
+    const jobs = yield* crawler.crawlJobLinks();
     yield* Effect.forEach(jobs, (job) =>
-      sendMessageToQueue({ jobNumber: job.jobNumber }, QUEUE_URL),
+      Effect.tryPromise({
+        try: () => env.JOB_DETAIL_QUEUE.send({ jobNumber: job.jobNumber }),
+        catch: (e) => new Error(`Failed to send to queue: ${String(e)}`),
+      }),
     );
     return jobs;
   }).pipe(
     Effect.provide(HelloWorkCrawler.Default),
-    Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.provide(PlaywrightBrowserConfig.cloudflare(env.MYBROWSER)),
+    Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,
   );
   const exit = await Effect.runPromiseExit(program);

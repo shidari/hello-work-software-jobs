@@ -17,6 +17,7 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
   {
     effect: Effect.gen(function* () {
       const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
+      const apiKey = yield* Config.string("API_KEY");
       return {
         insertJob: (job: TransformedJob) =>
           Effect.gen(function* () {
@@ -30,7 +31,7 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
                   body: JSON.stringify(job),
                   headers: {
                     "content-type": "application/json",
-                    "x-api-key": process.env.API_KEY ?? "",
+                    "x-api-key": apiKey,
                   },
                 }),
               catch: (e) =>
