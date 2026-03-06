@@ -44,6 +44,8 @@
   --color-accent-subtle: rgba(59, 130, 246, 0.08);
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
+  --sidebar-width: 420px;
+  --sidebar-width-mobile: 85vw;
 }
 
 html,

@@ -2,15 +2,12 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
 
 import React, { useTransition } from "react";
-import { ClientNavLink } from "@/app/jobs/@search/ClientNavLink/ClientNavLink";
-import type { JobList } from "@/atom";
 import {
   continuousJobOverviewListWriterAtom,
   JobOverviewListAtom,
-  jobListAtom,
+  jobWriterAtom,
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
 } from "@/atom";
@@ -23,10 +20,11 @@ import cardStyles from "./jobCard.module.css";
 function NewBadge() {
   return <span className={cardStyles.newBadge}>新着</span>;
 }
-export function JobOverviewList() {
+export function JobOverviewList({ onJobSelect }: { onJobSelect?: () => void }) {
   const { items, page, totalPages } = useAtomValue(JobOverviewListAtom);
   const wrappedItems = useJobsWithFavorite(items);
   const fetchNextPage = useSetAtom(continuousJobOverviewListWriterAtom);
+  const selectJob = useSetAtom(jobWriterAtom);
   const parentRef = React.useRef<HTMLDivElement>(null);
   const [_kSavedOffset, setSavedOffset] = useAtom(
     scrollRestorationByItemIndexAtom,
@@ -85,9 +83,15 @@ export function JobOverviewList() {
             >
               <Card>
                 {isNew && <NewBadge />}
-                <ClientNavLink
-                  to={`/jobs/${item.jobNumber}`}
-                  // className={styles.jobLink}
+                <button
+                  type="button"
+                  className={cardStyles.selectButton}
+                  onClick={() => {
+                    startTransition(async () => {
+                      await selectJob(item.jobNumber);
+                      onJobSelect?.();
+                    });
+                  }}
                 >
                   <JobOverview
                     jobNumber={item.jobNumber}
@@ -98,7 +102,7 @@ export function JobOverviewList() {
                     employeeCount={item.employeeCount}
                     receivedDate={item.receivedDate}
                   />
-                </ClientNavLink>
+                </button>
                 <JobFavoriteButton />
               </Card>
               {virtualItem.index === lastItem.index && (
@@ -123,18 +127,4 @@ export function JobOverviewList() {
       </div>
     </div>
   );
-}
-
-export function HydratedJobOverviewList({
-  initialDataFromServer,
-}: {
-  initialDataFromServer: {
-    jobs: JobList;
-    page: number;
-    totalPages: number;
-    totalCount: number;
-  };
-}) {
-  useHydrateAtoms([[jobListAtom, initialDataFromServer]]);
-  return <JobOverviewList />;
 }
