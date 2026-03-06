@@ -1,21 +1,36 @@
 "use client";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import {
   initializeJobListWriterAtom,
+  type SearchFilter,
   scrollRestorationByItemIndexAtom,
   scrollRestorationByItemListAtom,
+  searchFilterAtom,
 } from "@/atom";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import styles from "./JobSearchFilter.module.css";
 
+function toEmployeeCountRange(filter: SearchFilter): string {
+  const gt = filter.employeeCountGt;
+  const lt = filter.employeeCountLt;
+  if (gt === "0" && lt === "10") return "1-9";
+  if (gt === "9" && lt === "31") return "10-30";
+  if (gt === "29" && lt === "101") return "30-100";
+  if (gt === "100" && lt === undefined) return "100+";
+  return "";
+}
+
 export const JobsSearchfilter = () => {
   const formRef = useRef<HTMLFormElement>(null);
-  const debounceRef = useRef<number | null>(null); // 追加
+  const debounceRef = useRef<number | null>(null);
   const initializeJobList = useSetAtom(initializeJobListWriterAtom);
   const jobListIndexSetter = useSetAtom(scrollRestorationByItemIndexAtom);
   const jobListItemSetter = useSetAtom(scrollRestorationByItemListAtom);
+  const currentFilter = useAtomValue(searchFilterAtom);
+  const router = useRouter();
 
   const resetRestoration = useCallback(() => {
     jobListIndexSetter(0);
@@ -68,10 +83,23 @@ export const JobsSearchfilter = () => {
           : {}),
         ...employeeCountFilter,
       };
+
+      // URL クエリパラメータを更新
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(searchFilter)) {
+        if (value !== undefined && value !== "") {
+          params.set(key, String(value));
+        }
+      }
+      const query = params.toString();
+      router.replace(query ? `/jobs?${query}` : "/jobs", { scroll: false });
+
       initializeJobList(searchFilter);
       resetRestoration();
     }, 300);
   };
+
+  const defaultRange = toEmployeeCountRange(currentFilter);
 
   return (
     <form ref={formRef} className={styles.formGrid}>
@@ -79,6 +107,7 @@ export const JobsSearchfilter = () => {
         type="text"
         placeholder="会社名を検索"
         name="companyName"
+        defaultValue={currentFilter.companyName ?? ""}
         onChange={handleChange}
         className={styles.inputFull}
       />
@@ -86,6 +115,7 @@ export const JobsSearchfilter = () => {
         type="text"
         placeholder="求人内容をキーワード検索"
         name="jobDescription"
+        defaultValue={currentFilter.jobDescription ?? ""}
         onChange={handleChange}
         className={styles.inputFull}
       />
@@ -93,12 +123,13 @@ export const JobsSearchfilter = () => {
         type="text"
         placeholder="求人内容をキーワード除外検索"
         name="jobDescriptionExclude"
+        defaultValue={currentFilter.jobDescriptionExclude ?? ""}
         onChange={handleChange}
         className={styles.inputFull}
       />
       <Select
         name="employeeCountRange"
-        defaultValue=""
+        defaultValue={defaultRange}
         onChange={handleChange}
         className={styles.inputFull}
       >

@@ -117,3 +117,9 @@ export const Job = Schema.Struct({
   qualifications: Schema.NullOr(Schema.String),
 });
 export type Job = typeof Job.Type;
+
+/**
+ * ブランドを剥がした Job 型。
+ * Hono RPC レスポンスや Jotai atom など、ブランドなしで Job を扱う場面で使う。
+ */
+export type UnBrandedJob = Unbrand<Job>;
