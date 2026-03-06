@@ -1,5 +1,5 @@
 {
-	"name": "@sho/job-store-api",
+	"name": "@sho/api",
 	"version": "0.0.0",
 	"private": true,
 	"exports": {

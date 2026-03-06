@@ -1,4 +1,4 @@
-# job-store-api
+# api
 
 Cloudflare Workers 求人情報管理 API
 

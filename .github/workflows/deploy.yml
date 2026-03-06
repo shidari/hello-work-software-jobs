@@ -28,7 +28,7 @@ jobs:
 
       - name: Build models and scripts packages 
         run: |
-          pnpm -r --filter='!hello-work-job-searcher' --filter='!job-store' build
+          pnpm -r --filter='!hello-work-job-searcher' --filter='!@sho/api' build
       # 👇 OIDCによるAssumeRole
       - name: Configure AWS CDK Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0

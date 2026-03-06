@@ -1,4 +1,4 @@
-import type { AppType as BackendAppType } from "@sho/job-store-api/types";
+import type { AppType as BackendAppType } from "@sho/api/types";
 import { hc } from "hono/client";
 
 export type AppType = BackendAppType;
