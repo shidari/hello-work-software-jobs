@@ -1,0 +1,34 @@
+.container {
+  position: relative;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.title {
+  padding: 0.7rem 1rem 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 700;
+  font-size: 1.35rem;
+  text-align: left;
+  font-family: "Merriweather", "Times New Roman", Times, serif;
+  letter-spacing: 0.04em;
+}
+
+.totalCount {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.mainHeader {
+  flex: none;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mainContent {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
