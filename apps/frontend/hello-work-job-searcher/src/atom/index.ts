@@ -1,25 +1,19 @@
-import type { Job, Unbrand } from "@sho/models";
+import type { UnBrandedJob } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
+import type { InferRequestType } from "hono/client";
 import { hc } from "hono/client";
 import { atom } from "jotai";
 import type { JobOverview } from "@/components/features/list/JobOverview";
 import type { AppType } from "@/lib/backend-client";
 
-export type JobList = Unbrand<Job>[];
-
-export type SearchFilter = {
-  companyName?: string;
-  employeeCountLt?: string;
-  employeeCountGt?: string;
-  jobDescription?: string;
-  jobDescriptionExclude?: string;
-  onlyNotExpired?: boolean;
-  orderByReceiveDate?: "asc" | "desc";
-  addedSince?: string;
-  addedUntil?: string;
-};
+export type JobList = UnBrandedJob[];
 
 const client = hc<AppType>("/api");
+
+export type SearchFilter = Omit<
+  NonNullable<InferRequestType<typeof client.jobs.$get>["query"]>,
+  "page"
+>;
 
 // --- favorites ---
 
@@ -157,7 +151,7 @@ export const continuousJobOverviewListWriterAtom = atom<
   }));
 });
 
-export const jobAtom = atom<Unbrand<Job> | undefined>();
+export const jobAtom = atom<UnBrandedJob | undefined>();
 export const jobWriterAtom = atom<null, [string], Promise<void>>(
   null,
   async (_get, set, jobNumber) => {

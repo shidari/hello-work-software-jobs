@@ -1,4 +1,4 @@
-import type { Job, Unbrand } from "@sho/models";
+import type { UnBrandedJob } from "@sho/models";
 import {
   Item,
   ItemContent,
@@ -9,7 +9,7 @@ import {
 import { formatDate } from "@/util";
 import styles from "./JobDetail.module.css";
 
-export function JobDetail(props: { jobDetail: Unbrand<Job> }) {
+export function JobDetail(props: { jobDetail: UnBrandedJob }) {
   const {
     jobNumber,
     companyName,
