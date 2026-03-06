@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "lib": ["es2022", "DOM"],
     "strict": true,
     "noImplicitAny": true,
@@ -13,10 +13,9 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
-    "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"],
+    "types": ["@cloudflare/workers-types"],
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "cdk.out"]
+  "exclude": ["node_modules"]
 }

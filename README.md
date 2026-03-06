@@ -10,7 +10,7 @@
 apps/
   ├── backend/
   │   ├── api/                      # Cloudflare Workers API (Hono + D1)
-  │   └── collector/                # AWS Lambda クローラー (Playwright)
+  │   └── collector/                # Cloudflare Workers クローラー (Browser Rendering + Queues)
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
@@ -23,7 +23,7 @@ packages/
 - **共通**: TypeScript, pnpm workspace
 - **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
 - **API**: Cloudflare Workers, Hono, Kysely, D1
-- **クローラー**: AWS Lambda, Playwright, Effect, SQS
+- **クローラー**: Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect
 - **型管理**: Effect Schema, @sho/models
 
 ## セットアップ
@@ -46,13 +46,12 @@ pnpm verify:job-detail-extractor
 ## デプロイ
 
 ```bash
-# クローラー (AWS Lambda)
+# クローラー (Cloudflare Workers)
 cd apps/backend/collector
-pnpm bootstrap  # 初回のみ
 pnpm deploy
 
 # API (Cloudflare Workers)
-cd apps/backend/job-store-api
+cd apps/backend/api
 pnpm deploy
 
 # フロントエンド (Vercel)

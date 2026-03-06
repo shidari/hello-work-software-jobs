@@ -1,0 +1,28 @@
+{
+  "name": "collector",
+  "main": "functions/index.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "browser": {
+    "binding": "MYBROWSER"
+  },
+  "queues": {
+    "producers": [
+      {
+        "queue": "job-detail-queue",
+        "binding": "JOB_DETAIL_QUEUE"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "job-detail-queue",
+        "max_batch_size": 1,
+        "max_concurrency": 5,
+        "dead_letter_queue": "job-detail-dlq"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["0 1 * * 1-5"]
+  }
+}

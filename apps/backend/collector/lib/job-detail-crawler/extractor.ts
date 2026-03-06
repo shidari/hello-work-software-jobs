@@ -1,7 +1,7 @@
 import type { JobNumber } from "@sho/models";
 import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
-import type { Page } from "playwright";
+import type { Page } from "../browser";
 import { FirstJobListPageNavigator } from "../page";
 
 // ── RawJob スキーマ: DOM から抽出した生テキスト ──

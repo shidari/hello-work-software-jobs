@@ -1,6 +1,6 @@
 import { JobNumber } from "@sho/models";
 import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
-import type { Locator } from "playwright";
+import type { Locator } from "../browser";
 import { FirstJobListPageNavigator, JobSearchPageService } from "../page";
 import { delay, formatParseError } from "../util";
 import type { etCrawlerConfig } from "./type";

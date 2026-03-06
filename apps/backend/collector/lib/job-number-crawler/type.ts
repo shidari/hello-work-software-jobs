@@ -1,6 +1,6 @@
 import { JobNumber } from "@sho/models";
 import { Schema } from "effect";
-import type { Locator, Page } from "playwright";
+import type { Locator, Page } from "../browser";
 
 // ── クローラー設定スキーマ ──
 

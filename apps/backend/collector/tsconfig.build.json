@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": false,     // JSファイルを出力
-    "outDir": "dist",   // 出力先ディレクトリ
-    "declaration": true // 型定義ファイル(.d.ts)も出す場合
-  },
-  "include": ["lib/**/*", "bin/**/*"]
-}

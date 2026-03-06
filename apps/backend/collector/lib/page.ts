@@ -1,5 +1,5 @@
 import { Data, Effect } from "effect";
-import type { Page } from "playwright";
+import type { Page } from "./browser";
 import { PlaywrightChromiumPageResource } from "./browser";
 import type {
   DirtyWorkLocation,
