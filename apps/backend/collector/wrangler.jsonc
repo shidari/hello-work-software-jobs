@@ -1,8 +1,12 @@
 {
   "name": "collector",
-  "main": "functions/index.ts",
+  "main": "dist/index.mjs",
   "compatibility_date": "2025-01-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat_v2"],
+  "build": {
+    "command": "tsdown",
+    "watch_dir": ["functions", "lib"]
+  },
   "browser": {
     "binding": "MYBROWSER"
   },
