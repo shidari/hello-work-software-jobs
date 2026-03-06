@@ -6,7 +6,13 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   format: ["esm"],
-  noExternal: ["@sho/models", "@cloudflare/playwright", "effect", "date-fns", "linkedom"],
+  noExternal: [
+    "@sho/models",
+    "@cloudflare/playwright",
+    "effect",
+    "date-fns",
+    "linkedom",
+  ],
   external: [/^cloudflare:/],
   plugins: [
     {
