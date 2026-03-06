@@ -1,7 +1,7 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
 import { Effect, Exit } from "effect";
 import { PlaywrightBrowserConfig } from "../../lib/browser";
-import { JobDetailCrawler } from "../../lib/job-detail-crawler/crawl";
+import { JobDetailCrawler } from "../../lib/job-detail-crawler";
 import { fromEventToFirstRecord } from "./helper";
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
