@@ -1,5 +1,5 @@
 {
-  "name": "headless-crawler",
+  "name": "collector",
   "version": "0.1.0",
   "bin": {
     "headless-crawler": "bin/headless-crawler.js"

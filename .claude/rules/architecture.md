@@ -66,7 +66,7 @@ Cloudflare Workers + Hono。
 
 ---
 
-## `apps/backend/headless-crawler`
+## `apps/backend/collector`
 
 AWS Lambda + Effect サービスパターン。
 

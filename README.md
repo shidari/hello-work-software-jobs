@@ -10,7 +10,7 @@
 apps/
   ├── backend/
   │   ├── api/                      # Cloudflare Workers API (Hono + D1)
-  │   └── headless-crawler/         # AWS Lambda クローラー (Playwright)
+  │   └── collector/                # AWS Lambda クローラー (Playwright)
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
@@ -37,7 +37,7 @@ cd apps/frontend/hello-work-job-searcher && pnpm dev   # フロントエンド (
 cd apps/backend/api && pnpm dev                        # API (port 8787)
 
 # クローラー検証
-cd apps/backend/headless-crawler
+cd apps/backend/collector
 pnpm exec playwright install chromium
 pnpm verify:e-t-crawler
 pnpm verify:job-detail-extractor
@@ -47,7 +47,7 @@ pnpm verify:job-detail-extractor
 
 ```bash
 # クローラー (AWS Lambda)
-cd apps/backend/headless-crawler
+cd apps/backend/collector
 pnpm bootstrap  # 初回のみ
 pnpm deploy
 
