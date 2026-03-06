@@ -1,10 +1,15 @@
 import { Config, Effect, Either, Exit, Logger, LogLevel, Schema } from "effect";
 import { PlaywrightBrowserConfig } from "../../lib/browser";
 import { HelloWorkCrawler } from "../../lib/job-number-crawler/crawl";
-import { eventSchema } from "../../lib/schemas";
 import { formatParseError } from "../../lib/util";
 import { sendMessageToQueue } from "../helpers/helper";
 import { EventSchemaValidationError } from "./error";
+
+const eventSchema = Schema.partial(
+  Schema.Struct({
+    debugLog: Schema.Boolean,
+  }),
+);
 
 // Handler
 export const handler = async (event: unknown) => {

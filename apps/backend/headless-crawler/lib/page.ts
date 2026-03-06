@@ -11,7 +11,7 @@ import type {
   EngineeringLabelSelectorRadioBtn,
   JobSearchCriteria,
   SearchPeriod,
-} from "./schemas";
+} from "./job-number-crawler/type";
 
 // ============================================================
 // Errors

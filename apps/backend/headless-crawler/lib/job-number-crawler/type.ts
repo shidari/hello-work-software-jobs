@@ -1,20 +1,43 @@
+import { JobNumber } from "@sho/models";
+import { Schema } from "effect";
 import type { Locator, Page } from "playwright";
-import type {
-  etCrawlerConfigWithoutBrowserConfigSchema,
-  jobSearchCriteriaSchema,
-  paritalEngineeringLabelSchema,
-  partialEmploymentTypeSchema,
-  partialWorkLocationSchema,
-  searchPeriodSchema,
-} from "./config";
-import type { JobNumber } from "./extractor";
-import type { eventSchema } from "./lambdaEvent";
 
-export type { JobNumber };
+// ── クローラー設定スキーマ ──
 
-export type JobMetadata = {
-  jobNumber: JobNumber;
-};
+export const partialWorkLocationSchema = Schema.Struct({
+  prefecture: Schema.Literal("東京都"),
+});
+export const partialEmploymentTypeSchema = Schema.Union(
+  Schema.Literal("RegularEmployee"),
+  Schema.Literal("PartTimeWorker"),
+);
+export const paritalEngineeringLabelSchema = Schema.Literal(
+  "ソフトウェア開発技術者、プログラマー",
+);
+export const searchPeriodSchema = Schema.Union(
+  Schema.Literal("all"),
+  Schema.Literal("today"),
+  Schema.Literal("week"),
+);
+export const jobSearchCriteriaSchema = Schema.Struct({
+  jobNumber: Schema.optional(JobNumber),
+  workLocation: partialWorkLocationSchema,
+  desiredOccupation: Schema.optional(
+    Schema.Struct({
+      occupationSelection: Schema.optional(paritalEngineeringLabelSchema),
+    }),
+  ),
+  employmentType: partialEmploymentTypeSchema,
+  searchPeriod: searchPeriodSchema,
+});
+
+export const etCrawlerConfigWithoutBrowserConfigSchema = Schema.Struct({
+  roughMaxCount: Schema.Number,
+  nextPageDelayMs: Schema.Number,
+  jobSearchCriteria: jobSearchCriteriaSchema,
+});
+
+// ── 型エイリアス ──
 
 export type NewJobOpeningsFilter = "TodayYesterday" | "Within1Week";
 
@@ -62,8 +85,6 @@ const emplomentTypeSelector = Symbol();
 export type EmploymentTypeSelector = string & {
   [emplomentTypeSelector]: unknown;
 };
-
-export type JobNumberEvent = typeof eventSchema.Type;
 
 export type JobSearchCriteria = typeof jobSearchCriteriaSchema.Type;
 export type DirtyWorkLocation = typeof partialWorkLocationSchema.Type;
