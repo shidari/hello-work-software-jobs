@@ -20,6 +20,7 @@ export default defineConfig({
     },
   ],
   inlineOnly: false,
+  platform: "browser",
   target: "esnext",
   outputOptions: {
     codeSplitting: false,
