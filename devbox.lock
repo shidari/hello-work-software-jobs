@@ -230,9 +230,43 @@
         }
       }
     },
-    "stack": {
-      "resolved": "github:NixOS/nixpkgs/6308c3b21396534d8aaeac46179c14c439a89b8a?narHash=sha256-xKPyJoMoXfXpDM5DFDZDsi9PHArf2k5BJjvReYXoFpM%3D#stack",
-      "source": "nixpkg"
+    "stack@3.9.1": {
+      "last_modified": "2026-03-02T11:03:52Z",
+      "resolved": "github:NixOS/nixpkgs/dc7513872406b53d2ff417a003895d6daffdff2f#stack",
+      "source": "devbox-search",
+      "version": "3.9.1",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3mvyrx9p3g127fx9w0d2k993krchmykn-stack-3.9.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/3mvyrx9p3g127fx9w0d2k993krchmykn-stack-3.9.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ksp5mribirfajqg3y1z1jfcjdsplgd06-stack-3.9.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ksp5mribirfajqg3y1z1jfcjdsplgd06-stack-3.9.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9f42k2l2zf69vb6ifbhr1lplxccyi9rm-stack-3.9.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9f42k2l2zf69vb6ifbhr1lplxccyi9rm-stack-3.9.1"
+        }
+      }
     }
   }
 }

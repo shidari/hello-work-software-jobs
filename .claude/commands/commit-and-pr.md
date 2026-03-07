@@ -17,10 +17,11 @@
       - **Common Commands**（コマンドの追加・変更）
       - **Coding Conventions**（規約・ツール・パターンの変更）
       - **API Endpoints**（エンドポイントの追加・削除・変更）
-   2. ルートの `README.md` を Read し、同様に更新する
-   3. 変更パッケージの `README.md` があれば Read し、同様に更新する
-   4. 更新したファイルは staging に追加する
-   5. 結果を報告する:「CLAUDE.md: 更新なし / 更新あり（内容）」「README.md: 更新なし / 更新あり（内容）」
+   2. `.claude/rules/architecture.md` を Read し、staged 変更と照合して更新する（コンポーネント追加・削除・設計変更）
+   3. ルートの `README.md` を Read し、同様に更新する
+   4. 変更パッケージの `README.md` があれば Read し、同様に更新する
+   5. 更新したファイルは staging に追加する
+   6. 結果を報告する:「CLAUDE.md: 更新なし / 更新あり（内容）」「architecture.md: 更新なし / 更新あり（内容）」「README.md: 更新なし / 更新あり（内容）」
 
 ### 2. セキュリティレビュー
 
@@ -28,6 +29,11 @@ staging されたファイルに対して、security-review コマンドの Chec
 - OWASP Top 10（Injection, Auth, Sensitive Data 等）
 - Input Validation
 - Data Protection
+- **脆弱性導入チェック**: 変更されたコードに新たな脆弱性が導入されていないか確認する
+  - コマンドインジェクション、XSS、SQLインジェクション等
+  - 安全でないデシリアライゼーション
+  - ハードコードされたシークレットや認証情報
+  - 不適切な入力サニタイズ
 - 問題が見つかった場合は修正してから次のステップに進む
 - 問題がなければ「セキュリティレビュー: 問題なし」と報告する
 
