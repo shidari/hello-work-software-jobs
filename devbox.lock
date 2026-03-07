@@ -229,6 +229,10 @@
           "store_path": "/nix/store/dimsg0mxvqrc973zq0h477zfnm8mkjqw-pnpm-10.30.0"
         }
       }
+    },
+    "stack": {
+      "resolved": "github:NixOS/nixpkgs/6308c3b21396534d8aaeac46179c14c439a89b8a?narHash=sha256-xKPyJoMoXfXpDM5DFDZDsi9PHArf2k5BJjvReYXoFpM%3D#stack",
+      "source": "nixpkg"
     }
   }
 }

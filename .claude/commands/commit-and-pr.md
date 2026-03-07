@@ -22,14 +22,23 @@
    4. 更新したファイルは staging に追加する
    5. 結果を報告する:「CLAUDE.md: 更新なし / 更新あり（内容）」「README.md: 更新なし / 更新あり（内容）」
 
-### 2. コミット
+### 2. セキュリティレビュー
+
+staging されたファイルに対して、security-review コマンドの Checklist に従いレビューを実施する:
+- OWASP Top 10（Injection, Auth, Sensitive Data 等）
+- Input Validation
+- Data Protection
+- 問題が見つかった場合は修正してから次のステップに進む
+- 問題がなければ「セキュリティレビュー: 問題なし」と報告する
+
+### 3. コミット
 
 - Conventional Commits 形式（日本語）
 - スコープ付き（例: `feat(api): 求人検索フィルターを追加`）
 - body に変更の説明を含める
 - `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` を末尾に付ける
 
-### 3. ブランチ作成 & Push
+### 4. ブランチ作成 & Push
 
 - main ブランチ上なら、コミット内容に基づいたブランチ名を作成する
   - 例: `feat/add-search-filter`, `refactor/models-domain-only`, `fix/companyname-type`
@@ -37,7 +46,7 @@
 - 既に feature ブランチ上ならそのまま
 - `git push -u origin <branch>` で push
 
-### 4. PR 作成
+### 5. PR 作成
 
 - そのブランチの PR が未作成なら `devbox run gh pr create` で作成
   - タイトル: コミットメッセージの1行目
@@ -45,7 +54,7 @@
   - body にバッククォート等の特殊文字を含む場合は `--body-file` を使う
 - 既に PR があるなら push のみ（PR は自動更新される）
 
-### 5. 結果報告
+### 6. 結果報告
 
 - PR の URL を表示する
 - PR が既存の場合はその旨を伝える
