@@ -100,4 +100,10 @@ export type SearchFilter = {
   orderByReceiveDate?: "asc" | "desc";
   addedSince?: string;
   addedUntil?: string;
+  occupation?: string;
+  employmentType?: string;
+  wageMin?: number;
+  wageMax?: number;
+  workPlace?: string;
+  qualifications?: string;
 };

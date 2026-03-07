@@ -72,25 +72,89 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   ? ("asc" as const)
                   : ("desc" as const);
 
-              let query = db
+              const filtered = db
                 .selectFrom("jobs")
+                .$if(!!filter.companyName, (qb) =>
+                  qb.where("companyName", "like", `%${filter.companyName}%`),
+                )
+                .$if(filter.employeeCountGt !== undefined, (qb) =>
+                  qb.where("employeeCount", ">", filter.employeeCountGt!),
+                )
+                .$if(filter.employeeCountLt !== undefined, (qb) =>
+                  qb.where("employeeCount", "<", filter.employeeCountLt!),
+                )
+                .$if(!!filter.jobDescription, (qb) =>
+                  qb.where(
+                    "jobDescription",
+                    "like",
+                    `%${filter.jobDescription}%`,
+                  ),
+                )
+                .$if(!!filter.jobDescriptionExclude, (qb) =>
+                  qb.where(
+                    "jobDescription",
+                    "not like",
+                    `%${filter.jobDescriptionExclude}%`,
+                  ),
+                )
+                .$if(!!filter.onlyNotExpired, (qb) =>
+                  qb.where("expiryDate", ">", new Date().toISOString()),
+                )
+                .$if(!!filter.addedSince, (qb) => {
+                  const result = DateTime.fromISO(filter.addedSince!, {
+                    zone: "Asia/Tokyo",
+                  })
+                    .startOf("day")
+                    .toUTC()
+                    .toISO();
+                  return result ? qb.where("createdAt", ">", result) : qb;
+                })
+                .$if(!!filter.addedUntil, (qb) => {
+                  const result = DateTime.fromISO(filter.addedUntil!, {
+                    zone: "Asia/Tokyo",
+                  })
+                    .endOf("day")
+                    .toUTC()
+                    .toISO();
+                  return result ? qb.where("createdAt", "<", result) : qb;
+                })
+                .$if(!!filter.occupation, (qb) =>
+                  qb.where("occupation", "like", `%${filter.occupation}%`),
+                )
+                .$if(!!filter.employmentType, (qb) =>
+                  qb.where(
+                    "employmentType",
+                    "like",
+                    `%${filter.employmentType}%`,
+                  ),
+                )
+                .$if(filter.wageMin !== undefined, (qb) =>
+                  qb.where("wageMin", ">=", filter.wageMin!),
+                )
+                .$if(filter.wageMax !== undefined, (qb) =>
+                  qb.where("wageMax", "<=", filter.wageMax!),
+                )
+                .$if(!!filter.workPlace, (qb) =>
+                  qb.where("workPlace", "like", `%${filter.workPlace}%`),
+                )
+                .$if(!!filter.qualifications, (qb) =>
+                  qb.where(
+                    "qualifications",
+                    "like",
+                    `%${filter.qualifications}%`,
+                  ),
+                );
+
+              const jobList = await filtered
                 .selectAll()
-                .orderBy("receivedDate", order);
-
-              query = applyFilters(query, filter);
-
-              const jobList = await query
+                .orderBy("receivedDate", order)
                 .limit(PAGE_SIZE)
                 .offset(offset)
                 .execute();
 
-              let countQuery = db
-                .selectFrom("jobs")
-                .select((eb) => eb.fn.countAll<number>().as("count"));
-
-              countQuery = applyFilters(countQuery, filter);
-
-              const countResult = await countQuery.executeTakeFirstOrThrow();
+              const countResult = await filtered
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .executeTakeFirstOrThrow();
               const totalCount = countResult.count;
 
               const decodeDbRow = Schema.decodeUnknownSync(DbJobSchema);
@@ -134,52 +198,3 @@ export class FetchDailyStatsQuery extends Effect.Service<FetchDailyStatsQuery>()
     }),
   },
 ) {}
-
-// --- フィルタ適用ヘルパー ---
-
-function applyFilters<T extends { $if: (...args: any[]) => T }>(
-  query: T,
-  filter: SearchFilter,
-): T {
-  return query
-    .$if(!!filter.companyName, (qb: any) =>
-      qb.where("companyName", "like", `%${filter.companyName}%`),
-    )
-    .$if(filter.employeeCountGt !== undefined, (qb: any) =>
-      qb.where("employeeCount", ">", filter.employeeCountGt!),
-    )
-    .$if(filter.employeeCountLt !== undefined, (qb: any) =>
-      qb.where("employeeCount", "<", filter.employeeCountLt!),
-    )
-    .$if(!!filter.jobDescription, (qb: any) =>
-      qb.where("jobDescription", "like", `%${filter.jobDescription}%`),
-    )
-    .$if(!!filter.jobDescriptionExclude, (qb: any) =>
-      qb.where(
-        "jobDescription",
-        "not like",
-        `%${filter.jobDescriptionExclude}%`,
-      ),
-    )
-    .$if(!!filter.onlyNotExpired, (qb: any) =>
-      qb.where("expiryDate", ">", new Date().toISOString()),
-    )
-    .$if(!!filter.addedSince, (qb: any) => {
-      const result = DateTime.fromISO(filter.addedSince!, {
-        zone: "Asia/Tokyo",
-      })
-        .startOf("day")
-        .toUTC()
-        .toISO();
-      return result ? qb.where("createdAt", ">", result) : qb;
-    })
-    .$if(!!filter.addedUntil, (qb: any) => {
-      const result = DateTime.fromISO(filter.addedUntil!, {
-        zone: "Asia/Tokyo",
-      })
-        .endOf("day")
-        .toUTC()
-        .toISO();
-      return result ? qb.where("createdAt", "<", result) : qb;
-    });
-}
