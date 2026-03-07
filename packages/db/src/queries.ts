@@ -1,5 +1,4 @@
 import type { Kysely } from "kysely";
-import { sql } from "kysely";
 import type { DB } from "./generated/types";
 
 export type DailyStatRow = {
@@ -18,7 +17,7 @@ export async function selectDailyStats(
       eb.fn.countAll<number>().as("count"),
       eb.fn<string>("json_group_array", [eb.ref("jobNumber")]).as("jobNumbers"),
     ])
-    .groupBy(sql`date(createdAt)`)
+    .groupBy((eb) => eb.fn("date", [eb.ref("createdAt")]))
     .orderBy("addedDate", "desc")
     .execute();
 
