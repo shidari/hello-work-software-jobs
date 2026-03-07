@@ -95,6 +95,7 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 |---------|------|
 | `hwctl jobs list [--page N] [--keyword TEXT] [--table]` | 求人一覧取得 |
 | `hwctl jobs get <jobNumber> [--table]` | 個別求人取得 |
+| `hwctl stats daily [FILTER_JSON] [--table]` | 日ごとの新着求人数サマリー |
 
 ### 設計
 

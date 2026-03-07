@@ -4,14 +4,15 @@ module Hwctl.Output
   ( OutputFormat (..)
   , outputJob
   , outputJobs
+  , outputDailyStats
   , outputError
   ) where
 
-import Data.Aeson (encode)
+import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, Job (..), JobsResponse (..), PageMeta (..), WageRange (..))
+import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), StatsSummary (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -68,6 +69,20 @@ formatJobDetail j =
 formatWage :: Maybe WageRange -> String
 formatWage Nothing = "-"
 formatWage (Just w) = show (wageMin w) <> " ~ " <> show (wageMax w) <> " 円"
+
+outputDailyStats :: OutputFormat -> [DailyStat] -> IO ()
+outputDailyStats JSON filtered = do
+  let summary = StatsSummary (length filtered) (sum (map statCount filtered))
+  LBS.putStrLn (encode (object ["stats" .= filtered, "summary" .= summary]))
+outputDailyStats Table filtered = do
+  putStrLn "追加日        件数"
+  mapM_ printRow filtered
+  let totalD = length filtered
+      totalJ = sum (map statCount filtered)
+  putStrLn $ "\n(" <> show totalD <> " 日間, 合計 " <> show totalJ <> " 件)"
+  where
+    printRow s =
+      putStrLn $ T.unpack (addedDate s) <> "    " <> show (statCount s)
 
 unlines' :: [String] -> String
 unlines' = foldr (\a b -> if null b then a else a <> "\n" <> b) ""

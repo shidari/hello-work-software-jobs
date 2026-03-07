@@ -3,6 +3,7 @@
 module Hwctl.Client
   ( listJobs
   , getJob
+  , fetchDailyStats
   , JobsQuery (..)
   , defaultQuery
   ) where
@@ -10,7 +11,7 @@ module Hwctl.Client
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy as LBS
 import Hwctl.Config (Config (..))
-import Hwctl.Types (AppError (..), Job, JobsResponse)
+import Hwctl.Types (AppError (..), Job, JobsResponse, StatsResponse)
 import Network.HTTP.Client
   ( Manager
   , httpLbs
@@ -73,6 +74,19 @@ listJobs cfg q = withManager $ \mgr -> do
 getJob :: Config -> String -> IO (Either AppError Job)
 getJob cfg jobNum = withManager $ \mgr -> do
   let url = buildUrl cfg ("/jobs/" <> jobNum)
+  req <- parseRequest url
+  let req' = req {requestHeaders = [("Accept", "application/json")]}
+  resp <- httpLbs req' mgr
+  let sc = statusCode (responseStatus resp)
+  pure $ case handleResponse (responseBody resp) sc of
+    Left err -> Left err
+    Right body -> case eitherDecode body of
+      Left msg -> Left (ParseError msg)
+      Right result -> Right result
+
+fetchDailyStats :: Config -> IO (Either AppError StatsResponse)
+fetchDailyStats cfg = withManager $ \mgr -> do
+  let url = buildUrl cfg "/stats/daily"
   req <- parseRequest url
   let req' = req {requestHeaders = [("Accept", "application/json")]}
   resp <- httpLbs req' mgr

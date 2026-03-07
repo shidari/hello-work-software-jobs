@@ -61,6 +61,7 @@ pnpm deploy            # Wrangler deploy to Cloudflare
 stack build                       # Build
 stack exec hwctl -- jobs list     # List jobs (JSON)
 stack exec hwctl -- jobs get ID   # Get job by number (JSON)
+stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
 ```
 
 ## API Endpoints
