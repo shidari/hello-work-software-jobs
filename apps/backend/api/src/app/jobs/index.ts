@@ -56,6 +56,12 @@ const jobListQuerySchema = Schema.Struct({
   addedUntil: Schema.optional(
     Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
   ),
+  occupation: Schema.optional(Schema.String),
+  employmentType: Schema.optional(Schema.String),
+  wageMin: Schema.optional(Schema.String),
+  wageMax: Schema.optional(Schema.String),
+  workPlace: Schema.optional(Schema.String),
+  qualifications: Schema.optional(Schema.String),
   page: Schema.optional(Schema.String),
 });
 
@@ -135,6 +141,22 @@ const jobListRoute = describeRoute({
       example: "2025-10-17",
       required: false,
     },
+    { name: "occupation", in: "query", required: false },
+    { name: "employmentType", in: "query", required: false },
+    {
+      name: "wageMin",
+      in: "query",
+      description: "最低賃金の下限",
+      required: false,
+    },
+    {
+      name: "wageMax",
+      in: "query",
+      description: "最高賃金の上限",
+      required: false,
+    },
+    { name: "workPlace", in: "query", required: false },
+    { name: "qualifications", in: "query", required: false },
     {
       name: "page",
       in: "query",
@@ -282,6 +304,12 @@ const app = new Hono<{ Bindings: Env }>()
         orderByReceiveDate,
         addedSince,
         addedUntil,
+        occupation: encodedOccupation,
+        employmentType: encodedEmploymentType,
+        wageMin: rawWageMin,
+        wageMax: rawWageMax,
+        workPlace: encodedWorkPlace,
+        qualifications: encodedQualifications,
         page: rawPage,
       } = c.req.valid("query");
       const companyName = encodedCompanyName
@@ -292,6 +320,20 @@ const app = new Hono<{ Bindings: Env }>()
         : undefined;
       const jobDescriptionExclude = encodedJobDescriptionExclude
         ? decodeURIComponent(encodedJobDescriptionExclude)
+        : undefined;
+      const occupation = encodedOccupation
+        ? decodeURIComponent(encodedOccupation)
+        : undefined;
+      const employmentType = encodedEmploymentType
+        ? decodeURIComponent(encodedEmploymentType)
+        : undefined;
+      const wageMin = rawWageMin ? Number(rawWageMin) : undefined;
+      const wageMax = rawWageMax ? Number(rawWageMax) : undefined;
+      const workPlace = encodedWorkPlace
+        ? decodeURIComponent(encodedWorkPlace)
+        : undefined;
+      const qualifications = encodedQualifications
+        ? decodeURIComponent(encodedQualifications)
         : undefined;
 
       const parsedPage = rawPage ? Number(rawPage) : 1;
@@ -343,6 +385,12 @@ const app = new Hono<{ Bindings: Env }>()
               orderByReceiveDate,
               addedSince,
               addedUntil,
+              occupation,
+              employmentType,
+              wageMin,
+              wageMax,
+              workPlace,
+              qualifications,
             },
           });
           const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);

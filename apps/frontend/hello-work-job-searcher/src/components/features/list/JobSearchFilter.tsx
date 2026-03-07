@@ -76,6 +76,12 @@ export const JobsSearchfilter = () => {
       const addedUntil = formData.get("addedUntil");
       const orderByReceiveDate = formData.get("orderByReceiveDate");
       const onlyNotExpired = formData.get("onlyNotExpired") === "on";
+      const occupation = formData.get("occupation");
+      const employmentType = formData.get("employmentType");
+      const wageMin = formData.get("wageMin");
+      const wageMax = formData.get("wageMax");
+      const workPlace = formData.get("workPlace");
+      const qualifications = formData.get("qualifications");
 
       const searchFilter = {
         ...(typeof companyName === "string" && companyName
@@ -94,6 +100,16 @@ export const JobsSearchfilter = () => {
           ? { orderByReceiveDate }
           : {}),
         ...(onlyNotExpired ? { onlyNotExpired: "true" } : {}),
+        ...(typeof occupation === "string" && occupation ? { occupation } : {}),
+        ...(typeof employmentType === "string" && employmentType
+          ? { employmentType }
+          : {}),
+        ...(typeof wageMin === "string" && wageMin ? { wageMin } : {}),
+        ...(typeof wageMax === "string" && wageMax ? { wageMax } : {}),
+        ...(typeof workPlace === "string" && workPlace ? { workPlace } : {}),
+        ...(typeof qualifications === "string" && qualifications
+          ? { qualifications }
+          : {}),
       };
 
       // URL クエリパラメータを更新
@@ -150,10 +166,58 @@ export const JobsSearchfilter = () => {
             onChange={handleChange}
           />
         </div>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>職種</Label>
+          <Input
+            type="text"
+            placeholder="職種で検索"
+            name="occupation"
+            aria-label="職種"
+            defaultValue={currentFilter.occupation ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>勤務地</Label>
+          <Input
+            type="text"
+            placeholder="勤務地で検索"
+            name="workPlace"
+            aria-label="勤務地"
+            defaultValue={currentFilter.workPlace ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>資格・経験</Label>
+          <Input
+            type="text"
+            placeholder="必要な資格・経験で検索"
+            name="qualifications"
+            aria-label="資格・経験"
+            defaultValue={currentFilter.qualifications ?? ""}
+            onChange={handleChange}
+          />
+        </div>
       </div>
       <div className={styles.section}>
         <span className={styles.sectionTitle}>絞り込み</span>
         <div className={styles.row}>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>雇用形態</Label>
+            <Select
+              name="employmentType"
+              aria-label="雇用形態"
+              defaultValue={currentFilter.employmentType ?? ""}
+              onChange={handleChange}
+            >
+              <option value="">すべて</option>
+              <option value="正社員">正社員</option>
+              <option value="パート">パート</option>
+              <option value="契約社員">契約社員</option>
+              <option value="派遣">派遣</option>
+            </Select>
+          </div>
           <div className={styles.fieldGroup}>
             <Label className={styles.fieldLabel}>従業員数</Label>
             <Select
@@ -169,6 +233,32 @@ export const JobsSearchfilter = () => {
               <option value="100+">100人以上</option>
             </Select>
           </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>賃金（下限）</Label>
+            <Input
+              type="number"
+              placeholder="最低賃金"
+              name="wageMin"
+              aria-label="賃金下限"
+              defaultValue={currentFilter.wageMin ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>賃金（上限）</Label>
+            <Input
+              type="number"
+              placeholder="最高賃金"
+              name="wageMax"
+              aria-label="賃金上限"
+              defaultValue={currentFilter.wageMax ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <div className={styles.row}>
           <div className={styles.fieldGroup}>
             <Label className={styles.fieldLabel}>受付日ソート</Label>
             <Select
