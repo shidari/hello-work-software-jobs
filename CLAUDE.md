@@ -68,6 +68,7 @@ stack exec hwctl -- jobs get ID   # Get job by number (JSON)
 - `GET /jobs` - List jobs (with filters, page-number pagination)
 - `GET /jobs/{jobNumber}` - Get job details
 - `POST /jobs` - Create job
+- `GET /stats/daily` - Daily new job count summary (with job numbers)
 
 ## Database
 
