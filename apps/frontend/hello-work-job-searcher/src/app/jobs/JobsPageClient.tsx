@@ -52,9 +52,30 @@ export function JobsPageClient({
           <ItemGroup className={styles.sidebarHeader}>
             <Item>
               <ItemContent>
-                <ItemTitle>
-                  <h1 className={styles.title}>求人情報一覧</h1>
-                </ItemTitle>
+                <div className={styles.titleRow}>
+                  <ItemTitle>
+                    <h1 className={styles.title}>求人情報一覧</h1>
+                  </ItemTitle>
+                  <button
+                    type="button"
+                    className={styles.trigger}
+                    onClick={toggleSidebar}
+                    aria-label="サイドバーを閉じる"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 5h14M3 10h14M3 15h14" />
+                    </svg>
+                  </button>
+                </div>
               </ItemContent>
             </Item>
             <Item>
@@ -76,27 +97,29 @@ export function JobsPageClient({
         </aside>
       </Activity>
       <div className={styles.main}>
-        <div className={styles.mainHeader}>
-          <button
-            type="button"
-            className={styles.trigger}
-            onClick={toggleSidebar}
-            aria-label={open ? "サイドバーを閉じる" : "サイドバーを開く"}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              aria-hidden="true"
+        {!open && (
+          <div className={styles.mainHeader}>
+            <button
+              type="button"
+              className={styles.trigger}
+              onClick={toggleSidebar}
+              aria-label="サイドバーを開く"
             >
-              <path d="M3 5h14M3 10h14M3 15h14" />
-            </svg>
-          </button>
-        </div>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M3 5h14M3 10h14M3 15h14" />
+              </svg>
+            </button>
+          </div>
+        )}
         <div className={styles.mainContent}>
           <ClientJobDetail />
         </div>

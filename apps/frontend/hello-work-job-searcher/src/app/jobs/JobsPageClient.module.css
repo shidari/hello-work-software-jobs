@@ -82,6 +82,14 @@
   letter-spacing: 0.04em;
 }
 
+/* ── Title row ── */
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* ── Trigger button ── */
 
 .trigger {
