@@ -1,4 +1,4 @@
-import { Data, Effect } from "effect";
+import { Context, Data, Effect } from "effect";
 import type { Page } from "./browser";
 import { PlaywrightChromiumPageResource } from "./browser";
 import type {
@@ -21,11 +21,15 @@ class PageActionError extends Data.TaggedError("PageActionError")<{
 }> {}
 
 // ============================================================
-// Types
+// Context Tags (branded page types)
 // ============================================================
 
 const _jobSearchPage: unique symbol = Symbol("JobSearchPage");
 export type JobSearchPage = Page & { [_jobSearchPage]: unknown };
+export class JobSearchPageTag extends Context.Tag("JobSearchPage")<
+  JobSearchPageTag,
+  JobSearchPage
+>() {}
 
 const _firstJobListPage: unique symbol = Symbol("FirstJobListPage");
 export type FirstJobListPage = Page & { [_firstJobListPage]: unknown };
@@ -53,13 +57,13 @@ const searchPeriodSelectors = {
 } as const;
 
 // ============================================================
-// Page operations (module-level Effect.fn)
+// Page operations (context-based Effect.fn)
 // ============================================================
 
 const fillWorkType = Effect.fn("fillWorkType")(function* (
-  page: JobSearchPage,
   employmentType: EmploymentType,
 ) {
+  const page = yield* JobSearchPageTag;
   const selector = employmentTypeSelectors[employmentType] as
     | string
     | undefined;
@@ -84,9 +88,9 @@ const fillWorkType = Effect.fn("fillWorkType")(function* (
 });
 
 const fillPrefectureField = Effect.fn("fillPrefectureField")(function* (
-  page: JobSearchPage,
   workLocation: DirtyWorkLocation,
 ) {
+  const page = yield* JobSearchPageTag;
   const { prefecture } = workLocation;
   yield* Effect.logDebug(
     `fill PrefectureField.\nworkLocation: ${JSON.stringify(workLocation, null, 2)}`,
@@ -105,9 +109,9 @@ const fillPrefectureField = Effect.fn("fillPrefectureField")(function* (
 });
 
 const fillOccupationField = Effect.fn("fillOccupationField")(function* (
-  page: JobSearchPage,
   label: EngineeringLabel,
 ) {
+  const page = yield* JobSearchPageTag;
   const selector = engineeringLabelSelectors[label] as
     | { radioBtn: string; openerSibling: string }
     | undefined;
@@ -149,9 +153,9 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
 });
 
 const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
-  page: JobSearchPage,
   searchPeriod: SearchPeriod,
 ) {
+  const page = yield* JobSearchPageTag;
   yield* Effect.logDebug(`fillJobPeriod: searchPeriod=${searchPeriod}`);
   const id = searchPeriodSelectors[searchPeriod];
   if (id) {
@@ -165,23 +169,21 @@ const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
   }
 });
 
-const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(function* (
-  page: JobSearchPage,
-  criteria: JobSearchCriteria,
-) {
-  const { employmentType, workLocation, desiredOccupation, searchPeriod } =
-    criteria;
-  if (employmentType) yield* fillWorkType(page, employmentType);
-  if (workLocation) yield* fillPrefectureField(page, workLocation);
-  if (desiredOccupation?.occupationSelection) {
-    yield* fillOccupationField(page, desiredOccupation.occupationSelection);
-  }
-  if (searchPeriod) yield* fillJobPeriod(page, searchPeriod);
-});
+export const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(
+  function* (criteria: JobSearchCriteria) {
+    const { employmentType, workLocation, desiredOccupation, searchPeriod } =
+      criteria;
+    if (employmentType) yield* fillWorkType(employmentType);
+    if (workLocation) yield* fillPrefectureField(workLocation);
+    if (desiredOccupation?.occupationSelection) {
+      yield* fillOccupationField(desiredOccupation.occupationSelection);
+    }
+    if (searchPeriod) yield* fillJobPeriod(searchPeriod);
+  },
+);
 
-const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
-  page: JobSearchPage,
-) {
+const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* () {
+  const page = yield* JobSearchPageTag;
   yield* Effect.tryPromise({
     try: async () => {
       const searchNoBtn = page.locator("#ID_searchNoBtn");
@@ -201,9 +203,8 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
   );
 });
 
-const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
-  page: JobSearchPage,
-) {
+const clickSearchBtn = Effect.fn("clickSearchBtn")(function* () {
+  const page = yield* JobSearchPageTag;
   yield* Effect.tryPromise({
     try: async () => {
       const searchBtn = page.locator("#ID_searchBtn");
@@ -224,91 +225,60 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
 });
 
 // ============================================================
-// Services (composition only)
+// Constructors (Effect.fn)
 // ============================================================
 
-export class JobSearchPageService extends Effect.Service<JobSearchPageService>()(
-  "JobSearchPageService",
-  {
-    effect: Effect.gen(function* () {
-      const { page } = yield* PlaywrightChromiumPageResource;
-      yield* Effect.tryPromise({
-        try: () =>
-          page.goto(
-            "https://www.hellowork.mhlw.go.jp/kensaku/GECA110010.do?action=initDisp&screenId=GECA110010",
-          ),
-        catch: (e) =>
-          new PageActionError({
-            message: `navigation failed: ${String(e)}`,
-          }),
-      }).pipe(
-        Effect.tap(() => Effect.logDebug("navigated to job search page.")),
-      );
+export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
+  const { page } = yield* PlaywrightChromiumPageResource;
+  yield* Effect.tryPromise({
+    try: () =>
+      page.goto(
+        "https://www.hellowork.mhlw.go.jp/kensaku/GECA110010.do?action=initDisp&screenId=GECA110010",
+      ),
+    catch: (e) =>
+      new PageActionError({
+        message: `navigation failed: ${String(e)}`,
+      }),
+  }).pipe(Effect.tap(() => Effect.logDebug("navigated to job search page.")));
+  return page as JobSearchPage;
+});
 
-      const jobSearchPage = page as JobSearchPage;
-      return {
-        page: jobSearchPage,
-        clickSearchNoBtn: () => clickSearchNoBtn(jobSearchPage),
-        clickSearchBtn: () => clickSearchBtn(jobSearchPage),
-        fillJobCriteriaField: (c: JobSearchCriteria) =>
-          fillJobCriteriaField(jobSearchPage, c),
-      };
-    }),
-    dependencies: [PlaywrightChromiumPageResource.Default],
-  },
-) {}
+export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
+  jobNumber: string,
+) {
+  const page = yield* JobSearchPageTag;
+  yield* Effect.tryPromise({
+    try: async () => {
+      const jobNumberSplits = jobNumber.split("-");
+      const firstJobNumber = jobNumberSplits.at(0);
+      const secondJobNumber = jobNumberSplits.at(1);
+      if (!firstJobNumber)
+        throw new Error(`firstJobNumber undefined. jobNumber=${jobNumber}`);
+      if (!secondJobNumber)
+        throw new Error(`secondJobNumber undefined. jobNumber=${jobNumber}`);
+      const firstJobNumberInput = page.locator("#ID_kJNoJo1");
+      const secondJobNumberInput = page.locator("#ID_kJNoGe1");
+      await firstJobNumberInput.fill(firstJobNumber);
+      await secondJobNumberInput.fill(secondJobNumber);
+    },
+    catch: (e) =>
+      new PageActionError({
+        message: `byJobNumber failed: jobNumber=${jobNumber}\n${String(e)}`,
+      }),
+  }).pipe(
+    Effect.tap(() =>
+      Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`),
+    ),
+  );
+  yield* clickSearchNoBtn();
+  return page as unknown as FirstJobListPage;
+});
 
-export class FirstJobListPageNavigator extends Effect.Service<FirstJobListPageNavigator>()(
-  "FirstJobListPageNavigator",
-  {
-    effect: Effect.gen(function* () {
-      const { page, clickSearchNoBtn, clickSearchBtn, fillJobCriteriaField } =
-        yield* JobSearchPageService;
-
-      const byJobNumber = Effect.fn("byJobNumber")(function* (
-        jobNumber: string,
-      ) {
-        yield* Effect.tryPromise({
-          try: async () => {
-            const jobNumberSplits = jobNumber.split("-");
-            const firstJobNumber = jobNumberSplits.at(0);
-            const secondJobNumber = jobNumberSplits.at(1);
-            if (!firstJobNumber)
-              throw new Error(
-                `firstJobNumber undefined. jobNumber=${jobNumber}`,
-              );
-            if (!secondJobNumber)
-              throw new Error(
-                `secondJobNumber undefined. jobNumber=${jobNumber}`,
-              );
-            const firstJobNumberInput = page.locator("#ID_kJNoJo1");
-            const secondJobNumberInput = page.locator("#ID_kJNoGe1");
-            await firstJobNumberInput.fill(firstJobNumber);
-            await secondJobNumberInput.fill(secondJobNumber);
-          },
-          catch: (e) =>
-            new PageActionError({
-              message: `byJobNumber failed: jobNumber=${jobNumber}\n${String(e)}`,
-            }),
-        }).pipe(
-          Effect.tap(() =>
-            Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`),
-          ),
-        );
-        yield* clickSearchNoBtn();
-        return page as unknown as FirstJobListPage;
-      });
-
-      const byCriteria = Effect.fn("byCriteria")(function* (
-        criteria: JobSearchCriteria,
-      ) {
-        yield* fillJobCriteriaField(criteria);
-        yield* clickSearchBtn();
-        return page as unknown as FirstJobListPage;
-      });
-
-      return { byJobNumber, byCriteria };
-    }),
-    dependencies: [JobSearchPageService.Default],
-  },
-) {}
+export const navigateByCriteria = Effect.fn("navigateByCriteria")(function* (
+  criteria: JobSearchCriteria,
+) {
+  const page = yield* JobSearchPageTag;
+  yield* fillJobCriteriaField(criteria);
+  yield* clickSearchBtn();
+  return page as unknown as FirstJobListPage;
+});

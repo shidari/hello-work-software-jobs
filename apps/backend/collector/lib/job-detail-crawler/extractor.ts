@@ -2,7 +2,12 @@ import type { JobNumber } from "@sho/models";
 import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
-import { FirstJobListPageNavigator } from "../page";
+import { PlaywrightChromiumPageResource } from "../browser";
+import {
+  JobSearchPageTag,
+  navigateByJobNumber,
+  openJobSearchPage,
+} from "../page";
 
 // ── RawJob スキーマ: DOM から抽出した生テキスト ──
 
@@ -193,13 +198,14 @@ const nowISODateString = (): ISODateString =>
 export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
   "JobDetailExtractor",
   {
+    dependencies: [PlaywrightChromiumPageResource.Default],
     effect: Effect.gen(function* () {
-      const firstJobListPage = yield* FirstJobListPageNavigator;
+      const jobSearchPage = yield* openJobSearchPage();
       const extractRawHtml = Effect.fn("extractRawHtml")(function* (
         jobNumber: JobNumber,
       ) {
         yield* Effect.logInfo("start extracting raw job detail HTML...");
-        const page = yield* firstJobListPage.byJobNumber(jobNumber);
+        const page = yield* navigateByJobNumber(jobNumber);
         yield* Effect.logDebug("now on job List page.");
         yield* goToSingleJobDetailPage(page);
         const jobDetailPage = yield* validateJobDetailPage(page);
@@ -214,8 +220,12 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
         });
         return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
       });
-      return { extractRawHtml };
+      return {
+        extractRawHtml: (jobNumber: JobNumber) =>
+          extractRawHtml(jobNumber).pipe(
+            Effect.provideService(JobSearchPageTag, jobSearchPage),
+          ),
+      };
     }),
-    dependencies: [FirstJobListPageNavigator.Default],
   },
 ) {}
