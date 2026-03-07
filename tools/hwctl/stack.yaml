@@ -1,0 +1,4 @@
+resolver: lts-24.11
+
+packages:
+  - .

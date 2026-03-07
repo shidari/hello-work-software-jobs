@@ -4,7 +4,8 @@
     "nodejs@22",
     "pnpm@10.30.0",
     "gh@2.87.2",
-    "pinact@3.8.0"
+    "pinact@3.8.0",
+    "stack@3.9.1"
   ],
   "shell": {
     "init_hook": [

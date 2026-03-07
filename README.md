@@ -16,6 +16,8 @@ apps/
 packages/
   ├── db/                           # Kysely + D1 client factory & types
   └── models/                       # 共通型定義
+tools/
+  └── hwctl/                        # Haskell admin CLI (Stack)
 ```
 
 ## 技術スタック
@@ -25,6 +27,7 @@ packages/
 - **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect
 - **型管理**: Effect Schema, @sho/models
+- **Admin CLI**: Haskell (Stack), optparse-applicative, aeson
 
 ## セットアップ
 
