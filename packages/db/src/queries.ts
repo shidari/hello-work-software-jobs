@@ -13,10 +13,10 @@ export async function selectDailyStats(
 ): Promise<DailyStatRow[]> {
   const rows = await db
     .selectFrom("jobs")
-    .select([
-      sql<string>`date(createdAt)`.as("addedDate"),
-      sql<number>`count(*)`.as("count"),
-      sql<string>`group_concat(jobNumber)`.as("jobNumbers"),
+    .select((eb) => [
+      eb.fn<string>("date", [eb.ref("createdAt")]).as("addedDate"),
+      eb.fn.countAll<number>().as("count"),
+      eb.fn<string>("json_group_array", [eb.ref("jobNumber")]).as("jobNumbers"),
     ])
     .groupBy(sql`date(createdAt)`)
     .orderBy("addedDate", "desc")
@@ -25,6 +25,6 @@ export async function selectDailyStats(
   return rows.map((row) => ({
     addedDate: row.addedDate,
     count: row.count,
-    jobNumbers: row.jobNumbers ? row.jobNumbers.split(",") : [],
+    jobNumbers: row.jobNumbers ? JSON.parse(row.jobNumbers) : [],
   }));
 }
