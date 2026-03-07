@@ -12,6 +12,14 @@
   min-width: 8rem;
 }
 
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   .formGrid {
     grid-template-columns: 1fr;

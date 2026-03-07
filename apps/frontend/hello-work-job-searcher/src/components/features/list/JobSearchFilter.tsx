@@ -71,6 +71,11 @@ export const JobsSearchfilter = () => {
           employeeCountFilter = {};
       }
 
+      const addedSince = formData.get("addedSince");
+      const addedUntil = formData.get("addedUntil");
+      const orderByReceiveDate = formData.get("orderByReceiveDate");
+      const onlyNotExpired = formData.get("onlyNotExpired") === "on";
+
       const searchFilter = {
         ...(typeof companyName === "string" && companyName
           ? { companyName }
@@ -82,6 +87,12 @@ export const JobsSearchfilter = () => {
           ? { jobDescriptionExclude }
           : {}),
         ...employeeCountFilter,
+        ...(typeof addedSince === "string" && addedSince ? { addedSince } : {}),
+        ...(typeof addedUntil === "string" && addedUntil ? { addedUntil } : {}),
+        ...(typeof orderByReceiveDate === "string" && orderByReceiveDate
+          ? { orderByReceiveDate }
+          : {}),
+        ...(onlyNotExpired ? { onlyNotExpired: "true" } : {}),
       };
 
       // URL クエリパラメータを更新
@@ -139,6 +150,41 @@ export const JobsSearchfilter = () => {
         <option value="30-100">30~100人</option>
         <option value="100+">100人以上</option>
       </Select>
+      <Input
+        type="date"
+        name="addedSince"
+        defaultValue={currentFilter.addedSince ?? ""}
+        onChange={handleChange}
+        className={styles.inputFull}
+        aria-label="追加日（から）"
+      />
+      <Input
+        type="date"
+        name="addedUntil"
+        defaultValue={currentFilter.addedUntil ?? ""}
+        onChange={handleChange}
+        className={styles.inputFull}
+        aria-label="追加日（まで）"
+      />
+      <Select
+        name="orderByReceiveDate"
+        defaultValue={currentFilter.orderByReceiveDate ?? ""}
+        onChange={handleChange}
+        className={styles.inputFull}
+      >
+        <option value="">受付日ソート</option>
+        <option value="desc">新しい順</option>
+        <option value="asc">古い順</option>
+      </Select>
+      <label className={styles.checkboxLabel}>
+        <input
+          type="checkbox"
+          name="onlyNotExpired"
+          defaultChecked={currentFilter.onlyNotExpired === "true"}
+          onChange={handleChange}
+        />
+        有効な求人のみ
+      </label>
     </form>
   );
 };

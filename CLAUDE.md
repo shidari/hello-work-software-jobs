@@ -96,7 +96,7 @@ stack exec hwctl -- jobs get ID   # Get job by number (JSON)
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`git commit` の前に以下を実行すること
   1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format)
   3. 変更があったパッケージのみ `pnpm exec tsc --noEmit` (型チェック)
-  4. CLAUDE.md / ルート README.md を Read し、以下の項目が staged 変更と整合しているか確認し、必要なら更新して staging に追加すること:
+  4. CLAUDE.md / `.claude/rules/architecture.md` / ルート README.md を Read し、以下の項目が staged 変更と整合しているか確認し、必要なら更新して staging に追加すること:
      - ディレクトリ構成（追加・削除・リネーム）
      - 技術スタック / バージョン番号
      - コマンド例のパス
