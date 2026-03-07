@@ -10,6 +10,7 @@ import {
   searchFilterAtom,
 } from "@/atom";
 import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import styles from "./JobSearchFilter.module.css";
 
@@ -114,77 +115,106 @@ export const JobsSearchfilter = () => {
 
   return (
     <form ref={formRef} className={styles.formGrid}>
-      <Input
-        type="text"
-        placeholder="会社名を検索"
-        name="companyName"
-        defaultValue={currentFilter.companyName ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-      />
-      <Input
-        type="text"
-        placeholder="求人内容をキーワード検索"
-        name="jobDescription"
-        defaultValue={currentFilter.jobDescription ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-      />
-      <Input
-        type="text"
-        placeholder="求人内容をキーワード除外検索"
-        name="jobDescriptionExclude"
-        defaultValue={currentFilter.jobDescriptionExclude ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-      />
-      <Select
-        name="employeeCountRange"
-        defaultValue={defaultRange}
-        onChange={handleChange}
-        className={styles.inputFull}
-      >
-        <option value="">従業員数で絞り込む</option>
-        <option value="1-9">1~9人</option>
-        <option value="10-30">10~30人</option>
-        <option value="30-100">30~100人</option>
-        <option value="100+">100人以上</option>
-      </Select>
-      <Input
-        type="date"
-        name="addedSince"
-        defaultValue={currentFilter.addedSince ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-        aria-label="追加日（から）"
-      />
-      <Input
-        type="date"
-        name="addedUntil"
-        defaultValue={currentFilter.addedUntil ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-        aria-label="追加日（まで）"
-      />
-      <Select
-        name="orderByReceiveDate"
-        defaultValue={currentFilter.orderByReceiveDate ?? ""}
-        onChange={handleChange}
-        className={styles.inputFull}
-      >
-        <option value="">受付日ソート</option>
-        <option value="desc">新しい順</option>
-        <option value="asc">古い順</option>
-      </Select>
-      <label className={styles.checkboxLabel}>
-        <input
-          type="checkbox"
-          name="onlyNotExpired"
-          defaultChecked={currentFilter.onlyNotExpired === "true"}
-          onChange={handleChange}
-        />
-        有効な求人のみ
-      </label>
+      <div className={styles.section}>
+        <span className={styles.sectionTitle}>検索</span>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>会社名</Label>
+          <Input
+            type="text"
+            placeholder="会社名で検索"
+            name="companyName"
+            aria-label="会社名"
+            defaultValue={currentFilter.companyName ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>求人内容（キーワード）</Label>
+          <Input
+            type="text"
+            placeholder="キーワードを入力"
+            name="jobDescription"
+            aria-label="求人内容キーワード"
+            defaultValue={currentFilter.jobDescription ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Label className={styles.fieldLabel}>除外キーワード</Label>
+          <Input
+            type="text"
+            placeholder="除外するキーワードを入力"
+            name="jobDescriptionExclude"
+            aria-label="除外キーワード"
+            defaultValue={currentFilter.jobDescriptionExclude ?? ""}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+      <div className={styles.section}>
+        <span className={styles.sectionTitle}>絞り込み</span>
+        <div className={styles.row}>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>従業員数</Label>
+            <Select
+              name="employeeCountRange"
+              aria-label="従業員数"
+              defaultValue={defaultRange}
+              onChange={handleChange}
+            >
+              <option value="">すべて</option>
+              <option value="1-9">1~9人</option>
+              <option value="10-30">10~30人</option>
+              <option value="30-100">30~100人</option>
+              <option value="100+">100人以上</option>
+            </Select>
+          </div>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>受付日ソート</Label>
+            <Select
+              name="orderByReceiveDate"
+              aria-label="受付日ソート"
+              defaultValue={currentFilter.orderByReceiveDate ?? ""}
+              onChange={handleChange}
+            >
+              <option value="">デフォルト</option>
+              <option value="desc">新しい順</option>
+              <option value="asc">古い順</option>
+            </Select>
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>追加日（から）</Label>
+            <Input
+              type="date"
+              name="addedSince"
+              aria-label="追加日（から）"
+              defaultValue={currentFilter.addedSince ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+          <div className={styles.fieldGroup}>
+            <Label className={styles.fieldLabel}>追加日（まで）</Label>
+            <Input
+              type="date"
+              name="addedUntil"
+              aria-label="追加日（まで）"
+              defaultValue={currentFilter.addedUntil ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <label className={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            name="onlyNotExpired"
+            defaultChecked={currentFilter.onlyNotExpired === "true"}
+            onChange={handleChange}
+          />
+          有効な求人のみ
+        </label>
+      </div>
     </form>
   );
 };
