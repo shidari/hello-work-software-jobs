@@ -1,3 +1,4 @@
+import { selectDailyStats } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
 import { DateTime } from "luxon";
 import { PAGE_SIZE } from "../constant";
@@ -13,6 +14,10 @@ export class FetchJobError extends Data.TaggedError("FetchJobError")<{
 export class FetchJobListError extends Data.TaggedError("FetchJobListError")<{
   readonly message: string;
   readonly errorType: "client" | "server";
+}> {}
+
+export class FetchStatsError extends Data.TaggedError("FetchStatsError")<{
+  readonly message: string;
 }> {}
 
 // --- クエリ ---
@@ -98,6 +103,31 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
               new FetchJobListError({
                 message: String(e),
                 errorType: "server",
+              }),
+          }),
+      };
+    }),
+  },
+) {}
+
+export type DailyStat = {
+  addedDate: string;
+  count: number;
+  jobNumbers: string[];
+};
+
+export class FetchDailyStatsQuery extends Effect.Service<FetchDailyStatsQuery>()(
+  "FetchDailyStatsQuery",
+  {
+    effect: Effect.gen(function* () {
+      const db = yield* JobStoreDB;
+      return {
+        run: () =>
+          Effect.tryPromise({
+            try: (): Promise<DailyStat[]> => selectDailyStats(db),
+            catch: (e) =>
+              new FetchStatsError({
+                message: String(e),
               }),
           }),
       };

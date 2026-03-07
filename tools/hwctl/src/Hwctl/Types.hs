@@ -7,6 +7,11 @@ module Hwctl.Types
   , WorkingHours (..)
   , JobsResponse (..)
   , PageMeta (..)
+  , DailyStat (..)
+  , StatsResponse (..)
+  , StatsFilter (..)
+  , StatsSummary (..)
+  , defaultStatsFilter
   , AppError (..)
   ) where
 
@@ -118,6 +123,60 @@ data JobsResponse = JobsResponse
 
 instance FromJSON JobsResponse
 instance ToJSON JobsResponse
+
+data DailyStat = DailyStat
+  { addedDate :: Text
+  , statCount :: Int
+  , statJobNumbers :: [Text]
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON DailyStat where
+  parseJSON = withObject "DailyStat" $ \v ->
+    DailyStat <$> v .: "addedDate" <*> v .: "count" <*> v .: "jobNumbers"
+
+instance ToJSON DailyStat where
+  toJSON s =
+    object
+      [ "addedDate" .= addedDate s
+      , "count" .= statCount s
+      , "jobNumbers" .= statJobNumbers s
+      ]
+
+data StatsResponse = StatsResponse
+  { stats :: [DailyStat]
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON StatsResponse
+instance ToJSON StatsResponse
+
+data StatsFilter = StatsFilter
+  { filterSince :: Maybe Text
+  , filterUntil :: Maybe Text
+  , filterMinCount :: Maybe Int
+  , filterLimit :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON StatsFilter where
+  parseJSON = withObject "StatsFilter" $ \v ->
+    StatsFilter
+      <$> v .:? "since"
+      <*> v .:? "until"
+      <*> v .:? "minCount"
+      <*> v .:? "limit"
+
+defaultStatsFilter :: StatsFilter
+defaultStatsFilter = StatsFilter Nothing Nothing Nothing Nothing
+
+data StatsSummary = StatsSummary
+  { totalDays :: Int
+  , totalJobs :: Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance ToJSON StatsSummary
 
 data AppError
   = HttpError String

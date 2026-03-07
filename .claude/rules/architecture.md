@@ -43,6 +43,7 @@ Kysely 型定義 + DB行スキーマ。D1 (SQLite) 向け。
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
 - `src/schema.ts` に `DbJobRowSchema`（フラットDB行スキーマ）を定義。型レベルチェックで Kysely 生成型との整合性を保証
 - ドメインモデルへの変換（`DbJobSchema`）は `api/src/cqrs/index.ts` で行う
+- `src/queries.ts` に集計クエリユーティリティ（`selectDailyStats` 等）を提供。API 層から `sql` を直接 import しない設計
 
 ---
 
@@ -57,10 +58,11 @@ Cloudflare Workers + Hono。
 | GET | `/jobs` | - | 一覧取得（フィルター + ページネーション） |
 | POST | `/jobs` | x-api-key | 登録 |
 | GET | `/jobs/:jobNumber` | - | 個別取得 |
+| GET | `/stats/daily` | - | 日ごとの新着求人数サマリー |
 
 ### 設計
 
-- **CQRS**: 各操作が独立した `Effect.Service`。コマンド（`InsertJobCommand`）とクエリ（`FindJobByNumberQuery`, `FetchJobsPageQuery`）に分離。
+- **CQRS**: 各操作が独立した `Effect.Service`。コマンド（`InsertJobCommand`）とクエリ（`FindJobByNumberQuery`, `FetchJobsPageQuery`, `FetchDailyStatsQuery`）に分離。
 - **エラー**: `Data.TaggedError` で型安全なエラーハンドリング。コントローラーで `Effect.match` により分岐。
 - **ページネーション**: ページ番号方式。
 
@@ -93,6 +95,7 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 |---------|------|
 | `hwctl jobs list [--page N] [--keyword TEXT] [--table]` | 求人一覧取得 |
 | `hwctl jobs get <jobNumber> [--table]` | 個別求人取得 |
+| `hwctl stats daily [FILTER_JSON] [--table]` | 日ごとの新着求人数サマリー |
 
 ### 設計
 

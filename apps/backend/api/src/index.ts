@@ -2,6 +2,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
 import jobs from "./app/jobs";
+import stats from "./app/stats";
 
 const app = new Hono()
   .use("*", async (c, next) => {
@@ -14,7 +15,8 @@ const app = new Hono()
     const duration = Date.now() - start;
     console.log(`📤 ${c.res.status} (${duration}ms)`);
   })
-  .route("/jobs", jobs);
+  .route("/jobs", jobs)
+  .route("/stats", stats);
 app.get(
   "/openapi",
   openAPIRouteHandler(app, {
