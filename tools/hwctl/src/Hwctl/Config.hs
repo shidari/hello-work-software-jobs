@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Hwctl.Config
   ( Config (..)
@@ -10,6 +11,8 @@ module Hwctl.Config
   , requireCollectorEndpoint
   ) where
 
+import Configuration.Dotenv (defaultConfig, loadFile)
+import Control.Exception (catch, SomeException)
 import Hwctl.Types (AppError (..))
 import System.Environment (lookupEnv)
 
@@ -31,6 +34,7 @@ data CfConfig = CfConfig
 
 loadConfig :: IO Config
 loadConfig = do
+  loadFile defaultConfig `catch` (\(_ :: SomeException) -> pure ())
   ep <- lookupEnv "HWCTL_ENDPOINT"
   key <- lookupEnv "HWCTL_API_KEY"
   cep <- lookupEnv "HWCTL_COLLECTOR_ENDPOINT"

@@ -31,8 +31,8 @@ hello-work-software-jobs/
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
 | Crawler | Cloudflare Workers, Hono, Browser Rendering, Queues, @cloudflare/playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
-| Admin CLI | Haskell (Stack), optparse-applicative, aeson, req |
-| Secrets | dotenvx (API, Frontend) |
+| Admin CLI | Haskell (Stack), optparse-applicative, aeson, req, dotenv-hs |
+| Secrets | dotenvx (API, Frontend), dotenv-hs (hwctl) |
 | Quality | Biome, Playwright/Vitest |
 
 ## Common Commands

@@ -28,6 +28,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , dotenv
     , modern-uri
     , optparse-applicative
     , prettyprinter
@@ -48,6 +49,7 @@ executable hwctl
       aeson
     , base >=4.7 && <5
     , bytestring
+    , dotenv
     , hwctl
     , modern-uri
     , optparse-applicative
@@ -69,6 +71,7 @@ test-suite hwctl-test
       aeson
     , base >=4.7 && <5
     , bytestring
+    , dotenv
     , hwctl
     , modern-uri
     , optparse-applicative
