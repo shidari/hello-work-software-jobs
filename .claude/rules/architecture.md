@@ -96,13 +96,16 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 | `hwctl jobs list [--page N] [--keyword TEXT] [--table]` | 求人一覧取得 |
 | `hwctl jobs get <jobNumber> [--table]` | 個別求人取得 |
 | `hwctl stats daily [FILTER_JSON] [--table]` | 日ごとの新着求人数サマリー |
+| `hwctl queue status [--table]` | Cloudflare Queue 状態取得 |
+| `hwctl queue messages [OPTIONS_JSON] [--table]` | Queue メッセージ pull |
+| `hwctl logs tail [OPTIONS_JSON] [--table]` | Worker Tail セッション作成 |
 
 ### 設計
 
 - **デフォルト JSON 出力**: `--table` で human-readable テーブル表示に切替
 - **構造化エラー**: `{ "error": { "code": "...", "message": "..." } }` を stderr に出力
 - **終了コード**: 0=成功, 1=エラー
-- **設定**: 環境変数 `HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`
+- **設定**: 環境変数 `HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
 
 ---
 

@@ -5,6 +5,9 @@ module Hwctl.Output
   , outputJob
   , outputJobs
   , outputDailyStats
+  , outputQueueStatus
+  , outputQueueMessages
+  , outputTailSession
   , outputError
   ) where
 
@@ -12,7 +15,7 @@ import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), StatsSummary (..), WageRange (..))
+import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -83,6 +86,51 @@ outputDailyStats Table filtered = do
   where
     printRow s =
       putStrLn $ T.unpack (addedDate s) <> "    " <> show (statCount s)
+
+outputQueueStatus :: OutputFormat -> QueueInfo -> IO ()
+outputQueueStatus JSON qi = LBS.putStrLn (encode qi)
+outputQueueStatus Table qi =
+  putStrLn $
+    unlines'
+      [ "Queue ID:    " <> T.unpack (queueId qi)
+      , "Queue Name:  " <> T.unpack (queueName qi)
+      , "Created:     " <> T.unpack (fromMaybe "-" (queueCreatedOn qi))
+      , "Modified:    " <> T.unpack (fromMaybe "-" (queueModifiedOn qi))
+      , "Producers:   " <> maybe "-" show (queueProducersTotalCount qi)
+      , "Consumers:   " <> maybe "-" show (queueConsumersTotalCount qi)
+      ]
+
+outputQueueMessages :: OutputFormat -> QueuePullResponse -> IO ()
+outputQueueMessages JSON resp = LBS.putStrLn (encode resp)
+outputQueueMessages Table resp = do
+  let msgs = pullMessages resp
+  if null msgs
+    then putStrLn "(メッセージなし)"
+    else do
+      putStrLn "ID                                    Attempts  Timestamp"
+      mapM_ printMsg msgs
+  putStrLn $ "\nBacklog: " <> maybe "-" show (pullMessageBacklogCount resp)
+  where
+    printMsg m =
+      putStrLn $
+        T.unpack (msgId m)
+          <> "  "
+          <> show (msgAttempts m)
+          <> "  "
+          <> show (msgTimestampMs m)
+
+outputTailSession :: OutputFormat -> TailSession -> IO ()
+outputTailSession JSON ts = LBS.putStrLn (encode ts)
+outputTailSession Table ts =
+  putStrLn $
+    unlines'
+      [ "Tail ID:     " <> T.unpack (tailId ts)
+      , "WebSocket:   " <> T.unpack (tailUrl ts)
+      , "Expires:     " <> T.unpack (fromMaybe "-" (tailExpiresAt ts))
+      , ""
+      , "接続コマンド:"
+      , "  wscat -c \"" <> T.unpack (tailUrl ts) <> "\""
+      ]
 
 unlines' :: [String] -> String
 unlines' = foldr (\a b -> if null b then a else a <> "\n" <> b) ""

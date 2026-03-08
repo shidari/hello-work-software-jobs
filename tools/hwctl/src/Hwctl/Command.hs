@@ -7,16 +7,19 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), defaultQuery, fetchDailyStats, getJob, listJobs)
-import Hwctl.Config (loadConfig)
-import Hwctl.Output (OutputFormat (..), outputDailyStats, outputError, outputJob, outputJobs)
-import Hwctl.Types (AppError (..), DailyStat (..), StatsFilter (..), StatsResponse (..), defaultStatsFilter)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages)
+import Hwctl.Config (loadConfig, requireCfConfig, requireQueueId)
+import Hwctl.Output (OutputFormat (..), outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession)
+import Hwctl.Types (AppError (..), DailyStat (..), QueuePullOptions, StatsFilter (..), StatsResponse (..), TailOptions (..), defaultQueuePullOptions, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
 data Command
   = JobsList ListOpts
   | JobsGet GetOpts
   | StatsDailyCmd StatsOpts
+  | QueueStatusCmd FormatOpts
+  | QueueMessagesCmd JsonOpts
+  | LogsTailCmd JsonOpts
   deriving (Show)
 
 data ListOpts = ListOpts
@@ -35,6 +38,17 @@ data GetOpts = GetOpts
 data StatsOpts = StatsOpts
   { statsFilterJson :: Maybe String
   , statsFormat :: OutputFormat
+  }
+  deriving (Show)
+
+data FormatOpts = FormatOpts
+  { fmtFormat :: OutputFormat
+  }
+  deriving (Show)
+
+data JsonOpts = JsonOpts
+  { jsonOptJson :: Maybe String
+  , jsonOptFormat :: OutputFormat
   }
   deriving (Show)
 
@@ -61,21 +75,22 @@ statsOptsParser =
     <$> optional (argument str (metavar "FILTER_JSON" <> help "Filter JSON (e.g., '{\"since\":\"2026-03-01\",\"limit\":5}')"))
     <*> formatOption
 
+formatOptsParser :: Parser FormatOpts
+formatOptsParser = FormatOpts <$> formatOption
+
+jsonOptsParser :: String -> Parser JsonOpts
+jsonOptsParser metaName =
+  JsonOpts
+    <$> optional (argument str (metavar metaName <> help "Options JSON"))
+    <*> formatOption
+
 commandParser :: Parser Command
 commandParser =
   hsubparser
-    ( command
-        "jobs"
-        ( info
-            jobsSubcommand
-            (progDesc "Manage jobs")
-        )
-        <> command
-          "stats"
-          ( info
-              statsSubcommand
-              (progDesc "View statistics")
-          )
+    ( command "jobs" (info jobsSubcommand (progDesc "Manage jobs"))
+        <> command "stats" (info statsSubcommand (progDesc "View statistics"))
+        <> command "queue" (info queueSubcommand (progDesc "Cloudflare Queue operations"))
+        <> command "logs" (info logsSubcommand (progDesc "Worker logs"))
     )
   where
     jobsSubcommand =
@@ -86,6 +101,15 @@ commandParser =
     statsSubcommand =
       hsubparser
         ( command "daily" (info (StatsDailyCmd <$> statsOptsParser) (progDesc "Daily new job counts"))
+        )
+    queueSubcommand =
+      hsubparser
+        ( command "status" (info (QueueStatusCmd <$> formatOptsParser) (progDesc "Get queue status"))
+            <> command "messages" (info (QueueMessagesCmd <$> jsonOptsParser "OPTIONS_JSON") (progDesc "Pull queue messages"))
+        )
+    logsSubcommand =
+      hsubparser
+        ( command "tail" (info (LogsTailCmd <$> jsonOptsParser "OPTIONS_JSON") (progDesc "Create tail session"))
         )
 
 opts :: ParserInfo Command
@@ -132,6 +156,49 @@ runApp = do
             Right resp -> do
               let filtered = applyStatsFilter filt (stats resp)
               outputDailyStats (statsFormat statsOpt) filtered
+    QueueStatusCmd fmtOpt -> do
+      case requireCfConfig cfg of
+        Left err -> outputError err
+        Right cfCfg -> case requireQueueId cfg of
+          Left err -> outputError err
+          Right qid -> do
+            result <- getQueueStatus cfCfg qid
+            case result of
+              Left err -> outputError err
+              Right qi -> outputQueueStatus (fmtFormat fmtOpt) qi
+    QueueMessagesCmd jsonOpt -> do
+      let pullOptsResult = case jsonOptJson jsonOpt of
+            Nothing -> Right defaultQueuePullOptions
+            Just s -> case eitherDecode (LBS.pack s) :: Either String QueuePullOptions of
+              Left msg -> Left msg
+              Right o -> Right o
+      case pullOptsResult of
+        Left msg -> outputError (ParseError ("Invalid options JSON: " <> msg))
+        Right pullOpts -> case requireCfConfig cfg of
+          Left err -> outputError err
+          Right cfCfg -> case requireQueueId cfg of
+            Left err -> outputError err
+            Right qid -> do
+              result <- pullQueueMessages cfCfg qid pullOpts
+              case result of
+                Left err -> outputError err
+                Right resp -> outputQueueMessages (jsonOptFormat jsonOpt) resp
+    LogsTailCmd jsonOpt -> do
+      let tailOptsResult = case jsonOptJson jsonOpt of
+            Nothing -> Right defaultTailOptions
+            Just s -> case eitherDecode (LBS.pack s) :: Either String TailOptions of
+              Left msg -> Left msg
+              Right o -> Right o
+      case tailOptsResult of
+        Left msg -> outputError (ParseError ("Invalid options JSON: " <> msg))
+        Right tailOpts -> case requireCfConfig cfg of
+          Left err -> outputError err
+          Right cfCfg -> do
+            let worker = maybe "collector" T.unpack (tailWorker tailOpts)
+            result <- createTailSession cfCfg (T.pack worker)
+            case result of
+              Left err -> outputError err
+              Right ts -> outputTailSession (jsonOptFormat jsonOpt) ts
 
 applyStatsFilter :: StatsFilter -> [DailyStat] -> [DailyStat]
 applyStatsFilter filt =

@@ -7,11 +7,10 @@ dependencies:
   - base >= 4.7 && < 5
   - aeson
   - bytestring
-  - http-client
-  - http-client-tls
-  - http-types
+  - modern-uri
   - optparse-applicative
   - prettyprinter
+  - req
   - text
 
 executables:

@@ -13,6 +13,15 @@ module Hwctl.Types
   , StatsSummary (..)
   , defaultStatsFilter
   , AppError (..)
+  , CfApiResponse (..)
+  , QueueInfo (..)
+  , QueueMessage (..)
+  , QueuePullOptions (..)
+  , defaultQueuePullOptions
+  , QueuePullResponse (..)
+  , TailSession (..)
+  , TailOptions (..)
+  , defaultTailOptions
   ) where
 
 import Data.Aeson
@@ -178,10 +187,159 @@ data StatsSummary = StatsSummary
 
 instance ToJSON StatsSummary
 
+-- Cloudflare API response wrapper
+data CfApiResponse a = CfApiResponse
+  { cfResult :: a
+  , cfSuccess :: Bool
+  }
+  deriving (Show, Eq, Generic)
+
+instance (FromJSON a) => FromJSON (CfApiResponse a) where
+  parseJSON = withObject "CfApiResponse" $ \v ->
+    CfApiResponse <$> v .: "result" <*> v .: "success"
+
+-- Queue types
+data QueueInfo = QueueInfo
+  { queueId :: Text
+  , queueName :: Text
+  , queueCreatedOn :: Maybe Text
+  , queueModifiedOn :: Maybe Text
+  , queueProducersTotalCount :: Maybe Int
+  , queueConsumersTotalCount :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON QueueInfo where
+  parseJSON = withObject "QueueInfo" $ \v ->
+    QueueInfo
+      <$> v .: "queue_id"
+      <*> v .: "queue_name"
+      <*> v .:? "created_on"
+      <*> v .:? "modified_on"
+      <*> v .:? "producers_total_count"
+      <*> v .:? "consumers_total_count"
+
+instance ToJSON QueueInfo where
+  toJSON q =
+    object
+      [ "queue_id" .= queueId q
+      , "queue_name" .= queueName q
+      , "created_on" .= queueCreatedOn q
+      , "modified_on" .= queueModifiedOn q
+      , "producers_total_count" .= queueProducersTotalCount q
+      , "consumers_total_count" .= queueConsumersTotalCount q
+      ]
+
+data QueueMessage = QueueMessage
+  { msgId :: Text
+  , msgBody :: Text
+  , msgTimestampMs :: Int
+  , msgAttempts :: Int
+  , msgLeaseId :: Maybe Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON QueueMessage where
+  parseJSON = withObject "QueueMessage" $ \v ->
+    QueueMessage
+      <$> v .: "id"
+      <*> v .: "body"
+      <*> v .: "timestamp_ms"
+      <*> v .: "attempts"
+      <*> v .:? "lease_id"
+
+instance ToJSON QueueMessage where
+  toJSON m =
+    object
+      [ "id" .= msgId m
+      , "body" .= msgBody m
+      , "timestamp_ms" .= msgTimestampMs m
+      , "attempts" .= msgAttempts m
+      , "lease_id" .= msgLeaseId m
+      ]
+
+data QueuePullOptions = QueuePullOptions
+  { pullBatchSize :: Maybe Int
+  , pullVisibilityTimeoutMs :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON QueuePullOptions where
+  parseJSON = withObject "QueuePullOptions" $ \v ->
+    QueuePullOptions
+      <$> v .:? "batch_size"
+      <*> v .:? "visibility_timeout_ms"
+
+instance ToJSON QueuePullOptions where
+  toJSON o =
+    object
+      [ "batch_size" .= pullBatchSize o
+      , "visibility_timeout_ms" .= pullVisibilityTimeoutMs o
+      ]
+
+defaultQueuePullOptions :: QueuePullOptions
+defaultQueuePullOptions = QueuePullOptions (Just 10) (Just 30000)
+
+data QueuePullResponse = QueuePullResponse
+  { pullMessages :: [QueueMessage]
+  , pullMessageBacklogCount :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON QueuePullResponse where
+  parseJSON = withObject "QueuePullResponse" $ \v ->
+    QueuePullResponse
+      <$> v .: "messages"
+      <*> v .:? "message_backlog_count"
+
+instance ToJSON QueuePullResponse where
+  toJSON r =
+    object
+      [ "messages" .= pullMessages r
+      , "message_backlog_count" .= pullMessageBacklogCount r
+      ]
+
+-- Tail types
+data TailSession = TailSession
+  { tailId :: Text
+  , tailUrl :: Text
+  , tailExpiresAt :: Maybe Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON TailSession where
+  parseJSON = withObject "TailSession" $ \v ->
+    TailSession
+      <$> v .: "id"
+      <*> v .: "url"
+      <*> v .:? "expires_at"
+
+instance ToJSON TailSession where
+  toJSON t =
+    object
+      [ "id" .= tailId t
+      , "url" .= tailUrl t
+      , "expires_at" .= tailExpiresAt t
+      ]
+
+data TailOptions = TailOptions
+  { tailWorker :: Maybe Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON TailOptions where
+  parseJSON = withObject "TailOptions" $ \v ->
+    TailOptions <$> v .:? "worker"
+
+defaultTailOptions :: TailOptions
+defaultTailOptions = TailOptions (Just "collector")
+
+-- Error types
 data AppError
   = HttpError String
   | ApiError Int String
   | ParseError String
+  | ConfigError String
   deriving (Show, Eq)
 
 instance ToJSON AppError where
@@ -191,3 +349,5 @@ instance ToJSON AppError where
     object ["error" .= object ["code" .= ("API_ERROR_" <> show code), "message" .= msg]]
   toJSON (ParseError msg) =
     object ["error" .= object ["code" .= ("PARSE_ERROR" :: Text), "message" .= msg]]
+  toJSON (ConfigError msg) =
+    object ["error" .= object ["code" .= ("CONFIG_ERROR" :: Text), "message" .= msg]]

@@ -27,7 +27,7 @@ tools/
 - **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect
 - **型管理**: Effect Schema, @sho/models
-- **Admin CLI**: Haskell (Stack), optparse-applicative, aeson
+- **Admin CLI**: Haskell (Stack), optparse-applicative, aeson, req
 
 ## セットアップ
 
