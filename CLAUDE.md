@@ -64,7 +64,6 @@ stack exec hwctl -- jobs list     # List jobs (JSON)
 stack exec hwctl -- jobs get ID   # Get job by number (JSON)
 stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
 stack exec hwctl -- queue status  # Queue status (JSON)
-stack exec hwctl -- queue messages '{"batch_size": 5}'  # Pull queue messages
 stack exec hwctl -- logs tail     # Create tail session (JSON)
 stack exec hwctl -- crawler run   # Trigger crawler manually (JSON)
 stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)

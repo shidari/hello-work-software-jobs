@@ -7,10 +7,10 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages, triggerCrawler)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, getJob, getQueueStatus, listJobs, triggerCrawler)
 import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireQueueId)
-import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession, outputTriggerResult)
-import Hwctl.Types (AppError (..), DailyStat (..), QueuePullOptions, StatsFilter (..), StatsResponse (..), TailOptions (..), defaultQueuePullOptions, defaultStatsFilter, defaultTailOptions)
+import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobs, outputQueueStatus, outputTailSession, outputTriggerResult)
+import Hwctl.Types (AppError (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
 data Command
@@ -18,7 +18,6 @@ data Command
   | JobsGet GetOpts
   | StatsDailyCmd StatsOpts
   | QueueStatusCmd FormatOpts
-  | QueueMessagesCmd JsonOpts
   | LogsTailCmd JsonOpts
   | CrawlerRunCmd
   | CrawlerHistoryCmd HistoryOpts
@@ -113,7 +112,6 @@ commandParser =
     queueSubcommand =
       hsubparser
         ( command "status" (info (QueueStatusCmd <$> formatOptsParser) (progDesc "Get queue status"))
-            <> command "messages" (info (QueueMessagesCmd <$> jsonOptsParser "OPTIONS_JSON") (progDesc "Pull queue messages"))
         )
     logsSubcommand =
       hsubparser
@@ -182,23 +180,6 @@ runApp = do
             case result of
               Left err -> outputError err
               Right qi -> outputQueueStatus (fmtFormat fmtOpt) qi
-    QueueMessagesCmd jsonOpt -> do
-      let pullOptsResult = case jsonOptJson jsonOpt of
-            Nothing -> Right defaultQueuePullOptions
-            Just s -> case eitherDecode (LBS.pack s) :: Either String QueuePullOptions of
-              Left msg -> Left msg
-              Right o -> Right o
-      case pullOptsResult of
-        Left msg -> outputError (ParseError ("Invalid options JSON: " <> msg))
-        Right pullOpts -> case requireCfConfig cfg of
-          Left err -> outputError err
-          Right cfCfg -> case requireQueueId cfg of
-            Left err -> outputError err
-            Right qid -> do
-              result <- pullQueueMessages cfCfg qid pullOpts
-              case result of
-                Left err -> outputError err
-                Right resp -> outputQueueMessages (jsonOptFormat jsonOpt) resp
     LogsTailCmd jsonOpt -> do
       let tailOptsResult = case jsonOptJson jsonOpt of
             Nothing -> Right defaultTailOptions

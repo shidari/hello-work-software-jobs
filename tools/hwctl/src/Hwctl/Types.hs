@@ -15,10 +15,6 @@ module Hwctl.Types
   , AppError (..)
   , CfApiResponse (..)
   , QueueInfo (..)
-  , QueueMessage (..)
-  , QueuePullOptions (..)
-  , defaultQueuePullOptions
-  , QueuePullResponse (..)
   , TailSession (..)
   , TailOptions (..)
   , defaultTailOptions

@@ -111,7 +111,6 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 | `hwctl jobs get <jobNumber> [--table]` | 個別求人取得 |
 | `hwctl stats daily [FILTER_JSON] [--table]` | 日ごとの新着求人数サマリー |
 | `hwctl queue status [--table]` | Cloudflare Queue 状態取得 |
-| `hwctl queue messages [OPTIONS_JSON] [--table]` | Queue メッセージ pull |
 | `hwctl logs tail [OPTIONS_JSON] [--table]` | Worker Tail セッション作成 |
 | `hwctl crawler run [--table]` | クローラー手動トリガー |
 | `hwctl crawler history [--limit N]` | クローラー実行履歴 |
