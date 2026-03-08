@@ -6,7 +6,7 @@
     "gh@2.87.3",
     "pinact@3.8.0",
     "stack@3.9.1",
-    "jq@latest"
+    "jq@1.8.1"
   ],
   "shell": {
     "init_hook": [

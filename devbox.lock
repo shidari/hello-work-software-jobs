@@ -53,9 +53,9 @@
       "last_modified": "2026-01-30T02:32:49Z",
       "resolved": "github:NixOS/nixpkgs/6308c3b21396534d8aaeac46179c14c439a89b8a?lastModified=1769740369&narHash=sha256-xKPyJoMoXfXpDM5DFDZDsi9PHArf2k5BJjvReYXoFpM%3D"
     },
-    "jq@latest": {
-      "last_modified": "2026-03-05T09:48:44Z",
-      "resolved": "github:NixOS/nixpkgs/289c8a834fbf87af1f01cb78f479537ef5219a0b#jq",
+    "jq@1.8.1": {
+      "last_modified": "2026-03-05T18:52:33Z",
+      "resolved": "github:NixOS/nixpkgs/917fec990948658ef1ccd07cef2a1ef060786846#jq",
       "source": "devbox-search",
       "version": "1.8.1",
       "systems": {
