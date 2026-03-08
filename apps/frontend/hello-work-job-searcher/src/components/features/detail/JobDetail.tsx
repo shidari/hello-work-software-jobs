@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/Item";
 import { formatDate } from "@/util";
 import styles from "./JobDetail.module.css";
+import { WorkPlaceMap } from "./WorkPlaceMap";
 
 export function JobDetail(props: { jobDetail: UnBrandedJob }) {
   const {
@@ -64,6 +65,7 @@ export function JobDetail(props: { jobDetail: UnBrandedJob }) {
             <ItemDescription>{workPlace ?? "未記載"}</ItemDescription>
           </ItemContent>
         </Item>
+        {workPlace && <WorkPlaceMap address={workPlace} />}
         <Item variant="outline">
           <ItemContent>
             <ItemTitle>紹介期限</ItemTitle>
