@@ -121,7 +121,7 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 - **デフォルト JSON 出力**: `--table` で human-readable テーブル表示に切替
 - **構造化エラー**: `{ "error": { "code": "...", "message": "..." } }` を stderr に出力
 - **終了コード**: 0=成功, 1=エラー
-- **設定**: 環境変数 `HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
+- **設定**: `.env` ファイル（dotenv-hs で自動読み込み）+ 環境変数。`HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
 
 ---
 
