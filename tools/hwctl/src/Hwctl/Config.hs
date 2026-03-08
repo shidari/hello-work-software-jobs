@@ -32,15 +32,23 @@ data CfConfig = CfConfig
   }
   deriving (Show)
 
+-- | 空文字列を Nothing として扱う lookupEnv
+lookupEnvNonEmpty :: String -> IO (Maybe String)
+lookupEnvNonEmpty name = do
+  val <- lookupEnv name
+  pure $ case val of
+    Just "" -> Nothing
+    other -> other
+
 loadConfig :: IO Config
 loadConfig = do
   loadFile defaultConfig `catch` (\(_ :: SomeException) -> pure ())
   ep <- lookupEnv "HWCTL_ENDPOINT"
-  key <- lookupEnv "HWCTL_API_KEY"
-  cep <- lookupEnv "HWCTL_COLLECTOR_ENDPOINT"
-  accId <- lookupEnv "HWCTL_CF_ACCOUNT_ID"
-  token <- lookupEnv "HWCTL_CF_API_TOKEN"
-  qId <- lookupEnv "HWCTL_CF_QUEUE_ID"
+  key <- lookupEnvNonEmpty "HWCTL_API_KEY"
+  cep <- lookupEnvNonEmpty "HWCTL_COLLECTOR_ENDPOINT"
+  accId <- lookupEnvNonEmpty "HWCTL_CF_ACCOUNT_ID"
+  token <- lookupEnvNonEmpty "HWCTL_CF_API_TOKEN"
+  qId <- lookupEnvNonEmpty "HWCTL_CF_QUEUE_ID"
   pure
     Config
       { endpoint = maybe "http://localhost:8787" id ep

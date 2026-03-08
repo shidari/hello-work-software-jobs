@@ -8,7 +8,6 @@ module Hwctl.Client
   , getJob
   , fetchDailyStats
   , getQueueStatus
-  , pullQueueMessages
   , createTailSession
   , triggerCrawler
   , fetchCrawlerRuns
@@ -29,12 +28,9 @@ import Hwctl.Types
   , Job
   , JobsResponse
   , QueueInfo
-  , QueuePullOptions (..)
-  , QueuePullResponse
   , StatsResponse
   , TailSession
   , TriggerResponse
-  , defaultQueuePullOptions
   )
 import Network.HTTP.Req
 import Text.URI (mkURI)
@@ -98,19 +94,6 @@ getQueueStatus cf qid = runReq defaultHttpConfig $ do
   let url = cfBaseUrl /: "accounts" /: T.pack (cfAccount cf) /: "queues" /: T.pack qid
   resp <- req GET url NoReqBody lbsResponse (cfAuth cf)
   pure $ decodeCfResponse (responseBody resp)
-
-pullQueueMessages :: CfConfig -> String -> QueuePullOptions -> IO (Either AppError QueuePullResponse)
-pullQueueMessages cf qid pullOpts = runReq defaultHttpConfig $ do
-  let url = cfBaseUrl /: "accounts" /: T.pack (cfAccount cf) /: "queues" /: T.pack qid /: "messages" /: "pull"
-      merged = mergeWithDefaults pullOpts
-  resp <- req POST url (ReqBodyJson merged) lbsResponse (cfAuth cf)
-  pure $ decodeCfResponse (responseBody resp)
-  where
-    mergeWithDefaults o =
-      QueuePullOptions
-        { pullBatchSize = maybe (pullBatchSize defaultQueuePullOptions) Just (pullBatchSize o)
-        , pullVisibilityTimeoutMs = maybe (pullVisibilityTimeoutMs defaultQueuePullOptions) Just (pullVisibilityTimeoutMs o)
-        }
 
 createTailSession :: CfConfig -> T.Text -> IO (Either AppError TailSession)
 createTailSession cf worker = runReq defaultHttpConfig $ do

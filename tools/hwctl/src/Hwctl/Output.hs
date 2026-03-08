@@ -6,7 +6,6 @@ module Hwctl.Output
   , outputJobs
   , outputDailyStats
   , outputQueueStatus
-  , outputQueueMessages
   , outputTailSession
   , outputTriggerResult
   , outputCrawlerRuns
@@ -17,7 +16,7 @@ import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, CrawlerRun (..), DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
+import Hwctl.Types (AppError, CrawlerRun (..), DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -101,25 +100,6 @@ outputQueueStatus Table qi =
       , "Producers:   " <> maybe "-" show (queueProducersTotalCount qi)
       , "Consumers:   " <> maybe "-" show (queueConsumersTotalCount qi)
       ]
-
-outputQueueMessages :: OutputFormat -> QueuePullResponse -> IO ()
-outputQueueMessages JSON resp = LBS.putStrLn (encode resp)
-outputQueueMessages Table resp = do
-  let msgs = pullMessages resp
-  if null msgs
-    then putStrLn "(メッセージなし)"
-    else do
-      putStrLn "ID                                    Attempts  Timestamp"
-      mapM_ printMsg msgs
-  putStrLn $ "\nBacklog: " <> maybe "-" show (pullMessageBacklogCount resp)
-  where
-    printMsg m =
-      putStrLn $
-        T.unpack (msgId m)
-          <> "  "
-          <> show (msgAttempts m)
-          <> "  "
-          <> show (msgTimestampMs m)
 
 outputTailSession :: OutputFormat -> TailSession -> IO ()
 outputTailSession JSON ts = LBS.putStrLn (encode ts)
