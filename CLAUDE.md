@@ -32,6 +32,7 @@ hello-work-software-jobs/
 | Crawler | Cloudflare Workers, Hono, Browser Rendering, Queues, @cloudflare/playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
 | Admin CLI | Haskell (Stack), optparse-applicative, aeson, req |
+| Secrets | dotenvx (API, Frontend) |
 | Quality | Biome, Playwright/Vitest |
 
 ## Common Commands
