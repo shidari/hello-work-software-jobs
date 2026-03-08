@@ -2,7 +2,7 @@ import { JobNumber } from "@sho/models";
 import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
 import type { Locator } from "../browser";
 import {
-  JobSearchPageTag,
+  type FirstJobListPage,
   navigateByCriteria,
   openJobSearchPage,
 } from "../page";
@@ -76,8 +76,9 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
   );
 });
 
-const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* () {
-  const page = yield* JobSearchPageTag;
+const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
+  page: FirstJobListPage,
+) {
   return yield* Effect.tryPromise({
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
     catch: (e) =>
@@ -102,8 +103,9 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* () {
   );
 });
 
-const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* () {
-  const page = yield* JobSearchPageTag;
+const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
+  page: FirstJobListPage,
+) {
   return yield* Effect.tryPromise({
     try: async () => {
       const nextPageBtn = page.locator('input[value="次へ＞"]').first();
@@ -120,8 +122,9 @@ const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* () {
   );
 });
 
-const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* () {
-  const page = yield* JobSearchPageTag;
+const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
+  page: FirstJobListPage,
+) {
   yield* Effect.tryPromise({
     try: async () => {
       const nextButton = page.locator('input[value="次へ＞"]').first();
@@ -136,21 +139,24 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* () {
   );
 });
 
-const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (args: {
-  count: number;
-  roughMaxCount: number;
-  nextPageDelayMs: number;
-}) {
+const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
+  page: FirstJobListPage,
+  args: {
+    count: number;
+    roughMaxCount: number;
+    nextPageDelayMs: number;
+  },
+) {
   const { count, roughMaxCount, nextPageDelayMs } = args;
-  const jobOverviewList = yield* listJobOverviewElem();
+  const jobOverviewList = yield* listJobOverviewElem(page);
   const jobNumbers = (yield* extractJobNumbers(jobOverviewList)).map(
     (jobNumber) => ({ jobNumber }),
   );
   const chunked = Chunk.fromIterable(jobNumbers);
   const tmpTotal = count + jobNumbers.length;
-  const nextPageEnabled = yield* isNextPageEnabled();
+  const nextPageEnabled = yield* isNextPageEnabled(page);
   if (nextPageEnabled) {
-    yield* goToNextJobListPage();
+    yield* goToNextJobListPage(page);
   }
   yield* delay(nextPageDelayMs);
   return [
@@ -215,19 +221,20 @@ export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
   );
   const jobSearchPage = yield* openJobSearchPage();
   yield* Effect.logInfo("start crawling...");
-  const jobLinks = yield* Effect.gen(function* () {
-    yield* navigateByCriteria(config.jobSearchCriteria);
-    const stream = Stream.paginateChunkEffect(
-      {
-        count: 0,
-        roughMaxCount: config.roughMaxCount,
-        nextPageDelayMs: config.nextPageDelayMs,
-      },
-      fetchJobMetaData,
-    );
-    const chunk = yield* Stream.runCollect(stream);
-    return Chunk.toArray(chunk);
-  }).pipe(Effect.provideService(JobSearchPageTag, jobSearchPage));
+  const firstJobListPage = yield* navigateByCriteria(
+    jobSearchPage,
+    config.jobSearchCriteria,
+  );
+  const stream = Stream.paginateChunkEffect(
+    {
+      count: 0,
+      roughMaxCount: config.roughMaxCount,
+      nextPageDelayMs: config.nextPageDelayMs,
+    },
+    (args) => fetchJobMetaData(firstJobListPage, args),
+  );
+  const chunk = yield* Stream.runCollect(stream);
+  const jobLinks = Chunk.toArray(chunk);
   yield* Effect.logInfo(`crawling finished. total: ${jobLinks.length}`);
   return jobLinks;
 });
