@@ -1,5 +1,5 @@
-import type { LaunchOptions } from "playwright";
 import { Data, Effect, Layer } from "effect";
+import type { LaunchOptions } from "playwright";
 
 // ── BrowserWorker 型 (Cloudflare Browser Rendering) ──
 

@@ -1,8 +1,5 @@
 import { Effect, Layer, Logger, LogLevel } from "effect";
-import {
-  PlaywrightBrowserConfig,
-  PlaywrightChromium,
-} from "../browser";
+import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,

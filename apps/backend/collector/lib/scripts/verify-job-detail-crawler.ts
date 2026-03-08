@@ -1,9 +1,6 @@
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
-import {
-  PlaywrightBrowserConfig,
-  PlaywrightChromium,
-} from "../browser";
+import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
