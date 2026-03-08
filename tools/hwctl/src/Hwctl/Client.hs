@@ -25,6 +25,7 @@ import Hwctl.Types
   ( AppError (..)
   , CfApiResponse (..)
   , CrawlerRun
+  , CrawlerRunOpts (..)
   , Job
   , JobsResponse
   , QueueInfo
@@ -103,16 +104,21 @@ createTailSession cf worker = runReq defaultHttpConfig $ do
 
 -- Collector trigger
 
-triggerCrawler :: String -> String -> Maybe String -> IO (Either AppError TriggerResponse)
-triggerCrawler collectorEp key mPeriod = withEndpointStr collectorEp $ \case
+triggerCrawler :: String -> String -> CrawlerRunOpts -> IO (Either AppError TriggerResponse)
+triggerCrawler collectorEp key croOpts = withEndpointStr collectorEp $ \case
   Left (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty (("period" =:) . T.pack) mPeriod
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> crawlerQueryParams croOpts
     resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
   Right (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty (("period" =:) . T.pack) mPeriod
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> crawlerQueryParams croOpts
     resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
+
+crawlerQueryParams :: CrawlerRunOpts -> Option scheme
+crawlerQueryParams croOpts =
+  maybe mempty ("period" =:) (croPeriod croOpts)
+    <> maybe mempty ("maxCount" =:) (croMaxCount croOpts)
 
 -- Crawler runs
 

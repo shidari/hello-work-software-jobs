@@ -10,7 +10,7 @@ import qualified Data.Text as T
 import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, getJob, getQueueStatus, listJobs, triggerCrawler)
 import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireQueueId)
 import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobs, outputQueueStatus, outputTailSession, outputTriggerResult)
-import Hwctl.Types (AppError (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultStatsFilter, defaultTailOptions)
+import Hwctl.Types (AppError (..), CrawlerRunOpts (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultCrawlerRunOpts, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
 data Command
@@ -24,7 +24,7 @@ data Command
   deriving (Show)
 
 data RunOpts = RunOpts
-  { runPeriod :: Maybe String
+  { runOptsJson :: Maybe String
   }
   deriving (Show)
 
@@ -129,7 +129,7 @@ commandParser =
         )
     runOptsParser =
       RunOpts
-        <$> optional (strOption (long "period" <> metavar "PERIOD" <> help "Search period: today (default), week, all"))
+        <$> optional (argument str (metavar "OPTIONS_JSON" <> help "Options JSON (e.g., '{\"period\":\"week\",\"maxCount\":50}')"))
     historyOptsParser =
       HistoryOpts
         <$> optional (option auto (long "limit" <> short 'n' <> metavar "N" <> help "Number of runs to show (default: 20)"))
@@ -205,15 +205,30 @@ runApp = do
               Left err -> outputError err
               Right ts -> outputTailSession (jsonOptFormat jsonOpt) ts
     CrawlerRunCmd runOpt -> do
-      case requireCollectorEndpoint cfg of
-        Left err -> outputError err
-        Right ep -> case requireApiKey cfg of
-          Left err -> outputError err
-          Right key -> do
-            result <- triggerCrawler ep key (runPeriod runOpt)
-            case result of
-              Left err -> outputError err
-              Right tr -> outputTriggerResult tr
+      let optsResult = case runOptsJson runOpt of
+            Nothing -> Right defaultCrawlerRunOpts
+            Just s -> case eitherDecode (LBS.pack s) of
+              Left msg -> Left msg
+              Right o -> Right o
+      case optsResult of
+        Left msg -> outputError (ParseError ("Invalid options JSON: " <> msg))
+        Right croOpts -> do
+          let validPeriods = ["today", "week", "all"] :: [T.Text]
+          case croPeriod croOpts of
+            Just p | p `notElem` validPeriods ->
+              outputError (ParseError ("Invalid period: " <> T.unpack p <> ". Must be one of: today, week, all"))
+            _ -> case croMaxCount croOpts of
+              Just n | n <= 0 || n > 5000 ->
+                outputError (ParseError ("maxCount must be between 1 and 5000, got: " <> show n))
+              _ -> case requireCollectorEndpoint cfg of
+                Left err -> outputError err
+                Right ep -> case requireApiKey cfg of
+                  Left err -> outputError err
+                  Right key -> do
+                    result <- triggerCrawler ep key croOpts
+                    case result of
+                      Left err -> outputError err
+                      Right tr -> outputTriggerResult tr
     CrawlerHistoryCmd histOpt -> do
       case requireCollectorEndpoint cfg of
         Left err -> outputError err
