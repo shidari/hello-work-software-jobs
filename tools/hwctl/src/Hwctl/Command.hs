@@ -7,9 +7,9 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, getJob, getQueueStatus, listJobs, triggerCrawler)
-import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireQueueId)
-import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobs, outputQueueStatus, outputTailSession, outputTriggerResult)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, fetchJobDetailRuns, getJob, getQueueStatus, listJobs, triggerCrawler)
+import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireDlqId, requireQueueId)
+import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobDetailRuns, outputJobs, outputQueueStatus, outputTailSession, outputTriggerResult)
 import Hwctl.Types (AppError (..), CrawlerRunOpts (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultCrawlerRunOpts, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
@@ -18,9 +18,11 @@ data Command
   | JobsGet GetOpts
   | StatsDailyCmd StatsOpts
   | QueueStatusCmd FormatOpts
+  | QueueDlqCmd FormatOpts
   | LogsTailCmd JsonOpts
   | CrawlerRunCmd RunOpts
   | CrawlerHistoryCmd HistoryOpts
+  | JobDetailHistoryCmd HistoryOpts
   deriving (Show)
 
 data RunOpts = RunOpts
@@ -103,6 +105,7 @@ commandParser =
         <> command "queue" (info queueSubcommand (progDesc "Cloudflare Queue operations"))
         <> command "logs" (info logsSubcommand (progDesc "Worker logs"))
         <> command "crawler" (info crawlerSubcommand (progDesc "Crawler operations"))
+        <> command "job-detail" (info jobDetailSubcommand (progDesc "Job detail ETL operations"))
     )
   where
     jobsSubcommand =
@@ -117,6 +120,7 @@ commandParser =
     queueSubcommand =
       hsubparser
         ( command "status" (info (QueueStatusCmd <$> formatOptsParser) (progDesc "Get queue status"))
+            <> command "dlq" (info (QueueDlqCmd <$> formatOptsParser) (progDesc "Get DLQ status"))
         )
     logsSubcommand =
       hsubparser
@@ -126,6 +130,10 @@ commandParser =
       hsubparser
         ( command "run" (info (CrawlerRunCmd <$> runOptsParser) (progDesc "Trigger crawler manually"))
             <> command "history" (info (CrawlerHistoryCmd <$> historyOptsParser) (progDesc "Show crawler run history"))
+        )
+    jobDetailSubcommand =
+      hsubparser
+        ( command "history" (info (JobDetailHistoryCmd <$> historyOptsParser) (progDesc "Show job detail ETL run history"))
         )
     runOptsParser =
       RunOpts
@@ -229,6 +237,26 @@ runApp = do
                     case result of
                       Left err -> outputError err
                       Right tr -> outputTriggerResult tr
+    QueueDlqCmd fmtOpt -> do
+      case requireCfConfig cfg of
+        Left err -> outputError err
+        Right cfCfg -> case requireDlqId cfg of
+          Left err -> outputError err
+          Right did -> do
+            result <- getQueueStatus cfCfg did
+            case result of
+              Left err -> outputError err
+              Right qi -> outputQueueStatus (fmtFormat fmtOpt) qi
+    JobDetailHistoryCmd histOpt -> do
+      case requireCollectorEndpoint cfg of
+        Left err -> outputError err
+        Right ep -> case requireApiKey cfg of
+          Left err -> outputError err
+          Right key -> do
+            result <- fetchJobDetailRuns ep key (historyLimit histOpt)
+            case result of
+              Left err -> outputError err
+              Right runs -> outputJobDetailRuns runs
     CrawlerHistoryCmd histOpt -> do
       case requireCollectorEndpoint cfg of
         Left err -> outputError err

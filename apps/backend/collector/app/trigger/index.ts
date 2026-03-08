@@ -1,4 +1,4 @@
-import { createD1DB, selectCrawlerRuns } from "@sho/db";
+import { createD1DB, selectCrawlerRuns, selectJobDetailRuns } from "@sho/db";
 import { Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { handleScheduled } from "../../functions/ET-JobNumberHandler/handler";
@@ -34,6 +34,12 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
         const limit = Number(c.req.query("limit") ?? "20");
         const db = createD1DB(c.env.DB);
         const runs = await selectCrawlerRuns(db, limit);
+        return c.json(runs);
+      })
+      .get("/job-detail-runs", auth.middleware, async (c) => {
+        const limit = Number(c.req.query("limit") ?? "20");
+        const db = createD1DB(c.env.DB);
+        const runs = await selectJobDetailRuns(db, limit);
         return c.json(runs);
       });
 

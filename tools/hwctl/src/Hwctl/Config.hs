@@ -7,6 +7,7 @@ module Hwctl.Config
   , loadConfig
   , requireCfConfig
   , requireQueueId
+  , requireDlqId
   , requireApiKey
   , requireCollectorEndpoint
   ) where
@@ -23,6 +24,7 @@ data Config = Config
   , cfAccountId :: Maybe String
   , cfApiToken :: Maybe String
   , cfQueueId :: Maybe String
+  , cfDlqId :: Maybe String
   }
   deriving (Show)
 
@@ -49,6 +51,7 @@ loadConfig = do
   accId <- lookupEnvNonEmpty "HWCTL_CF_ACCOUNT_ID"
   token <- lookupEnvNonEmpty "HWCTL_CF_API_TOKEN"
   qId <- lookupEnvNonEmpty "HWCTL_CF_QUEUE_ID"
+  dlqId <- lookupEnvNonEmpty "HWCTL_CF_DLQ_ID"
   pure
     Config
       { endpoint = maybe "http://localhost:8787" id ep
@@ -57,6 +60,7 @@ loadConfig = do
       , cfAccountId = accId
       , cfApiToken = token
       , cfQueueId = qId
+      , cfDlqId = dlqId
       }
 
 requireCfConfig :: Config -> Either AppError CfConfig
@@ -68,6 +72,11 @@ requireQueueId :: Config -> Either AppError String
 requireQueueId cfg = case cfQueueId cfg of
   Just qid -> Right qid
   Nothing -> Left (ConfigError "HWCTL_CF_QUEUE_ID is required")
+
+requireDlqId :: Config -> Either AppError String
+requireDlqId cfg = case cfDlqId cfg of
+  Just did -> Right did
+  Nothing -> Left (ConfigError "HWCTL_CF_DLQ_ID is required")
 
 requireApiKey :: Config -> Either AppError String
 requireApiKey cfg = case apiKey cfg of

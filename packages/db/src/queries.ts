@@ -36,3 +36,12 @@ export async function selectCrawlerRuns(db: Kysely<DB>, limit = 20) {
     .limit(limit)
     .execute();
 }
+
+export async function selectJobDetailRuns(db: Kysely<DB>, limit = 20) {
+  return db
+    .selectFrom("job_detail_runs")
+    .selectAll()
+    .orderBy("startedAt", "desc")
+    .limit(limit)
+    .execute();
+}

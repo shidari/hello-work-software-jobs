@@ -22,6 +22,7 @@ module Hwctl.Types
   , CrawlerRun (..)
   , CrawlerRunOpts (..)
   , defaultCrawlerRunOpts
+  , JobDetailRun (..)
   ) where
 
 import Data.Aeson
@@ -406,6 +407,44 @@ instance FromJSON CrawlerRunOpts where
 
 defaultCrawlerRunOpts :: CrawlerRunOpts
 defaultCrawlerRunOpts = CrawlerRunOpts Nothing Nothing
+
+-- Job detail run types
+data JobDetailRun = JobDetailRun
+  { jdrId :: Int
+  , jdrJobNumber :: Text
+  , jdrStatus :: Text
+  , jdrStage :: Maybe Text
+  , jdrStartedAt :: Text
+  , jdrFinishedAt :: Maybe Text
+  , jdrErrorMessage :: Maybe Text
+  , jdrCreatedAt :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON JobDetailRun where
+  parseJSON = withObject "JobDetailRun" $ \v ->
+    JobDetailRun
+      <$> v .: "id"
+      <*> v .: "jobNumber"
+      <*> v .: "status"
+      <*> v .:? "stage"
+      <*> v .: "startedAt"
+      <*> v .:? "finishedAt"
+      <*> v .:? "errorMessage"
+      <*> v .: "createdAt"
+
+instance ToJSON JobDetailRun where
+  toJSON r =
+    object
+      [ "id" .= jdrId r
+      , "jobNumber" .= jdrJobNumber r
+      , "status" .= jdrStatus r
+      , "stage" .= jdrStage r
+      , "startedAt" .= jdrStartedAt r
+      , "finishedAt" .= jdrFinishedAt r
+      , "errorMessage" .= jdrErrorMessage r
+      , "createdAt" .= jdrCreatedAt r
+      ]
 
 -- Error types
 data AppError

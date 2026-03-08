@@ -68,6 +68,8 @@ stack exec hwctl -- queue status  # Queue status (JSON)
 stack exec hwctl -- logs tail     # Create tail session (JSON)
 stack exec hwctl -- crawler run [OPTIONS_JSON]  # Trigger crawler (e.g., '{"period":"week","maxCount":50}')
 stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)
+stack exec hwctl -- job-detail history [--limit N]  # Job detail ETL run history (JSON)
+stack exec hwctl -- queue dlq [--table]  # DLQ status (JSON)
 ```
 
 ## API Endpoints
@@ -78,6 +80,7 @@ stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)
 - `GET /stats/daily` - Daily new job count summary (with job numbers)
 - `POST /trigger` - Trigger crawler manually (x-api-key auth, collector only, `?period=today|week|all&maxCount=N`)
 - `GET /crawler-runs` - Crawler run history (x-api-key auth, collector only)
+- `GET /job-detail-runs` - Job detail ETL run history (x-api-key auth, collector only)
 
 ## Database
 
@@ -123,7 +126,7 @@ stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)
 - Frontend: `JOB_STORE_ENDPOINT`
 - API: Cloudflare credentials
 - Crawler: `CLOUDFLARE_API_TOKEN`, `JOB_STORE_ENDPOINT`, `API_KEY` (wrangler secrets)
-- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
+- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`, `HWCTL_CF_DLQ_ID`
 
 ## CI/CD
 
