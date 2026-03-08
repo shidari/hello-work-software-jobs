@@ -10,6 +10,7 @@ module Hwctl.Client
   , getQueueStatus
   , pullQueueMessages
   , createTailSession
+  , triggerCrawler
   , JobsQuery (..)
   , defaultQuery
   ) where
@@ -30,6 +31,7 @@ import Hwctl.Types
   , QueuePullResponse
   , StatsResponse
   , TailSession
+  , TriggerResponse
   , defaultQueuePullOptions
   )
 import Network.HTTP.Req
@@ -114,14 +116,33 @@ createTailSession cf worker = runReq defaultHttpConfig $ do
   resp <- req POST url (ReqBodyJson (object [])) lbsResponse (cfAuth cf)
   pure $ decodeCfResponse (responseBody resp)
 
+-- Collector trigger
+
+triggerCrawler :: String -> String -> IO (Either AppError TriggerResponse)
+triggerCrawler collectorEp key = withEndpointStr collectorEp $ \case
+  Left (url, baseOpts) -> do
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key))
+    resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
+    pure $ decodeResponse (responseBody resp)
+  Right (url, baseOpts) -> do
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key))
+    resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
+    pure $ decodeResponse (responseBody resp)
+
 -- Helpers
 
 withEndpoint ::
   Config ->
   (Either (Url 'Http, Option 'Http) (Url 'Https, Option 'Https) -> Req (Either AppError a)) ->
   IO (Either AppError a)
-withEndpoint cfg f = do
-  let baseUrl = T.pack (endpoint cfg)
+withEndpoint cfg = withEndpointStr (endpoint cfg)
+
+withEndpointStr ::
+  String ->
+  (Either (Url 'Http, Option 'Http) (Url 'Https, Option 'Https) -> Req (Either AppError a)) ->
+  IO (Either AppError a)
+withEndpointStr ep f = do
+  let baseUrl = T.pack ep
       go = do
         uri <- mkURI baseUrl
         case useHttpURI uri of
@@ -131,7 +152,7 @@ withEndpoint cfg f = do
             Nothing -> Nothing
   case go of
     Just action -> action `catch` (\(e :: SomeException) -> pure $ Left (HttpError $ show e))
-    Nothing -> pure $ Left (HttpError $ "Invalid URL: " <> endpoint cfg)
+    Nothing -> pure $ Left (HttpError $ "Invalid URL: " <> ep)
 
 decodeResponse :: (FromJSON a) => LBS.ByteString -> Either AppError a
 decodeResponse body = case eitherDecode body of

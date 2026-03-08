@@ -1,3 +1,5 @@
+import { ConfigProvider, Effect, Layer } from "effect";
+import { TriggerApp } from "../app/trigger";
 import type { BrowserWorker } from "../lib/browser";
 import { handleQueue } from "./E-T-L-JobDetailHandler/handler";
 import { handleScheduled } from "./ET-JobNumberHandler/handler";
@@ -10,6 +12,23 @@ export type Env = {
 };
 
 export default {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
+    const program = Effect.gen(function* () {
+      const app = yield* TriggerApp;
+      return app;
+    }).pipe(
+      Effect.provide(TriggerApp.Default),
+      Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
+    );
+
+    const triggerApp = await Effect.runPromise(program);
+    return triggerApp.fetch(request, env, ctx);
+  },
+
   async scheduled(
     _event: ScheduledEvent,
     env: Env,

@@ -8,6 +8,7 @@ module Hwctl.Output
   , outputQueueStatus
   , outputQueueMessages
   , outputTailSession
+  , outputTriggerResult
   , outputError
   ) where
 
@@ -15,7 +16,7 @@ import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), WageRange (..))
+import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -131,6 +132,9 @@ outputTailSession Table ts =
       , "接続コマンド:"
       , "  wscat -c \"" <> T.unpack (tailUrl ts) <> "\""
       ]
+
+outputTriggerResult :: TriggerResponse -> IO ()
+outputTriggerResult tr = LBS.putStrLn (encode tr)
 
 unlines' :: [String] -> String
 unlines' = foldr (\a b -> if null b then a else a <> "\n" <> b) ""

@@ -7,9 +7,9 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages)
-import Hwctl.Config (loadConfig, requireCfConfig, requireQueueId)
-import Hwctl.Output (OutputFormat (..), outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages, triggerCrawler)
+import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireQueueId)
+import Hwctl.Output (OutputFormat (..), outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession, outputTriggerResult)
 import Hwctl.Types (AppError (..), DailyStat (..), QueuePullOptions, StatsFilter (..), StatsResponse (..), TailOptions (..), defaultQueuePullOptions, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
@@ -20,6 +20,7 @@ data Command
   | QueueStatusCmd FormatOpts
   | QueueMessagesCmd JsonOpts
   | LogsTailCmd JsonOpts
+  | CrawlerRunCmd
   deriving (Show)
 
 data ListOpts = ListOpts
@@ -91,6 +92,7 @@ commandParser =
         <> command "stats" (info statsSubcommand (progDesc "View statistics"))
         <> command "queue" (info queueSubcommand (progDesc "Cloudflare Queue operations"))
         <> command "logs" (info logsSubcommand (progDesc "Worker logs"))
+        <> command "crawler" (info crawlerSubcommand (progDesc "Crawler operations"))
     )
   where
     jobsSubcommand =
@@ -110,6 +112,10 @@ commandParser =
     logsSubcommand =
       hsubparser
         ( command "tail" (info (LogsTailCmd <$> jsonOptsParser "OPTIONS_JSON") (progDesc "Create tail session"))
+        )
+    crawlerSubcommand =
+      hsubparser
+        ( command "run" (info (pure CrawlerRunCmd) (progDesc "Trigger crawler manually"))
         )
 
 opts :: ParserInfo Command
@@ -199,6 +205,16 @@ runApp = do
             case result of
               Left err -> outputError err
               Right ts -> outputTailSession (jsonOptFormat jsonOpt) ts
+    CrawlerRunCmd -> do
+      case requireCollectorEndpoint cfg of
+        Left err -> outputError err
+        Right ep -> case requireApiKey cfg of
+          Left err -> outputError err
+          Right key -> do
+            result <- triggerCrawler ep key
+            case result of
+              Left err -> outputError err
+              Right tr -> outputTriggerResult tr
 
 applyStatsFilter :: StatsFilter -> [DailyStat] -> [DailyStat]
 applyStatsFilter filt =
