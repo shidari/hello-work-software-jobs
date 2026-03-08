@@ -1,8 +1,5 @@
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
-import {
-  PlaywrightBrowserConfig,
-  PlaywrightChromiumBrowser,
-} from "../../lib/browser";
+import { PlaywrightChromium } from "../../lib/browser";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
@@ -19,14 +16,15 @@ export const handleScheduled = async (env: Env) => {
       }),
     );
     return jobs;
-  }).pipe(
+  });
+
+  const runnable = program.pipe(
     Effect.provide(JobNumberCrawlerConfig.Default),
-    Effect.provide(PlaywrightChromiumBrowser.Default),
-    Effect.provide(PlaywrightBrowserConfig.cloudflare(env.MYBROWSER)),
+    Effect.provide(PlaywrightChromium.cloudflare(env.MYBROWSER)),
     Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,
   );
-  const exit = await Effect.runPromiseExit(program);
+  const exit = await Effect.runPromiseExit(runnable);
   if (Exit.isSuccess(exit)) {
     console.log("handler succeeded", JSON.stringify(exit.value, null, 2));
     return exit.value;

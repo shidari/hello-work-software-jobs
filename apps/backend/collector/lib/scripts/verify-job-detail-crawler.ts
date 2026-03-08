@@ -1,6 +1,9 @@
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
-import { PlaywrightBrowserConfig, PlaywrightChromiumBrowser } from "../browser";
+import {
+  PlaywrightBrowserConfig,
+  PlaywrightChromium,
+} from "../browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -13,16 +16,18 @@ async function main() {
     const jobNumber = "01010-06778561" as JobNumber;
     yield* Effect.logInfo(`verifying job detail crawler for ${jobNumber}...`);
     return yield* processJob(jobNumber);
-  }).pipe(
+  });
+
+  const runnable = program.pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.Default),
-    Effect.provide(PlaywrightChromiumBrowser.Default),
+    Effect.provide(PlaywrightChromium.Default),
     Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
-  Effect.runPromise(program).then((result) =>
+  Effect.runPromise(runnable).then((result) =>
     console.dir({ result }, { depth: null }),
   );
 }

@@ -1,5 +1,8 @@
 import { Effect, Layer, Logger, LogLevel } from "effect";
-import { PlaywrightBrowserConfig, PlaywrightChromiumBrowser } from "../browser";
+import {
+  PlaywrightBrowserConfig,
+  PlaywrightChromium,
+} from "../browser";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
@@ -8,16 +11,18 @@ import {
 async function main() {
   const program = Effect.gen(function* () {
     return yield* crawlJobLinks();
-  }).pipe(
+  });
+
+  const runnable = program.pipe(
     Effect.provide(
       Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
     ),
-    Effect.provide(PlaywrightChromiumBrowser.Default),
+    Effect.provide(PlaywrightChromium.Default),
     Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
-  Effect.runPromise(program).then((jobNumbers) =>
+  Effect.runPromise(runnable).then((jobNumbers) =>
     console.dir({ jobNumbers }, { depth: null }),
   );
 }

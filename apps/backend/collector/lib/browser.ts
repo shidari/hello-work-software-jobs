@@ -1,4 +1,5 @@
-import { Context, Data, Effect, Layer } from "effect";
+import type { LaunchOptions } from "playwright";
+import { Data, Effect, Layer } from "effect";
 
 // ── BrowserWorker 型 (Cloudflare Browser Rendering) ──
 
@@ -46,107 +47,86 @@ export interface Locator {
   locator(selector: string, options?: { hasText?: string | RegExp }): Locator;
 }
 
-// ── Config (Context.Tag — 環境切り替え) ──
+// ── Config (Context.Tag — ブラウザ設定) ──
 
-type CloudflareConfig = {
-  readonly mode: "cloudflare";
-  readonly binding: BrowserWorker;
-};
-type DevConfig = { readonly mode: "dev"; readonly headless: boolean };
-
-export class PlaywrightBrowserConfig extends Context.Tag(
+export class PlaywrightBrowserConfig extends Effect.Service<PlaywrightBrowserConfig>()(
   "PlaywrightBrowserConfig",
-)<PlaywrightBrowserConfig, CloudflareConfig | DevConfig>() {
-  static dev = Layer.succeed(PlaywrightBrowserConfig, {
-    mode: "dev" as const,
-    headless: false,
-  });
-
-  static cloudflare = (binding: BrowserWorker) =>
-    Layer.succeed(PlaywrightBrowserConfig, {
-      mode: "cloudflare" as const,
-      binding,
-    });
+  {
+    succeed: {} as LaunchOptions,
+  },
+) {
+  static dev = Layer.succeed(
+    PlaywrightBrowserConfig,
+    new PlaywrightBrowserConfig({ headless: false }),
+  );
 }
 
-// ── Browser (Effect.Service — dev/cloudflare 切り替え) ──
+// ── Chromium (Effect.Service — エンジン提供) ──
 
-class LaunchBrowserError extends Data.TaggedError("LaunchBrowserError")<{
+class ImportError extends Data.TaggedError("ImportError")<{
   readonly message: string;
 }> {}
 
-export class PlaywrightChromiumBrowser extends Effect.Service<PlaywrightChromiumBrowser>()(
-  "PlaywrightChromiumBrowser",
+export class PlaywrightChromium extends Effect.Service<PlaywrightChromium>()(
+  "PlaywrightChromium",
   {
     effect: Effect.gen(function* () {
+      const { chromium } = yield* Effect.tryPromise({
+        try: () => import("playwright"),
+        catch: (e) =>
+          new ImportError({
+            message: `Failed to import playwright: ${String(e)}`,
+          }),
+      });
       const config = yield* PlaywrightBrowserConfig;
-      yield* Effect.logDebug(
-        `launching chromium browser... mode=${config.mode}`,
-      );
-      const browser = yield* Effect.acquireRelease(
-        Effect.gen(function* () {
-          if (config.mode === "cloudflare") {
-            const cfPlaywright = yield* Effect.tryPromise({
-              try: () => import("@cloudflare/playwright"),
-              catch: (e) =>
-                new LaunchBrowserError({
-                  message: `Failed to import @cloudflare/playwright: ${String(e)}`,
-                }),
-            });
-            return yield* Effect.tryPromise({
-              try: () =>
-                cfPlaywright.launch(config.binding) as Promise<Browser>,
-              catch: (e) =>
-                new LaunchBrowserError({
-                  message: `unexpected error.\n${String(e)}`,
-                }),
-            });
-          }
-          // dev mode: regular playwright
-          const { chromium } = yield* Effect.tryPromise({
-            try: () => import("playwright"),
-            catch: (e) =>
-              new LaunchBrowserError({
-                message: `Failed to import playwright: ${String(e)}`,
-              }),
-          });
-          return yield* Effect.tryPromise({
-            try: () =>
-              chromium.launch({
-                headless: config.headless,
-              }) as Promise<Browser>,
-            catch: (e) =>
-              new LaunchBrowserError({
-                message: `unexpected error.\n${String(e)}`,
-              }),
-          });
-        }),
-        (browser) => Effect.promise(() => browser.close()),
-      );
-      return { browser };
+      return {
+        launch: () => chromium.launch(config) as Promise<Browser>,
+      };
     }),
+    dependencies: [PlaywrightBrowserConfig.Default],
   },
-) {}
+) {
+  static cloudflare(binding: BrowserWorker) {
+    return Layer.effect(
+      PlaywrightChromium,
+      Effect.gen(function* () {
+        const cfPlaywright = yield* Effect.tryPromise({
+          try: () => import("@cloudflare/playwright"),
+          catch: (e) =>
+            new ImportError({
+              message: `Failed to import @cloudflare/playwright: ${String(e)}`,
+            }),
+        });
+        return new PlaywrightChromium({
+          launch: () => cfPlaywright.launch(binding) as Promise<Browser>,
+        });
+      }),
+    );
+  }
+}
 
-// ── Context / Page (Effect.fn — 手続き的リソース生成) ──
+// ── Browser / Page (Effect.fn — ライフサイクル管理) ──
 
-class NewContextError extends Data.TaggedError("NewContextError")<{
-  readonly message: string;
-}> {}
-
-class NewPageError extends Data.TaggedError("NewPageError")<{
+class BrowserError extends Data.TaggedError("BrowserError")<{
   readonly message: string;
 }> {}
 
 export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
-  const { browser } = yield* PlaywrightChromiumBrowser;
+  const { launch } = yield* PlaywrightChromium;
+  yield* Effect.logDebug("launching chromium browser...");
+  const browser = yield* Effect.acquireRelease(
+    Effect.tryPromise({
+      try: () => launch(),
+      catch: (e) =>
+        new BrowserError({ message: `launch failed.\n${String(e)}` }),
+    }),
+    (browser) => Effect.promise(() => browser.close()),
+  );
   const context = yield* Effect.acquireRelease(
     Effect.tryPromise({
       try: () => browser.newContext(),
       catch: (e) =>
-        new NewContextError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+        new BrowserError({ message: `newContext failed.\n${String(e)}` }),
     }),
     (context) => Effect.promise(() => context.close()),
   );
@@ -154,9 +134,7 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
     Effect.tryPromise({
       try: () => context.newPage(),
       catch: (e) =>
-        new NewPageError({
-          message: `unexpected error.\n${String(e)}`,
-        }),
+        new BrowserError({ message: `newPage failed.\n${String(e)}` }),
     }),
     (page) => Effect.promise(() => page.close()),
   );
