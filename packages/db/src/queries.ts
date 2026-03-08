@@ -27,3 +27,28 @@ export async function selectDailyStats(
     jobNumbers: row.jobNumbers ? JSON.parse(row.jobNumbers) : [],
   }));
 }
+
+export type CrawlerRunRow = {
+  id: number;
+  status: string;
+  trigger: string;
+  startedAt: string;
+  finishedAt: string | null;
+  fetchedCount: number;
+  queuedCount: number;
+  failedCount: number;
+  errorMessage: string | null;
+  createdAt: string;
+};
+
+export async function selectCrawlerRuns(
+  db: Kysely<DB>,
+  limit = 20,
+): Promise<CrawlerRunRow[]> {
+  return db
+    .selectFrom("crawler_runs")
+    .selectAll()
+    .orderBy("startedAt", "desc")
+    .limit(limit)
+    .execute();
+}

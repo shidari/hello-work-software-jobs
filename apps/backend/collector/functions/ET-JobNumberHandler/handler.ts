@@ -1,12 +1,26 @@
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
 import { PlaywrightChromium } from "../../lib/browser";
 import {
+  finishCrawlerRun,
+  startCrawlerRun,
+} from "../../lib/crawler-run-logger";
+import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../lib/job-number-crawler/crawl";
 import type { Env } from "../index";
 
-export const handleScheduled = async (env: Env) => {
+export const handleScheduled = async (
+  env: Env,
+  trigger: "cron" | "manual" = "cron",
+) => {
+  let runId: number | null = null;
+  try {
+    runId = await startCrawlerRun(env, trigger);
+  } catch (e) {
+    console.error("Failed to start crawler run log", e);
+  }
+
   const program = Effect.gen(function* () {
     const jobs = yield* crawlJobLinks();
     yield* Effect.forEach(jobs, (job) =>
@@ -25,9 +39,33 @@ export const handleScheduled = async (env: Env) => {
     Effect.scoped,
   );
   const exit = await Effect.runPromiseExit(runnable);
+
   if (Exit.isSuccess(exit)) {
-    console.log("handler succeeded", JSON.stringify(exit.value, null, 2));
-    return exit.value;
+    const jobs = exit.value;
+    console.log("handler succeeded", JSON.stringify(jobs, null, 2));
+    if (runId != null) {
+      try {
+        await finishCrawlerRun(env, runId, {
+          status: "success",
+          fetchedCount: jobs.length,
+          queuedCount: jobs.length,
+        });
+      } catch (e) {
+        console.error("Failed to finish crawler run log", e);
+      }
+    }
+    return jobs;
+  }
+
+  if (runId != null) {
+    try {
+      await finishCrawlerRun(env, runId, {
+        status: "failed",
+        errorMessage: String(exit.cause),
+      });
+    } catch (e) {
+      console.error("Failed to finish crawler run log", e);
+    }
   }
   throw new Error(`handler failed: ${exit.cause}`);
 };

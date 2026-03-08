@@ -9,6 +9,7 @@ module Hwctl.Output
   , outputQueueMessages
   , outputTailSession
   , outputTriggerResult
+  , outputCrawlerRuns
   , outputError
   ) where
 
@@ -16,7 +17,7 @@ import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
+import Hwctl.Types (AppError, CrawlerRun (..), DailyStat (..), Job (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueueMessage (..), QueuePullResponse (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -135,6 +136,9 @@ outputTailSession Table ts =
 
 outputTriggerResult :: TriggerResponse -> IO ()
 outputTriggerResult tr = LBS.putStrLn (encode tr)
+
+outputCrawlerRuns :: [CrawlerRun] -> IO ()
+outputCrawlerRuns runs = LBS.putStrLn (encode runs)
 
 unlines' :: [String] -> String
 unlines' = foldr (\a b -> if null b then a else a <> "\n" <> b) ""

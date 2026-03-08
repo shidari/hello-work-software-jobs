@@ -11,6 +11,7 @@ module Hwctl.Client
   , pullQueueMessages
   , createTailSession
   , triggerCrawler
+  , fetchCrawlerRuns
   , JobsQuery (..)
   , defaultQuery
   ) where
@@ -24,6 +25,7 @@ import Hwctl.Config (CfConfig (..), Config (..))
 import Hwctl.Types
   ( AppError (..)
   , CfApiResponse (..)
+  , CrawlerRun
   , Job
   , JobsResponse
   , QueueInfo
@@ -127,6 +129,19 @@ triggerCrawler collectorEp key = withEndpointStr collectorEp $ \case
   Right (url, baseOpts) -> do
     let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key))
     resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
+    pure $ decodeResponse (responseBody resp)
+
+-- Crawler runs
+
+fetchCrawlerRuns :: String -> String -> Maybe Int -> IO (Either AppError [CrawlerRun])
+fetchCrawlerRuns collectorEp key mLimit = withEndpointStr collectorEp $ \case
+  Left (url, baseOpts) -> do
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    resp <- req GET (url /: "crawler-runs") NoReqBody lbsResponse opts
+    pure $ decodeResponse (responseBody resp)
+  Right (url, baseOpts) -> do
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    resp <- req GET (url /: "crawler-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
 
 -- Helpers

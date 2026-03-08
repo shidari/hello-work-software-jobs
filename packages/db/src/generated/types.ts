@@ -5,10 +5,22 @@
 
 import type { ColumnType } from "kysely";
 
-export type Generated<T> =
-  T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export interface CrawlerRuns {
+  createdAt: string;
+  errorMessage: string | null;
+  failedCount: Generated<number>;
+  fetchedCount: Generated<number>;
+  finishedAt: string | null;
+  id: Generated<number>;
+  queuedCount: Generated<number>;
+  startedAt: string;
+  status: string;
+  trigger: string;
+}
 
 export interface Jobs {
   companyName: string | null;
@@ -33,5 +45,6 @@ export interface Jobs {
 }
 
 export interface DB {
+  crawler_runs: CrawlerRuns;
   jobs: Jobs;
 }

@@ -9,6 +9,16 @@ export function createD1DB(database: D1Database): Kysely<DB> {
 }
 
 // クエリユーティリティ
-export { type DailyStatRow, selectDailyStats } from "./queries";
+export {
+  type CrawlerRunRow,
+  type DailyStatRow,
+  selectCrawlerRuns,
+  selectDailyStats,
+} from "./queries";
 // DB行スキーマ（Kysely 生成型との整合性を保証）
-export { type DbJobRow, DbJobRowSchema } from "./schema";
+export {
+  type DbCrawlerRunRow,
+  DbCrawlerRunRowSchema,
+  type DbJobRow,
+  DbJobRowSchema,
+} from "./schema";

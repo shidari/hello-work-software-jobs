@@ -10,6 +10,13 @@
   "browser": {
     "binding": "MYBROWSER"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "job-store",
+      "database_id": "99b54ef6-2e19-436e-8676-b50ef2d98dda"
+    }
+  ],
   "queues": {
     "producers": [
       {

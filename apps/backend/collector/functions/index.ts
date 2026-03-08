@@ -9,6 +9,7 @@ export type Env = {
   JOB_DETAIL_QUEUE: Queue<{ jobNumber: string }>;
   JOB_STORE_ENDPOINT: string;
   API_KEY: string;
+  DB: D1Database;
 };
 
 export default {
@@ -34,7 +35,7 @@ export default {
     env: Env,
     ctx: ExecutionContext,
   ): Promise<void> {
-    ctx.waitUntil(handleScheduled(env));
+    ctx.waitUntil(handleScheduled(env, "cron"));
   },
 
   async queue(

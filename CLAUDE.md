@@ -66,6 +66,7 @@ stack exec hwctl -- queue status  # Queue status (JSON)
 stack exec hwctl -- queue messages '{"batch_size": 5}'  # Pull queue messages
 stack exec hwctl -- logs tail     # Create tail session (JSON)
 stack exec hwctl -- crawler run   # Trigger crawler manually (JSON)
+stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)
 ```
 
 ## API Endpoints
@@ -75,6 +76,7 @@ stack exec hwctl -- crawler run   # Trigger crawler manually (JSON)
 - `POST /jobs` - Create job
 - `GET /stats/daily` - Daily new job count summary (with job numbers)
 - `POST /trigger` - Trigger crawler manually (x-api-key auth, collector only)
+- `GET /crawler-runs` - Crawler run history (x-api-key auth, collector only)
 
 ## Database
 

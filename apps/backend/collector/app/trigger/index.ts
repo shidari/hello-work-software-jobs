@@ -1,3 +1,4 @@
+import { createD1DB, selectCrawlerRuns } from "@sho/db";
 import { Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { handleScheduled } from "../../functions/ET-JobNumberHandler/handler";
@@ -8,14 +9,17 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
   effect: Effect.gen(function* () {
     const auth = yield* AuthMiddleware;
 
-    const app = new Hono<{ Bindings: Env }>().post(
-      "/trigger",
-      auth.middleware,
-      (c) => {
-        c.executionCtx?.waitUntil(handleScheduled(c.env));
+    const app = new Hono<{ Bindings: Env }>()
+      .post("/trigger", auth.middleware, (c) => {
+        c.executionCtx?.waitUntil(handleScheduled(c.env, "manual"));
         return c.json({ message: "Crawler triggered" }, 202);
-      },
-    );
+      })
+      .get("/crawler-runs", auth.middleware, async (c) => {
+        const limit = Number(c.req.query("limit") ?? "20");
+        const db = createD1DB(c.env.DB);
+        const runs = await selectCrawlerRuns(db, limit);
+        return c.json(runs);
+      });
 
     return app;
   }),

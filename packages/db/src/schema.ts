@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import type { Selectable } from "kysely";
-import type { Jobs } from "./generated/types";
+import type { CrawlerRuns, Jobs } from "./generated/types";
 
 // ── DB行スキーマ（フラット構造） ──
 
@@ -35,3 +35,28 @@ type _Check2 = _SelectableJobsWithoutId extends _DbJobRow ? true : never;
 // ── 型エクスポート ──
 
 export type DbJobRow = typeof DbJobRowSchema.Type;
+
+// ── CrawlerRun DB行スキーマ ──
+
+export const DbCrawlerRunRowSchema = Schema.Struct({
+  status: Schema.String,
+  trigger: Schema.String,
+  startedAt: Schema.String,
+  finishedAt: Schema.NullOr(Schema.String),
+  fetchedCount: Schema.Number,
+  queuedCount: Schema.Number,
+  failedCount: Schema.Number,
+  errorMessage: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+});
+
+type _DbCrawlerRunRow = typeof DbCrawlerRunRowSchema.Type;
+type _SelectableCrawlerRunsWithoutId = Omit<Selectable<CrawlerRuns>, "id">;
+type _Check3 = _DbCrawlerRunRow extends _SelectableCrawlerRunsWithoutId
+  ? true
+  : never;
+type _Check4 = _SelectableCrawlerRunsWithoutId extends _DbCrawlerRunRow
+  ? true
+  : never;
+
+export type DbCrawlerRunRow = typeof DbCrawlerRunRowSchema.Type;
