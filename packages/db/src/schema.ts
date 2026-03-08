@@ -52,7 +52,11 @@ export const DbCrawlerRunRowSchema = Schema.Struct({
 
 type _DbCrawlerRunRow = typeof DbCrawlerRunRowSchema.Type;
 type _SelectableCrawlerRunsWithoutId = Omit<Selectable<CrawlerRuns>, "id">;
-const _check3: _DbCrawlerRunRow extends _SelectableCrawlerRunsWithoutId ? true : never = true;
-const _check4: _SelectableCrawlerRunsWithoutId extends _DbCrawlerRunRow ? true : never = true;
+const _check3: _DbCrawlerRunRow extends _SelectableCrawlerRunsWithoutId
+  ? true
+  : never = true;
+const _check4: _SelectableCrawlerRunsWithoutId extends _DbCrawlerRunRow
+  ? true
+  : never = true;
 
 export type DbCrawlerRunRow = typeof DbCrawlerRunRowSchema.Type;
