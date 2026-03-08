@@ -10,7 +10,6 @@ export function createD1DB(database: D1Database): Kysely<DB> {
 
 // クエリユーティリティ
 export {
-  type CrawlerRunRow,
   type DailyStatRow,
   selectCrawlerRuns,
   selectDailyStats,

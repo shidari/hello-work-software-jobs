@@ -28,23 +28,7 @@ export async function selectDailyStats(
   }));
 }
 
-export type CrawlerRunRow = {
-  id: number;
-  status: string;
-  trigger: string;
-  startedAt: string;
-  finishedAt: string | null;
-  fetchedCount: number;
-  queuedCount: number;
-  failedCount: number;
-  errorMessage: string | null;
-  createdAt: string;
-};
-
-export async function selectCrawlerRuns(
-  db: Kysely<DB>,
-  limit = 20,
-): Promise<CrawlerRunRow[]> {
+export async function selectCrawlerRuns(db: Kysely<DB>, limit = 20) {
   return db
     .selectFrom("crawler_runs")
     .selectAll()
