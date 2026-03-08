@@ -2,9 +2,9 @@ import type { JobNumber } from "@sho/models";
 import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
-import { PlaywrightChromiumPageResource } from "../browser";
 import {
-  JobSearchPageTag,
+  type FirstJobListPage,
+  type JobDetailPage,
   navigateByJobNumber,
   openJobSearchPage,
 } from "../page";
@@ -75,29 +75,64 @@ const jobDetailSelectors = {
 // ── DOM → RawJob 抽出 ──
 
 export function extractRawFieldsFromDocument(document: Document): RawJob {
-  const text = (selector: string) =>
-    document.querySelector(selector)?.textContent?.trim() || undefined;
-
   return {
-    jobNumber: text(jobDetailSelectors.jobNumber),
-    companyName: text(jobDetailSelectors.companyName),
-    receivedDate: text(jobDetailSelectors.receivedDate),
-    expiryDate: text(jobDetailSelectors.expiryDate),
-    homePage: text(jobDetailSelectors.homePage) || null,
-    occupation: text(jobDetailSelectors.occupation),
-    employmentType: text(jobDetailSelectors.employmentType),
-    wage: text(jobDetailSelectors.wage),
-    workingHours: text(jobDetailSelectors.workingHours),
-    employeeCount: text(jobDetailSelectors.employeeCount),
-    workPlace: text(jobDetailSelectors.workPlace),
-    jobDescription: text(jobDetailSelectors.jobDescription),
-    qualifications: text(jobDetailSelectors.qualifications),
+    jobNumber:
+      document
+        .querySelector(jobDetailSelectors.jobNumber)
+        ?.textContent?.trim() || undefined,
+    companyName:
+      document
+        .querySelector(jobDetailSelectors.companyName)
+        ?.textContent?.trim() || undefined,
+    receivedDate:
+      document
+        .querySelector(jobDetailSelectors.receivedDate)
+        ?.textContent?.trim() || undefined,
+    expiryDate:
+      document
+        .querySelector(jobDetailSelectors.expiryDate)
+        ?.textContent?.trim() || undefined,
+    homePage:
+      document
+        .querySelector(jobDetailSelectors.homePage)
+        ?.textContent?.trim() || null,
+    occupation:
+      document
+        .querySelector(jobDetailSelectors.occupation)
+        ?.textContent?.trim() || undefined,
+    employmentType:
+      document
+        .querySelector(jobDetailSelectors.employmentType)
+        ?.textContent?.trim() || undefined,
+    wage:
+      document.querySelector(jobDetailSelectors.wage)?.textContent?.trim() ||
+      undefined,
+    workingHours:
+      document
+        .querySelector(jobDetailSelectors.workingHours)
+        ?.textContent?.trim() || undefined,
+    employeeCount:
+      document
+        .querySelector(jobDetailSelectors.employeeCount)
+        ?.textContent?.trim() || undefined,
+    workPlace:
+      document
+        .querySelector(jobDetailSelectors.workPlace)
+        ?.textContent?.trim() || undefined,
+    jobDescription:
+      document
+        .querySelector(jobDetailSelectors.jobDescription)
+        ?.textContent?.trim() || undefined,
+    qualifications:
+      document
+        .querySelector(jobDetailSelectors.qualifications)
+        ?.textContent?.trim() || undefined,
   };
 }
 
 // ── ページ操作ヘルパー ──
 
-function listJobOverviewElem(page: Page) {
+function listJobOverviewElem(page: FirstJobListPage) {
   return Effect.tryPromise({
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
     catch: (e) =>
@@ -119,7 +154,7 @@ function listJobOverviewElem(page: Page) {
     );
 }
 
-function assertSingleJobListed(page: Page) {
+function assertSingleJobListed(page: FirstJobListPage) {
   return Effect.gen(function* () {
     const jobOverViewList = yield* listJobOverviewElem(page);
     if (jobOverViewList.length !== 1) {
@@ -135,7 +170,7 @@ function assertSingleJobListed(page: Page) {
   });
 }
 
-function goToSingleJobDetailPage(page: Page) {
+function goToSingleJobDetailPage(page: FirstJobListPage) {
   return Effect.gen(function* () {
     yield* assertSingleJobListed(page);
     yield* Effect.tryPromise({
@@ -155,11 +190,12 @@ function goToSingleJobDetailPage(page: Page) {
         );
       }),
     );
-    return page;
+    const _page: Page = page;
+    return _page as JobDetailPage;
   });
 }
 
-function validateJobDetailPage(page: Page) {
+function validateJobDetailPage(page: JobDetailPage) {
   return Effect.gen(function* () {
     const jobTitle = yield* Effect.tryPromise({
       try: async () => {
@@ -177,7 +213,7 @@ function validateJobDetailPage(page: Page) {
       }),
     );
     if (jobTitle !== "求人情報")
-      throw new JobDetailPageValidationError({
+      return yield* new JobDetailPageValidationError({
         reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
         currentUrl: page.url(),
       });
@@ -198,17 +234,19 @@ const nowISODateString = (): ISODateString =>
 export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
   "JobDetailExtractor",
   {
-    dependencies: [PlaywrightChromiumPageResource.Default],
     effect: Effect.gen(function* () {
       const jobSearchPage = yield* openJobSearchPage();
       const extractRawHtml = Effect.fn("extractRawHtml")(function* (
         jobNumber: JobNumber,
       ) {
         yield* Effect.logInfo("start extracting raw job detail HTML...");
-        const page = yield* navigateByJobNumber(jobNumber);
+        const firstJobListPage = yield* navigateByJobNumber(
+          jobSearchPage,
+          jobNumber,
+        );
         yield* Effect.logDebug("now on job List page.");
-        yield* goToSingleJobDetailPage(page);
-        const jobDetailPage = yield* validateJobDetailPage(page);
+        const jobDetailPage = yield* goToSingleJobDetailPage(firstJobListPage);
+        yield* validateJobDetailPage(jobDetailPage);
         const rawHtml = yield* Effect.tryPromise({
           try: () => jobDetailPage.content(),
           catch: (error) =>
@@ -221,10 +259,7 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
         return { rawHtml, fetchedDate: nowISODateString(), jobNumber };
       });
       return {
-        extractRawHtml: (jobNumber: JobNumber) =>
-          extractRawHtml(jobNumber).pipe(
-            Effect.provideService(JobSearchPageTag, jobSearchPage),
-          ),
+        extractRawHtml: (jobNumber: JobNumber) => extractRawHtml(jobNumber),
       };
     }),
   },

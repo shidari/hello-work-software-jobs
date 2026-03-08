@@ -1,34 +1,25 @@
 import { Effect, Layer, Logger, LogLevel } from "effect";
+import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
 import {
-  PlaywrightBrowserConfig,
-  PlaywrightChromiumBrowseResource,
-  PlaywrightChromiumContextResource,
-  PlaywrightChromiumPageResource,
-} from "../browser";
-import {
-  HelloWorkCrawler,
+  crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../job-number-crawler/crawl";
 
 async function main() {
-  const devLayer = HelloWorkCrawler.DefaultWithoutDependencies.pipe(
-    Layer.provide(
+  const program = Effect.gen(function* () {
+    return yield* crawlJobLinks();
+  });
+
+  const runnable = program.pipe(
+    Effect.provide(
       Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
     ),
-    Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
-    Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
-    Layer.provide(PlaywrightChromiumBrowseResource.Default),
-    Layer.provide(PlaywrightBrowserConfig.dev),
-  );
-  const program = Effect.gen(function* () {
-    const crawler = yield* HelloWorkCrawler;
-    return yield* crawler.crawlJobLinks();
-  }).pipe(
-    Effect.provide(devLayer),
+    Effect.provide(PlaywrightChromium.Default),
+    Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
-  Effect.runPromise(program).then((jobNumbers) =>
+  Effect.runPromise(runnable).then((jobNumbers) =>
     console.dir({ jobNumbers }, { depth: null }),
   );
 }

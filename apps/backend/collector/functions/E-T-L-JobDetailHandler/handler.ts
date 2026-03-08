@@ -1,19 +1,28 @@
+import type { JobNumber } from "@sho/models";
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
-import { PlaywrightBrowserConfig } from "../../lib/browser";
-import { JobDetailCrawler } from "../../lib/job-detail-crawler";
+import { PlaywrightChromium } from "../../lib/browser";
+import {
+  JobDetailExtractor,
+  JobDetailLoader,
+  JobDetailTransformer,
+  processJob,
+} from "../../lib/job-detail-crawler";
 import type { Env } from "../index";
 
 export const handleQueue = async (jobNumber: string, env: Env) => {
   const program = Effect.gen(function* () {
-    const crawler = yield* JobDetailCrawler;
-    yield* crawler.processJob(jobNumber as import("@sho/models").JobNumber);
-  }).pipe(
-    Effect.provide(JobDetailCrawler.Default),
-    Effect.provide(PlaywrightBrowserConfig.cloudflare(env.MYBROWSER)),
+    yield* processJob(jobNumber as JobNumber);
+  });
+
+  const runnable = program.pipe(
+    Effect.provide(JobDetailExtractor.Default),
+    Effect.provide(JobDetailTransformer.Default),
+    Effect.provide(JobDetailLoader.Default),
+    Effect.provide(PlaywrightChromium.cloudflare(env.MYBROWSER)),
     Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,
   );
-  const result = await Effect.runPromiseExit(program);
+  const result = await Effect.runPromiseExit(runnable);
 
   if (Exit.isSuccess(result)) {
     console.log("Queue job succeeded:", result.value);

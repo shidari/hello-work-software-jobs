@@ -1,6 +1,6 @@
-import { Context, Data, Effect } from "effect";
+import { Data, Effect } from "effect";
 import type { Page } from "./browser";
-import { PlaywrightChromiumPageResource } from "./browser";
+import { openBrowserPage } from "./browser";
 import type {
   DirtyWorkLocation,
   EmploymentType,
@@ -21,18 +21,17 @@ class PageActionError extends Data.TaggedError("PageActionError")<{
 }> {}
 
 // ============================================================
-// Context Tags (branded page types)
+// Branded page types
 // ============================================================
 
 const _jobSearchPage: unique symbol = Symbol("JobSearchPage");
 export type JobSearchPage = Page & { [_jobSearchPage]: unknown };
-export class JobSearchPageTag extends Context.Tag("JobSearchPage")<
-  JobSearchPageTag,
-  JobSearchPage
->() {}
 
 const _firstJobListPage: unique symbol = Symbol("FirstJobListPage");
 export type FirstJobListPage = Page & { [_firstJobListPage]: unknown };
+
+const _jobDetailPage: unique symbol = Symbol("JobDetailPage");
+export type JobDetailPage = Page & { [_jobDetailPage]: unknown };
 
 // ============================================================
 // Selector mappings (pure data)
@@ -57,13 +56,13 @@ const searchPeriodSelectors = {
 } as const;
 
 // ============================================================
-// Page operations (context-based Effect.fn)
+// Page operations (Effect.fn with page argument)
 // ============================================================
 
 const fillWorkType = Effect.fn("fillWorkType")(function* (
+  page: JobSearchPage,
   employmentType: EmploymentType,
 ) {
-  const page = yield* JobSearchPageTag;
   const selector = employmentTypeSelectors[employmentType] as
     | string
     | undefined;
@@ -88,9 +87,9 @@ const fillWorkType = Effect.fn("fillWorkType")(function* (
 });
 
 const fillPrefectureField = Effect.fn("fillPrefectureField")(function* (
+  page: JobSearchPage,
   workLocation: DirtyWorkLocation,
 ) {
-  const page = yield* JobSearchPageTag;
   const { prefecture } = workLocation;
   yield* Effect.logDebug(
     `fill PrefectureField.\nworkLocation: ${JSON.stringify(workLocation, null, 2)}`,
@@ -109,9 +108,9 @@ const fillPrefectureField = Effect.fn("fillPrefectureField")(function* (
 });
 
 const fillOccupationField = Effect.fn("fillOccupationField")(function* (
+  page: JobSearchPage,
   label: EngineeringLabel,
 ) {
-  const page = yield* JobSearchPageTag;
   const selector = engineeringLabelSelectors[label] as
     | { radioBtn: string; openerSibling: string }
     | undefined;
@@ -153,9 +152,9 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
 });
 
 const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
+  page: JobSearchPage,
   searchPeriod: SearchPeriod,
 ) {
-  const page = yield* JobSearchPageTag;
   yield* Effect.logDebug(`fillJobPeriod: searchPeriod=${searchPeriod}`);
   const id = searchPeriodSelectors[searchPeriod];
   if (id) {
@@ -169,21 +168,23 @@ const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
   }
 });
 
-export const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(
-  function* (criteria: JobSearchCriteria) {
-    const { employmentType, workLocation, desiredOccupation, searchPeriod } =
-      criteria;
-    if (employmentType) yield* fillWorkType(employmentType);
-    if (workLocation) yield* fillPrefectureField(workLocation);
-    if (desiredOccupation?.occupationSelection) {
-      yield* fillOccupationField(desiredOccupation.occupationSelection);
-    }
-    if (searchPeriod) yield* fillJobPeriod(searchPeriod);
-  },
-);
+const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(function* (
+  page: JobSearchPage,
+  criteria: JobSearchCriteria,
+) {
+  const { employmentType, workLocation, desiredOccupation, searchPeriod } =
+    criteria;
+  if (employmentType) yield* fillWorkType(page, employmentType);
+  if (workLocation) yield* fillPrefectureField(page, workLocation);
+  if (desiredOccupation?.occupationSelection) {
+    yield* fillOccupationField(page, desiredOccupation.occupationSelection);
+  }
+  if (searchPeriod) yield* fillJobPeriod(page, searchPeriod);
+});
 
-const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* () {
-  const page = yield* JobSearchPageTag;
+const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
+  page: JobSearchPage,
+) {
   yield* Effect.tryPromise({
     try: async () => {
       const searchNoBtn = page.locator("#ID_searchNoBtn");
@@ -203,8 +204,9 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* () {
   );
 });
 
-const clickSearchBtn = Effect.fn("clickSearchBtn")(function* () {
-  const page = yield* JobSearchPageTag;
+const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
+  page: JobSearchPage,
+) {
   yield* Effect.tryPromise({
     try: async () => {
       const searchBtn = page.locator("#ID_searchBtn");
@@ -229,7 +231,7 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* () {
 // ============================================================
 
 export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
-  const { page } = yield* PlaywrightChromiumPageResource;
+  const page = yield* openBrowserPage();
   yield* Effect.tryPromise({
     try: () =>
       page.goto(
@@ -244,9 +246,9 @@ export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
 });
 
 export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
+  page: JobSearchPage,
   jobNumber: string,
 ) {
-  const page = yield* JobSearchPageTag;
   yield* Effect.tryPromise({
     try: async () => {
       const jobNumberSplits = jobNumber.split("-");
@@ -270,15 +272,17 @@ export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
       Effect.logDebug(`filled job number field. jobNumber=${jobNumber}`),
     ),
   );
-  yield* clickSearchNoBtn();
-  return page as unknown as FirstJobListPage;
+  yield* clickSearchNoBtn(page);
+  const _page: Page = page;
+  return _page as FirstJobListPage;
 });
 
 export const navigateByCriteria = Effect.fn("navigateByCriteria")(function* (
+  page: JobSearchPage,
   criteria: JobSearchCriteria,
 ) {
-  const page = yield* JobSearchPageTag;
-  yield* fillJobCriteriaField(criteria);
-  yield* clickSearchBtn();
-  return page as unknown as FirstJobListPage;
+  yield* fillJobCriteriaField(page, criteria);
+  yield* clickSearchBtn(page);
+  const _page: Page = page;
+  return _page as FirstJobListPage;
 });
