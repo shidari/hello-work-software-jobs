@@ -32,3 +32,13 @@ CREATE TABLE `crawler_runs` (
 	`errorMessage` text,
 	`createdAt` text NOT NULL
 );
+CREATE TABLE `job_detail_runs` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`jobNumber` text NOT NULL,
+	`status` text NOT NULL,
+	`stage` text,
+	`startedAt` text NOT NULL,
+	`finishedAt` text,
+	`errorMessage` text,
+	`createdAt` text NOT NULL
+);

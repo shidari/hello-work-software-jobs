@@ -23,6 +23,17 @@ export interface CrawlerRuns {
   trigger: string;
 }
 
+export interface JobDetailRuns {
+  createdAt: string;
+  errorMessage: string | null;
+  finishedAt: string | null;
+  id: Generated<number>;
+  jobNumber: string;
+  stage: string | null;
+  startedAt: string;
+  status: string;
+}
+
 export interface Jobs {
   companyName: string | null;
   createdAt: string;
@@ -47,5 +58,6 @@ export interface Jobs {
 
 export interface DB {
   crawler_runs: CrawlerRuns;
+  job_detail_runs: JobDetailRuns;
   jobs: Jobs;
 }
