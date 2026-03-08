@@ -31,7 +31,7 @@ hello-work-software-jobs/
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
 | Crawler | Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
-| Admin CLI | Haskell (Stack), optparse-applicative, aeson, http-client |
+| Admin CLI | Haskell (Stack), optparse-applicative, aeson, req |
 | Quality | Biome, Playwright/Vitest |
 
 ## Common Commands
@@ -62,6 +62,9 @@ stack build                       # Build
 stack exec hwctl -- jobs list     # List jobs (JSON)
 stack exec hwctl -- jobs get ID   # Get job by number (JSON)
 stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
+stack exec hwctl -- queue status  # Queue status (JSON)
+stack exec hwctl -- queue messages '{"batch_size": 5}'  # Pull queue messages
+stack exec hwctl -- logs tail     # Create tail session (JSON)
 ```
 
 ## API Endpoints
@@ -115,7 +118,7 @@ stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
 - Frontend: `JOB_STORE_ENDPOINT`
 - API: Cloudflare credentials
 - Crawler: `CLOUDFLARE_API_TOKEN`, `JOB_STORE_ENDPOINT`, `API_KEY` (wrangler secrets)
-- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`
+- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
 
 ## CI/CD
 
