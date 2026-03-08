@@ -82,6 +82,9 @@ importers:
       '@cloudflare/playwright':
         specifier: ^1.1.1
         version: 1.1.1
+      '@sho/db':
+        specifier: workspace:*
+        version: link:../../../packages/db
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models

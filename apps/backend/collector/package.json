@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@cloudflare/playwright": "^1.1.1",
+    "@sho/db": "workspace:*",
     "@sho/models": "workspace:*",
     "date-fns": "^4.1.0",
     "effect": "^3.16.5",

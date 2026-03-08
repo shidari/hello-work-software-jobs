@@ -20,3 +20,15 @@ CREATE TABLE `jobs` (
 	`updatedAt` text NOT NULL
 );
 CREATE UNIQUE INDEX `jobs_jobNumber_unique` ON `jobs` (`jobNumber`);
+CREATE TABLE `crawler_runs` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`status` text NOT NULL,
+	`trigger` text NOT NULL,
+	`startedAt` text NOT NULL,
+	`finishedAt` text,
+	`fetchedCount` integer DEFAULT 0 NOT NULL,
+	`queuedCount` integer DEFAULT 0 NOT NULL,
+	`failedCount` integer DEFAULT 0 NOT NULL,
+	`errorMessage` text,
+	`createdAt` text NOT NULL
+);

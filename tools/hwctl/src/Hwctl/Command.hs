@@ -7,9 +7,9 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages, triggerCrawler)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, getJob, getQueueStatus, listJobs, pullQueueMessages, triggerCrawler)
 import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireQueueId)
-import Hwctl.Output (OutputFormat (..), outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession, outputTriggerResult)
+import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobs, outputQueueMessages, outputQueueStatus, outputTailSession, outputTriggerResult)
 import Hwctl.Types (AppError (..), DailyStat (..), QueuePullOptions, StatsFilter (..), StatsResponse (..), TailOptions (..), defaultQueuePullOptions, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
@@ -21,6 +21,12 @@ data Command
   | QueueMessagesCmd JsonOpts
   | LogsTailCmd JsonOpts
   | CrawlerRunCmd
+  | CrawlerHistoryCmd HistoryOpts
+  deriving (Show)
+
+data HistoryOpts = HistoryOpts
+  { historyLimit :: Maybe Int
+  }
   deriving (Show)
 
 data ListOpts = ListOpts
@@ -116,7 +122,11 @@ commandParser =
     crawlerSubcommand =
       hsubparser
         ( command "run" (info (pure CrawlerRunCmd) (progDesc "Trigger crawler manually"))
+            <> command "history" (info (CrawlerHistoryCmd <$> historyOptsParser) (progDesc "Show crawler run history"))
         )
+    historyOptsParser =
+      HistoryOpts
+        <$> optional (option auto (long "limit" <> short 'n' <> metavar "N" <> help "Number of runs to show (default: 20)"))
 
 opts :: ParserInfo Command
 opts =
@@ -215,6 +225,16 @@ runApp = do
             case result of
               Left err -> outputError err
               Right tr -> outputTriggerResult tr
+    CrawlerHistoryCmd histOpt -> do
+      case requireCollectorEndpoint cfg of
+        Left err -> outputError err
+        Right ep -> case requireApiKey cfg of
+          Left err -> outputError err
+          Right key -> do
+            result <- fetchCrawlerRuns ep key (historyLimit histOpt)
+            case result of
+              Left err -> outputError err
+              Right runs -> outputCrawlerRuns runs
 
 applyStatsFilter :: StatsFilter -> [DailyStat] -> [DailyStat]
 applyStatsFilter filt =

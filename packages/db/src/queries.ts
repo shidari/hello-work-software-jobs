@@ -27,3 +27,12 @@ export async function selectDailyStats(
     jobNumbers: row.jobNumbers ? JSON.parse(row.jobNumbers) : [],
   }));
 }
+
+export async function selectCrawlerRuns(db: Kysely<DB>, limit = 20) {
+  return db
+    .selectFrom("crawler_runs")
+    .selectAll()
+    .orderBy("startedAt", "desc")
+    .limit(limit)
+    .execute();
+}

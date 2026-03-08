@@ -23,6 +23,7 @@ module Hwctl.Types
   , TailOptions (..)
   , defaultTailOptions
   , TriggerResponse (..)
+  , CrawlerRun (..)
   ) where
 
 import Data.Aeson
@@ -347,6 +348,50 @@ instance FromJSON TriggerResponse where
 
 instance ToJSON TriggerResponse where
   toJSON t = object ["message" .= triggerMessage t]
+
+-- Crawler run types
+data CrawlerRun = CrawlerRun
+  { runId :: Int
+  , runStatus :: Text
+  , runTrigger :: Text
+  , runStartedAt :: Text
+  , runFinishedAt :: Maybe Text
+  , runFetchedCount :: Int
+  , runQueuedCount :: Int
+  , runFailedCount :: Int
+  , runErrorMessage :: Maybe Text
+  , runCreatedAt :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON CrawlerRun where
+  parseJSON = withObject "CrawlerRun" $ \v ->
+    CrawlerRun
+      <$> v .: "id"
+      <*> v .: "status"
+      <*> v .: "trigger"
+      <*> v .: "startedAt"
+      <*> v .:? "finishedAt"
+      <*> v .: "fetchedCount"
+      <*> v .: "queuedCount"
+      <*> v .: "failedCount"
+      <*> v .:? "errorMessage"
+      <*> v .: "createdAt"
+
+instance ToJSON CrawlerRun where
+  toJSON r =
+    object
+      [ "id" .= runId r
+      , "status" .= runStatus r
+      , "trigger" .= runTrigger r
+      , "startedAt" .= runStartedAt r
+      , "finishedAt" .= runFinishedAt r
+      , "fetchedCount" .= runFetchedCount r
+      , "queuedCount" .= runQueuedCount r
+      , "failedCount" .= runFailedCount r
+      , "errorMessage" .= runErrorMessage r
+      , "createdAt" .= runCreatedAt r
+      ]
 
 -- Error types
 data AppError

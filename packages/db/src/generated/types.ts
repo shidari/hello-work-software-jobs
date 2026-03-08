@@ -10,6 +10,19 @@ export type Generated<T> =
     ? ColumnType<S, I | undefined, U>
     : ColumnType<T, T | undefined, T>;
 
+export interface CrawlerRuns {
+  createdAt: string;
+  errorMessage: string | null;
+  failedCount: Generated<number>;
+  fetchedCount: Generated<number>;
+  finishedAt: string | null;
+  id: Generated<number>;
+  queuedCount: Generated<number>;
+  startedAt: string;
+  status: string;
+  trigger: string;
+}
+
 export interface Jobs {
   companyName: string | null;
   createdAt: string;
@@ -33,5 +46,6 @@ export interface Jobs {
 }
 
 export interface DB {
+  crawler_runs: CrawlerRuns;
   jobs: Jobs;
 }
