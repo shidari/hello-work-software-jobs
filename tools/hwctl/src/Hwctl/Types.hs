@@ -22,6 +22,7 @@ module Hwctl.Types
   , TailSession (..)
   , TailOptions (..)
   , defaultTailOptions
+  , TriggerResponse (..)
   ) where
 
 import Data.Aeson
@@ -333,6 +334,19 @@ instance FromJSON TailOptions where
 
 defaultTailOptions :: TailOptions
 defaultTailOptions = TailOptions (Just "collector")
+
+-- Trigger types
+data TriggerResponse = TriggerResponse
+  { triggerMessage :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON TriggerResponse where
+  parseJSON = withObject "TriggerResponse" $ \v ->
+    TriggerResponse <$> v .: "message"
+
+instance ToJSON TriggerResponse where
+  toJSON t = object ["message" .= triggerMessage t]
 
 -- Error types
 data AppError

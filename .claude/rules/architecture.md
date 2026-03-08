@@ -70,16 +70,28 @@ Cloudflare Workers + Hono。
 
 ## `apps/backend/collector`
 
-Cloudflare Workers + Browser Rendering + Queues + Effect サービスパターン。
+Cloudflare Workers + Hono + Browser Rendering + Queues + Effect サービスパターン。
 
 ### パイプライン
 
 1. **求人番号抽出** — Cron Trigger → Worker → @cloudflare/playwright で検索ページ走査 → Queue 送信
 2. **求人詳細 ETL** — Queue → Worker → @cloudflare/playwright で HTML 取得 → linkedom でパース → API に POST
+3. **手動トリガー** — `POST /trigger` (x-api-key 認証) → `handleScheduled` をバックグラウンド実行
+
+### エンドポイント
+
+| メソッド | パス | 認証 | 概要 |
+|---------|------|------|------|
+| POST | `/trigger` | x-api-key | クローラー手動トリガー |
+
+### 設計
+
+- **Effect.Service**: `AuthMiddleware`（API キー検証）と `TriggerApp`（Hono app）を Effect.Service で定義。DI によりテスト時に ConfigProvider を差し替え可能
+- **Hono**: fetch ハンドラーで Hono app を構築し、`app.fetch` で処理委譲
 
 ### インフラ (wrangler.jsonc)
 
-- Worker (scheduled + queue handler)
+- Worker (fetch + scheduled + queue handler)
 - Browser Rendering binding
 - Cloudflare Queues (job-detail-queue + DLQ)
 
@@ -99,13 +111,14 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 | `hwctl queue status [--table]` | Cloudflare Queue 状態取得 |
 | `hwctl queue messages [OPTIONS_JSON] [--table]` | Queue メッセージ pull |
 | `hwctl logs tail [OPTIONS_JSON] [--table]` | Worker Tail セッション作成 |
+| `hwctl crawler run [--table]` | クローラー手動トリガー |
 
 ### 設計
 
 - **デフォルト JSON 出力**: `--table` で human-readable テーブル表示に切替
 - **構造化エラー**: `{ "error": { "code": "...", "message": "..." } }` を stderr に出力
 - **終了コード**: 0=成功, 1=エラー
-- **設定**: 環境変数 `HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
+- **設定**: 環境変数 `HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`), `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
 
 ---
 

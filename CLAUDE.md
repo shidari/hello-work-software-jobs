@@ -29,7 +29,7 @@ hello-work-software-jobs/
 |-------|--------------|
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
-| Crawler | Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect |
+| Crawler | Cloudflare Workers, Hono, Browser Rendering, Queues, @cloudflare/playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
 | Admin CLI | Haskell (Stack), optparse-applicative, aeson, req |
 | Quality | Biome, Playwright/Vitest |
@@ -65,6 +65,7 @@ stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
 stack exec hwctl -- queue status  # Queue status (JSON)
 stack exec hwctl -- queue messages '{"batch_size": 5}'  # Pull queue messages
 stack exec hwctl -- logs tail     # Create tail session (JSON)
+stack exec hwctl -- crawler run   # Trigger crawler manually (JSON)
 ```
 
 ## API Endpoints
@@ -73,6 +74,7 @@ stack exec hwctl -- logs tail     # Create tail session (JSON)
 - `GET /jobs/{jobNumber}` - Get job details
 - `POST /jobs` - Create job
 - `GET /stats/daily` - Daily new job count summary (with job numbers)
+- `POST /trigger` - Trigger crawler manually (x-api-key auth, collector only)
 
 ## Database
 
@@ -118,7 +120,7 @@ stack exec hwctl -- logs tail     # Create tail session (JSON)
 - Frontend: `JOB_STORE_ENDPOINT`
 - API: Cloudflare credentials
 - Crawler: `CLOUDFLARE_API_TOKEN`, `JOB_STORE_ENDPOINT`, `API_KEY` (wrangler secrets)
-- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
+- Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`
 
 ## CI/CD
 
