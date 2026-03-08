@@ -183,7 +183,7 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
           searchPeriod: "today",
         },
         roughMaxCount: 1600,
-      } satisfies etCrawlerConfig,
+      } as etCrawlerConfig,
     }),
   },
 ) {
@@ -199,6 +199,21 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
         searchPeriod: "today",
       },
       roughMaxCount: 50,
+    },
+  });
+
+  static weekly = new JobNumberCrawlerConfig({
+    config: {
+      nextPageDelayMs: 3000,
+      jobSearchCriteria: {
+        workLocation: { prefecture: "東京都" },
+        desiredOccupation: {
+          occupationSelection: "ソフトウェア開発技術者、プログラマー",
+        },
+        employmentType: "RegularEmployee",
+        searchPeriod: "week",
+      },
+      roughMaxCount: 1600,
     },
   });
 }

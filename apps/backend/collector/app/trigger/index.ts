@@ -3,7 +3,10 @@ import { Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { handleScheduled } from "../../functions/ET-JobNumberHandler/handler";
 import type { Env } from "../../functions/index";
+import type { SearchPeriod } from "../../lib/job-number-crawler/type";
 import { AuthMiddleware } from "../middleware/auth";
+
+const validPeriods = new Set<string>(["today", "week", "all"]);
 
 export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
   effect: Effect.gen(function* () {
@@ -11,7 +14,14 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
 
     const app = new Hono<{ Bindings: Env }>()
       .post("/trigger", auth.middleware, (c) => {
-        c.executionCtx?.waitUntil(handleScheduled(c.env, "manual"));
+        const period = c.req.query("period");
+        const searchPeriod =
+          period && validPeriods.has(period)
+            ? (period as SearchPeriod)
+            : "today";
+        c.executionCtx?.waitUntil(
+          handleScheduled(c.env, "manual", searchPeriod),
+        );
         return c.json({ message: "Crawler triggered" }, 202);
       })
       .get("/crawler-runs", auth.middleware, async (c) => {
