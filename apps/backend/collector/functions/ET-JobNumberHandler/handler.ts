@@ -5,11 +5,13 @@ import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../lib/job-number-crawler/crawl";
+import type { SearchPeriod } from "../../lib/job-number-crawler/type";
 import type { Env } from "../index";
 
 export const handleScheduled = async (
   env: Env,
   trigger: "cron" | "manual" = "cron",
+  searchPeriod: SearchPeriod = "today",
 ) => {
   const db = createD1DB(env.DB);
 
@@ -37,8 +39,24 @@ export const handleScheduled = async (
     return jobs;
   });
 
+  const crawlerConfigLayer = Layer.effect(
+    JobNumberCrawlerConfig,
+    Effect.gen(function* () {
+      const base = yield* JobNumberCrawlerConfig;
+      return new JobNumberCrawlerConfig({
+        config: {
+          ...base.config,
+          jobSearchCriteria: {
+            ...base.config.jobSearchCriteria,
+            searchPeriod,
+          },
+        },
+      });
+    }).pipe(Effect.provide(JobNumberCrawlerConfig.Default)),
+  );
+
   const runnable = program.pipe(
-    Effect.provide(JobNumberCrawlerConfig.Default),
+    Effect.provide(crawlerConfigLayer),
     Effect.provide(PlaywrightChromium.cloudflare(env.MYBROWSER)),
     Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,

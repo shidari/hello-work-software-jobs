@@ -103,14 +103,14 @@ createTailSession cf worker = runReq defaultHttpConfig $ do
 
 -- Collector trigger
 
-triggerCrawler :: String -> String -> IO (Either AppError TriggerResponse)
-triggerCrawler collectorEp key = withEndpointStr collectorEp $ \case
+triggerCrawler :: String -> String -> Maybe String -> IO (Either AppError TriggerResponse)
+triggerCrawler collectorEp key mPeriod = withEndpointStr collectorEp $ \case
   Left (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key))
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty (("period" =:) . T.pack) mPeriod
     resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
   Right (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key))
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty (("period" =:) . T.pack) mPeriod
     resp <- req POST (url /: "trigger") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
 

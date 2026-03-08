@@ -19,8 +19,13 @@ data Command
   | StatsDailyCmd StatsOpts
   | QueueStatusCmd FormatOpts
   | LogsTailCmd JsonOpts
-  | CrawlerRunCmd
+  | CrawlerRunCmd RunOpts
   | CrawlerHistoryCmd HistoryOpts
+  deriving (Show)
+
+data RunOpts = RunOpts
+  { runPeriod :: Maybe String
+  }
   deriving (Show)
 
 data HistoryOpts = HistoryOpts
@@ -119,9 +124,12 @@ commandParser =
         )
     crawlerSubcommand =
       hsubparser
-        ( command "run" (info (pure CrawlerRunCmd) (progDesc "Trigger crawler manually"))
+        ( command "run" (info (CrawlerRunCmd <$> runOptsParser) (progDesc "Trigger crawler manually"))
             <> command "history" (info (CrawlerHistoryCmd <$> historyOptsParser) (progDesc "Show crawler run history"))
         )
+    runOptsParser =
+      RunOpts
+        <$> optional (strOption (long "period" <> metavar "PERIOD" <> help "Search period: today (default), week, all"))
     historyOptsParser =
       HistoryOpts
         <$> optional (option auto (long "limit" <> short 'n' <> metavar "N" <> help "Number of runs to show (default: 20)"))
@@ -196,13 +204,13 @@ runApp = do
             case result of
               Left err -> outputError err
               Right ts -> outputTailSession (jsonOptFormat jsonOpt) ts
-    CrawlerRunCmd -> do
+    CrawlerRunCmd runOpt -> do
       case requireCollectorEndpoint cfg of
         Left err -> outputError err
         Right ep -> case requireApiKey cfg of
           Left err -> outputError err
           Right key -> do
-            result <- triggerCrawler ep key
+            result <- triggerCrawler ep key (runPeriod runOpt)
             case result of
               Left err -> outputError err
               Right tr -> outputTriggerResult tr
