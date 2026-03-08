@@ -57,6 +57,7 @@ pnpm test              # Vitest tests
 pnpm dev               # Wrangler dev server
 pnpm test              # Vitest tests (PBT)
 pnpm deploy            # Wrangler deploy to Cloudflare
+pnpm verify:dump-html [today|week|all]  # 検索結果HTMLダンプ & セレクタ診断
 
 # Admin CLI (tools/hwctl)
 stack build                       # Build
