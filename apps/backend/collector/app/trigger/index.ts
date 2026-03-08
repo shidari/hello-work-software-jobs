@@ -19,8 +19,14 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
           period && validPeriods.has(period)
             ? (period as SearchPeriod)
             : "today";
+        const MAX_COUNT_LIMIT = 5000;
+        const maxCountRaw = c.req.query("maxCount");
+        const maxCount =
+          maxCountRaw && /^\d+$/.test(maxCountRaw) && Number(maxCountRaw) > 0
+            ? Math.min(Number(maxCountRaw), MAX_COUNT_LIMIT)
+            : undefined;
         c.executionCtx?.waitUntil(
-          handleScheduled(c.env, "manual", searchPeriod),
+          handleScheduled(c.env, "manual", searchPeriod, maxCount),
         );
         return c.json({ message: "Crawler triggered" }, 202);
       })

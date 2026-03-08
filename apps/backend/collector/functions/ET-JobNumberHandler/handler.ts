@@ -12,6 +12,7 @@ export const handleScheduled = async (
   env: Env,
   trigger: "cron" | "manual" = "cron",
   searchPeriod: SearchPeriod = "today",
+  maxCount?: number,
 ) => {
   const db = createD1DB(env.DB);
 
@@ -46,6 +47,7 @@ export const handleScheduled = async (
       return new JobNumberCrawlerConfig({
         config: {
           ...base.config,
+          ...(maxCount != null ? { roughMaxCount: maxCount } : {}),
           jobSearchCriteria: {
             ...base.config.jobSearchCriteria,
             searchPeriod,

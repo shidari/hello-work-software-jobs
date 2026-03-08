@@ -20,6 +20,8 @@ module Hwctl.Types
   , defaultTailOptions
   , TriggerResponse (..)
   , CrawlerRun (..)
+  , CrawlerRunOpts (..)
+  , defaultCrawlerRunOpts
   ) where
 
 import Data.Aeson
@@ -388,6 +390,22 @@ instance ToJSON CrawlerRun where
       , "errorMessage" .= runErrorMessage r
       , "createdAt" .= runCreatedAt r
       ]
+
+-- Crawler run options
+data CrawlerRunOpts = CrawlerRunOpts
+  { croPeriod :: Maybe Text
+  , croMaxCount :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON CrawlerRunOpts where
+  parseJSON = withObject "CrawlerRunOpts" $ \v ->
+    CrawlerRunOpts
+      <$> v .:? "period"
+      <*> v .:? "maxCount"
+
+defaultCrawlerRunOpts :: CrawlerRunOpts
+defaultCrawlerRunOpts = CrawlerRunOpts Nothing Nothing
 
 -- Error types
 data AppError
