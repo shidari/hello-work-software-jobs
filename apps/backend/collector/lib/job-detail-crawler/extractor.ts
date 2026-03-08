@@ -2,7 +2,6 @@ import type { JobNumber } from "@sho/models";
 import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
-import { PlaywrightChromiumPageResource } from "../browser";
 import {
   type FirstJobListPage,
   type JobDetailPage,
@@ -235,7 +234,6 @@ const nowISODateString = (): ISODateString =>
 export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
   "JobDetailExtractor",
   {
-    dependencies: [PlaywrightChromiumPageResource.Default],
     effect: Effect.gen(function* () {
       const jobSearchPage = yield* openJobSearchPage();
       const extractRawHtml = Effect.fn("extractRawHtml")(function* (

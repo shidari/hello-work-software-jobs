@@ -1,7 +1,7 @@
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
 import {
   PlaywrightBrowserConfig,
-  PlaywrightChromiumPageResource,
+  PlaywrightChromiumBrowser,
 } from "../../lib/browser";
 import {
   crawlJobLinks,
@@ -21,7 +21,7 @@ export const handleScheduled = async (env: Env) => {
     return jobs;
   }).pipe(
     Effect.provide(JobNumberCrawlerConfig.Default),
-    Effect.provide(PlaywrightChromiumPageResource.Default),
+    Effect.provide(PlaywrightChromiumBrowser.Default),
     Effect.provide(PlaywrightBrowserConfig.cloudflare(env.MYBROWSER)),
     Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,

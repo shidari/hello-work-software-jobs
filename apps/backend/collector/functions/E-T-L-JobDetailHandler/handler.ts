@@ -1,6 +1,9 @@
 import type { JobNumber } from "@sho/models";
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
-import { PlaywrightBrowserConfig } from "../../lib/browser";
+import {
+  PlaywrightBrowserConfig,
+  PlaywrightChromiumBrowser,
+} from "../../lib/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -16,6 +19,7 @@ export const handleQueue = async (jobNumber: string, env: Env) => {
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.Default),
+    Effect.provide(PlaywrightChromiumBrowser.Default),
     Effect.provide(PlaywrightBrowserConfig.cloudflare(env.MYBROWSER)),
     Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
     Effect.scoped,

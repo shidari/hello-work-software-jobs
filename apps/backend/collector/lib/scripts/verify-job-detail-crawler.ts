@@ -1,11 +1,6 @@
 import type { JobNumber } from "@sho/models";
-import { Effect, Layer, Logger, LogLevel } from "effect";
-import {
-  PlaywrightBrowserConfig,
-  PlaywrightChromiumBrowseResource,
-  PlaywrightChromiumContextResource,
-  PlaywrightChromiumPageResource,
-} from "../browser";
+import { Effect, Logger, LogLevel } from "effect";
+import { PlaywrightBrowserConfig, PlaywrightChromiumBrowser } from "../browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -14,22 +9,16 @@ import {
 } from "../job-detail-crawler";
 
 async function main() {
-  const devLayer = Layer.mergeAll(
-    JobDetailExtractor.DefaultWithoutDependencies,
-    JobDetailTransformer.Default,
-    JobDetailLoader.Default,
-  ).pipe(
-    Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
-    Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
-    Layer.provide(PlaywrightChromiumBrowseResource.Default),
-    Layer.provide(PlaywrightBrowserConfig.dev),
-  );
   const program = Effect.gen(function* () {
     const jobNumber = "01010-06778561" as JobNumber;
     yield* Effect.logInfo(`verifying job detail crawler for ${jobNumber}...`);
     return yield* processJob(jobNumber);
   }).pipe(
-    Effect.provide(devLayer),
+    Effect.provide(JobDetailExtractor.Default),
+    Effect.provide(JobDetailTransformer.Default),
+    Effect.provide(JobDetailLoader.Default),
+    Effect.provide(PlaywrightChromiumBrowser.Default),
+    Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );

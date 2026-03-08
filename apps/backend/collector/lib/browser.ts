@@ -46,7 +46,7 @@ export interface Locator {
   locator(selector: string, options?: { hasText?: string | RegExp }): Locator;
 }
 
-// ── Config ──
+// ── Config (Context.Tag — 環境切り替え) ──
 
 type CloudflareConfig = {
   readonly mode: "cloudflare";
@@ -69,14 +69,14 @@ export class PlaywrightBrowserConfig extends Context.Tag(
     });
 }
 
-// ── Browser ──
+// ── Browser (Effect.Service — dev/cloudflare 切り替え) ──
 
 class LaunchBrowserError extends Data.TaggedError("LaunchBrowserError")<{
   readonly message: string;
 }> {}
 
-export class PlaywrightChromiumBrowseResource extends Effect.Service<PlaywrightChromiumBrowseResource>()(
-  "PlaywrightChromiumBrowseResource",
+export class PlaywrightChromiumBrowser extends Effect.Service<PlaywrightChromiumBrowser>()(
+  "PlaywrightChromiumBrowser",
   {
     effect: Effect.gen(function* () {
       const config = yield* PlaywrightBrowserConfig;
@@ -128,58 +128,36 @@ export class PlaywrightChromiumBrowseResource extends Effect.Service<PlaywrightC
   },
 ) {}
 
-// ── Context ──
+// ── Context / Page (Effect.fn — 手続き的リソース生成) ──
 
 class NewContextError extends Data.TaggedError("NewContextError")<{
   readonly message: string;
 }> {}
 
-export class PlaywrightChromiumContextResource extends Effect.Service<PlaywrightChromiumContextResource>()(
-  "PlaywrightChromiumContextResource",
-  {
-    effect: Effect.gen(function* () {
-      const browserResource = yield* PlaywrightChromiumBrowseResource;
-      const { browser } = browserResource;
-      const context = yield* Effect.acquireRelease(
-        Effect.tryPromise({
-          try: () => browser.newContext(),
-          catch: (e) =>
-            new NewContextError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
-        }),
-        (context) => Effect.promise(() => context.close()),
-      );
-      return { context };
-    }),
-    dependencies: [PlaywrightChromiumBrowseResource.Default],
-  },
-) {}
-
-// ── Page ──
-
 class NewPageError extends Data.TaggedError("NewPageError")<{
   readonly message: string;
 }> {}
 
-export class PlaywrightChromiumPageResource extends Effect.Service<PlaywrightChromiumPageResource>()(
-  "PlaywrightChromiumPageResource",
-  {
-    effect: Effect.gen(function* () {
-      const contextResource = yield* PlaywrightChromiumContextResource;
-      const { context } = contextResource;
-      const page = yield* Effect.acquireRelease(
-        Effect.tryPromise({
-          try: () => context.newPage(),
-          catch: (e) =>
-            new NewPageError({
-              message: `unexpected error.\n${String(e)}`,
-            }),
+export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
+  const { browser } = yield* PlaywrightChromiumBrowser;
+  const context = yield* Effect.acquireRelease(
+    Effect.tryPromise({
+      try: () => browser.newContext(),
+      catch: (e) =>
+        new NewContextError({
+          message: `unexpected error.\n${String(e)}`,
         }),
-        (page) => Effect.promise(() => page.close()),
-      );
-      return { page };
     }),
-    dependencies: [PlaywrightChromiumContextResource.Default],
-  },
-) {}
+    (context) => Effect.promise(() => context.close()),
+  );
+  return yield* Effect.acquireRelease(
+    Effect.tryPromise({
+      try: () => context.newPage(),
+      catch: (e) =>
+        new NewPageError({
+          message: `unexpected error.\n${String(e)}`,
+        }),
+    }),
+    (page) => Effect.promise(() => page.close()),
+  );
+});

@@ -1,6 +1,6 @@
 import { Data, Effect } from "effect";
 import type { Page } from "./browser";
-import { PlaywrightChromiumPageResource } from "./browser";
+import { openBrowserPage } from "./browser";
 import type {
   DirtyWorkLocation,
   EmploymentType,
@@ -231,7 +231,7 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
 // ============================================================
 
 export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
-  const { page } = yield* PlaywrightChromiumPageResource;
+  const page = yield* openBrowserPage();
   yield* Effect.tryPromise({
     try: () =>
       page.goto(
