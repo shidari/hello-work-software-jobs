@@ -86,19 +86,8 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
         message: `failed to list job overview elements. ${String(e)}`,
       }),
   }).pipe(
-    Effect.flatMap((tables) =>
-      tables.length === 0
-        ? Effect.fail(
-            new JobListPageScraperError({
-              message: "jobOverviewList is empty.",
-            }),
-          )
-        : Effect.succeed(tables),
-    ),
     Effect.tap((list) =>
-      Effect.logDebug(
-        `succeeded to list job overview elements. count=${list.length}`,
-      ),
+      Effect.logDebug(`listed job overview elements. count=${list.length}`),
     ),
   );
 });
@@ -149,6 +138,10 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
 ) {
   const { count, roughMaxCount, nextPageDelayMs } = args;
   const jobOverviewList = yield* listJobOverviewElem(page);
+  if (jobOverviewList.length === 0) {
+    yield* Effect.logInfo("no job listings found on this page. finishing.");
+    return [Chunk.empty(), Option.none()] as const;
+  }
   const jobNumbers = (yield* extractJobNumbers(jobOverviewList)).map(
     (jobNumber) => ({ jobNumber }),
   );
