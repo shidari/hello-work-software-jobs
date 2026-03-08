@@ -6,23 +6,21 @@ import {
   PlaywrightChromiumPageResource,
 } from "../browser";
 import {
-  HelloWorkCrawler,
+  crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../job-number-crawler/crawl";
 
 async function main() {
-  const devLayer = HelloWorkCrawler.DefaultWithoutDependencies.pipe(
-    Layer.provide(
-      Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
-    ),
-    Layer.provide(PlaywrightChromiumPageResource.DefaultWithoutDependencies),
+  const devLayer = Layer.mergeAll(
+    Layer.succeed(JobNumberCrawlerConfig, JobNumberCrawlerConfig.dev),
+    PlaywrightChromiumPageResource.DefaultWithoutDependencies,
+  ).pipe(
     Layer.provide(PlaywrightChromiumContextResource.DefaultWithoutDependencies),
     Layer.provide(PlaywrightChromiumBrowseResource.Default),
     Layer.provide(PlaywrightBrowserConfig.dev),
   );
   const program = Effect.gen(function* () {
-    const crawler = yield* HelloWorkCrawler;
-    return yield* crawler.crawlJobLinks();
+    return yield* crawlJobLinks();
   }).pipe(
     Effect.provide(devLayer),
     Effect.scoped,

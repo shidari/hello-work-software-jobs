@@ -13,29 +13,16 @@ export {
   type TransformedJob,
 } from "./transformer";
 
-// ── Crawler サービス (E + T + L オーケストレーション) ──
+// ── processJob (Effect.fn — 手続き的オーケストレーション) ──
 
-export class JobDetailCrawler extends Effect.Service<JobDetailCrawler>()(
-  "JobDetailCrawler",
-  {
-    effect: Effect.gen(function* () {
-      const extractor = yield* JobDetailExtractor;
-      const transformer = yield* JobDetailTransformer;
-      const loader = yield* JobDetailLoader;
-      return {
-        processJob: (jobNumber: JobNumber) =>
-          Effect.gen(function* () {
-            const { rawHtml } = yield* extractor.extractRawHtml(jobNumber);
-            const transformed = yield* transformer.transform(rawHtml);
-            yield* loader.load(transformed);
-            return transformed;
-          }),
-      };
-    }),
-    dependencies: [
-      JobDetailExtractor.Default,
-      JobDetailTransformer.Default,
-      JobDetailLoader.Default,
-    ],
-  },
-) {}
+export const processJob = Effect.fn("processJob")(function* (
+  jobNumber: JobNumber,
+) {
+  const extractor = yield* JobDetailExtractor;
+  const transformer = yield* JobDetailTransformer;
+  const loader = yield* JobDetailLoader;
+  const { rawHtml } = yield* extractor.extractRawHtml(jobNumber);
+  const transformed = yield* transformer.transform(rawHtml);
+  yield* loader.load(transformed);
+  return transformed;
+});

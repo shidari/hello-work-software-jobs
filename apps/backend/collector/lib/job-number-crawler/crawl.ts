@@ -1,7 +1,6 @@
 import { JobNumber } from "@sho/models";
 import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
 import type { Locator } from "../browser";
-import { PlaywrightChromiumPageResource } from "../browser";
 import {
   JobSearchPageTag,
   navigateByCriteria,
@@ -167,7 +166,7 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (args: {
 });
 
 // ============================================================
-// Config
+// Config (Effect.Service — 環境切り替え)
 // ============================================================
 
 export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfig>()(
@@ -206,43 +205,29 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
 }
 
 // ============================================================
-// Crawler
+// Crawler (Effect.fn — 手続き的オーケストレーション)
 // ============================================================
 
-export class HelloWorkCrawler extends Effect.Service<HelloWorkCrawler>()(
-  "HelloWorkCrawler",
-  {
-    dependencies: [
-      JobNumberCrawlerConfig.Default,
-      PlaywrightChromiumPageResource.Default,
-    ],
-    effect: Effect.gen(function* () {
-      const config = (yield* JobNumberCrawlerConfig).config;
-      yield* Effect.logInfo(
-        `building crawler: config=${JSON.stringify(config, null, 2)}`,
-      );
-      const jobSearchPage = yield* openJobSearchPage();
-      return {
-        crawlJobLinks: () =>
-          Effect.gen(function* () {
-            yield* Effect.logInfo("start crawling...");
-            yield* navigateByCriteria(config.jobSearchCriteria);
-            const stream = Stream.paginateChunkEffect(
-              {
-                count: 0,
-                roughMaxCount: config.roughMaxCount,
-                nextPageDelayMs: config.nextPageDelayMs,
-              },
-              fetchJobMetaData,
-            );
-            const chunk = yield* Stream.runCollect(stream);
-            const jobLinks = Chunk.toArray(chunk);
-            yield* Effect.logInfo(
-              `crawling finished. total: ${jobLinks.length}`,
-            );
-            return jobLinks;
-          }).pipe(Effect.provideService(JobSearchPageTag, jobSearchPage)),
-      };
-    }),
-  },
-) {}
+export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
+  const config = (yield* JobNumberCrawlerConfig).config;
+  yield* Effect.logInfo(
+    `building crawler: config=${JSON.stringify(config, null, 2)}`,
+  );
+  const jobSearchPage = yield* openJobSearchPage();
+  yield* Effect.logInfo("start crawling...");
+  const jobLinks = yield* Effect.gen(function* () {
+    yield* navigateByCriteria(config.jobSearchCriteria);
+    const stream = Stream.paginateChunkEffect(
+      {
+        count: 0,
+        roughMaxCount: config.roughMaxCount,
+        nextPageDelayMs: config.nextPageDelayMs,
+      },
+      fetchJobMetaData,
+    );
+    const chunk = yield* Stream.runCollect(stream);
+    return Chunk.toArray(chunk);
+  }).pipe(Effect.provideService(JobSearchPageTag, jobSearchPage));
+  yield* Effect.logInfo(`crawling finished. total: ${jobLinks.length}`);
+  return jobLinks;
+});
