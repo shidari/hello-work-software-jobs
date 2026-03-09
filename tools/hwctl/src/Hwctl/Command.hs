@@ -7,9 +7,10 @@ module Hwctl.Command
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Text as T
-import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, fetchJobDetailRuns, getJob, getQueueStatus, listJobs, triggerCrawler)
+import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawlerRuns, fetchDailyStats, fetchJobDetailRuns, getJob, getQueueStatus, listJobs, pullQueueMessages, sendQueueMessage, triggerCrawler)
 import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireDlqId, requireQueueId)
-import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobDetailRuns, outputJobs, outputQueueStatus, outputTailSession, outputTriggerResult)
+import Data.Char (isDigit)
+import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobDetailRuns, outputJobs, outputQueueMessages, outputQueueStatus, outputSendMessageResult, outputTailSession, outputTriggerResult)
 import Hwctl.Types (AppError (..), CrawlerRunOpts (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultCrawlerRunOpts, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
@@ -23,6 +24,8 @@ data Command
   | CrawlerRunCmd RunOpts
   | CrawlerHistoryCmd HistoryOpts
   | JobDetailHistoryCmd HistoryOpts
+  | JobDetailRunCmd EtlRunOpts
+  | QueueDlqPullCmd DlqPullOpts
   deriving (Show)
 
 data RunOpts = RunOpts
@@ -51,6 +54,16 @@ data GetOpts = GetOpts
 data StatsOpts = StatsOpts
   { statsFilterJson :: Maybe String
   , statsFormat :: OutputFormat
+  }
+  deriving (Show)
+
+data EtlRunOpts = EtlRunOpts
+  { etlRunJobNumber :: String
+  }
+  deriving (Show)
+
+data DlqPullOpts = DlqPullOpts
+  { dlqPullBatchSize :: Maybe Int
   }
   deriving (Show)
 
@@ -121,6 +134,7 @@ commandParser =
       hsubparser
         ( command "status" (info (QueueStatusCmd <$> formatOptsParser) (progDesc "Get queue status"))
             <> command "dlq" (info (QueueDlqCmd <$> formatOptsParser) (progDesc "Get DLQ status"))
+            <> command "dlq-pull" (info (QueueDlqPullCmd <$> dlqPullOptsParser) (progDesc "Pull messages from DLQ"))
         )
     logsSubcommand =
       hsubparser
@@ -134,7 +148,14 @@ commandParser =
     jobDetailSubcommand =
       hsubparser
         ( command "history" (info (JobDetailHistoryCmd <$> historyOptsParser) (progDesc "Show job detail ETL run history"))
+            <> command "run" (info (JobDetailRunCmd <$> etlRunOptsParser) (progDesc "Send a job number to the ETL queue"))
         )
+    etlRunOptsParser =
+      EtlRunOpts
+        <$> argument str (metavar "JOB_NUMBER" <> help "Job number (e.g., 13080-26240361)")
+    dlqPullOptsParser =
+      DlqPullOpts
+        <$> optional (option auto (long "batch-size" <> short 'n' <> metavar "N" <> help "Number of messages to pull (default: 10)"))
     runOptsParser =
       RunOpts
         <$> optional (argument str (metavar "OPTIONS_JSON" <> help "Options JSON (e.g., '{\"period\":\"week\",\"maxCount\":50}')"))
@@ -257,6 +278,32 @@ runApp = do
             case result of
               Left err -> outputError err
               Right runs -> outputJobDetailRuns runs
+    JobDetailRunCmd etlOpt -> do
+      let jn = etlRunJobNumber etlOpt
+      if not (isValidJobNumber jn)
+        then outputError (ParseError ("Invalid job number format: " <> jn <> ". Expected format: NNNNN-NNNNNNNNN"))
+        else case requireCfConfig cfg of
+          Left err -> outputError err
+          Right cfCfg -> case requireQueueId cfg of
+            Left err -> outputError err
+            Right qid -> do
+              result <- sendQueueMessage cfCfg qid jn
+              case result of
+                Left err -> outputError err
+                Right r -> outputSendMessageResult r
+    QueueDlqPullCmd dlqOpt -> do
+      let batchSize = maybe 10 id (dlqPullBatchSize dlqOpt)
+      if batchSize <= 0 || batchSize > 100
+        then outputError (ParseError ("batch-size must be between 1 and 100, got: " <> show batchSize))
+        else case requireCfConfig cfg of
+          Left err -> outputError err
+          Right cfCfg -> case requireDlqId cfg of
+            Left err -> outputError err
+            Right did -> do
+              result <- pullQueueMessages cfCfg did batchSize
+              case result of
+                Left err -> outputError err
+                Right r -> outputQueueMessages r
     CrawlerHistoryCmd histOpt -> do
       case requireCollectorEndpoint cfg of
         Left err -> outputError err
@@ -267,6 +314,11 @@ runApp = do
             case result of
               Left err -> outputError err
               Right runs -> outputCrawlerRuns runs
+
+isValidJobNumber :: String -> Bool
+isValidJobNumber s = case break (== '-') s of
+  (prefix, '-' : suffix) -> not (null prefix) && not (null suffix) && all isDigit prefix && all isDigit suffix
+  _ -> False
 
 applyStatsFilter :: StatsFilter -> [DailyStat] -> [DailyStat]
 applyStatsFilter filt =

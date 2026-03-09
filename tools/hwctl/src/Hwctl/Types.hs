@@ -23,6 +23,9 @@ module Hwctl.Types
   , CrawlerRunOpts (..)
   , defaultCrawlerRunOpts
   , JobDetailRun (..)
+  , QueueMessage (..)
+  , QueuePullResponse (..)
+  , SendMessageResponse (..)
   ) where
 
 import Data.Aeson
@@ -445,6 +448,19 @@ instance ToJSON JobDetailRun where
       , "errorMessage" .= jdrErrorMessage r
       , "createdAt" .= jdrCreatedAt r
       ]
+
+-- Send message response (Cloudflare Queue API)
+data SendMessageResponse = SendMessageResponse
+  { smrMessageId :: Maybe Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON SendMessageResponse where
+  parseJSON = withObject "SendMessageResponse" $ \v ->
+    SendMessageResponse <$> v .:? "messageId"
+
+instance ToJSON SendMessageResponse where
+  toJSON r = object ["messageId" .= smrMessageId r]
 
 -- Error types
 data AppError

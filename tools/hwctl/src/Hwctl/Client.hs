@@ -12,12 +12,14 @@ module Hwctl.Client
   , triggerCrawler
   , fetchCrawlerRuns
   , fetchJobDetailRuns
+  , sendQueueMessage
+  , pullQueueMessages
   , JobsQuery (..)
   , defaultQuery
   ) where
 
 import Control.Exception (catch, SomeException)
-import Data.Aeson (FromJSON, eitherDecode, object)
+import Data.Aeson (FromJSON, eitherDecode, object, (.=))
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
@@ -31,6 +33,8 @@ import Hwctl.Types
   , JobDetailRun
   , JobsResponse
   , QueueInfo
+  , QueuePullResponse
+  , SendMessageResponse
   , StatsResponse
   , TailSession
   , TriggerResponse
@@ -147,6 +151,26 @@ fetchJobDetailRuns collectorEp key mLimit = withEndpointStr collectorEp $ \case
     let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
     resp <- req GET (url /: "job-detail-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
+
+-- Queue message operations (Cloudflare API)
+
+sendQueueMessage :: CfConfig -> String -> String -> IO (Either AppError SendMessageResponse)
+sendQueueMessage cf qid jobNum =
+  (runReq defaultHttpConfig $ do
+    let url = cfBaseUrl /: "accounts" /: T.pack (cfAccount cf) /: "queues" /: T.pack qid /: "messages"
+        body = object ["body" .= object ["jobNumber" .= jobNum]]
+    resp <- req POST url (ReqBodyJson body) lbsResponse (cfAuth cf)
+    pure $ decodeCfResponse (responseBody resp))
+  `catch` (\(e :: SomeException) -> pure $ Left (HttpError $ show e))
+
+pullQueueMessages :: CfConfig -> String -> Int -> IO (Either AppError QueuePullResponse)
+pullQueueMessages cf qid batchSize =
+  (runReq defaultHttpConfig $ do
+    let url = cfBaseUrl /: "accounts" /: T.pack (cfAccount cf) /: "queues" /: T.pack qid /: "messages" /: "pull"
+        body = object ["batch_size" .= batchSize, "visibility_timeout_ms" .= (30000 :: Int)]
+    resp <- req POST url (ReqBodyJson body) lbsResponse (cfAuth cf)
+    pure $ decodeCfResponse (responseBody resp))
+  `catch` (\(e :: SomeException) -> pure $ Left (HttpError $ show e))
 
 -- Helpers
 
