@@ -50,8 +50,8 @@
       }
     },
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
-      "last_modified": "2026-01-30T02:32:49Z",
-      "resolved": "github:NixOS/nixpkgs/6308c3b21396534d8aaeac46179c14c439a89b8a?lastModified=1769740369&narHash=sha256-xKPyJoMoXfXpDM5DFDZDsi9PHArf2k5BJjvReYXoFpM%3D"
+      "last_modified": "2026-03-06T04:25:18Z",
+      "resolved": "github:NixOS/nixpkgs/e38213b91d3786389a446dfce4ff5a8aaf6012f2?lastModified=1772771118&narHash=sha256-xWzaTvmmACR%2FSRWtABgI%2FZ97lcqwJAeoSd5QW1KdK1s%3D"
     },
     "jq@1.8.1": {
       "last_modified": "2026-03-05T18:52:33Z",
@@ -170,9 +170,9 @@
       }
     },
     "nodejs@22": {
-      "last_modified": "2026-02-04T01:49:30Z",
+      "last_modified": "2026-02-23T15:40:43Z",
       "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/aa290c9891fa4ebe88f8889e59633d20cc06a5f2#nodejs_22",
+      "resolved": "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97#nodejs_22",
       "source": "devbox-search",
       "version": "22.22.0",
       "systems": {
@@ -180,79 +180,47 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/zphm4748w514z6p9g073f673sjl338gm-nodejs-22.22.0",
+              "path": "/nix/store/3kkw1cwcwl0vvn4y2jkpfr3iarxaq284-nodejs-22.22.0",
               "default": true
-            },
-            {
-              "name": "dev",
-              "path": "/nix/store/pp6k9i2dpr8rimfl5dhrpm8y2384g8l3-nodejs-22.22.0-dev"
-            },
-            {
-              "name": "libv8",
-              "path": "/nix/store/f5mnrbcj44qx8pb0xj9g71cb0ffxrmd0-nodejs-22.22.0-libv8"
             }
           ],
-          "store_path": "/nix/store/zphm4748w514z6p9g073f673sjl338gm-nodejs-22.22.0"
+          "store_path": "/nix/store/3kkw1cwcwl0vvn4y2jkpfr3iarxaq284-nodejs-22.22.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2hzivwi1fq7gyn42nxf1299ydza2qvqq-nodejs-22.22.0",
+              "path": "/nix/store/7996sfm56iryn7p639frvhajrbrb4ych-nodejs-22.22.0",
               "default": true
-            },
-            {
-              "name": "dev",
-              "path": "/nix/store/4m4b63ix1kljgcap8zhbpiy4xvg90n1r-nodejs-22.22.0-dev"
-            },
-            {
-              "name": "libv8",
-              "path": "/nix/store/xl8f6lq0p5lf1dixhd9rhxzkvx4lzpzl-nodejs-22.22.0-libv8"
             }
           ],
-          "store_path": "/nix/store/2hzivwi1fq7gyn42nxf1299ydza2qvqq-nodejs-22.22.0"
+          "store_path": "/nix/store/7996sfm56iryn7p639frvhajrbrb4ych-nodejs-22.22.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2jw64xbn385nrg0dkinyxy1dk57zib21-nodejs-22.22.0",
+              "path": "/nix/store/ixd7h25iyw6wc4hz37bqfg19782bm7z2-nodejs-22.22.0",
               "default": true
-            },
-            {
-              "name": "libv8",
-              "path": "/nix/store/q81bvbbawxkm3kb741x4wmxvyyxd8w51-nodejs-22.22.0-libv8"
-            },
-            {
-              "name": "dev",
-              "path": "/nix/store/vaq9lp4bchqhvfbfjws5rx2qwx6m57pn-nodejs-22.22.0-dev"
             }
           ],
-          "store_path": "/nix/store/2jw64xbn385nrg0dkinyxy1dk57zib21-nodejs-22.22.0"
+          "store_path": "/nix/store/ixd7h25iyw6wc4hz37bqfg19782bm7z2-nodejs-22.22.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cv3yxgf7zp70wk8d8lg5zi84lg35nyxs-nodejs-22.22.0",
+              "path": "/nix/store/b87dfjnjvg932xsw4mszjg4qmvrqzlqk-nodejs-22.22.0",
               "default": true
-            },
-            {
-              "name": "libv8",
-              "path": "/nix/store/vzddff6gppvny62qsvr1sgqq629laz12-nodejs-22.22.0-libv8"
-            },
-            {
-              "name": "dev",
-              "path": "/nix/store/azkh9xkfaphcs7cj5l43rh4a92zjc510-nodejs-22.22.0-dev"
             }
           ],
-          "store_path": "/nix/store/cv3yxgf7zp70wk8d8lg5zi84lg35nyxs-nodejs-22.22.0"
+          "store_path": "/nix/store/b87dfjnjvg932xsw4mszjg4qmvrqzlqk-nodejs-22.22.0"
         }
       }
     },
     "pinact@3.8.0": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#pinact",
+      "last_modified": "2026-02-23T15:40:43Z",
+      "resolved": "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97#pinact",
       "source": "devbox-search",
       "version": "3.8.0",
       "systems": {
@@ -260,41 +228,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fiay5vwig4zzx62bg059h7pyvs2i67m7-pinact-3.8.0",
+              "path": "/nix/store/07rrc2dxci15vcw5iz6xia3zpch7dx08-pinact-3.8.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fiay5vwig4zzx62bg059h7pyvs2i67m7-pinact-3.8.0"
+          "store_path": "/nix/store/07rrc2dxci15vcw5iz6xia3zpch7dx08-pinact-3.8.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l90z6k8v1r6b25jk8nqn7kxrgni029f3-pinact-3.8.0",
+              "path": "/nix/store/2zfa24p0vbbgj9q2x5gzljnm7l74amaz-pinact-3.8.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/l90z6k8v1r6b25jk8nqn7kxrgni029f3-pinact-3.8.0"
+          "store_path": "/nix/store/2zfa24p0vbbgj9q2x5gzljnm7l74amaz-pinact-3.8.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/p3zpwscx19j1gbhin9izbdnip3d68nbf-pinact-3.8.0",
+              "path": "/nix/store/qyxqkh69b0xz33w8y7fgg3h9x74gh2lh-pinact-3.8.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/p3zpwscx19j1gbhin9izbdnip3d68nbf-pinact-3.8.0"
+          "store_path": "/nix/store/qyxqkh69b0xz33w8y7fgg3h9x74gh2lh-pinact-3.8.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/c522g2iwjw9pklj07a2igib4w60jrh4f-pinact-3.8.0",
+              "path": "/nix/store/yzga5mx5i88zs0kxfa2wd79300xy16gj-pinact-3.8.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/c522g2iwjw9pklj07a2igib4w60jrh4f-pinact-3.8.0"
+          "store_path": "/nix/store/yzga5mx5i88zs0kxfa2wd79300xy16gj-pinact-3.8.0"
         }
       }
     },
