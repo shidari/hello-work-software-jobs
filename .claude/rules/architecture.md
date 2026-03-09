@@ -118,6 +118,8 @@ Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計
 | `hwctl crawler history [--limit N]` | クローラー実行履歴 |
 | `hwctl job-detail history [--limit N]` | 求人詳細 ETL 実行履歴 |
 | `hwctl queue dlq [--table]` | DLQ 状態取得 |
+| `hwctl queue dlq-pull [--batch-size N]` | DLQ メッセージ取得 |
+| `hwctl job-detail run <jobNumber>` | 求人番号をETLキューに送信 |
 
 ### 設計
 

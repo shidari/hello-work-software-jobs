@@ -10,6 +10,8 @@ module Hwctl.Output
   , outputTriggerResult
   , outputCrawlerRuns
   , outputJobDetailRuns
+  , outputSendMessageResult
+  , outputQueueMessages
   , outputError
   ) where
 
@@ -17,7 +19,7 @@ import Data.Aeson (encode, object, (.=))
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
-import Hwctl.Types (AppError, CrawlerRun (..), DailyStat (..), Job (..), JobDetailRun (..), JobsResponse (..), PageMeta (..), QueueInfo (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
+import Hwctl.Types (AppError, CrawlerRun (..), DailyStat (..), Job (..), JobDetailRun (..), JobsResponse (..), PageMeta (..), QueueInfo (..), QueuePullResponse (..), SendMessageResponse (..), StatsSummary (..), TailSession (..), TriggerResponse (..), WageRange (..))
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 
@@ -123,6 +125,12 @@ outputCrawlerRuns runs = LBS.putStrLn (encode runs)
 
 outputJobDetailRuns :: [JobDetailRun] -> IO ()
 outputJobDetailRuns runs = LBS.putStrLn (encode runs)
+
+outputSendMessageResult :: SendMessageResponse -> IO ()
+outputSendMessageResult r = LBS.putStrLn (encode r)
+
+outputQueueMessages :: QueuePullResponse -> IO ()
+outputQueueMessages r = LBS.putStrLn (encode r)
 
 unlines' :: [String] -> String
 unlines' = foldr (\a b -> if null b then a else a <> "\n" <> b) ""

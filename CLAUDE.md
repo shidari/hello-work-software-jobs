@@ -70,6 +70,8 @@ stack exec hwctl -- crawler run [OPTIONS_JSON]  # Trigger crawler (e.g., '{"peri
 stack exec hwctl -- crawler history [--limit N]  # Crawler run history (JSON)
 stack exec hwctl -- job-detail history [--limit N]  # Job detail ETL run history (JSON)
 stack exec hwctl -- queue dlq [--table]  # DLQ status (JSON)
+stack exec hwctl -- queue dlq-pull [--batch-size N]  # DLQ messages pull (JSON)
+stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 ```
 
 ## API Endpoints
