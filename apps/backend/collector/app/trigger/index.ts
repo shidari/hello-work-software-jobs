@@ -38,7 +38,13 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
             400,
           );
         const db = createD1DB(c.env.DB);
-        const runs = await selectCrawlerRuns(db, limit);
+        const runs = await selectCrawlerRuns(db, {
+          limit,
+          since: c.req.query("since"),
+          until: c.req.query("until"),
+          status: c.req.query("status"),
+          trigger: c.req.query("trigger"),
+        });
         return c.json(runs);
       })
       .get("/job-detail-runs", auth.middleware, async (c) => {
@@ -49,7 +55,12 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
             400,
           );
         const db = createD1DB(c.env.DB);
-        const runs = await selectJobDetailRuns(db, limit);
+        const runs = await selectJobDetailRuns(db, {
+          limit,
+          since: c.req.query("since"),
+          until: c.req.query("until"),
+          status: c.req.query("status"),
+        });
         return c.json(runs);
       });
 

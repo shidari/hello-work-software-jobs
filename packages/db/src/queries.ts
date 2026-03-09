@@ -28,20 +28,46 @@ export async function selectDailyStats(
   }));
 }
 
-export async function selectCrawlerRuns(db: Kysely<DB>, limit = 20) {
-  return db
-    .selectFrom("crawler_runs")
-    .selectAll()
+export type CrawlerRunFilter = {
+  since?: string;
+  until?: string;
+  status?: string;
+  trigger?: string;
+  limit?: number;
+};
+
+export async function selectCrawlerRuns(
+  db: Kysely<DB>,
+  filter: CrawlerRunFilter = {},
+) {
+  let query = db.selectFrom("crawler_runs").selectAll();
+  if (filter.since) query = query.where("startedAt", ">=", filter.since);
+  if (filter.until) query = query.where("startedAt", "<=", filter.until);
+  if (filter.status) query = query.where("status", "=", filter.status);
+  if (filter.trigger) query = query.where("trigger", "=", filter.trigger);
+  return query
     .orderBy("startedAt", "desc")
-    .limit(limit)
+    .limit(filter.limit ?? 20)
     .execute();
 }
 
-export async function selectJobDetailRuns(db: Kysely<DB>, limit = 20) {
-  return db
-    .selectFrom("job_detail_runs")
-    .selectAll()
+export type JobDetailRunFilter = {
+  since?: string;
+  until?: string;
+  status?: string;
+  limit?: number;
+};
+
+export async function selectJobDetailRuns(
+  db: Kysely<DB>,
+  filter: JobDetailRunFilter = {},
+) {
+  let query = db.selectFrom("job_detail_runs").selectAll();
+  if (filter.since) query = query.where("startedAt", ">=", filter.since);
+  if (filter.until) query = query.where("startedAt", "<=", filter.until);
+  if (filter.status) query = query.where("status", "=", filter.status);
+  return query
     .orderBy("startedAt", "desc")
-    .limit(limit)
+    .limit(filter.limit ?? 20)
     .execute();
 }

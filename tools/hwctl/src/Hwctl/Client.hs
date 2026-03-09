@@ -28,9 +28,11 @@ import Hwctl.Types
   ( AppError (..)
   , CfApiResponse (..)
   , CrawlerRun
+  , CrawlerRunFilter (..)
   , CrawlerRunOpts (..)
   , Job
   , JobDetailRun
+  , JobDetailRunFilter (..)
   , JobsResponse
   , QueueInfo
   , QueuePullResponse
@@ -128,29 +130,44 @@ crawlerQueryParams croOpts =
 
 -- Crawler runs
 
-fetchCrawlerRuns :: String -> String -> Maybe Int -> IO (Either AppError [CrawlerRun])
-fetchCrawlerRuns collectorEp key mLimit = withEndpointStr collectorEp $ \case
+fetchCrawlerRuns :: String -> String -> CrawlerRunFilter -> IO (Either AppError [CrawlerRun])
+fetchCrawlerRuns collectorEp key filt = withEndpointStr collectorEp $ \case
   Left (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> crawlerRunFilterParams filt
     resp <- req GET (url /: "crawler-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
   Right (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> crawlerRunFilterParams filt
     resp <- req GET (url /: "crawler-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
+
+crawlerRunFilterParams :: CrawlerRunFilter -> Option scheme
+crawlerRunFilterParams filt =
+  maybe mempty ("since" =:) (crfSince filt)
+    <> maybe mempty ("until" =:) (crfUntil filt)
+    <> maybe mempty ("status" =:) (crfStatus filt)
+    <> maybe mempty ("trigger" =:) (crfTrigger filt)
+    <> maybe mempty ("limit" =:) (crfLimit filt)
 
 -- Job detail runs
 
-fetchJobDetailRuns :: String -> String -> Maybe Int -> IO (Either AppError [JobDetailRun])
-fetchJobDetailRuns collectorEp key mLimit = withEndpointStr collectorEp $ \case
+fetchJobDetailRuns :: String -> String -> JobDetailRunFilter -> IO (Either AppError [JobDetailRun])
+fetchJobDetailRuns collectorEp key filt = withEndpointStr collectorEp $ \case
   Left (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> jobDetailRunFilterParams filt
     resp <- req GET (url /: "job-detail-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
   Right (url, baseOpts) -> do
-    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> maybe mempty ("limit" =:) mLimit
+    let opts = baseOpts <> header "x-api-key" (encodeUtf8 (T.pack key)) <> jobDetailRunFilterParams filt
     resp <- req GET (url /: "job-detail-runs") NoReqBody lbsResponse opts
     pure $ decodeResponse (responseBody resp)
+
+jobDetailRunFilterParams :: JobDetailRunFilter -> Option scheme
+jobDetailRunFilterParams filt =
+  maybe mempty ("since" =:) (jdrfSince filt)
+    <> maybe mempty ("until" =:) (jdrfUntil filt)
+    <> maybe mempty ("status" =:) (jdrfStatus filt)
+    <> maybe mempty ("limit" =:) (jdrfLimit filt)
 
 -- Queue message operations (Cloudflare API)
 
