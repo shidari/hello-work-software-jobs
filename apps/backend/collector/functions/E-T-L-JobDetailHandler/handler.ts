@@ -29,10 +29,9 @@ export const handleQueue = async (jobNumber: string, env: Env) => {
   );
 
   await runnable.pipe(
-    // 一次対処: DBログの失敗でパイプラインを止めないため、tryPromiseではなくpromiseを使用
     Effect.matchEffect({
       onSuccess: () =>
-        Effect.promise(() =>
+        Effect.tryPromise(() =>
           db
             .insertInto("job_detail_runs")
             .values({
@@ -43,9 +42,13 @@ export const handleQueue = async (jobNumber: string, env: Env) => {
               createdAt: new Date().toISOString(),
             })
             .execute(),
-        ),
-      onFailure: (error) =>
-        Effect.promise(() =>
+        ).pipe(Effect.ignore),
+      onFailure: (error) => {
+        const errorMessage =
+          typeof error === "string"
+            ? error
+            : `${error._tag}: ${"reason" in error ? error.reason : error.message}`;
+        return Effect.tryPromise(() =>
           db
             .insertInto("job_detail_runs")
             .values({
@@ -53,11 +56,17 @@ export const handleQueue = async (jobNumber: string, env: Env) => {
               status: "failed",
               startedAt,
               finishedAt: new Date().toISOString(),
-              errorMessage: String(error),
+              errorMessage,
               createdAt: new Date().toISOString(),
             })
             .execute(),
-        ),
+        ).pipe(
+          Effect.tapError((e) =>
+            Effect.logError("Failed to log job_detail_run", e),
+          ),
+          Effect.ignore,
+        );
+      },
     }),
     Effect.runPromise,
   );
