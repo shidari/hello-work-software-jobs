@@ -94,6 +94,7 @@ stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 ## General Rules
 
 - **プロジェクト外のファイル参照禁止**: 原則として、このリポジトリ外のファイル（`~/devbox.json` 等）を参照・編集しないこと。ツールチェーンはプロジェクトレベルの `devbox.json` で管理する
+- **ad-hoc スクリプト禁止**: コマンド出力の加工に `python3 -c`, `node -e` 等のワンライナーを使わないこと。`jq` 等の専用ツールを使う
 
 ## Coding Conventions
 
