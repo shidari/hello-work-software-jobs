@@ -11,7 +11,7 @@ import Hwctl.Client (JobsQuery (..), createTailSession, defaultQuery, fetchCrawl
 import Hwctl.Config (loadConfig, requireApiKey, requireCfConfig, requireCollectorEndpoint, requireDlqId, requireQueueId)
 import Data.Char (isDigit)
 import Hwctl.Output (OutputFormat (..), outputCrawlerRuns, outputDailyStats, outputError, outputJob, outputJobDetailRuns, outputJobs, outputQueueMessages, outputQueueStatus, outputSendMessageResult, outputTailSession, outputTriggerResult)
-import Hwctl.Types (AppError (..), CrawlerRunOpts (..), DailyStat (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultCrawlerRunOpts, defaultStatsFilter, defaultTailOptions)
+import Hwctl.Types (AppError (..), CrawlerRunFilter (..), CrawlerRunOpts (..), DailyStat (..), JobDetailRunFilter (..), StatsFilter (..), StatsResponse (..), TailOptions (..), defaultCrawlerRunFilter, defaultCrawlerRunOpts, defaultJobDetailRunFilter, defaultStatsFilter, defaultTailOptions)
 import Options.Applicative
 
 data Command
@@ -34,7 +34,8 @@ data RunOpts = RunOpts
   deriving (Show)
 
 data HistoryOpts = HistoryOpts
-  { historyLimit :: Maybe Int
+  { historyFilterJson :: Maybe String
+  , historyFormat :: OutputFormat
   }
   deriving (Show)
 
@@ -161,7 +162,8 @@ commandParser =
         <$> optional (argument str (metavar "OPTIONS_JSON" <> help "Options JSON (e.g., '{\"period\":\"week\",\"maxCount\":50}')"))
     historyOptsParser =
       HistoryOpts
-        <$> optional (option auto (long "limit" <> short 'n' <> metavar "N" <> help "Number of runs to show (default: 20)"))
+        <$> optional (argument str (metavar "FILTER_JSON" <> help "Filter JSON (e.g., '{\"since\":\"2026-03-01\",\"status\":\"failed\",\"limit\":5}')"))
+        <*> formatOption
 
 opts :: ParserInfo Command
 opts =
@@ -269,15 +271,30 @@ runApp = do
               Left err -> outputError err
               Right qi -> outputQueueStatus (fmtFormat fmtOpt) qi
     JobDetailHistoryCmd histOpt -> do
-      case requireCollectorEndpoint cfg of
-        Left err -> outputError err
-        Right ep -> case requireApiKey cfg of
-          Left err -> outputError err
-          Right key -> do
-            result <- fetchJobDetailRuns ep key (historyLimit histOpt)
-            case result of
-              Left err -> outputError err
-              Right runs -> outputJobDetailRuns runs
+      let filterResult = case historyFilterJson histOpt of
+            Nothing -> Right defaultJobDetailRunFilter
+            Just s -> case eitherDecode (LBS.pack s) of
+              Left msg -> Left msg
+              Right f -> Right f
+      case filterResult of
+        Left msg -> outputError (ParseError ("Invalid filter JSON: " <> msg))
+        Right filt -> do
+          let validStatuses = ["success", "failed"] :: [T.Text]
+          case jdrfStatus filt of
+            Just st | st `notElem` validStatuses ->
+              outputError (ParseError ("Invalid status: " <> T.unpack st <> ". Must be one of: success, failed"))
+            _ -> case jdrfLimit filt of
+              Just n | n <= 0 || n > 1000 ->
+                outputError (ParseError ("limit must be between 1 and 1000, got: " <> show n))
+              _ -> case requireCollectorEndpoint cfg of
+                Left err -> outputError err
+                Right ep -> case requireApiKey cfg of
+                  Left err -> outputError err
+                  Right key -> do
+                    result <- fetchJobDetailRuns ep key filt
+                    case result of
+                      Left err -> outputError err
+                      Right runs -> outputJobDetailRuns runs
     JobDetailRunCmd etlOpt -> do
       let jn = etlRunJobNumber etlOpt
       if not (isValidJobNumber jn)
@@ -305,15 +322,34 @@ runApp = do
                 Left err -> outputError err
                 Right r -> outputQueueMessages r
     CrawlerHistoryCmd histOpt -> do
-      case requireCollectorEndpoint cfg of
-        Left err -> outputError err
-        Right ep -> case requireApiKey cfg of
-          Left err -> outputError err
-          Right key -> do
-            result <- fetchCrawlerRuns ep key (historyLimit histOpt)
-            case result of
-              Left err -> outputError err
-              Right runs -> outputCrawlerRuns runs
+      let filterResult = case historyFilterJson histOpt of
+            Nothing -> Right defaultCrawlerRunFilter
+            Just s -> case eitherDecode (LBS.pack s) of
+              Left msg -> Left msg
+              Right f -> Right f
+      case filterResult of
+        Left msg -> outputError (ParseError ("Invalid filter JSON: " <> msg))
+        Right filt -> do
+          let validStatuses = ["success", "failed"] :: [T.Text]
+              validTriggers = ["cron", "manual"] :: [T.Text]
+          case crfStatus filt of
+            Just st | st `notElem` validStatuses ->
+              outputError (ParseError ("Invalid status: " <> T.unpack st <> ". Must be one of: success, failed"))
+            _ -> case crfTrigger filt of
+              Just tr | tr `notElem` validTriggers ->
+                outputError (ParseError ("Invalid trigger: " <> T.unpack tr <> ". Must be one of: cron, manual"))
+              _ -> case crfLimit filt of
+                Just n | n <= 0 || n > 1000 ->
+                  outputError (ParseError ("limit must be between 1 and 1000, got: " <> show n))
+                _ -> case requireCollectorEndpoint cfg of
+                  Left err -> outputError err
+                  Right ep -> case requireApiKey cfg of
+                    Left err -> outputError err
+                    Right key -> do
+                      result <- fetchCrawlerRuns ep key filt
+                      case result of
+                        Left err -> outputError err
+                        Right runs -> outputCrawlerRuns runs
 
 isValidJobNumber :: String -> Bool
 isValidJobNumber s = case break (== '-') s of

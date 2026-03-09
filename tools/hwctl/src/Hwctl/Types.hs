@@ -26,6 +26,10 @@ module Hwctl.Types
   , QueueMessage (..)
   , QueuePullResponse (..)
   , SendMessageResponse (..)
+  , CrawlerRunFilter (..)
+  , defaultCrawlerRunFilter
+  , JobDetailRunFilter (..)
+  , defaultJobDetailRunFilter
   ) where
 
 import Data.Aeson
@@ -461,6 +465,48 @@ instance FromJSON SendMessageResponse where
 
 instance ToJSON SendMessageResponse where
   toJSON r = object ["messageId" .= smrMessageId r]
+
+-- Crawler run filter
+data CrawlerRunFilter = CrawlerRunFilter
+  { crfSince :: Maybe Text
+  , crfUntil :: Maybe Text
+  , crfStatus :: Maybe Text
+  , crfTrigger :: Maybe Text
+  , crfLimit :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON CrawlerRunFilter where
+  parseJSON = withObject "CrawlerRunFilter" $ \v ->
+    CrawlerRunFilter
+      <$> v .:? "since"
+      <*> v .:? "until"
+      <*> v .:? "status"
+      <*> v .:? "trigger"
+      <*> v .:? "limit"
+
+defaultCrawlerRunFilter :: CrawlerRunFilter
+defaultCrawlerRunFilter = CrawlerRunFilter Nothing Nothing Nothing Nothing Nothing
+
+-- Job detail run filter
+data JobDetailRunFilter = JobDetailRunFilter
+  { jdrfSince :: Maybe Text
+  , jdrfUntil :: Maybe Text
+  , jdrfStatus :: Maybe Text
+  , jdrfLimit :: Maybe Int
+  }
+  deriving (Show, Eq, Generic)
+
+instance FromJSON JobDetailRunFilter where
+  parseJSON = withObject "JobDetailRunFilter" $ \v ->
+    JobDetailRunFilter
+      <$> v .:? "since"
+      <*> v .:? "until"
+      <*> v .:? "status"
+      <*> v .:? "limit"
+
+defaultJobDetailRunFilter :: JobDetailRunFilter
+defaultJobDetailRunFilter = JobDetailRunFilter Nothing Nothing Nothing Nothing
 
 -- Error types
 data AppError
