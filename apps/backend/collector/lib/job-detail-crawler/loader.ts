@@ -40,6 +40,18 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
                   serializedPayload: JSON.stringify(job, null, 2),
                 }),
             });
+            if (!res.ok) {
+              const body = yield* Effect.tryPromise({
+                try: () => res.text(),
+                catch: () => "<unreadable>",
+              });
+              yield* new InsertJobError({
+                reason: `API responded with ${res.status}: ${body}`,
+                serializedPayload: JSON.stringify(job, null, 2),
+                responseStatus: res.status,
+                responseStatusMessage: res.statusText,
+              });
+            }
             const data = yield* Effect.tryPromise({
               try: () => res.json(),
               catch: (e) =>
