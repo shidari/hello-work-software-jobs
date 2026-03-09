@@ -1,5 +1,8 @@
 {
   "name": "collector",
+  "observability": {
+    "enabled": true
+  },
   "main": "dist/index.mjs",
   "compatibility_date": "2025-09-15",
   "compatibility_flags": ["nodejs_compat"],
@@ -28,7 +31,7 @@
       {
         "queue": "job-detail-queue",
         "max_batch_size": 1,
-        "max_concurrency": 5,
+        "max_concurrency": 2,
         "dead_letter_queue": "job-detail-dlq"
       }
     ]

@@ -95,8 +95,9 @@ Cloudflare Workers + Hono + Browser Rendering + Queues + Effect サービスパ�
 
 - Worker (fetch + scheduled + queue handler)
 - Browser Rendering binding
-- Cloudflare Queues (job-detail-queue + DLQ)
+- Cloudflare Queues (job-detail-queue + DLQ, max_concurrency: 2)
 - D1 binding (job-store — API と同一 DB を共有)
+- Observability 有効
 
 ---
 
