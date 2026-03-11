@@ -29,7 +29,7 @@
 	},
 	"dependencies": {
 		"@hono/standard-validator": "^0.2.0",
-		"@hono/swagger-ui": "^0.5.2",
+		"@hono/swagger-ui": "^0.6.0",
 		"@sho/db": "workspace:*",
 		"@sho/models": "workspace:*",
 		"dotenv": "^17.0.0",
