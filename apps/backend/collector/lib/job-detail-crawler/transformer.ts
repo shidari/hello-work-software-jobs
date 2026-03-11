@@ -27,12 +27,14 @@ export class JobDetailTransformError extends Data.TaggedError(
 const japaneseDateToISOStr = Schema.transform(Schema.String, Schema.String, {
   strict: true,
   decode: (val) => {
-    // "2025年7月23日" → "2025-07-23"
+    // "2025年7月23日" → "2025-07-23T..."
     const dateStr = val.replace("年", "-").replace("月", "-").replace("日", "");
     return new Date(dateStr).toISOString();
   },
-  encode: () => {
-    throw new Error("encode not supported");
+  encode: (val) => {
+    // "2025-07-23T..." → "2025年7月23日"
+    const d = new Date(val);
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
   },
 });
 
@@ -50,10 +52,10 @@ const homePageTransform = Schema.transform(Schema.String, HomePageUrl, {
     if (/^https?:\/\//i.test(val)) return val;
     return `https://${val}`;
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
+  encode: (val) => val,
 });
+
+const formatNumberWithCommas = (n: number): string => n.toLocaleString("ja-JP");
 
 const wageRangeTransform = Schema.transform(Schema.String, WageRange, {
   strict: true,
@@ -65,9 +67,8 @@ const wageRangeTransform = Schema.transform(Schema.String, WageRange, {
       max: Number.parseInt(match[2].replace(/,/g, ""), 10),
     };
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
+  encode: (val) =>
+    `${formatNumberWithCommas(val.min)}円〜${formatNumberWithCommas(val.max)}円`,
 });
 
 const workingHoursTransform = Schema.transform(Schema.String, WorkingHours, {
@@ -84,8 +85,10 @@ const workingHoursTransform = Schema.transform(Schema.String, WorkingHours, {
       end: `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`,
     };
   },
-  encode: () => {
-    throw new Error("encode not supported");
+  encode: (val) => {
+    const [sH, sM] = (val.start ?? "00:00:00").split(":");
+    const [eH, eM] = (val.end ?? "00:00:00").split(":");
+    return `${Number(sH)}時${sM}分〜${Number(eH)}時${eM}分`;
   },
 });
 
@@ -96,9 +99,7 @@ const employeeCountTransform = Schema.transform(Schema.String, EmployeeCount, {
     if (!match) throw new Error(`Invalid employee count format: "${val}"`);
     return Number(match[0]);
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
+  encode: (val) => `${val}人`,
 });
 
 // ── 集約: RawJob → Domain Job ──

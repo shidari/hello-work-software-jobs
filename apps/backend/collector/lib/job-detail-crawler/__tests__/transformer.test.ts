@@ -235,6 +235,106 @@ describe("transformer PBT: 各 transform の振る舞い", () => {
   });
 });
 
+describe("transformer PBT: encode(decode(s)) === s roundtrip", () => {
+  it("賃金: encode(decode(s)) === s の形式で roundtrip できる", () => {
+    const wageArb = fc.integer({ min: 100, max: 9_999_999 }).chain((min) =>
+      fc.integer({ min, max: 9_999_999 }).map((max) => {
+        const fmt = (n: number) => n.toLocaleString("ja-JP");
+        return `${fmt(min)}円〜${fmt(max)}円`;
+      }),
+    );
+    const wageField = Schema.Struct({ wage: RawJobToDomainJob.fields.wage });
+    fc.assert(
+      fc.property(wageArb, (wageStr) => {
+        const decoded = Schema.decodeSync(wageField)({ wage: wageStr });
+        const encoded = Schema.encodeSync(wageField)(decoded);
+        return encoded.wage === wageStr;
+      }),
+    );
+  });
+
+  it("勤務時間: encode(decode(s)) === s の形式で roundtrip できる", () => {
+    const hoursArb = fc
+      .record({
+        sH: fc.integer({ min: 0, max: 23 }),
+        sM: fc.integer({ min: 0, max: 59 }),
+        eH: fc.integer({ min: 0, max: 23 }),
+        eM: fc.integer({ min: 0, max: 59 }),
+      })
+      .map(
+        ({ sH, sM, eH, eM }) =>
+          `${sH}時${String(sM).padStart(2, "0")}分〜${eH}時${String(eM).padStart(2, "0")}分`,
+      );
+    const hoursField = Schema.Struct({
+      workingHours: RawJobToDomainJob.fields.workingHours,
+    });
+    fc.assert(
+      fc.property(hoursArb, (hoursStr) => {
+        const decoded = Schema.decodeSync(hoursField)({
+          workingHours: hoursStr,
+        });
+        const encoded = Schema.encodeSync(hoursField)(decoded);
+        return encoded.workingHours === hoursStr;
+      }),
+    );
+  });
+
+  it("従業員数: encode(decode(s)) === s の形式で roundtrip できる", () => {
+    const countArb = fc.integer({ min: 1, max: 999999 }).map((n) => `${n}人`);
+    const countField = Schema.Struct({
+      employeeCount: RawJobToDomainJob.fields.employeeCount,
+    });
+    fc.assert(
+      fc.property(countArb, (countStr) => {
+        const decoded = Schema.decodeSync(countField)({
+          employeeCount: countStr,
+        });
+        const encoded = Schema.encodeSync(countField)(decoded);
+        return encoded.employeeCount === countStr;
+      }),
+    );
+  });
+
+  it("日付(受付日): encode(decode(s)) === s の形式で roundtrip できる", () => {
+    const dateArb = fc
+      .record({
+        year: fc.integer({ min: 2000, max: 2099 }),
+        month: fc.integer({ min: 1, max: 12 }),
+        day: fc.integer({ min: 1, max: 28 }),
+      })
+      .map(({ year, month, day }) => `${year}年${month}月${day}日`);
+    const dateField = Schema.Struct({
+      receivedDate: RawJobToDomainJob.fields.receivedDate,
+    });
+    fc.assert(
+      fc.property(dateArb, (dateStr) => {
+        const decoded = Schema.decodeSync(dateField)({
+          receivedDate: dateStr,
+        });
+        const encoded = Schema.encodeSync(dateField)(decoded);
+        return encoded.receivedDate === dateStr;
+      }),
+    );
+  });
+
+  it("ホームページURL: https://付きURLはそのまま roundtrip できる", () => {
+    const httpsUrlArb = fc
+      .webUrl({ withFragments: false, withQueryParameters: false })
+      .map((url) => url.replace(/^http:/, "https:"))
+      .filter((u) => /^https:\/\//.test(u));
+    const hpField = Schema.Struct({
+      homePage: RawJobToDomainJob.fields.homePage,
+    });
+    fc.assert(
+      fc.property(httpsUrlArb, (url) => {
+        const decoded = Schema.decodeSync(hpField)({ homePage: url });
+        const encoded = Schema.encodeSync(hpField)(decoded);
+        return encoded.homePage === url;
+      }),
+    );
+  });
+});
+
 describe("transformer PBT: RawJobToDomainJob の全体的な振る舞い", () => {
   it("nullable フィールドが全て null でもエラーなく変換される", () => {
     fc.assert(

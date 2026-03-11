@@ -3,14 +3,19 @@
 ## データフロー
 
 ```
-Cron Trigger (平日 01:00)
-  → 求人番号抽出 Worker (@cloudflare/playwright)
-  → Cloudflare Queue
-  → 求人詳細 ETL Worker (@cloudflare/playwright + linkedom)
+Cloud Scheduler (平日 01:00 JST)
+  → POST /trigger (Cloud Run)
+  → 求人番号クローラー (Playwright)
+  → Pub/Sub topic (job-detail-queue)
+  → Push subscription → POST /pubsub/job-detail (Cloud Run)
+  → 求人詳細 ETL (Playwright + linkedom)
   → POST /jobs
   → API (Cloudflare Workers + D1)
   → GET /jobs
   → フロントエンド (Next.js 16)
+
+ログ:
+  Cloud Run → console.log (構造化JSON) → Cloud Logging
 ```
 
 ---
@@ -70,34 +75,35 @@ Cloudflare Workers + Hono。
 
 ## `apps/backend/collector`
 
-Cloudflare Workers + Hono + Browser Rendering + Queues + Effect サービスパターン。
+GCP Cloud Run + Hono + Playwright + Pub/Sub + Effect サービスパターン。
 
 ### パイプライン
 
-1. **求人番号抽出** — Cron Trigger → Worker → @cloudflare/playwright で検索ページ走査 → Queue 送信
-2. **求人詳細 ETL** — Queue → Worker → @cloudflare/playwright で HTML 取得 → linkedom でパース → API に POST（`job_detail_runs` テーブルに実行記録）
+1. **求人番号抽出** — Cloud Scheduler / POST /trigger → Playwright で検索ページ走査 → Pub/Sub publish
+2. **求人詳細 ETL** — Pub/Sub push → POST /pubsub/job-detail → Playwright で HTML 取得 → linkedom でパース → API に POST
 3. **手動トリガー** — `POST /trigger` (x-api-key 認証) → `handleScheduled` をバックグラウンド実行
+4. **ログ** — 構造化 JSON を console.log → Cloud Logging で自動収集
 
 ### エンドポイント
 
 | メソッド | パス | 認証 | 概要 |
 |---------|------|------|------|
 | POST | `/trigger` | x-api-key | クローラー手動トリガー (`?period=today\|week\|all&maxCount=N`) |
-| GET | `/crawler-runs` | x-api-key | クローラー実行履歴（since, until, status, trigger, limit フィルター） |
-| GET | `/job-detail-runs` | x-api-key | 求人詳細 ETL 実行履歴（since, until, status, limit フィルター） |
+| POST | `/pubsub/job-detail` | - | Pub/Sub push subscription 受信 |
 
 ### 設計
 
 - **Effect.Service**: `AuthMiddleware`（API キー検証）と `TriggerApp`（Hono app）を Effect.Service で定義。DI によりテスト時に ConfigProvider を差し替え可能
-- **Hono**: fetch ハンドラーで Hono app を構築し、`app.fetch` で処理委譲
+- **Hono**: `@hono/node-server` で Node.js HTTP サーバーとして起動
+- **Pub/Sub**: `PubSubConfig` Effect.Service で projectId / topicName を管理。`publishJobDetail` で求人番号をキューイング
+- **ブラウザ**: `PlaywrightChromium` Effect.Service で Playwright Chromium を管理。`PlaywrightBrowserConfig` で headless/dev 設定を切り替え
 
-### インフラ (wrangler.jsonc)
+### インフラ
 
-- Worker (fetch + scheduled + queue handler)
-- Browser Rendering binding
-- Cloudflare Queues (job-detail-queue + DLQ, max_concurrency: 1)
-- D1 binding (job-store — API と同一 DB を共有)
-- Observability 有効
+- Cloud Run (max-instances: 1, concurrency: 1)
+- Pub/Sub (job-detail-queue topic + push subscription + DLQ)
+- Cloud Scheduler (cron: 0 1 * * 1-5 JST)
+- Dockerfile (node:22-slim + Playwright Chromium)
 
 ---
 

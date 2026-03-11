@@ -1,13 +1,11 @@
+import type { JobNumber } from "@sho/models";
 import { Data, Effect } from "effect";
 import type { Page } from "./browser";
 import { openBrowserPage } from "./browser";
 import type {
   DirtyWorkLocation,
   EmploymentType,
-  EmploymentTypeSelector,
   EngineeringLabel,
-  EngineeringLabelSelectorOpenerSibling,
-  EngineeringLabelSelectorRadioBtn,
   JobSearchCriteria,
   SearchPeriod,
 } from "./job-number-crawler/type";
@@ -27,33 +25,16 @@ class PageActionError extends Data.TaggedError("PageActionError")<{
 const _jobSearchPage: unique symbol = Symbol("JobSearchPage");
 export type JobSearchPage = Page & { [_jobSearchPage]: unknown };
 
+const _jobListPage: unique symbol = Symbol("JobListPage");
+export type JobListPage = Page & { [_jobListPage]: unknown };
+
 const _firstJobListPage: unique symbol = Symbol("FirstJobListPage");
-export type FirstJobListPage = Page & { [_firstJobListPage]: unknown };
+export type FirstJobListPage = JobListPage & {
+  [_firstJobListPage]: unknown;
+};
 
 const _jobDetailPage: unique symbol = Symbol("JobDetailPage");
 export type JobDetailPage = Page & { [_jobDetailPage]: unknown };
-
-// ============================================================
-// Selector mappings (pure data)
-// ============================================================
-
-const employmentTypeSelectors = {
-  RegularEmployee: "#ID_LippanCKBox1",
-  PartTimeWorker: "#ID_LippanCKBox2",
-} as const;
-
-const engineeringLabelSelectors = {
-  "ソフトウェア開発技術者、プログラマー": {
-    radioBtn: "#ID_skCheck094",
-    openerSibling: "#ID_skHid09",
-  },
-} as const;
-
-const searchPeriodSelectors = {
-  today: "#ID_newArrivedCKBox1",
-  week: "#ID_newArrivedCKBox2",
-  all: null,
-} as const;
 
 // ============================================================
 // Page operations (Effect.fn with page argument)
@@ -63,16 +44,19 @@ const fillWorkType = Effect.fn("fillWorkType")(function* (
   page: JobSearchPage,
   employmentType: EmploymentType,
 ) {
-  const selector = employmentTypeSelectors[employmentType] as
-    | string
-    | undefined;
+  const selector =
+    employmentType === "RegularEmployee"
+      ? "#ID_LippanCKBox1"
+      : employmentType === "PartTimeWorker"
+        ? "#ID_LippanCKBox2"
+        : undefined;
   if (!selector) {
     return yield* new PageActionError({
       message: `unknown employment type: ${employmentType}`,
     });
   }
   yield* Effect.tryPromise({
-    try: () => page.locator(selector as EmploymentTypeSelector).check(),
+    try: () => page.locator(selector).check(),
     catch: (e) =>
       new PageActionError({
         message: `fillWorkType failed: employmentType=${employmentType} ${String(e)}`,
@@ -111,34 +95,22 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
   page: JobSearchPage,
   label: EngineeringLabel,
 ) {
-  const selector = engineeringLabelSelectors[label] as
-    | { radioBtn: string; openerSibling: string }
-    | undefined;
-  if (!selector) {
-    return yield* new PageActionError({
-      message: `unknown engineering label: ${label}`,
-    });
-  }
-  yield* Effect.logDebug(
-    `will execute fillOccupationField\nlabel=${label}\nselector=${JSON.stringify(selector, null, 2)}`,
-  );
+  const radioBtn = "#ID_skCheck094";
+  const openerSibling = "#ID_skHid09";
+  yield* Effect.logDebug(`will execute fillOccupationField\nlabel=${label}`);
   yield* Effect.tryPromise({
     try: async () => {
       const firstoccupationSelectionBtn = page
         .locator("#ID_Btn", { hasText: /職種を選択/ })
         .first();
       await firstoccupationSelectionBtn.click();
-      const openerSibling = page.locator(
-        selector.openerSibling as EngineeringLabelSelectorOpenerSibling,
-      );
-      const opener = openerSibling.locator("..").locator("i.one_i");
+      const opener = page
+        .locator(openerSibling)
+        .locator("..")
+        .locator("i.one_i");
       await opener.click();
-      const radioBtn = page.locator(
-        selector.radioBtn as EngineeringLabelSelectorRadioBtn,
-      );
-      await radioBtn.click();
-      const okBtn = page.locator("#ID_ok3");
-      await okBtn.click();
+      await page.locator(radioBtn).click();
+      await page.locator("#ID_ok3").click();
     },
     catch: (e) =>
       new PageActionError({
@@ -156,7 +128,12 @@ const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
   searchPeriod: SearchPeriod,
 ) {
   yield* Effect.logDebug(`fillJobPeriod: searchPeriod=${searchPeriod}`);
-  const id = searchPeriodSelectors[searchPeriod];
+  const id =
+    searchPeriod === "today"
+      ? "#ID_newArrivedCKBox1"
+      : searchPeriod === "week"
+        ? "#ID_newArrivedCKBox2"
+        : null;
   if (id) {
     yield* Effect.tryPromise({
       try: () => page.locator(id).check(),
@@ -201,6 +178,7 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
     Effect.tap(() =>
       Effect.logDebug("navigated to job list page from job search page."),
     ),
+    Effect.tap(() => Effect.sleep("500 millis")),
   );
 });
 
@@ -223,6 +201,7 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
     Effect.tap(() =>
       Effect.logDebug("navigated to job list page from job search page."),
     ),
+    Effect.tap(() => Effect.sleep("500 millis")),
   );
 });
 
@@ -241,14 +220,16 @@ export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
       new PageActionError({
         message: `navigation failed: ${String(e)}`,
       }),
-  }).pipe(Effect.tap(() => Effect.logDebug("navigated to job search page.")));
+  }).pipe(
+    Effect.tap(() => Effect.logDebug("navigated to job search page.")),
+    Effect.tap(() => Effect.sleep("500 millis")),
+  );
   return page as JobSearchPage;
 });
 
-export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
-  page: JobSearchPage,
-  jobNumber: string,
-) {
+export const navigateSearchToJobListByJobNumber = Effect.fn(
+  "navigateSearchToJobListByJobNumber",
+)(function* (page: JobSearchPage, jobNumber: JobNumber) {
   yield* Effect.tryPromise({
     try: async () => {
       const jobNumberSplits = jobNumber.split("-");
@@ -273,16 +254,13 @@ export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
     ),
   );
   yield* clickSearchNoBtn(page);
-  const _page: Page = page;
-  return _page as FirstJobListPage;
+  return page as unknown as FirstJobListPage;
 });
 
-export const navigateByCriteria = Effect.fn("navigateByCriteria")(function* (
-  page: JobSearchPage,
-  criteria: JobSearchCriteria,
-) {
+export const navigateSearchToJobListByCriteria = Effect.fn(
+  "navigateSearchToJobListByCriteria",
+)(function* (page: JobSearchPage, criteria: JobSearchCriteria) {
   yield* fillJobCriteriaField(page, criteria);
   yield* clickSearchBtn(page);
-  const _page: Page = page;
-  return _page as FirstJobListPage;
+  return page as unknown as FirstJobListPage;
 });

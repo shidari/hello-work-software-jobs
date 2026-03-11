@@ -3,9 +3,9 @@ import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
 import {
-  type FirstJobListPage,
   type JobDetailPage,
-  navigateByJobNumber,
+  type JobListPage,
+  navigateSearchToJobListByJobNumber,
   openJobSearchPage,
 } from "../page";
 
@@ -13,18 +13,18 @@ import {
 
 export const RawJob = Schema.Struct({
   jobNumber: Schema.optional(Schema.String),
-  companyName: Schema.optional(Schema.String),
+  companyName: Schema.NullOr(Schema.String),
   receivedDate: Schema.optional(Schema.String),
   expiryDate: Schema.optional(Schema.String),
   homePage: Schema.NullOr(Schema.String),
   occupation: Schema.optional(Schema.String),
   employmentType: Schema.optional(Schema.String),
-  wage: Schema.optional(Schema.String),
-  workingHours: Schema.optional(Schema.String),
-  employeeCount: Schema.optional(Schema.String),
-  workPlace: Schema.optional(Schema.String),
-  jobDescription: Schema.optional(Schema.String),
-  qualifications: Schema.optional(Schema.String),
+  wage: Schema.NullOr(Schema.String),
+  workingHours: Schema.NullOr(Schema.String),
+  employeeCount: Schema.NullOr(Schema.String),
+  workPlace: Schema.NullOr(Schema.String),
+  jobDescription: Schema.NullOr(Schema.String),
+  qualifications: Schema.NullOr(Schema.String),
 });
 export type RawJob = typeof RawJob.Type;
 
@@ -50,89 +50,43 @@ class ListJobsError extends Data.TaggedError("ListJobsError")<{
   readonly message: string;
 }> {}
 
-class JobDetailPageValidationError extends Data.TaggedError(
-  "JobDetailPageValidationError",
-)<{ readonly reason: string; readonly currentUrl: string }> {}
-
-// ── DOM セレクタマップ ──
-
-const jobDetailSelectors = {
-  jobNumber: "#ID_kjNo",
-  companyName: "#ID_jgshMei",
-  receivedDate: "#ID_uktkYmd",
-  expiryDate: "#ID_shkiKigenHi",
-  homePage: "#ID_hp",
-  occupation: "#ID_sksu",
-  employmentType: "#ID_koyoKeitai",
-  wage: "#ID_chgn",
-  workingHours: "#ID_shgJn1",
-  employeeCount: "#ID_jgisKigyoZentai",
-  workPlace: "#ID_shgBsJusho",
-  jobDescription: "#ID_shigotoNy",
-  qualifications: "#ID_hynaMenkyoSkku",
-} as const;
-
 // ── DOM → RawJob 抽出 ──
 
 export function extractRawFieldsFromDocument(document: Document): RawJob {
   return {
     jobNumber:
-      document
-        .querySelector(jobDetailSelectors.jobNumber)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_kjNo")?.textContent?.trim() || undefined,
     companyName:
-      document
-        .querySelector(jobDetailSelectors.companyName)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_jgshMei")?.textContent?.trim() ?? null,
     receivedDate:
-      document
-        .querySelector(jobDetailSelectors.receivedDate)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_uktkYmd")?.textContent?.trim() || undefined,
     expiryDate:
-      document
-        .querySelector(jobDetailSelectors.expiryDate)
-        ?.textContent?.trim() || undefined,
-    homePage:
-      document
-        .querySelector(jobDetailSelectors.homePage)
-        ?.textContent?.trim() || null,
-    occupation:
-      document
-        .querySelector(jobDetailSelectors.occupation)
-        ?.textContent?.trim() || undefined,
-    employmentType:
-      document
-        .querySelector(jobDetailSelectors.employmentType)
-        ?.textContent?.trim() || undefined,
-    wage:
-      document.querySelector(jobDetailSelectors.wage)?.textContent?.trim() ||
+      document.querySelector("#ID_shkiKigenHi")?.textContent?.trim() ||
       undefined,
+    homePage: document.querySelector("#ID_hp")?.textContent?.trim() || null,
+    occupation:
+      document.querySelector("#ID_sksu")?.textContent?.trim() || undefined,
+    employmentType:
+      document.querySelector("#ID_koyoKeitai")?.textContent?.trim() ||
+      undefined,
+    wage: document.querySelector("#ID_chgn")?.textContent?.trim() ?? null,
     workingHours:
-      document
-        .querySelector(jobDetailSelectors.workingHours)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_shgJn1")?.textContent?.trim() ?? null,
     employeeCount:
-      document
-        .querySelector(jobDetailSelectors.employeeCount)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_jgisKigyoZentai")?.textContent?.trim() ??
+      null,
     workPlace:
-      document
-        .querySelector(jobDetailSelectors.workPlace)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_shgBsJusho")?.textContent?.trim() ?? null,
     jobDescription:
-      document
-        .querySelector(jobDetailSelectors.jobDescription)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_shigotoNy")?.textContent?.trim() ?? null,
     qualifications:
-      document
-        .querySelector(jobDetailSelectors.qualifications)
-        ?.textContent?.trim() || undefined,
+      document.querySelector("#ID_hynaMenkyoSkku")?.textContent?.trim() ?? null,
   };
 }
 
 // ── ページ操作ヘルパー ──
 
-function listJobOverviewElem(page: FirstJobListPage) {
+function listJobOverviewElem(page: JobListPage) {
   return Effect.tryPromise({
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
     catch: (e) =>
@@ -154,7 +108,7 @@ function listJobOverviewElem(page: FirstJobListPage) {
     );
 }
 
-function assertSingleJobListed(page: FirstJobListPage) {
+function assertSingleJobListed(page: JobListPage) {
   return Effect.gen(function* () {
     const jobOverViewList = yield* listJobOverviewElem(page);
     if (jobOverViewList.length !== 1) {
@@ -170,7 +124,7 @@ function assertSingleJobListed(page: FirstJobListPage) {
   });
 }
 
-function goToSingleJobDetailPage(page: FirstJobListPage) {
+function goToJobDetailPage(page: JobListPage) {
   return Effect.gen(function* () {
     yield* assertSingleJobListed(page);
     yield* Effect.tryPromise({
@@ -190,34 +144,21 @@ function goToSingleJobDetailPage(page: FirstJobListPage) {
         );
       }),
     );
+    // ページタイトルで求人詳細ページであることを確認
+    const jobTitle = yield* Effect.tryPromise({
+      try: () => page.locator("div.page_title").textContent(),
+      catch: (e) =>
+        new FromJobListToJobDetailPageError({
+          message: `failed to read page title: ${String(e)}`,
+        }),
+    });
+    if (jobTitle !== "求人情報") {
+      return yield* new FromJobListToJobDetailPageError({
+        message: `expected page title "求人情報" but got "${jobTitle}"`,
+      });
+    }
     const _page: Page = page;
     return _page as JobDetailPage;
-  });
-}
-
-function validateJobDetailPage(page: JobDetailPage) {
-  return Effect.gen(function* () {
-    const jobTitle = yield* Effect.tryPromise({
-      try: async () => {
-        const jobTitle = await page.locator("div.page_title").textContent();
-        return jobTitle;
-      },
-      catch: (e) =>
-        new JobDetailPageValidationError({
-          reason: `${e instanceof Error ? e.message : String(e)}`,
-          currentUrl: page.url(),
-        }),
-    }).pipe(
-      Effect.tap((jobTitle) => {
-        return Effect.logDebug(`extracted job title: ${jobTitle}`);
-      }),
-    );
-    if (jobTitle !== "求人情報")
-      return yield* new JobDetailPageValidationError({
-        reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
-        currentUrl: page.url(),
-      });
-    return page;
   });
 }
 
@@ -240,13 +181,12 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
         jobNumber: JobNumber,
       ) {
         yield* Effect.logInfo("start extracting raw job detail HTML...");
-        const firstJobListPage = yield* navigateByJobNumber(
+        const jobListPage = yield* navigateSearchToJobListByJobNumber(
           jobSearchPage,
           jobNumber,
         );
-        yield* Effect.logDebug("now on job List page.");
-        const jobDetailPage = yield* goToSingleJobDetailPage(firstJobListPage);
-        yield* validateJobDetailPage(jobDetailPage);
+        yield* Effect.logDebug("now on job list page.");
+        const jobDetailPage = yield* goToJobDetailPage(jobListPage);
         const rawHtml = yield* Effect.tryPromise({
           try: () => jobDetailPage.content(),
           catch: (error) =>

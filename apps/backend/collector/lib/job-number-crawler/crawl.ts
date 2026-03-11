@@ -1,12 +1,11 @@
 import { JobNumber } from "@sho/models";
-import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
-import type { Locator } from "../browser";
+import { Chunk, Data, Effect, Option, Schema, Stream } from "effect";
 import {
-  type FirstJobListPage,
-  navigateByCriteria,
+  type JobListPage,
+  navigateSearchToJobListByCriteria,
   openJobSearchPage,
 } from "../page";
-import { delay, formatParseError } from "../util";
+import { delay } from "../util";
 import type { etCrawlerConfig } from "./type";
 
 // ============================================================
@@ -18,27 +17,17 @@ class JobListPageScraperError extends Data.TaggedError(
 )<{ readonly message: string }> {}
 
 // ============================================================
+// Constants
+// ============================================================
+
+const NEXT_PAGE_DELAY_MS = 3000;
+
+// ============================================================
 // Functions
 // ============================================================
 
-const validateJobNumber = Effect.fn("validateJobNumber")(function* (
-  val: unknown,
-) {
-  yield* Effect.logDebug(
-    `calling validateJobNumber. args={val:${JSON.stringify(val, null, 2)}}`,
-  );
-  const result = Schema.decodeUnknownEither(JobNumber)(val);
-  if (Either.isLeft(result))
-    return yield* Effect.fail(
-      new JobListPageScraperError({
-        message: `job number validation failed. val=${JSON.stringify(val, null, 2)}\n${formatParseError(result.left)}`,
-      }),
-    );
-  return result.right;
-});
-
 const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
-  jobOverviewList: Locator[],
+  jobOverviewList: import("playwright").Locator[],
 ) {
   return yield* Effect.forEach(jobOverviewList, (table) =>
     Effect.gen(function* () {
@@ -71,13 +60,20 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
           }),
         );
       }
-      return yield* validateJobNumber(rawJobNumber.trim());
+      return yield* Schema.decodeUnknown(JobNumber)(rawJobNumber.trim()).pipe(
+        Effect.mapError(
+          (e) =>
+            new JobListPageScraperError({
+              message: `job number validation failed. val="${rawJobNumber.trim()}" ${e.message}`,
+            }),
+        ),
+      );
     }),
   );
 });
 
 const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   return yield* Effect.tryPromise({
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
@@ -93,7 +89,7 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
 });
 
 const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   return yield* Effect.tryPromise({
     try: async () => {
@@ -112,7 +108,7 @@ const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
 });
 
 const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   yield* Effect.tryPromise({
     try: async () => {
@@ -129,14 +125,13 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
 });
 
 const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
   args: {
     count: number;
     roughMaxCount: number;
-    nextPageDelayMs: number;
   },
 ) {
-  const { count, roughMaxCount, nextPageDelayMs } = args;
+  const { count, roughMaxCount } = args;
   const jobOverviewList = yield* listJobOverviewElem(page);
   if (jobOverviewList.length === 0) {
     yield* Effect.logInfo("no job listings found on this page. finishing.");
@@ -151,14 +146,13 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
   if (nextPageEnabled) {
     yield* goToNextJobListPage(page);
   }
-  yield* delay(nextPageDelayMs);
+  yield* delay(NEXT_PAGE_DELAY_MS);
   return [
     chunked,
     nextPageEnabled && tmpTotal <= roughMaxCount
       ? Option.some({
           count: tmpTotal,
           roughMaxCount,
-          nextPageDelayMs,
         })
       : Option.none(),
   ] as const;
@@ -173,7 +167,6 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
   {
     effect: Effect.succeed({
       config: {
-        nextPageDelayMs: 3000,
         jobSearchCriteria: {
           workLocation: { prefecture: "東京都" },
           desiredOccupation: {
@@ -189,7 +182,6 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
 ) {
   static dev = new JobNumberCrawlerConfig({
     config: {
-      nextPageDelayMs: 3000,
       jobSearchCriteria: {
         workLocation: { prefecture: "東京都" },
         desiredOccupation: {
@@ -204,7 +196,6 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
 
   static weekly = new JobNumberCrawlerConfig({
     config: {
-      nextPageDelayMs: 3000,
       jobSearchCriteria: {
         workLocation: { prefecture: "東京都" },
         desiredOccupation: {
@@ -223,13 +214,13 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
 // ============================================================
 
 export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
-  const config = (yield* JobNumberCrawlerConfig).config;
+  const { config } = yield* JobNumberCrawlerConfig;
   yield* Effect.logInfo(
     `building crawler: config=${JSON.stringify(config, null, 2)}`,
   );
   const jobSearchPage = yield* openJobSearchPage();
   yield* Effect.logInfo("start crawling...");
-  const firstJobListPage = yield* navigateByCriteria(
+  const firstJobListPage = yield* navigateSearchToJobListByCriteria(
     jobSearchPage,
     config.jobSearchCriteria,
   );
@@ -237,7 +228,6 @@ export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
     {
       count: 0,
       roughMaxCount: config.roughMaxCount,
-      nextPageDelayMs: config.nextPageDelayMs,
     },
     (args) => fetchJobMetaData(firstJobListPage, args),
   );

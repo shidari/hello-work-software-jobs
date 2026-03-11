@@ -12,7 +12,7 @@ import { Effect, Layer, Logger, LogLevel } from "effect";
 import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
 import { JobNumberCrawlerConfig } from "../job-number-crawler/crawl";
 import type { SearchPeriod } from "../job-number-crawler/type";
-import { navigateByCriteria, openJobSearchPage } from "../page";
+import { navigateSearchToJobListByCriteria, openJobSearchPage } from "../page";
 
 const searchPeriod = (process.argv[2] ?? "today") as SearchPeriod;
 const outPath = "/tmp/hellowork-search-result.html";
@@ -34,7 +34,7 @@ async function main() {
     const { config: cfg } = yield* JobNumberCrawlerConfig;
     yield* Effect.logInfo(`searchPeriod=${cfg.jobSearchCriteria.searchPeriod}`);
     const jobSearchPage = yield* openJobSearchPage();
-    const firstJobListPage = yield* navigateByCriteria(
+    const firstJobListPage = yield* navigateSearchToJobListByCriteria(
       jobSearchPage,
       cfg.jobSearchCriteria,
     );

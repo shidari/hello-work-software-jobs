@@ -1,6 +1,5 @@
 import { Config, ConfigProvider, Data, Effect, Layer } from "effect";
 import { createMiddleware } from "hono/factory";
-import type { Env } from "../../functions/index";
 
 export class InvalidApiKeyError extends Data.TaggedError("InvalidApiKeyError")<{
   readonly message: string;
@@ -12,7 +11,7 @@ export class AuthMiddleware extends Effect.Service<AuthMiddleware>()(
     effect: Effect.gen(function* () {
       const validApiKey = yield* Config.string("API_KEY");
       return {
-        middleware: createMiddleware<{ Bindings: Env }>(async (c, next) => {
+        middleware: createMiddleware(async (c, next) => {
           const apiKey = c.req.header("x-api-key");
           if (!apiKey || apiKey !== validApiKey) {
             return c.json({ message: "Invalid API key" }, 401);

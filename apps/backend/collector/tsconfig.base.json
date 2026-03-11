@@ -14,7 +14,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": false,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["node"],
     "skipLibCheck": true
   },
   "exclude": ["node_modules"]

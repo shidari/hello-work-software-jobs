@@ -1,8 +1,6 @@
-import { createD1DB, selectCrawlerRuns, selectJobDetailRuns } from "@sho/db";
 import { Effect, Layer } from "effect";
 import { Hono } from "hono";
-import { handleScheduled } from "../../functions/ET-JobNumberHandler/handler";
-import type { Env } from "../../functions/index";
+import { handleScheduled } from "../../functions/job-number-handler/handler";
 import type { SearchPeriod } from "../../lib/job-number-crawler/type";
 import { AuthMiddleware } from "../middleware/auth";
 
@@ -12,57 +10,19 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
   effect: Effect.gen(function* () {
     const auth = yield* AuthMiddleware;
 
-    const app = new Hono<{ Bindings: Env }>()
-      .post("/trigger", auth.middleware, (c) => {
-        const period = c.req.query("period");
-        const searchPeriod =
-          period && validPeriods.has(period)
-            ? (period as SearchPeriod)
-            : "today";
-        const MAX_COUNT_LIMIT = 5000;
-        const maxCountRaw = c.req.query("maxCount");
-        const maxCount =
-          maxCountRaw && /^\d+$/.test(maxCountRaw) && Number(maxCountRaw) > 0
-            ? Math.min(Number(maxCountRaw), MAX_COUNT_LIMIT)
-            : undefined;
-        c.executionCtx?.waitUntil(
-          handleScheduled(c.env, "manual", searchPeriod, maxCount),
-        );
-        return c.json({ message: "Crawler triggered" }, 202);
-      })
-      .get("/crawler-runs", auth.middleware, async (c) => {
-        const limit = Number(c.req.query("limit") ?? "20");
-        if (!Number.isInteger(limit) || limit < 1 || limit > 1000)
-          return c.json(
-            { error: "limit must be an integer between 1 and 1000" },
-            400,
-          );
-        const db = createD1DB(c.env.DB);
-        const runs = await selectCrawlerRuns(db, {
-          limit,
-          since: c.req.query("since"),
-          until: c.req.query("until"),
-          status: c.req.query("status"),
-          trigger: c.req.query("trigger"),
-        });
-        return c.json(runs);
-      })
-      .get("/job-detail-runs", auth.middleware, async (c) => {
-        const limit = Number(c.req.query("limit") ?? "20");
-        if (!Number.isInteger(limit) || limit < 1 || limit > 1000)
-          return c.json(
-            { error: "limit must be an integer between 1 and 1000" },
-            400,
-          );
-        const db = createD1DB(c.env.DB);
-        const runs = await selectJobDetailRuns(db, {
-          limit,
-          since: c.req.query("since"),
-          until: c.req.query("until"),
-          status: c.req.query("status"),
-        });
-        return c.json(runs);
-      });
+    const app = new Hono().post("/trigger", auth.middleware, (c) => {
+      const period = c.req.query("period");
+      const searchPeriod =
+        period && validPeriods.has(period) ? (period as SearchPeriod) : "today";
+      const MAX_COUNT_LIMIT = 5000;
+      const maxCountRaw = c.req.query("maxCount");
+      const maxCount =
+        maxCountRaw && /^\d+$/.test(maxCountRaw) && Number(maxCountRaw) > 0
+          ? Math.min(Number(maxCountRaw), MAX_COUNT_LIMIT)
+          : undefined;
+      handleScheduled("manual", searchPeriod, maxCount).catch(console.error);
+      return c.json({ message: "Crawler triggered" }, 202);
+    });
 
     return app;
   }),

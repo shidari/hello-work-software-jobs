@@ -1,51 +1,7 @@
 import { Data, Effect, Layer } from "effect";
-import type { LaunchOptions } from "playwright";
+import type { Browser, LaunchOptions } from "playwright";
 
-// ── BrowserWorker 型 (Cloudflare Browser Rendering) ──
-
-export type BrowserWorker = import("@cloudflare/playwright").BrowserWorker;
-
-// ── 共通インターフェース ──
-// @cloudflare/playwright と playwright で使うAPIは同じ。
-// 型の衝突を避けるため、必要最小限のインターフェースを定義する。
-
-interface Browser {
-  newContext(): Promise<BrowserContext>;
-  close(): Promise<void>;
-}
-
-interface BrowserContext {
-  newPage(): Promise<Page>;
-  close(): Promise<void>;
-}
-
-export interface Page {
-  goto(
-    url: string,
-    options?: {
-      waitUntil?: "load" | "domcontentloaded" | "networkidle" | "commit";
-    },
-  ): Promise<unknown>;
-  url(): string;
-  content(): Promise<string>;
-  locator(selector: string, options?: { hasText?: string | RegExp }): Locator;
-  waitForURL(url: string | RegExp): Promise<void>;
-  close(): Promise<void>;
-}
-
-export interface Locator {
-  click(): Promise<void>;
-  check(): Promise<void>;
-  fill(value: string): Promise<void>;
-  isDisabled(): Promise<boolean>;
-  selectOption(value: string): Promise<string[]>;
-  textContent(): Promise<string | null>;
-  evaluate(fn: (el: Element) => void): Promise<void>;
-  first(): Locator;
-  nth(index: number): Locator;
-  all(): Promise<Locator[]>;
-  locator(selector: string, options?: { hasText?: string | RegExp }): Locator;
-}
+export type { Locator, Page } from "playwright";
 
 // ── Config (Context.Tag — ブラウザ設定) ──
 
@@ -85,25 +41,7 @@ export class PlaywrightChromium extends Effect.Service<PlaywrightChromium>()(
     }),
     dependencies: [PlaywrightBrowserConfig.Default],
   },
-) {
-  static cloudflare(binding: BrowserWorker) {
-    return Layer.effect(
-      PlaywrightChromium,
-      Effect.gen(function* () {
-        const cfPlaywright = yield* Effect.tryPromise({
-          try: () => import("@cloudflare/playwright"),
-          catch: (e) =>
-            new ImportError({
-              message: `Failed to import @cloudflare/playwright: ${String(e)}`,
-            }),
-        });
-        return new PlaywrightChromium({
-          launch: () => cfPlaywright.launch(binding) as Promise<Browser>,
-        });
-      }),
-    );
-  }
-}
+) {}
 
 // ── Browser / Page (Effect.fn — ライフサイクル管理) ──
 

@@ -1,5 +1,5 @@
-import type { JobNumber } from "@sho/models";
-import { Effect, Logger, LogLevel } from "effect";
+import { JobNumber } from "@sho/models";
+import { Effect, Logger, LogLevel, Schema } from "effect";
 import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
 import {
   JobDetailExtractor,
@@ -9,8 +9,14 @@ import {
 } from "../job-detail-crawler";
 
 async function main() {
+  const arg = process.argv[2];
+  if (!arg) {
+    console.error("Usage: pnpm dev:verify-job-detail-crawler <jobNumber>");
+    process.exit(1);
+  }
+  const jobNumber = Schema.decodeUnknownSync(JobNumber)(arg);
+
   const program = Effect.gen(function* () {
-    const jobNumber = "01010-06778561" as JobNumber;
     yield* Effect.logInfo(`verifying job detail crawler for ${jobNumber}...`);
     return yield* processJob(jobNumber);
   });
@@ -19,7 +25,7 @@ async function main() {
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.Default),
-    Effect.provide(PlaywrightChromium.Default),
+    Effect.provide(PlaywrightChromium.DefaultWithoutDependencies),
     Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),

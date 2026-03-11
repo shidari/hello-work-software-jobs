@@ -1,50 +1,22 @@
-import { ConfigProvider, Effect, Layer } from "effect";
+import { serve } from "@hono/node-server";
+import { Effect } from "effect";
+import { Hono } from "hono";
+import { pubsubApp } from "../app/pubsub";
 import { TriggerApp } from "../app/trigger";
-import type { BrowserWorker } from "../lib/browser";
-import { handleQueue } from "./E-T-L-JobDetailHandler/handler";
-import { handleScheduled } from "./ET-JobNumberHandler/handler";
 
-export type Env = {
-  MYBROWSER: BrowserWorker;
-  JOB_DETAIL_QUEUE: Queue<{ jobNumber: string }>;
-  JOB_STORE_ENDPOINT: string;
-  API_KEY: string;
-  DB: D1Database;
-};
+const program = Effect.gen(function* () {
+  const triggerApp = yield* TriggerApp;
+  return triggerApp;
+});
 
-export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext,
-  ): Promise<Response> {
-    const program = Effect.gen(function* () {
-      const app = yield* TriggerApp;
-      return app;
-    }).pipe(
-      Effect.provide(TriggerApp.Default),
-      Effect.provide(Layer.setConfigProvider(ConfigProvider.fromJson(env))),
-    );
+const runnable = program.pipe(Effect.provide(TriggerApp.Default));
 
-    const triggerApp = await Effect.runPromise(program);
-    return triggerApp.fetch(request, env, ctx);
-  },
+const triggerApp = await Effect.runPromise(runnable);
 
-  async scheduled(
-    _event: ScheduledEvent,
-    env: Env,
-    ctx: ExecutionContext,
-  ): Promise<void> {
-    ctx.waitUntil(handleScheduled(env, "cron"));
-  },
+const app = new Hono();
+app.route("/", triggerApp);
+app.route("/", pubsubApp);
 
-  async queue(
-    batch: MessageBatch<{ jobNumber: string }>,
-    env: Env,
-  ): Promise<void> {
-    for (const message of batch.messages) {
-      await handleQueue(message.body.jobNumber, env);
-      message.ack();
-    }
-  },
-};
+const port = Number(process.env.PORT ?? 8080);
+serve({ fetch: app.fetch, port });
+console.log(`Collector running on port ${port}`);
