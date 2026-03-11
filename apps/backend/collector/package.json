@@ -29,7 +29,7 @@
     "@sho/models": "workspace:*",
     "date-fns": "^4.1.0",
     "effect": "^3.16.5",
-    "hono": "^4.12.5",
+    "hono": "^4.12.7",
     "linkedom": "0.18.12"
   }
 }

@@ -34,7 +34,7 @@
 		"@sho/models": "workspace:*",
 		"dotenv": "^17.0.0",
 		"effect": "^3.16.5",
-		"hono": "^4.11.9",
+		"hono": "^4.12.7",
 		"hono-openapi": "^1.0.8",
 		"kysely": "^0.28.0",
 		"luxon": "^3.7.2"
