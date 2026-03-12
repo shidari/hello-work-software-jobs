@@ -1,52 +1,96 @@
-import { Cause, Effect, Exit, Layer } from "effect";
+import { Cause, Effect, Exit, Layer, Schedule } from "effect";
 import { PlaywrightChromium } from "../../lib/browser";
+import {
+  JobDetailExtractor,
+  JobDetailLoader,
+  JobDetailTransformer,
+  processJob,
+} from "../../lib/job-detail-crawler";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../lib/job-number-crawler/crawl";
 import type { SearchPeriod } from "../../lib/job-number-crawler/type";
-import { PubSubConfig, publishJobDetail } from "../../lib/pubsub";
 
 export const handleScheduled = async (
   trigger: "cron" | "manual" = "cron",
   searchPeriod: SearchPeriod = "today",
-  maxCount?: number,
+  maxCount = 1000,
 ) => {
   const startedAt = new Date().toISOString();
 
   const program = Effect.gen(function* () {
     const jobs = yield* crawlJobLinks();
-    yield* Effect.forEach(jobs, (job) => publishJobDetail(job));
-    return jobs;
+
+    const results = yield* Effect.forEach(
+      jobs,
+      (job) =>
+        processJob(job.jobNumber).pipe(
+          Effect.scoped,
+          Effect.retry({
+            times: 3,
+            schedule: Schedule.exponential("1 second"),
+          }),
+          Effect.matchEffect({
+            onSuccess: () =>
+              Effect.succeed({
+                jobNumber: job.jobNumber,
+                status: "success" as const,
+              }),
+            onFailure: (cause) =>
+              Effect.gen(function* () {
+                yield* Effect.logError(
+                  JSON.stringify({
+                    type: "job_detail_run",
+                    jobNumber: job.jobNumber,
+                    status: "failed",
+                    errorMessage: String(cause),
+                  }),
+                );
+                return {
+                  jobNumber: job.jobNumber,
+                  status: "failed" as const,
+                };
+              }),
+          }),
+        ),
+      { concurrency: 2 },
+    );
+
+    const succeeded = results.filter((r) => r.status === "success");
+    const failed = results.filter((r) => r.status === "failed");
+    return { jobs, succeeded, failed };
   });
 
-  const crawlerConfigLayer = Layer.effect(
+  const crawlerConfigLayer = Layer.succeed(
     JobNumberCrawlerConfig,
-    Effect.gen(function* () {
-      const base = yield* JobNumberCrawlerConfig;
-      return new JobNumberCrawlerConfig({
-        config: {
-          ...base.config,
-          ...(maxCount != null ? { roughMaxCount: maxCount } : {}),
-          jobSearchCriteria: {
-            ...base.config.jobSearchCriteria,
-            searchPeriod,
+    new JobNumberCrawlerConfig({
+      config: {
+        jobSearchCriteria: {
+          workLocation: { prefecture: "東京都" },
+          desiredOccupation: {
+            occupationSelection: "ソフトウェア開発技術者、プログラマー",
           },
+          employmentType: "RegularEmployee",
+          searchPeriod,
         },
-      });
-    }).pipe(Effect.provide(JobNumberCrawlerConfig.Default)),
+        roughMaxCount: maxCount,
+      },
+    }),
   );
 
-  const runnable = program.pipe(
-    Effect.provide(crawlerConfigLayer),
-    Effect.provide(PlaywrightChromium.Default),
-    Effect.provide(PubSubConfig.Default),
-    Effect.scoped,
-  );
+  const deps = Layer.mergeAll(
+    crawlerConfigLayer,
+    JobDetailExtractor.Default,
+    JobDetailTransformer.Default,
+    JobDetailLoader.Default,
+  ).pipe(Layer.provideMerge(PlaywrightChromium.Default));
+
+  const runnable = program.pipe(Effect.provide(deps), Effect.scoped);
   const exit = await Effect.runPromiseExit(runnable);
 
   if (Exit.isSuccess(exit)) {
-    const jobs = exit.value;
+    const { jobs, succeeded, failed } = exit.value;
     console.log(
       JSON.stringify({
         type: "crawler_run",
@@ -55,8 +99,8 @@ export const handleScheduled = async (
         startedAt,
         finishedAt: new Date().toISOString(),
         fetchedCount: jobs.length,
-        queuedCount: jobs.length,
-        failedCount: 0,
+        succeededCount: succeeded.length,
+        failedCount: failed.length,
       }),
     );
     return jobs;
@@ -71,7 +115,7 @@ export const handleScheduled = async (
       startedAt,
       finishedAt: new Date().toISOString(),
       fetchedCount: 0,
-      queuedCount: 0,
+      succeededCount: 0,
       failedCount: 0,
       errorMessage,
     }),

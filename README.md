@@ -10,7 +10,7 @@
 apps/
   ├── backend/
   │   ├── api/                      # Cloudflare Workers API (Hono + D1)
-  │   └── collector/                # GCP Cloud Run クローラー (Playwright + Pub/Sub)
+  │   └── collector/                # GCP Cloud Run クローラー (Playwright + Effect)
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
@@ -25,7 +25,7 @@ tools/
 - **共通**: TypeScript, pnpm workspace
 - **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
 - **API**: Cloudflare Workers, Hono, Kysely, D1
-- **クローラー**: GCP Cloud Run, Playwright, Pub/Sub, Effect
+- **クローラー**: GCP Cloud Run, Playwright, Effect
 - **型管理**: Effect Schema, @sho/models
 - **Admin CLI**: Haskell (Stack), optparse-applicative, aeson, req
 
@@ -41,7 +41,7 @@ cd apps/backend/api && pnpm dev                        # API (port 8787)
 
 # クローラー検証 (ローカル)
 cd apps/backend/collector
-docker-compose up  # Pub/Sub エミュレータ + Collector
+docker-compose up  # Collector
 ```
 
 ## デプロイ

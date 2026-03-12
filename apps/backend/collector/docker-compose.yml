@@ -1,10 +1,4 @@
 services:
-  pubsub-emulator:
-    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
-    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
-    ports:
-      - "8085:8085"
-
   collector:
     build:
       context: ../../..
@@ -12,10 +6,5 @@ services:
     ports:
       - "8080:8080"
     environment:
-      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
       JOB_STORE_ENDPOINT: http://host.docker.internal:8787
       API_KEY: dev-secret
-      GCP_PROJECT_ID: local-dev
-      PUBSUB_TOPIC: job-detail-queue
-    depends_on:
-      - pubsub-emulator

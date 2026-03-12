@@ -51,4 +51,4 @@ WORKDIR /app/apps/backend/collector
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "pnpm dev:setup-pubsub && pnpm exec tsx functions/index.ts"]
+CMD ["pnpm", "exec", "tsx", "functions/index.ts"]

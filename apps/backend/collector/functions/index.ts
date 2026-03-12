@@ -1,7 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Effect } from "effect";
 import { Hono } from "hono";
-import { pubsubApp } from "../app/pubsub";
 import { TriggerApp } from "../app/trigger";
 
 const program = Effect.gen(function* () {
@@ -15,7 +14,6 @@ const triggerApp = await Effect.runPromise(runnable);
 
 const app = new Hono();
 app.route("/", triggerApp);
-app.route("/", pubsubApp);
 
 const port = Number(process.env.PORT ?? 8080);
 serve({ fetch: app.fetch, port });

@@ -14,12 +14,12 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
       const period = c.req.query("period");
       const searchPeriod =
         period && validPeriods.has(period) ? (period as SearchPeriod) : "today";
-      const MAX_COUNT_LIMIT = 5000;
+      const MAX_COUNT_LIMIT = 1000;
       const maxCountRaw = c.req.query("maxCount");
       const maxCount =
         maxCountRaw && /^\d+$/.test(maxCountRaw) && Number(maxCountRaw) > 0
           ? Math.min(Number(maxCountRaw), MAX_COUNT_LIMIT)
-          : undefined;
+          : MAX_COUNT_LIMIT;
       handleScheduled("manual", searchPeriod, maxCount).catch(console.error);
       return c.json({ message: "Crawler triggered" }, 202);
     });

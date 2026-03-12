@@ -6,10 +6,9 @@
 Cloud Scheduler (平日 01:00 JST)
   → POST /trigger (Cloud Run)
   → 求人番号クローラー (Playwright)
-  → Pub/Sub topic (job-detail-queue)
-  → Push subscription → POST /pubsub/job-detail (Cloud Run)
-  → 求人詳細 ETL (Playwright + linkedom)
-  → POST /jobs
+  → Effect.forEach (concurrency: 2, retry: 3回 exponential backoff)
+    → 求人詳細 ETL (Playwright + linkedom)
+    → POST /jobs
   → API (Cloudflare Workers + D1)
   → GET /jobs
   → フロントエンド (Next.js 16)
@@ -75,12 +74,12 @@ Cloudflare Workers + Hono。
 
 ## `apps/backend/collector`
 
-GCP Cloud Run + Hono + Playwright + Pub/Sub + Effect サービスパターン。
+GCP Cloud Run + Hono + Playwright + Effect サービスパターン。
 
 ### パイプライン
 
-1. **求人番号抽出** — Cloud Scheduler / POST /trigger → Playwright で検索ページ走査 → Pub/Sub publish
-2. **求人詳細 ETL** — Pub/Sub push → POST /pubsub/job-detail → Playwright で HTML 取得 → linkedom でパース → API に POST
+1. **求人番号抽出** — Cloud Scheduler / POST /trigger → Playwright で検索ページ走査
+2. **求人詳細 ETL** — `Effect.forEach` (concurrency: 2) で並列処理。リトライ: 3回 exponential backoff。Playwright で HTML 取得 → linkedom でパース → API に POST
 3. **手動トリガー** — `POST /trigger` (x-api-key 認証) → `handleScheduled` をバックグラウンド実行
 4. **ログ** — 構造化 JSON を console.log → Cloud Logging で自動収集
 
@@ -89,19 +88,17 @@ GCP Cloud Run + Hono + Playwright + Pub/Sub + Effect サービスパターン。
 | メソッド | パス | 認証 | 概要 |
 |---------|------|------|------|
 | POST | `/trigger` | x-api-key | クローラー手動トリガー (`?period=today\|week\|all&maxCount=N`) |
-| POST | `/pubsub/job-detail` | - | Pub/Sub push subscription 受信 |
 
 ### 設計
 
 - **Effect.Service**: `AuthMiddleware`（API キー検証）と `TriggerApp`（Hono app）を Effect.Service で定義。DI によりテスト時に ConfigProvider を差し替え可能
 - **Hono**: `@hono/node-server` で Node.js HTTP サーバーとして起動
-- **Pub/Sub**: `PubSubConfig` Effect.Service で projectId / topicName を管理。`publishJobDetail` で求人番号をキューイング
+- **並列処理 + リトライ**: `Effect.forEach` で求人詳細 ETL を並列実行。`Effect.retry` + `Schedule.exponential` でリトライ
 - **ブラウザ**: `PlaywrightChromium` Effect.Service で Playwright Chromium を管理。`PlaywrightBrowserConfig` で headless/dev 設定を切り替え
 
 ### インフラ
 
-- Cloud Run (max-instances: 1, concurrency: 1)
-- Pub/Sub (job-detail-queue topic + push subscription + DLQ)
+- Cloud Run (max-instances: 1, memory: 2GiB)
 - Cloud Scheduler (cron: 0 1 * * 1-5 JST)
 - Dockerfile (node:22-slim + Playwright Chromium)
 
