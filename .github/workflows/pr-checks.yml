@@ -40,6 +40,13 @@ jobs:
         run: pnpm run test
         continue-on-error: false
         
+      - name: CDK synth (dry-run)
+        working-directory: ./apps/backend/collector/infra
+        env:
+          JOB_STORE_ENDPOINT: https://example.com
+          API_KEY: dummy
+        run: pnpm exec cdk synth --quiet
+
       - name: Lint & Format check
         run: |
           FILES=$(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' '*.css')
