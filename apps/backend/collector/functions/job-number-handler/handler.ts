@@ -7,10 +7,10 @@ import {
   processJob,
 } from "../../lib/job-detail-crawler";
 import {
+  type SearchPeriod,
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../lib/job-number-crawler/crawl";
-import type { SearchPeriod } from "../../lib/job-number-crawler/type";
 
 export const handleScheduled = async (
   trigger: "cron" | "manual" = "cron",

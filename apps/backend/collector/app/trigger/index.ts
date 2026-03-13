@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { handleScheduled } from "../../functions/job-number-handler/handler";
-import type { SearchPeriod } from "../../lib/job-number-crawler/type";
+import type { SearchPeriod } from "../../lib/job-number-crawler/crawl";
 import { AuthMiddleware } from "../middleware/auth";
 
 const validPeriods = new Set<string>(["today", "week", "all"]);
@@ -20,6 +20,7 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
         maxCountRaw && /^\d+$/.test(maxCountRaw) && Number(maxCountRaw) > 0
           ? Math.min(Number(maxCountRaw), MAX_COUNT_LIMIT)
           : MAX_COUNT_LIMIT;
+      // fire-and-forget: 202 を即返しバックグラウンドで実行。結果は Cloud Logging で確認
       handleScheduled("manual", searchPeriod, maxCount).catch(console.error);
       return c.json({ message: "Crawler triggered" }, 202);
     });
@@ -28,5 +29,7 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
   }),
   dependencies: [AuthMiddleware.Default],
 }) {
-  static test = TriggerApp.Default.pipe(Layer.provide(AuthMiddleware.test));
+  static test = TriggerApp.DefaultWithoutDependencies.pipe(
+    Layer.provide(AuthMiddleware.test),
+  );
 }

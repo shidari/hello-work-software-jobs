@@ -6,7 +6,78 @@ import {
   openJobSearchPage,
 } from "../page";
 import { delay } from "../util";
-import type { etCrawlerConfig } from "./type";
+
+// ============================================================
+// Schemas
+// ============================================================
+
+export const partialWorkLocationSchema = Schema.Struct({
+  prefecture: Schema.Literal("東京都"),
+});
+
+export const partialEmploymentTypeSchema = Schema.Union(
+  Schema.Literal("RegularEmployee"),
+  Schema.Literal("PartTimeWorker"),
+);
+
+export const paritalEngineeringLabelSchema = Schema.Literal(
+  "ソフトウェア開発技術者、プログラマー",
+);
+
+export const searchPeriodSchema = Schema.Union(
+  Schema.Literal("all"),
+  Schema.Literal("today"),
+  Schema.Literal("week"),
+);
+
+export const maxCountSchema = Schema.Int.pipe(
+  Schema.greaterThanOrEqualTo(1),
+  Schema.lessThanOrEqualTo(1000),
+);
+
+export const jobSearchCriteriaSchema = Schema.Struct({
+  jobNumber: Schema.optional(JobNumber),
+  workLocation: Schema.optionalWith(partialWorkLocationSchema, {
+    default: () => ({ prefecture: "東京都" as const }),
+  }),
+  desiredOccupation: Schema.optionalWith(
+    Schema.Struct({
+      occupationSelection: Schema.optional(paritalEngineeringLabelSchema),
+    }),
+    {
+      default: () => ({
+        occupationSelection: "ソフトウェア開発技術者、プログラマー" as const,
+      }),
+    },
+  ),
+  employmentType: Schema.optionalWith(partialEmploymentTypeSchema, {
+    default: () => "RegularEmployee" as const,
+  }),
+  searchPeriod: Schema.optionalWith(searchPeriodSchema, {
+    default: () => "today" as const,
+  }),
+});
+
+export const crawlerConfigSchema = Schema.Struct({
+  jobSearchCriteria: Schema.optionalWith(jobSearchCriteriaSchema, {
+    default: () => Schema.decodeSync(jobSearchCriteriaSchema)({}),
+  }),
+  roughMaxCount: Schema.optionalWith(maxCountSchema, {
+    default: () => 1000,
+  }),
+});
+
+// ============================================================
+// Types
+// ============================================================
+
+export type JobSearchCriteria = typeof jobSearchCriteriaSchema.Type;
+export type DirtyWorkLocation = typeof partialWorkLocationSchema.Type;
+export type EmploymentType = typeof partialEmploymentTypeSchema.Type;
+export type EngineeringLabel = typeof paritalEngineeringLabelSchema.Type;
+export type SearchPeriod = typeof searchPeriodSchema.Type;
+export type MaxCount = typeof maxCountSchema.Type;
+export type CrawlerConfig = typeof crawlerConfigSchema.Type;
 
 // ============================================================
 // Errors
@@ -162,50 +233,24 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
 // Config (Effect.Service — 環境切り替え)
 // ============================================================
 
+const decodeCrawlerConfig = Schema.decodeSync(crawlerConfigSchema);
+
 export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfig>()(
   "JobNumberCrawlerConfig",
   {
     effect: Effect.succeed({
-      config: {
-        jobSearchCriteria: {
-          workLocation: { prefecture: "東京都" },
-          desiredOccupation: {
-            occupationSelection: "ソフトウェア開発技術者、プログラマー",
-          },
-          employmentType: "RegularEmployee",
-          searchPeriod: "today",
-        },
-        roughMaxCount: 1600,
-      } as etCrawlerConfig,
+      config: decodeCrawlerConfig({}),
     }),
   },
 ) {
   static dev = new JobNumberCrawlerConfig({
-    config: {
-      jobSearchCriteria: {
-        workLocation: { prefecture: "東京都" },
-        desiredOccupation: {
-          occupationSelection: "ソフトウェア開発技術者、プログラマー",
-        },
-        employmentType: "RegularEmployee",
-        searchPeriod: "today",
-      },
-      roughMaxCount: 50,
-    },
+    config: decodeCrawlerConfig({ roughMaxCount: 50 }),
   });
 
   static weekly = new JobNumberCrawlerConfig({
-    config: {
-      jobSearchCriteria: {
-        workLocation: { prefecture: "東京都" },
-        desiredOccupation: {
-          occupationSelection: "ソフトウェア開発技術者、プログラマー",
-        },
-        employmentType: "RegularEmployee",
-        searchPeriod: "week",
-      },
-      roughMaxCount: 1600,
-    },
+    config: decodeCrawlerConfig({
+      jobSearchCriteria: { searchPeriod: "week" },
+    }),
   });
 }
 

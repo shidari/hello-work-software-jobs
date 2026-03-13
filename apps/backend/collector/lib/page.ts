@@ -8,7 +8,7 @@ import type {
   EngineeringLabel,
   JobSearchCriteria,
   SearchPeriod,
-} from "./job-number-crawler/type";
+} from "./job-number-crawler/crawl";
 
 // ============================================================
 // Errors
