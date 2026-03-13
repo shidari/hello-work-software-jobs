@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
+import { afterAll, beforeAll, test } from "vitest";
 import { CollectorStack } from "../lib/collector-stack";
 
 beforeAll(() => {
