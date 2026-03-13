@@ -4,3 +4,4 @@ TODO.md
 .stack-work
 .env
 .env.keys
+*.tsbuildinfo

@@ -13,7 +13,7 @@ hello-work-software-jobs/
 ├── apps/
 │   ├── backend/
 │   │   ├── api/                     # Cloudflare Workers REST API (Hono + D1)
-│   │   └── collector/               # Cloudflare Workers crawler (Browser Rendering + Queues)
+│   │   └── collector/               # AWS Lambda crawler (Playwright + SQS)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
@@ -29,7 +29,7 @@ hello-work-software-jobs/
 |-------|--------------|
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
-| Crawler | Cloudflare Workers, Hono, Browser Rendering, Queues, @cloudflare/playwright, Effect |
+| Crawler | AWS Lambda (Docker), SQS, Playwright, Effect |
 | Shared | TypeScript 5.8, Effect Schema |
 | Admin CLI | Haskell (Stack), optparse-applicative, aeson, req, dotenv-hs |
 | Secrets | dotenvx (API, Frontend), dotenv-hs (hwctl) |
@@ -54,10 +54,12 @@ pnpm deploy            # Deploy to Cloudflare
 pnpm test              # Vitest tests
 
 # Crawler (apps/backend/collector)
-pnpm dev               # Wrangler dev server
+pnpm dev:docker-up     # docker-compose up (LocalStack + Lambda)
+pnpm dev:docker-down   # docker-compose down
+pnpm dev:invoke-crawler  # 求人番号クローラー手動実行
+pnpm dev:invoke-detail   # 求人詳細 ETL 手動実行
 pnpm test              # Vitest tests (PBT)
-pnpm deploy            # Wrangler deploy to Cloudflare
-pnpm verify:dump-html [today|week|all]  # 検索結果HTMLダンプ & セレクタ診断
+pnpm build             # tsdown ビルド
 
 # Admin CLI (tools/hwctl)
 stack build                       # Build
@@ -80,9 +82,6 @@ stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 - `GET /jobs/{jobNumber}` - Get job details
 - `POST /jobs` - Create job
 - `GET /stats/daily` - Daily new job count summary (with job numbers)
-- `POST /trigger` - Trigger crawler manually (x-api-key auth, collector only, `?period=today|week|all&maxCount=N`)
-- `GET /crawler-runs` - Crawler run history (x-api-key auth, collector only, `?since=&until=&status=&trigger=&limit=`)
-- `GET /job-detail-runs` - Job detail ETL run history (x-api-key auth, collector only, `?since=&until=&status=&limit=`)
 
 ## Database
 
@@ -128,10 +127,10 @@ stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 
 - Frontend: `JOB_STORE_ENDPOINT`
 - API: Cloudflare credentials
-- Crawler: `CLOUDFLARE_API_TOKEN`, `JOB_STORE_ENDPOINT`, `API_KEY` (wrangler secrets)
+- Crawler: `JOB_STORE_ENDPOINT`, `API_KEY`, `SQS_QUEUE_URL`, `SQS_ENDPOINT_URL` (Lambda 環境変数)
 - Admin CLI: `HWCTL_ENDPOINT`, `HWCTL_API_KEY`, `HWCTL_COLLECTOR_ENDPOINT`, `HWCTL_CF_ACCOUNT_ID`, `HWCTL_CF_API_TOKEN`, `HWCTL_CF_QUEUE_ID`, `HWCTL_CF_DLQ_ID`
 
 ## CI/CD
 
 - `pr-checks.yml` - Build, type check, test, lint on PRs
-- Collector deploy: Cloudflare Workers Builds（GitHub連携で自動デプロイ）
+- Collector deploy: AWS Lambda (Docker image, CDK — 未実装)

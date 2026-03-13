@@ -9,12 +9,11 @@
 		"deploy": "pnpm build && pnpm exec wrangler deploy",
 		"no-main-deploy": "wrangler versions upload",
 		"build": "tsdown",
-		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs;\" && pnpm exec wrangler d1 execute job-store --file=database.sql && pnpm exec wrangler dev",
+		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs; DROP TABLE IF EXISTS crawler_runs; DROP TABLE IF EXISTS job_detail_runs;\" && pnpm exec wrangler d1 execute job-store --file=../../../packages/db/schema.sql && pnpm exec wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
-		"type-check": "tsc --noEmit",
-		"dump-remote-data": "pnpm exec wrangler d1 export job-store --remote --output=./database.sql"
+		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.12.0",

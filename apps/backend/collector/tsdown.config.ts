@@ -1,36 +1,14 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["functions/index.ts"],
+  entry: {
+    "job-number-handler": "aws/functions/job-number-handler/handler.ts",
+    "job-detail-handler": "aws/functions/job-detail-handler/handler.ts",
+  },
   outDir: "dist",
+  format: ["esm"],
+  platform: "node",
+  target: "node22",
   sourcemap: true,
   clean: true,
-  format: ["esm"],
-  noExternal: [
-    "@sho/models",
-    "@cloudflare/playwright",
-    "effect",
-    "date-fns",
-    "linkedom",
-  ],
-  external: [/^cloudflare:/],
-  plugins: [
-    {
-      name: "stub-playwright-core",
-      resolveId(id) {
-        if (id === "playwright-core") return id;
-        return undefined;
-      },
-      load(id) {
-        if (id === "playwright-core") return "export default {};";
-        return undefined;
-      },
-    },
-  ],
-  inlineOnly: false,
-  platform: "browser",
-  target: "esnext",
-  outputOptions: {
-    codeSplitting: false,
-  },
 });
