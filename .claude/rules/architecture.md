@@ -139,9 +139,17 @@ Next.js 16 + React 19。
 | `/favorites` | お気に入り（localStorage 永続化） |
 | `/history` | 検索履歴 |
 
+### 状態管理 (Jotai)
+
+```
+atom/
+  atoms.ts      — state atoms (searchFilter, jobList, job, favoriteJobs)
+  selectors.ts  — derived read atoms (jobTotalCountSelector, jobOverviewListSelector)
+  writers.ts    — write atoms (jobListInitWriter, jobListWriter, jobSelectWriter, favoriteAppendWriter, favoriteRemoveWriter)
+```
+
 ### 主な機能
 
-- @tanstack/react-virtual による仮想スクロール
-- JWT ページネーション
+- ページ番号ページネーション（shadcn 風 Pagination コンポーネント）
 - 14種フィルター検索
-- スクロール位置復元
+- お気に入り（localStorage 永続化）

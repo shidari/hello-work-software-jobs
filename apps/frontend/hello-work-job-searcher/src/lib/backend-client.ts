@@ -3,6 +3,9 @@ import { hc } from "hono/client";
 
 export type AppType = BackendAppType;
 
+export const client = hc<BackendAppType>("/api");
+export type Client = typeof client;
+
 export const jobStoreClient = (() => {
   const endpoint = process.env.JOB_STORE_ENDPOINT;
   if (!endpoint) throw new Error("JOB_STORE_ENDPOINT is not defined");

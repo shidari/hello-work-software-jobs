@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import type { SearchFilter } from "@/atom";
+import type { SearchFilter } from "@/atom/atoms";
 import { jobStoreClient } from "@/lib/backend-client";
 import { HydratedJobsPage } from "./HydratedJobsPage";
 
@@ -11,19 +11,25 @@ export default async function Page({
 }) {
   const params = await searchParams;
 
-  const str = (key: string) => {
-    const v = params[key];
-    return typeof v === "string" && v ? v : undefined;
-  };
-
   const filter: SearchFilter = {
-    ...(str("companyName") && { companyName: str("companyName") }),
-    ...(str("jobDescription") && { jobDescription: str("jobDescription") }),
-    ...(str("jobDescriptionExclude") && {
-      jobDescriptionExclude: str("jobDescriptionExclude"),
-    }),
-    ...(str("employeeCountGt") && { employeeCountGt: str("employeeCountGt") }),
-    ...(str("employeeCountLt") && { employeeCountLt: str("employeeCountLt") }),
+    companyName:
+      typeof params.companyName === "string" ? params.companyName : undefined,
+    jobDescription:
+      typeof params.jobDescription === "string"
+        ? params.jobDescription
+        : undefined,
+    jobDescriptionExclude:
+      typeof params.jobDescriptionExclude === "string"
+        ? params.jobDescriptionExclude
+        : undefined,
+    employeeCountGt:
+      typeof params.employeeCountGt === "string"
+        ? params.employeeCountGt
+        : undefined,
+    employeeCountLt:
+      typeof params.employeeCountLt === "string"
+        ? params.employeeCountLt
+        : undefined,
   };
 
   const { onlyNotExpired: _, ...queryFilter } = filter;

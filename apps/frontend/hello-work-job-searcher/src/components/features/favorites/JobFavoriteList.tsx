@@ -1,9 +1,10 @@
 "use client";
 import { Schema } from "effect";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
-import { favoriteJobsAtom, removeFavoriteJobAtom } from "@/atom";
+import { favoriteJobsAtom } from "@/atom/atoms";
+import { favoriteRemoveWriter } from "@/atom/writers";
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
 import cardStyles from "../list/jobCard.module.css";
@@ -12,8 +13,8 @@ import { JobOverviewCard } from "./JobOverview";
 
 export function FavoriteJobOverviewList() {
   const items = useAtomValue(favoriteJobsAtom);
-  const removeFavorite = useSetAtom(removeFavoriteJobAtom);
-  const setFavoriteJobs = useSetAtom(favoriteJobsAtom);
+  const [, removeFavorite] = useAtom(favoriteRemoveWriter);
+  const [, setFavoriteJobs] = useAtom(favoriteJobsAtom);
 
   useEffect(() => {
     try {
