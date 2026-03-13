@@ -1,4 +1,3 @@
-import type { UnBrandedJob } from "@sho/models";
 import {
   Item,
   ItemContent,
@@ -6,11 +5,12 @@ import {
   ItemGroup,
   ItemTitle,
 } from "@/components/ui/Item";
+import type { JobDetail } from "@/dto";
 import { formatDate } from "@/util";
 import styles from "./JobDetail.module.css";
 import { WorkPlaceMap } from "./WorkPlaceMap";
 
-export function JobDetail(props: { jobDetail: UnBrandedJob }) {
+export function JobDetailCard(props: { jobDetail: JobDetail }) {
   const {
     jobNumber,
     companyName,

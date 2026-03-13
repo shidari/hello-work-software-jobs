@@ -13,7 +13,7 @@ import {
 } from "@/atom";
 import { useJobsWithFavorite } from "@/components/features/favorites/useJobsWithFavorite";
 import { Card } from "@/components/ui/Card";
-import { JobOverview } from "./JobOverview";
+import { JobOverviewCard } from "./JobOverview";
 import styles from "./JobOverviewList.module.css";
 import cardStyles from "./jobCard.module.css";
 
@@ -94,7 +94,7 @@ export function JobOverviewList({ onJobSelect }: { onJobSelect?: () => void }) {
                     });
                   }}
                 >
-                  <JobOverview
+                  <JobOverviewCard
                     jobNumber={item.jobNumber}
                     companyName={item.companyName}
                     occupation={item.occupation}
