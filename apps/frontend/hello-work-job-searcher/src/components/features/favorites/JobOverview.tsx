@@ -1,6 +1,6 @@
-import type { JobOverview as TJobOverview } from "../list/JobOverview";
+import type { JobOverview } from "@/dto";
 
-export function JobOverview(props: TJobOverview) {
+export function JobOverviewCard(props: JobOverview) {
   const { companyName, occupation, employmentType, workPlace, employeeCount } =
     props;
   return (

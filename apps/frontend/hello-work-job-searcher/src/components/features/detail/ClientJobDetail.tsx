@@ -3,7 +3,7 @@
 import { useAtomValue } from "jotai";
 import { jobAtom } from "@/atom";
 import styles from "./ClientJobDetail.module.css";
-import { JobDetail } from "./JobDetail";
+import { JobDetailCard } from "./JobDetail";
 
 export function ClientJobDetail() {
   const job = useAtomValue(jobAtom);
@@ -14,5 +14,5 @@ export function ClientJobDetail() {
       </div>
     );
   }
-  return <JobDetail jobDetail={job} />;
+  return <JobDetailCard jobDetail={job} />;
 }

@@ -4,11 +4,11 @@ import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
 import { favoriteJobsAtom, removeFavoriteJobAtom } from "@/atom";
-import { JobOverviewSchema } from "@/components/features/list/JobOverview";
 import { Card, CardGroup } from "@/components/ui/Card";
+import { JobOverviewSchema } from "@/dto";
 import cardStyles from "../list/jobCard.module.css";
 import styles from "./JobFavoriteList.module.css";
-import { JobOverview } from "./JobOverview";
+import { JobOverviewCard } from "./JobOverview";
 
 export function FavoriteJobOverviewList() {
   const items = useAtomValue(favoriteJobsAtom);
@@ -39,7 +39,7 @@ export function FavoriteJobOverviewList() {
               href={`/jobs/${item.jobNumber}`}
               className={cardStyles.cardLink}
             >
-              <JobOverview
+              <JobOverviewCard
                 jobNumber={item.jobNumber}
                 companyName={item.companyName}
                 occupation={item.occupation}

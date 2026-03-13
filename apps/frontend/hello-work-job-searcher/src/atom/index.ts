@@ -1,12 +1,9 @@
-import type { UnBrandedJob } from "@sho/models";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import type { InferRequestType } from "hono/client";
 import { hc } from "hono/client";
 import { atom } from "jotai";
-import type { JobOverview } from "@/components/features/list/JobOverview";
+import type { JobDetail, JobList, JobOverview } from "@/dto";
 import type { AppType } from "@/lib/backend-client";
-
-export type JobList = UnBrandedJob[];
 
 const client = hc<AppType>("/api");
 
@@ -151,7 +148,7 @@ export const continuousJobOverviewListWriterAtom = atom<
   }));
 });
 
-export const jobAtom = atom<UnBrandedJob | undefined>();
+export const jobAtom = atom<JobDetail | undefined>();
 export const jobWriterAtom = atom<null, [string], Promise<void>>(
   null,
   async (_get, set, jobNumber) => {

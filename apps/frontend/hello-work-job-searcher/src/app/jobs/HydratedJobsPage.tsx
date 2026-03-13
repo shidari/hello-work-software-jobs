@@ -1,8 +1,9 @@
 "use client";
 
 import { useHydrateAtoms } from "jotai/utils";
-import type { JobList, SearchFilter } from "@/atom";
+import type { SearchFilter } from "@/atom";
 import { JobtotalCountAtom, jobListAtom, searchFilterAtom } from "@/atom";
+import type { JobList } from "@/dto";
 import { JobsPageClient } from "./JobsPageClient";
 
 export function HydratedJobsPage({

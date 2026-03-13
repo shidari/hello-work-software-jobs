@@ -5,7 +5,7 @@ import {
   favoriteJobsAtom,
   removeFavoriteJobAtom,
 } from "@/atom";
-import type { JobOverview } from "@/components/features/list/JobOverview";
+import type { JobOverview } from "@/dto";
 import styles from "./useJobsWithFavorite.module.css";
 
 export function useJobsWithFavorite(items: JobOverview[]) {

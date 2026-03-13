@@ -1,17 +1,6 @@
-import { Job, type Unbrand } from "@sho/models";
+import type { JobOverview } from "@/dto";
 
-export const JobOverviewSchema = Job.pick(
-  "jobNumber",
-  "companyName",
-  "occupation",
-  "employmentType",
-  "workPlace",
-  "employeeCount",
-  "receivedDate",
-);
-export type JobOverview = Unbrand<typeof JobOverviewSchema.Type>;
-
-export function JobOverview(props: JobOverview) {
+export function JobOverviewCard(props: JobOverview) {
   const { companyName, occupation, employmentType, workPlace, employeeCount } =
     props;
   return (
