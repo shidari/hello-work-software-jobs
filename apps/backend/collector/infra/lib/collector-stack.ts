@@ -36,7 +36,7 @@ export class CollectorStack extends cdk.Stack {
 
     // --- Docker image (shared) ---
     const dockerImageDir = path.join(__dirname, "..", "..", "..", "..", "..");
-    const dockerfilePath = "apps/backend/collector/aws/Dockerfile";
+    const dockerfilePath = "apps/backend/collector/infra/Dockerfile";
 
     // --- Lambda: job-number-crawler ---
     const jobNumberCrawlerLogGroup = new logs.LogGroup(
