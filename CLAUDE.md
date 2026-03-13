@@ -13,13 +13,13 @@ hello-work-software-jobs/
 ├── apps/
 │   ├── backend/
 │   │   ├── api/                     # Cloudflare Workers REST API (Hono + D1)
-│   │   └── collector/               # AWS Lambda crawler (Playwright + SQS)
-│   │       └── infra/               # CDK IaC (Lambda, SQS, EventBridge)
+│   │   └── collector/               # クローラー (Playwright + Effect)
+│   │       └── infra/               # AWS インフラ (CDK: Lambda, SQS, EventBridge)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
 │   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
-│   └── models/                      # Shared TypeScript types & schemas
+│   └── models/                      # ドメインモデル定義
 ├── tools/
 │   └── hwctl/                       # Haskell admin CLI (Stack)
 ```
@@ -30,7 +30,7 @@ hello-work-software-jobs/
 |-------|--------------|
 | Frontend | Next.js 16, React 19, Jotai, Hono RPC |
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
-| Crawler | AWS Lambda (Docker), SQS, Playwright, Effect |
+| Crawler | Playwright, Effect, AWS Lambda (Docker), SQS, EventBridge, CDK |
 | Shared | TypeScript 5.8, Effect Schema |
 | Admin CLI | Haskell (Stack), optparse-applicative, aeson, req, dotenv-hs |
 | Secrets | dotenvx (API, Frontend), dotenv-hs (hwctl) |

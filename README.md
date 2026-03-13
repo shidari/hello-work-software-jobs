@@ -10,13 +10,13 @@
 apps/
   ├── backend/
   │   ├── api/                      # Cloudflare Workers API (Hono + D1)
-  │   └── collector/                # AWS Lambda クローラー (Playwright + SQS)
-  │       └── infra/               # CDK IaC
+  │   └── collector/                # クローラー (Playwright + Effect)
+  │       └── infra/               # AWS インフラ (CDK: Lambda, SQS, EventBridge)
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
   ├── db/                           # Kysely + D1 client factory & types
-  └── models/                       # 共通型定義
+  └── models/                       # ドメインモデル定義
 tools/
   └── hwctl/                        # Haskell admin CLI (Stack)
 ```
