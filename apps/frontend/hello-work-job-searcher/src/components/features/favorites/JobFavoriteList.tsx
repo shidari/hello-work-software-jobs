@@ -7,7 +7,6 @@ import { favoriteJobsAtom } from "@/atom/atoms";
 import { favoriteRemoveWriter } from "@/atom/writers";
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
-import cardStyles from "../list/jobCard.module.css";
 import styles from "./JobFavoriteList.module.css";
 import { JobOverviewCard } from "./JobOverview";
 
@@ -38,7 +37,7 @@ export function FavoriteJobOverviewList() {
           <div className={styles.sectionHeader}>
             <Link
               href={`/jobs/${item.jobNumber}`}
-              className={cardStyles.cardLink}
+              className={styles.cardLink}
             >
               <JobOverviewCard
                 jobNumber={item.jobNumber}
