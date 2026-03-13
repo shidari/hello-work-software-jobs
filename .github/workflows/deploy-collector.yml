@@ -1,0 +1,51 @@
+name: Deploy Collector
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/collector/**"
+      - "packages/models/**"
+      - ".github/workflows/deploy-collector.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm --filter @sho/models build
+
+      - name: Build collector
+        run: pnpm --filter collector build
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          role-session-name: github-actions-cdk-deploy
+          aws-region: ap-northeast-1
+
+      - name: CDK Deploy
+        working-directory: ./apps/backend/collector/infra
+        env:
+          JOB_STORE_ENDPOINT: ${{ secrets.JOB_STORE_ENDPOINT }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: pnpm exec cdk deploy --all --require-approval never

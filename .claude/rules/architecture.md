@@ -3,10 +3,10 @@
 ## データフロー
 
 ```
-Cron Trigger (平日 01:00)
-  → 求人番号抽出 Worker (@cloudflare/playwright)
-  → Cloudflare Queue
-  → 求人詳細 ETL Worker (@cloudflare/playwright + linkedom)
+EventBridge (平日 01:00 JST = UTC 16:00 SUN-THU)
+  → Lambda: job-number-crawler (Playwright)
+  → SQS queue (job-detail-queue, batchSize: 1)
+  → Lambda: job-detail-etl (Playwright + linkedom)
   → POST /jobs
   → API (Cloudflare Workers + D1)
   → GET /jobs
@@ -70,34 +70,31 @@ Cloudflare Workers + Hono。
 
 ## `apps/backend/collector`
 
-Cloudflare Workers + Hono + Browser Rendering + Queues + Effect サービスパターン。
+AWS Lambda (Docker) + SQS + EventBridge + Playwright + Effect サービスパターン。
 
 ### パイプライン
 
-1. **求人番号抽出** — Cron Trigger → Worker → @cloudflare/playwright で検索ページ走査 → Queue 送信
-2. **求人詳細 ETL** — Queue → Worker → @cloudflare/playwright で HTML 取得 → linkedom でパース → API に POST（`job_detail_runs` テーブルに実行記録）
-3. **手動トリガー** — `POST /trigger` (x-api-key 認証) → `handleScheduled` をバックグラウンド実行
-
-### エンドポイント
-
-| メソッド | パス | 認証 | 概要 |
-|---------|------|------|------|
-| POST | `/trigger` | x-api-key | クローラー手動トリガー (`?period=today\|week\|all&maxCount=N`) |
-| GET | `/crawler-runs` | x-api-key | クローラー実行履歴（since, until, status, trigger, limit フィルター） |
-| GET | `/job-detail-runs` | x-api-key | 求人詳細 ETL 実行履歴（since, until, status, limit フィルター） |
+1. **求人番号抽出** — EventBridge (平日 01:00 JST) → Lambda `job-number-crawler` → Playwright で検索ページ走査 → SQS 送信
+2. **求人詳細 ETL** — SQS (batchSize: 1) → Lambda `job-detail-etl` → Playwright で HTML 取得 → linkedom でパース → API に POST
+3. **手動トリガー** — hwctl → Lambda invoke（未実装）
 
 ### 設計
 
-- **Effect.Service**: `AuthMiddleware`（API キー検証）と `TriggerApp`（Hono app）を Effect.Service で定義。DI によりテスト時に ConfigProvider を差し替え可能
-- **Hono**: fetch ハンドラーで Hono app を構築し、`app.fetch` で処理委譲
+- **1 メッセージ = 1 Lambda 起動 = フレッシュなブラウザ**: Cloudflare Browser Rendering のレートリミット問題を根本解決
+- **Effect.Service**: `JobDetailQueue`（SQS publish）を Effect.Service で定義。Config で環境変数を読み取り
+- **構造化ログ**: `console.log(JSON.stringify({...}))` → CloudWatch Logs
 
-### インフラ (wrangler.jsonc)
+### インフラ (CDK: `infra/`)
 
-- Worker (fetch + scheduled + queue handler)
-- Browser Rendering binding
-- Cloudflare Queues (job-detail-queue + DLQ, max_concurrency: 1)
-- D1 binding (job-store — API と同一 DB を共有)
-- Observability 有効
+- SQS Queue (`job-detail-queue`, visibilityTimeout: 360s) + DLQ (maxReceiveCount: 3)
+- Lambda `job-number-crawler` (Docker image, 2GB RAM, 15min timeout)
+- Lambda `job-detail-etl` (Docker image, 2GB RAM, 5min timeout, SQS event source)
+- EventBridge Rule (平日 01:00 JST)
+- CloudWatch Log Groups (retention: 30日)
+
+### CI/CD
+
+- `deploy-collector.yml`: main push → OIDC 認証 → `cdk deploy`
 
 ---
 
