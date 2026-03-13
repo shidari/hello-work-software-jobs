@@ -23,5 +23,13 @@ export function HydratedJobsPage({
     [jobTotalCountSelector, initialData.totalCount],
     [searchFilterAtom, initialFilter],
   ]);
-  return <JobsPageClient initialTotalCount={initialData.totalCount} />;
+  const hasFilter = Object.values(initialFilter).some(
+    (v) => v !== undefined && v !== "",
+  );
+  return (
+    <JobsPageClient
+      initialTotalCount={initialData.totalCount}
+      filterOpen={hasFilter}
+    />
+  );
 }
