@@ -2,34 +2,32 @@
   "name": "collector",
   "version": "0.1.0",
   "scripts": {
-    "build": "tsdown",
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "verify:job-number-crawler": "tsx lib/scripts/verify-job-number-crawler.ts",
-    "verify:job-detail-extractor": "tsx lib/jobDetail/extractor/playground/index.ts",
-    "verify:transform-jobDetail": "tsx lib/T-jobDetail/playground/index.ts",
-    "verify:e-t-crawler": "tsx lib/E-T-crawler/playground/index.ts",
-    "verify:dump-html": "tsx lib/scripts/dump-search-result.ts",
+    "dev:verify-job-number-crawler": "tsx lib/scripts/verify-job-number-crawler.ts",
+    "dev:verify-job-detail-crawler": "tsx lib/scripts/verify-job-detail-crawler.ts",
+    "dev:dump-html": "tsx lib/scripts/dump-search-result.ts",
+    "dev:docker-up": "docker compose -f aws/local/docker-compose.yml up --build",
+    "dev:docker-down": "docker compose -f aws/local/docker-compose.yml down",
+    "dev:docker-build": "docker compose -f aws/local/docker-compose.yml build",
+    "dev:invoke-crawler": "curl -s -X POST http://localhost:9000/2015-03-31/functions/function/invocations -d '{\"queryStringParameters\":{\"period\":\"today\",\"maxCount\":\"3\"},\"headers\":{\"x-api-key\":\"dev-secret\"},\"requestContext\":{},\"isBase64Encoded\":false}'",
+    "dev:invoke-detail": "curl -s -X POST http://localhost:9001/2015-03-31/functions/function/invocations -d '{\"Records\":[{\"messageId\":\"local-test\",\"receiptHandle\":\"local\",\"body\":\"{\\\"jobNumber\\\":\\\"13080-55925651\\\"}\",\"attributes\":{},\"messageAttributes\":{},\"md5OfBody\":\"\",\"eventSource\":\"aws:sqs\",\"eventSourceARN\":\"\",\"awsRegion\":\"ap-northeast-1\"}]}'",
+    "build": "pnpm exec tsdown",
     "test": "vitest",
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250214.0",
+    "@types/aws-lambda": "^8.10.149",
     "@types/node": "24.11.0",
-    "playwright": "^1.58.2",
     "tsdown": "^0.20.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
-    "vitest": "~3.2.4",
-    "wrangler": "^4.14.0"
+    "vitest": "~3.2.4"
   },
   "dependencies": {
-    "@cloudflare/playwright": "^1.1.1",
-    "@sho/db": "workspace:*",
+    "@aws-sdk/client-sqs": "^3.800.0",
     "@sho/models": "workspace:*",
     "date-fns": "^4.1.0",
     "effect": "^3.16.5",
-    "hono": "^4.12.5",
-    "linkedom": "0.18.12"
+    "linkedom": "0.18.12",
+    "playwright": "^1.58.2"
   }
 }

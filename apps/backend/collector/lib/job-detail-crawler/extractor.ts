@@ -12,19 +12,19 @@ import {
 // ── RawJob スキーマ: DOM から抽出した生テキスト ──
 
 export const RawJob = Schema.Struct({
-  jobNumber: Schema.optional(Schema.String),
-  companyName: Schema.optional(Schema.String),
-  receivedDate: Schema.optional(Schema.String),
-  expiryDate: Schema.optional(Schema.String),
+  jobNumber: Schema.NullOr(Schema.String),
+  companyName: Schema.NullOr(Schema.String),
+  receivedDate: Schema.NullOr(Schema.String),
+  expiryDate: Schema.NullOr(Schema.String),
   homePage: Schema.NullOr(Schema.String),
-  occupation: Schema.optional(Schema.String),
-  employmentType: Schema.optional(Schema.String),
-  wage: Schema.optional(Schema.String),
-  workingHours: Schema.optional(Schema.String),
-  employeeCount: Schema.optional(Schema.String),
-  workPlace: Schema.optional(Schema.String),
-  jobDescription: Schema.optional(Schema.String),
-  qualifications: Schema.optional(Schema.String),
+  occupation: Schema.NullOr(Schema.String),
+  employmentType: Schema.NullOr(Schema.String),
+  wage: Schema.NullOr(Schema.String),
+  workingHours: Schema.NullOr(Schema.String),
+  employeeCount: Schema.NullOr(Schema.String),
+  workPlace: Schema.NullOr(Schema.String),
+  jobDescription: Schema.NullOr(Schema.String),
+  qualifications: Schema.NullOr(Schema.String),
 });
 export type RawJob = typeof RawJob.Type;
 
@@ -79,19 +79,19 @@ export function extractRawFieldsFromDocument(document: Document): RawJob {
     jobNumber:
       document
         .querySelector(jobDetailSelectors.jobNumber)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     companyName:
       document
         .querySelector(jobDetailSelectors.companyName)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     receivedDate:
       document
         .querySelector(jobDetailSelectors.receivedDate)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     expiryDate:
       document
         .querySelector(jobDetailSelectors.expiryDate)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     homePage:
       document
         .querySelector(jobDetailSelectors.homePage)
@@ -99,34 +99,34 @@ export function extractRawFieldsFromDocument(document: Document): RawJob {
     occupation:
       document
         .querySelector(jobDetailSelectors.occupation)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     employmentType:
       document
         .querySelector(jobDetailSelectors.employmentType)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     wage:
       document.querySelector(jobDetailSelectors.wage)?.textContent?.trim() ||
-      undefined,
+      null,
     workingHours:
       document
         .querySelector(jobDetailSelectors.workingHours)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     employeeCount:
       document
         .querySelector(jobDetailSelectors.employeeCount)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     workPlace:
       document
         .querySelector(jobDetailSelectors.workPlace)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     jobDescription:
       document
         .querySelector(jobDetailSelectors.jobDescription)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
     qualifications:
       document
         .querySelector(jobDetailSelectors.qualifications)
-        ?.textContent?.trim() || undefined,
+        ?.textContent?.trim() || null,
   };
 }
 
