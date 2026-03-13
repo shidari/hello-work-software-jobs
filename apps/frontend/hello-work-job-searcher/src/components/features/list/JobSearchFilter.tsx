@@ -1,14 +1,9 @@
 "use client";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
-import {
-  initializeJobListWriterAtom,
-  type SearchFilter,
-  scrollRestorationByItemIndexAtom,
-  scrollRestorationByItemListAtom,
-  searchFilterAtom,
-} from "@/atom";
+import { useEffect, useRef } from "react";
+import { type SearchFilter, searchFilterAtom } from "@/atom/atoms";
+import { jobListInitWriter } from "@/atom/writers";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
@@ -27,16 +22,9 @@ function toEmployeeCountRange(filter: SearchFilter): string {
 export const JobsSearchfilter = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<number | null>(null);
-  const initializeJobList = useSetAtom(initializeJobListWriterAtom);
-  const jobListIndexSetter = useSetAtom(scrollRestorationByItemIndexAtom);
-  const jobListItemSetter = useSetAtom(scrollRestorationByItemListAtom);
+  const [, initializeJobList] = useAtom(jobListInitWriter);
   const currentFilter = useAtomValue(searchFilterAtom);
   const router = useRouter();
-
-  const resetRestoration = useCallback(() => {
-    jobListIndexSetter(0);
-    jobListItemSetter([]);
-  }, [jobListIndexSetter, jobListItemSetter]);
 
   useEffect(() => {
     return () => {
@@ -123,7 +111,6 @@ export const JobsSearchfilter = () => {
       router.replace(query ? `/jobs?${query}` : "/jobs", { scroll: false });
 
       initializeJobList(searchFilter);
-      resetRestoration();
     }, 300);
   };
 

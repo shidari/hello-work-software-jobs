@@ -1,8 +1,8 @@
 "use client";
 
 import { useHydrateAtoms } from "jotai/utils";
-import type { SearchFilter } from "@/atom";
-import { JobtotalCountAtom, jobListAtom, searchFilterAtom } from "@/atom";
+import { jobListAtom, type SearchFilter, searchFilterAtom } from "@/atom/atoms";
+import { jobTotalCountSelector } from "@/atom/selectors";
 import type { JobList } from "@/dto";
 import { JobsPageClient } from "./JobsPageClient";
 
@@ -20,7 +20,7 @@ export function HydratedJobsPage({
 }) {
   useHydrateAtoms([
     [jobListAtom, initialData],
-    [JobtotalCountAtom, initialData.totalCount],
+    [jobTotalCountSelector, initialData.totalCount],
     [searchFilterAtom, initialFilter],
   ]);
   return <JobsPageClient initialTotalCount={initialData.totalCount} />;

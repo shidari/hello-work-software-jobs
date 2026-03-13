@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtomValue } from "jotai";
-import { jobAtom } from "@/atom";
+import { jobAtom } from "@/atom/atoms";
 import styles from "./ClientJobDetail.module.css";
 import { JobDetailCard } from "./JobDetail";
 

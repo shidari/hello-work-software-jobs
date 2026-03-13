@@ -1,17 +1,14 @@
 "use client";
-import { useAtomValue, useSetAtom } from "jotai";
-import {
-  appendFavoriteJobAtom,
-  favoriteJobsAtom,
-  removeFavoriteJobAtom,
-} from "@/atom";
+import { useAtom, useAtomValue } from "jotai";
+import { favoriteJobsAtom } from "@/atom/atoms";
+import { favoriteAppendWriter, favoriteRemoveWriter } from "@/atom/writers";
 import type { JobOverview } from "@/dto";
 import styles from "./useJobsWithFavorite.module.css";
 
 export function useJobsWithFavorite(items: JobOverview[]) {
   const favoriteJobs = useAtomValue(favoriteJobsAtom);
-  const appendFavoriteJob = useSetAtom(appendFavoriteJobAtom);
-  const removeFavoriteJob = useSetAtom(removeFavoriteJobAtom);
+  const [, appendFavoriteJob] = useAtom(favoriteAppendWriter);
+  const [, removeFavoriteJob] = useAtom(favoriteRemoveWriter);
 
   return items.map((item) => {
     const isFavorite = !!favoriteJobs.find(

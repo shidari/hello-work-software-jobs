@@ -3,10 +3,10 @@
 import { useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import { Suspense } from "react";
-import { JobtotalCountAtom } from "@/atom";
+import { jobTotalCountSelector } from "@/atom/selectors";
 
 function TotalCountValue() {
-  const totalCount = useAtomValue(JobtotalCountAtom);
+  const totalCount = useAtomValue(jobTotalCountSelector);
   return <span>{totalCount}</span>;
 }
 
@@ -15,7 +15,7 @@ export const JobtotalCount = ({
 }: {
   initialDataFromServer: number;
 }) => {
-  useHydrateAtoms([[JobtotalCountAtom, initialDataFromServer]]);
+  useHydrateAtoms([[jobTotalCountSelector, initialDataFromServer]]);
   return (
     <div>
       求人情報の総数:

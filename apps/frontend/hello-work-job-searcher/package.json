@@ -12,7 +12,6 @@
   "dependencies": {
     "@sho/api": "workspace:*",
     "@sho/models": "workspace:*",
-    "@tanstack/react-virtual": "^3.13.12",
     "effect": "^3.16.5",
     "hono": "^4.8.3",
     "jotai": "^2.13.1",
