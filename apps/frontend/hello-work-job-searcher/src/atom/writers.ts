@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import type { JobOverview } from "@/dto";
-import { client } from "@/lib/backend-client";
+import { client } from "@/lib/client";
 import type { SearchFilter } from "./atoms";
 import {
   favoriteJobsAtom,
