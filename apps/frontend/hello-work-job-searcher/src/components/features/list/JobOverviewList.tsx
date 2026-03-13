@@ -27,8 +27,33 @@ export function JobOverviewList({ onJobSelect }: { onJobSelect?: () => void }) {
   const [, goToPage] = useAtom(jobListWriter);
   const [, selectJob] = useAtom(jobSelectWriter);
 
+  const pagination = totalPages > 1 && (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink disabled>
+            {page} / {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext
+            disabled={page >= totalPages}
+            onClick={() => goToPage(page + 1)}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+
   return (
     <div className={styles.list}>
+      {pagination}
       <div className={styles.items}>
         {wrappedItems.map(({ item, JobFavoriteButton }) => {
           const isNew =
@@ -61,29 +86,7 @@ export function JobOverviewList({ onJobSelect }: { onJobSelect?: () => void }) {
           );
         })}
       </div>
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                disabled={page <= 1}
-                onClick={() => goToPage(page - 1)}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink disabled>
-                {page} / {totalPages}
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                disabled={page >= totalPages}
-                onClick={() => goToPage(page + 1)}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      {pagination}
     </div>
   );
 }
