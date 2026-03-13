@@ -1,8 +1,8 @@
 .formGrid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  padding: 0.75rem 1rem 1.5rem;
+  padding: 0.75rem 0 0.5rem;
 }
 
 .section {
@@ -43,7 +43,11 @@
   cursor: pointer;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
   .row {
     grid-template-columns: 1fr;
   }

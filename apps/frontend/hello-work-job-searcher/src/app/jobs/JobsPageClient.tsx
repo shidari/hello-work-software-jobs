@@ -22,8 +22,10 @@ import styles from "./JobsPageClient.module.css";
 
 export function JobsPageClient({
   initialTotalCount,
+  filterOpen = false,
 }: {
   initialTotalCount: number;
+  filterOpen?: boolean;
 }) {
   const { items, page, totalPages } = useAtomValue(jobOverviewListSelector);
   const wrappedItems = useJobsWithFavorite(items);
@@ -58,7 +60,7 @@ export function JobsPageClient({
       <div className={styles.header}>
         <h1 className={styles.title}>求人情報一覧</h1>
         <JobtotalCount initialDataFromServer={initialTotalCount} />
-        <Collapsible title="絞り込み">
+        <Collapsible title="絞り込み" defaultOpen={filterOpen}>
           <JobsSearchfilter />
         </Collapsible>
       </div>
