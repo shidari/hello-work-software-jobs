@@ -122,13 +122,34 @@ importers:
 
   apps/backend/collector/infra:
     dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.800.0
+        version: 3.1008.0
+      '@sho/models':
+        specifier: workspace:*
+        version: link:../../../../packages/models
       aws-cdk-lib:
         specifier: 2.214.0
         version: 2.214.0(constructs@10.5.1)
       constructs:
         specifier: ^10.0.0
         version: 10.5.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
+      effect:
+        specifier: ^3.16.5
+        version: 3.19.19
+      linkedom:
+        specifier: 0.18.12
+        version: 0.18.12
+      playwright:
+        specifier: ^1.58.2
+        version: 1.58.2
     devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.149
+        version: 8.10.161
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
