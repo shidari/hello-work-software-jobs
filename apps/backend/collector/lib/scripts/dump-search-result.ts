@@ -10,8 +10,8 @@
 import * as fs from "node:fs";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
+import type { SearchPeriod } from "../job-number-crawler/crawl";
 import { JobNumberCrawlerConfig } from "../job-number-crawler/crawl";
-import type { SearchPeriod } from "../job-number-crawler/type";
 import { navigateByCriteria, openJobSearchPage } from "../page";
 
 const searchPeriod = (process.argv[2] ?? "today") as SearchPeriod;

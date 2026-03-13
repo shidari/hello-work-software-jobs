@@ -3,7 +3,7 @@ import { Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { handleScheduled } from "../../functions/ET-JobNumberHandler/handler";
 import type { Env } from "../../functions/index";
-import type { SearchPeriod } from "../../lib/job-number-crawler/type";
+import type { SearchPeriod } from "../../lib/job-number-crawler/crawl";
 import { AuthMiddleware } from "../middleware/auth";
 
 const validPeriods = new Set<string>(["today", "week", "all"]);
@@ -68,5 +68,7 @@ export class TriggerApp extends Effect.Service<TriggerApp>()("TriggerApp", {
   }),
   dependencies: [AuthMiddleware.Default],
 }) {
-  static test = TriggerApp.Default.pipe(Layer.provide(AuthMiddleware.test));
+  static test = TriggerApp.DefaultWithoutDependencies.pipe(
+    Layer.provide(AuthMiddleware.test),
+  );
 }
