@@ -2,12 +2,7 @@ import { atom } from "jotai";
 import type { JobOverview } from "@/dto";
 import { client } from "@/lib/client";
 import type { SearchFilter } from "./atoms";
-import {
-  favoriteJobsAtom,
-  jobAtom,
-  jobListAtom,
-  searchFilterAtom,
-} from "./atoms";
+import { favoriteJobsAtom, jobListAtom, searchFilterAtom } from "./atoms";
 
 export const jobListInitWriter = atom(
   null,
@@ -39,18 +34,6 @@ export const jobListWriter = atom(
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const { jobs, meta } = await res.json();
     set(jobListAtom, { jobs, ...meta });
-  },
-);
-
-export const jobSelectWriter = atom(
-  null,
-  async (_get, set, jobNumber: string) => {
-    const res = await client.jobs[":jobNumber"].$get({
-      param: { jobNumber },
-    });
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    set(jobAtom, data ?? undefined);
   },
 );
 

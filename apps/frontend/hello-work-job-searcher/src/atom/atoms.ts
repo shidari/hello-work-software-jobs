@@ -1,6 +1,6 @@
 import type { InferRequestType } from "hono/client";
 import { atom } from "jotai";
-import type { JobDetail, JobList, JobOverview } from "@/dto";
+import type { JobList, JobOverview } from "@/dto";
 import type { Client } from "@/lib/client";
 
 export type SearchFilter = Omit<
@@ -20,5 +20,4 @@ export const jobListAtom = atom<{
   totalPages: 0,
   totalCount: 0,
 });
-export const jobAtom = atom<JobDetail | undefined>();
 export const favoriteJobsAtom = atom<JobOverview[]>([]);

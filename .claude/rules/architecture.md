@@ -135,21 +135,22 @@ Next.js 16 + React 19。
 
 | パス | 概要 |
 |------|------|
-| `/jobs` | サイドバー（検索バー + 求人一覧）+ メイン（求人詳細パネル） |
+| `/jobs` | 求人一覧（検索フィルター + ページネーション + カードリスト） |
+| `/jobs/[jobNumber]` | 求人詳細（戻るボタン付き） |
 | `/favorites` | お気に入り（localStorage 永続化） |
-| `/history` | 検索履歴 |
 
 ### 状態管理 (Jotai)
 
 ```
 atom/
-  atoms.ts      — state atoms (searchFilter, jobList, job, favoriteJobs)
+  atoms.ts      — state atoms (searchFilter, jobList, favoriteJobs)
   selectors.ts  — derived read atoms (jobTotalCountSelector, jobOverviewListSelector)
-  writers.ts    — write atoms (jobListInitWriter, jobListWriter, jobSelectWriter, favoriteAppendWriter, favoriteRemoveWriter)
+  writers.ts    — write atoms (jobListInitWriter, jobListWriter, favoriteAppendWriter, favoriteRemoveWriter)
 ```
 
 ### 主な機能
 
+- ページ遷移ベースのUI（一覧 → 詳細）
 - ページ番号ページネーション（shadcn 風 Pagination コンポーネント）
 - 14種フィルター検索
 - お気に入り（localStorage 永続化）

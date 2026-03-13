@@ -1,129 +1,98 @@
 "use client";
 
-import { Activity, useCallback, useEffect, useState } from "react";
-import { ClientJobDetail } from "@/components/features/detail/ClientJobDetail";
-import { JobOverviewList } from "@/components/features/list/JobOverviewList";
+import { useAtom, useAtomValue } from "jotai";
+import Link from "next/link";
+import { jobOverviewListSelector } from "@/atom/selectors";
+import { jobListWriter } from "@/atom/writers";
+import { useJobsWithFavorite } from "@/components/features/favorites/useJobsWithFavorite";
+import { JobOverviewCard } from "@/components/features/list/JobOverview";
 import { JobsSearchfilter } from "@/components/features/list/JobSearchFilter";
 import { JobtotalCount } from "@/components/features/list/JobTotalCount";
+import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
-import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/Item";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/Pagination";
 import styles from "./JobsPageClient.module.css";
-
-const MOBILE_BREAKPOINT = 768;
 
 export function JobsPageClient({
   initialTotalCount,
 }: {
   initialTotalCount: number;
 }) {
-  const [open, setOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const { items, page, totalPages } = useAtomValue(jobOverviewListSelector);
+  const wrappedItems = useJobsWithFavorite(items);
+  const [, goToPage] = useAtom(jobListWriter);
 
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
-    const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
-      const mobile = e.matches;
-      setIsMobile(mobile);
-      if (mobile) setOpen(false);
-      else setOpen(true);
-    };
-    onChange(mql);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
-
-  const toggleSidebar = useCallback(() => setOpen((prev) => !prev), []);
-  const handleJobSelect = () => {
-    if (isMobile) setOpen(false);
-  };
+  const pagination = totalPages > 1 && (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink disabled>
+            {page} / {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext
+            disabled={page >= totalPages}
+            onClick={() => goToPage(page + 1)}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
 
   return (
     <div className={styles.container}>
-      {isMobile && open && (
-        <button
-          type="button"
-          className={styles.backdrop}
-          onClick={() => setOpen(false)}
-          aria-label="サイドバーを閉じる"
-        />
-      )}
-      <Activity mode={open ? "visible" : "hidden"}>
-        <aside className={`${styles.sidebar} ${isMobile ? styles.mobile : ""}`}>
-          <ItemGroup className={styles.sidebarHeader}>
-            <Item>
-              <ItemContent>
-                <div className={styles.titleRow}>
-                  <ItemTitle>
-                    <h1 className={styles.title}>求人情報一覧</h1>
-                  </ItemTitle>
-                  <button
-                    type="button"
-                    className={styles.trigger}
-                    onClick={toggleSidebar}
-                    aria-label="サイドバーを閉じる"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M3 5h14M3 10h14M3 15h14" />
-                    </svg>
-                  </button>
-                </div>
-              </ItemContent>
-            </Item>
-            <Item>
-              <ItemContent>
-                <JobtotalCount initialDataFromServer={initialTotalCount} />
-              </ItemContent>
-            </Item>
-            <Item>
-              <ItemContent>
-                <Collapsible title="絞り込み">
-                  <JobsSearchfilter />
-                </Collapsible>
-              </ItemContent>
-            </Item>
-          </ItemGroup>
-          <div className={styles.sidebarContent}>
-            <JobOverviewList onJobSelect={handleJobSelect} />
-          </div>
-        </aside>
-      </Activity>
-      <div className={styles.main}>
-        {!open && (
-          <div className={styles.mainHeader}>
-            <button
-              type="button"
-              className={styles.trigger}
-              onClick={toggleSidebar}
-              aria-label="サイドバーを開く"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                aria-hidden="true"
-              >
-                <path d="M3 5h14M3 10h14M3 15h14" />
-              </svg>
-            </button>
-          </div>
-        )}
-        <div className={styles.mainContent}>
-          <ClientJobDetail />
-        </div>
+      <div className={styles.header}>
+        <h1 className={styles.title}>求人情報一覧</h1>
+        <JobtotalCount initialDataFromServer={initialTotalCount} />
+        <Collapsible title="絞り込み">
+          <JobsSearchfilter />
+        </Collapsible>
       </div>
+      {pagination}
+      <div className={styles.items}>
+        {wrappedItems.map(({ item, JobFavoriteButton }) => {
+          const isNew =
+            !!item.receivedDate &&
+            Date.now() - new Date(item.receivedDate).getTime() <=
+              3 * 24 * 60 * 60 * 1000;
+          return (
+            <Link
+              key={item.jobNumber}
+              href={`/jobs/${item.jobNumber}`}
+              className={styles.cardLink}
+            >
+              <Card>
+                {isNew && <span className={styles.newBadge}>新着</span>}
+                <JobOverviewCard
+                  jobNumber={item.jobNumber}
+                  companyName={item.companyName}
+                  occupation={item.occupation}
+                  employmentType={item.employmentType}
+                  workPlace={item.workPlace}
+                  employeeCount={item.employeeCount}
+                  receivedDate={item.receivedDate}
+                />
+                <JobFavoriteButton />
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
+      {pagination}
     </div>
   );
 }
