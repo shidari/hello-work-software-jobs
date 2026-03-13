@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hono/swagger-ui':
-        specifier: ^0.5.2
-        version: 0.5.3(hono@4.12.7)
+        specifier: ^0.6.0
+        version: 0.6.1(hono@4.12.7)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.0.6
@@ -25,8 +25,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7)
       '@hono/swagger-ui':
-        specifier: ^0.5.2
-        version: 0.5.3(hono@4.12.7)
+        specifier: ^0.6.0
+        version: 0.6.1(hono@4.12.7)
       '@sho/db':
         specifier: workspace:*
         version: link:../../../packages/db
@@ -969,8 +969,8 @@ packages:
       '@standard-schema/spec': ^1.0.0
       hono: '>=3.9.0'
 
-  '@hono/swagger-ui@0.5.3':
-    resolution: {integrity: sha512-Hn90DOOJ62ICJQplQvCDVpi9Jcn6EhtRaiffyJIS53wA5RmRLtMCDQGVc0bor8vQD7JIwpkweWjs+3cycp+IvA==}
+  '@hono/swagger-ui@0.6.1':
+    resolution: {integrity: sha512-sJTvldu1GPeEPfyeLG7gRj+W4vEuD+JDi+JjJ3TJs/DvMUtBLs0KJO5yokGegWWdy5qrbdnQGekbhgNRmPmYKQ==}
     peerDependencies:
       hono: '>=4.0.0'
 
@@ -3765,7 +3765,7 @@ snapshots:
       '@standard-schema/spec': 1.1.0
       hono: 4.12.7
 
-  '@hono/swagger-ui@0.5.3(hono@4.12.7)':
+  '@hono/swagger-ui@0.6.1(hono@4.12.7)':
     dependencies:
       hono: 4.12.7
 
