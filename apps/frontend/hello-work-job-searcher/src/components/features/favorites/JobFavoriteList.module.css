@@ -33,3 +33,9 @@
   width: 100%;
   max-width: 700px;
 }
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
