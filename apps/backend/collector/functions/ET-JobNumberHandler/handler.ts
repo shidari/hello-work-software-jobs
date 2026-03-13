@@ -1,11 +1,11 @@
 import { createD1DB } from "@sho/db";
 import { Cause, ConfigProvider, Effect, Exit, Layer } from "effect";
 import { PlaywrightChromium } from "../../lib/browser";
+import type { SearchPeriod } from "../../lib/job-number-crawler/crawl";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../lib/job-number-crawler/crawl";
-import type { SearchPeriod } from "../../lib/job-number-crawler/type";
 import type { Env } from "../index";
 
 export const handleScheduled = async (

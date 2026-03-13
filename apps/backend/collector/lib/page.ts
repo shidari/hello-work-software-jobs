@@ -4,12 +4,14 @@ import { openBrowserPage } from "./browser";
 import type {
   DirtyWorkLocation,
   EmploymentType,
-  EmploymentTypeSelector,
   EngineeringLabel,
-  EngineeringLabelSelectorOpenerSibling,
-  EngineeringLabelSelectorRadioBtn,
   JobSearchCriteria,
   SearchPeriod,
+} from "./job-number-crawler/crawl";
+import type {
+  EmploymentTypeSelector,
+  EngineeringLabelSelectorOpenerSibling,
+  EngineeringLabelSelectorRadioBtn,
 } from "./job-number-crawler/type";
 
 // ============================================================
