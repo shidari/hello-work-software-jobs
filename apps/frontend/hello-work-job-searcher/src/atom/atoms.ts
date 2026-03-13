@@ -1,7 +1,7 @@
 import type { InferRequestType } from "hono/client";
 import { atom } from "jotai";
 import type { JobDetail, JobList, JobOverview } from "@/dto";
-import type { Client } from "@/lib/backend-client";
+import type { Client } from "@/lib/client";
 
 export type SearchFilter = Omit<
   NonNullable<InferRequestType<Client["jobs"]["$get"]>["query"]>,
