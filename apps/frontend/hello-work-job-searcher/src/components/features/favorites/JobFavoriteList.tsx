@@ -35,10 +35,7 @@ export function FavoriteJobOverviewList() {
       {items.map((item) => (
         <Card key={item.jobNumber} className={styles.favoriteCard}>
           <div className={styles.sectionHeader}>
-            <Link
-              href={`/jobs/${item.jobNumber}`}
-              className={styles.cardLink}
-            >
+            <Link href={`/jobs/${item.jobNumber}`} className={styles.cardLink}>
               <JobOverviewCard
                 jobNumber={item.jobNumber}
                 companyName={item.companyName}
