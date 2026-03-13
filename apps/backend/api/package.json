@@ -20,7 +20,7 @@
 		"@dotenvx/dotenvx": "^1.54.1",
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.0.15",
-		"tsdown": "^0.20.0",
+		"tsdown": "^0.21.0",
 		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.4",
