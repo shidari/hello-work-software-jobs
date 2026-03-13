@@ -3,7 +3,10 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["es2022", "DOM"],
+    "lib": [
+      "es2022",
+      "DOM"
+    ],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -13,9 +16,17 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "cdk.out"
+  ]
 }

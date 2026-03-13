@@ -10,7 +10,8 @@
 apps/
   ├── backend/
   │   ├── api/                      # Cloudflare Workers API (Hono + D1)
-  │   └── collector/                # Cloudflare Workers クローラー (Browser Rendering + Queues)
+  │   └── collector/                # AWS Lambda クローラー (Playwright + SQS)
+  │       └── infra/               # CDK IaC
   └── frontend/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
@@ -25,7 +26,7 @@ tools/
 - **共通**: TypeScript, pnpm workspace
 - **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
 - **API**: Cloudflare Workers, Hono, Kysely, D1
-- **クローラー**: Cloudflare Workers, Browser Rendering, Queues, @cloudflare/playwright, Effect
+- **クローラー**: AWS Lambda (Docker), SQS, EventBridge, Playwright, Effect, CDK
 - **型管理**: Effect Schema, @sho/models
 - **Admin CLI**: Haskell (Stack), optparse-applicative, aeson, req
 
@@ -49,9 +50,9 @@ pnpm verify:job-detail-extractor
 ## デプロイ
 
 ```bash
-# クローラー (Cloudflare Workers)
-cd apps/backend/collector
-pnpm deploy
+# クローラー (AWS CDK)
+cd apps/backend/collector/infra
+JOB_STORE_ENDPOINT=... API_KEY=... pnpm exec cdk deploy
 
 # API (Cloudflare Workers)
 cd apps/backend/api

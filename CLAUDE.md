@@ -14,6 +14,7 @@ hello-work-software-jobs/
 │   ├── backend/
 │   │   ├── api/                     # Cloudflare Workers REST API (Hono + D1)
 │   │   └── collector/               # AWS Lambda crawler (Playwright + SQS)
+│   │       └── infra/               # CDK IaC (Lambda, SQS, EventBridge)
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
@@ -133,4 +134,4 @@ stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 ## CI/CD
 
 - `pr-checks.yml` - Build, type check, test, lint on PRs
-- Collector deploy: AWS Lambda (Docker image, CDK — 未実装)
+- `deploy-collector.yml` - main push 時に OIDC 認証 → CDK deploy（collector / models 変更時のみ）
