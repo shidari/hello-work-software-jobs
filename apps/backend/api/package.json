@@ -13,7 +13,9 @@
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"migrate": "pnpm exec wrangler d1 migrations apply job-store --remote",
+		"migrate:local": "pnpm exec wrangler d1 migrations apply job-store"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.12.0",
