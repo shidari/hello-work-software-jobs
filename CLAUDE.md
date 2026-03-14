@@ -59,6 +59,7 @@ pnpm dev:docker-up     # docker-compose up (LocalStack + Lambda)
 pnpm dev:docker-down   # docker-compose down
 pnpm dev:invoke-crawler  # 求人番号クローラー手動実行
 pnpm dev:invoke-detail   # 求人詳細 ETL 手動実行
+pnpm dev:e2e             # E2E パイプライン検証 (crawler → SQS → ETL → API)
 pnpm test              # Vitest tests (PBT)
 pnpm build             # tsdown ビルド
 
@@ -82,6 +83,8 @@ stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
 - `GET /jobs` - List jobs (with filters, page-number pagination)
 - `GET /jobs/{jobNumber}` - Get job details
 - `POST /jobs` - Create job
+- `GET /companies/{establishmentNumber}` - Get company by establishment number
+- `POST /companies` - Upsert company
 - `GET /stats/daily` - Daily new job count summary (with job numbers)
 
 ## Database

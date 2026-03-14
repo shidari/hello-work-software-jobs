@@ -2,7 +2,14 @@ import { selectDailyStats } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
 import { DateTime } from "luxon";
 import { PAGE_SIZE } from "../constant";
-import { DbJobSchema, type Job, JobStoreDB, type SearchFilter } from ".";
+import {
+  type Company,
+  DbCompanySchema,
+  DbJobSchema,
+  type Job,
+  JobStoreDB,
+  type SearchFilter,
+} from ".";
 
 // --- エラー ---
 
@@ -143,6 +150,22 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                     "like",
                     `%${filter.qualifications}%`,
                   ),
+                )
+                .$if(!!filter.jobCategory, (qb) =>
+                  qb.where("jobCategory", "=", filter.jobCategory!),
+                )
+                .$if(!!filter.wageType, (qb) =>
+                  qb.where("wageType", "=", filter.wageType!),
+                )
+                .$if(!!filter.education, (qb) =>
+                  qb.where("education", "like", `%${filter.education}%`),
+                )
+                .$if(!!filter.industryClassification, (qb) =>
+                  qb.where(
+                    "industryClassification",
+                    "like",
+                    `%${filter.industryClassification}%`,
+                  ),
                 );
 
               const jobList = await filtered
@@ -179,6 +202,35 @@ export type DailyStat = {
   count: number;
   jobNumbers: string[];
 };
+
+export class FindCompanyQuery extends Effect.Service<FindCompanyQuery>()(
+  "FindCompanyQuery",
+  {
+    effect: Effect.gen(function* () {
+      const db = yield* JobStoreDB;
+      return {
+        run: (establishmentNumber: string) =>
+          Effect.tryPromise({
+            try: async (): Promise<Company | null> => {
+              const data = await db
+                .selectFrom("companies")
+                .selectAll()
+                .where("establishmentNumber", "=", establishmentNumber)
+                .limit(1)
+                .execute();
+              const decodeDbRow = Schema.decodeUnknownSync(DbCompanySchema);
+              return data.length > 0 ? decodeDbRow(data[0]) : null;
+            },
+            catch: (e) =>
+              new FetchJobError({
+                message: String(e),
+                errorType: "server",
+              }),
+          }),
+      };
+    }),
+  },
+) {}
 
 export class FetchDailyStatsQuery extends Effect.Service<FetchDailyStatsQuery>()(
   "FetchDailyStatsQuery",

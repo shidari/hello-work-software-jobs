@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.stack-work
+.env
+.env.keys
+*.tsbuildinfo
+apps/frontend
+tools
+apps/backend/api
+apps/backend/collector/infra/cdk.out
+apps/backend/collector/infra/node_modules

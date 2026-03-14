@@ -10,6 +10,7 @@
     "dev:docker-build": "docker compose -f infra/local/docker-compose.yml build",
     "dev:invoke-crawler": "curl -s -X POST http://localhost:9000/2015-03-31/functions/function/invocations -d '{\"queryStringParameters\":{\"period\":\"today\",\"maxCount\":\"3\"},\"headers\":{\"x-api-key\":\"dev-secret\"},\"requestContext\":{},\"isBase64Encoded\":false}'",
     "dev:invoke-detail": "curl -s -X POST http://localhost:9001/2015-03-31/functions/function/invocations -d '{\"Records\":[{\"messageId\":\"local-test\",\"receiptHandle\":\"local\",\"body\":\"{\\\"jobNumber\\\":\\\"13080-55925651\\\"}\",\"attributes\":{},\"messageAttributes\":{},\"md5OfBody\":\"\",\"eventSource\":\"aws:sqs\",\"eventSourceARN\":\"\",\"awsRegion\":\"ap-northeast-1\"}]}'",
+    "dev:e2e": "infra/local/e2e.sh",
     "build": "pnpm exec tsdown",
     "test": "vitest",
     "type-check": "pnpm exec tsc --noEmit"

@@ -9,7 +9,7 @@
 		"deploy": "pnpm build && pnpm exec wrangler deploy",
 		"no-main-deploy": "wrangler versions upload",
 		"build": "tsdown",
-		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs; DROP TABLE IF EXISTS crawler_runs; DROP TABLE IF EXISTS job_detail_runs;\" && pnpm exec wrangler d1 execute job-store --file=../../../packages/db/schema.sql && pnpm exec wrangler dev",
+		"dev": "pnpm exec wrangler d1 execute job-store --command=\"DROP TABLE IF EXISTS jobs; DROP TABLE IF EXISTS companies; DROP TABLE IF EXISTS crawler_runs; DROP TABLE IF EXISTS job_detail_runs;\" && pnpm exec wrangler d1 execute job-store --file=../../../packages/db/schema.sql && pnpm exec wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
