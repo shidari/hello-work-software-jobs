@@ -1,5 +1,35 @@
 # アーキテクチャ
 
+## ディレクトリ構成
+
+```
+hello-work-software-jobs/
+├── apps/
+│   ├── backend/
+│   │   ├── api/                     # Cloudflare Workers REST API (Hono + D1)
+│   │   └── collector/               # クローラー (Playwright + Effect)
+│   │       └── infra/               # AWS インフラ (CDK: Lambda, SQS, EventBridge)
+│   └── frontend/
+│       └── hello-work-job-searcher/ # Next.js web app
+├── packages/
+│   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
+│   └── models/                      # ドメインモデル定義
+├── tools/
+│   └── hwctl/                       # Haskell admin CLI (Stack)
+```
+
+## Tech Stack
+
+| Layer | Technologies |
+|-------|--------------|
+| Frontend | Next.js 16, React 19, Jotai, Hono RPC |
+| API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
+| Crawler | Playwright, Effect, AWS Lambda (Docker), SQS, EventBridge, CDK |
+| Shared | TypeScript 5.8, Effect Schema |
+| Admin CLI | Haskell (Stack), optparse-applicative, aeson, req, dotenv-hs |
+| Secrets | dotenvx (API, Frontend), dotenv-hs (hwctl) |
+| Quality | Biome, Playwright/Vitest |
+
 ## データフロー
 
 ```
@@ -60,6 +90,7 @@ Kysely 型定義 + DB行スキーマ。D1 (SQLite) 向け。
 - `src/schema.ts` に `DbJobRowSchema`・`DbCompanyRowSchema`・`DbCrawlerRunRowSchema`・`DbJobDetailRunRowSchema`（フラットDB行スキーマ）を定義。型レベルチェックで Kysely 生成型との整合性を保証
 - ドメインモデルへの変換（`DbJobSchema`）は `api/src/cqrs/index.ts` で行う
 - `src/queries.ts` に集計クエリユーティリティ（`selectDailyStats`, `selectCrawlerRuns`, `selectJobDetailRuns` 等）を提供。API 層から `sql` を直接 import しない設計
+- Migrations: `packages/db/migrations/` (wrangler d1 migrations で管理)
 
 ---
 
