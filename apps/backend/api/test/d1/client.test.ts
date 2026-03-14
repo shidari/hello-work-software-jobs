@@ -23,7 +23,7 @@ it("求人データを挿入できる", async () => {
     workPlace: "東京",
     wage: { min: 50000000, max: 80000000 },
     employmentType: "正社員",
-    workingHours: { start: "09:00", end: "18:00" },
+    workingHours: { start: "09:00:00", end: "18:00:00" },
     receivedDate: "2024-06-01T12:34:56Z",
     expiryDate: "2024-12-31T23:59:59Z",
     employeeCount: 200,
