@@ -10,6 +10,21 @@ export type Generated<T> =
     ? ColumnType<S, I | undefined, U>
     : ColumnType<T, T | undefined, T>;
 
+export interface Companies {
+  address: string | null;
+  businessDescription: string | null;
+  capital: string | null;
+  companyName: string | null;
+  corporateNumber: string | null;
+  createdAt: string;
+  employeeCount: number | null;
+  establishmentNumber: string;
+  foundedYear: string | null;
+  id: Generated<number>;
+  postalCode: string | null;
+  updatedAt: string;
+}
+
 export interface CrawlerRuns {
   createdAt: string;
   errorMessage: string | null;
@@ -35,28 +50,47 @@ export interface JobDetailRuns {
 }
 
 export interface Jobs {
+  ageRequirement: string | null;
+  bonus: string | null;
+  carCommute: string | null;
   companyName: string | null;
   createdAt: string;
+  dispatchType: string | null;
+  education: string | null;
   employeeCount: number | null;
+  employmentPeriod: string | null;
   employmentType: string;
+  establishmentNumber: string | null;
   expiryDate: string;
   homePage: string | null;
   id: Generated<number>;
+  industryClassification: string | null;
+  insurance: string | null;
+  jobCategory: string | null;
   jobDescription: string | null;
   jobNumber: string;
   occupation: string;
+  onlineApplicationAccepted: number | null;
+  publicEmploymentOffice: string | null;
   qualifications: string | null;
+  raise: string | null;
   receivedDate: string;
+  requiredExperience: string | null;
+  retirementBenefit: string | null;
   status: Generated<string>;
+  transferPossibility: string | null;
+  trialPeriod: string | null;
   updatedAt: string;
   wageMax: number | null;
   wageMin: number | null;
+  wageType: string | null;
   workingEndTime: string | null;
   workingStartTime: string | null;
   workPlace: string | null;
 }
 
 export interface DB {
+  companies: Companies;
   crawler_runs: CrawlerRuns;
   job_detail_runs: JobDetailRuns;
   jobs: Jobs;

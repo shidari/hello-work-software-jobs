@@ -2,8 +2,8 @@ import { createD1DB } from "@sho/db";
 import { Effect, Schema } from "effect";
 import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
-import { JobStoreDB } from "../../cqrs";
-import { FetchDailyStatsQuery } from "../../cqrs/queries";
+import { JobStoreDB } from "../cqrs";
+import { FetchDailyStatsQuery } from "../cqrs/queries";
 
 const dailyStatsSuccessResponseSchema = Schema.Struct({
   stats: Schema.Array(

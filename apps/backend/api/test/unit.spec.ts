@@ -4,8 +4,9 @@ import {
   waitOnExecutionContext,
 } from "cloudflare:test";
 import { createD1DB } from "@sho/db";
-import { Job as insertJobRequestBodySchema } from "@sho/models";
-import { Effect, Schema } from "effect";
+import { Job } from "@sho/models";
+import { Arbitrary, Effect } from "effect";
+import * as fc from "effect/FastCheck";
 import { beforeAll, describe, expect, it } from "vitest";
 import worker from "../src";
 import { JobStoreDB } from "../src/cqrs";
@@ -15,6 +16,8 @@ const MOCK_ENV = {
   ...env,
   API_KEY: "test-api-key",
 };
+
+const sampleJob = () => fc.sample(Arbitrary.make(Job), 1)[0];
 
 describe("/", () => {
   describe("GET 正常系", () => {
@@ -67,21 +70,7 @@ describe("/jobs", () => {
           "Content-Type": "application/json",
           "x-api-key": "test-api-key",
         },
-        body: JSON.stringify({
-          jobNumber: "54455-10912",
-          companyName: "Tech Corp",
-          jobDescription: "ソフトウェアエンジニアの募集です。",
-          workPlace: "東京",
-          wage: { min: 50000000, max: 80000000 },
-          employmentType: "正社員",
-          workingHours: { start: "09:00", end: "18:00" },
-          receivedDate: "2024-06-01T00:00:00Z",
-          expiryDate: "2024-12-31T00:00:00Z",
-          employeeCount: 200,
-          occupation: "IT",
-          homePage: "https://techcorp.example.com",
-          qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-        }),
+        body: JSON.stringify(sampleJob()),
       });
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
@@ -90,22 +79,7 @@ describe("/jobs", () => {
     });
   });
   describe("POST 異常系", () => {
-    const jobNumber = "52495-40218";
-    const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
-      jobNumber,
-      companyName: "Tech Corp",
-      jobDescription: "ソフトウェアエンジニアの募集です。",
-      workPlace: "東京",
-      wage: { min: 50000000, max: 80000000 },
-      employmentType: "正社員",
-      workingHours: { start: "09:00", end: "18:00" },
-      receivedDate: "2024-06-01T12:34:56Z",
-      expiryDate: "2024-12-31T23:59:59Z",
-      employeeCount: 200,
-      occupation: "IT",
-      homePage: "https://techcorp.example.com",
-      qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-    });
+    const insertingJob = sampleJob();
     beforeAll(async () => {
       const db = createD1DB(env.DB);
       await Effect.runPromise(
@@ -202,30 +176,13 @@ describe("/jobs?page=N", () => {
 
 describe("/jobs/:jobNumber", () => {
   describe("GET 正常系", () => {
-    const jobNumber = "24455-10912";
+    const job = sampleJob();
     beforeAll(async () => {
       const db = createD1DB(env.DB);
-      const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)(
-        {
-          jobNumber,
-          companyName: "Tech Corp",
-          jobDescription: "ソフトウェアエンジニアの募集です。",
-          workPlace: "東京",
-          wage: { min: 50000000, max: 80000000 },
-          employmentType: "正社員",
-          workingHours: { start: "09:00", end: "18:00" },
-          receivedDate: "2024-06-01T12:34:56Z",
-          expiryDate: "2024-12-31T23:59:59Z",
-          employeeCount: 200,
-          occupation: "IT",
-          homePage: "https://techcorp.example.com",
-          qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-        },
-      );
       await Effect.runPromise(
         Effect.gen(function* () {
           const cmd = yield* InsertJobCommand;
-          return yield* cmd.run(insertingJob);
+          return yield* cmd.run(job);
         }).pipe(
           Effect.provide(InsertJobCommand.Default),
           Effect.provideService(JobStoreDB, db),
@@ -233,9 +190,10 @@ describe("/jobs/:jobNumber", () => {
       );
     });
     it("jobNumberでデータを取得できる", async () => {
-      const request = new Request(`http://localhost:8787/jobs/${jobNumber}`, {
-        method: "GET",
-      });
+      const request = new Request(
+        `http://localhost:8787/jobs/${job.jobNumber}`,
+        { method: "GET" },
+      );
       const ctx = createExecutionContext();
       const response = await worker.fetch(request, MOCK_ENV, ctx);
       await waitOnExecutionContext(ctx);

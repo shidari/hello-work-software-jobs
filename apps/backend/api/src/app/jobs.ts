@@ -8,17 +8,14 @@ import {
   validator as effectValidator,
   resolver,
 } from "hono-openapi";
-import { PAGE_SIZE } from "../../constant";
-import { JobStoreDB } from "../../cqrs";
-import {
-  InsertJobCommand,
-  InsertJobDuplicationError,
-} from "../../cqrs/commands";
+import { PAGE_SIZE } from "../constant";
+import { JobStoreDB } from "../cqrs";
+import { InsertJobCommand, InsertJobDuplicationError } from "../cqrs/commands";
 import {
   FetchJobError,
   FetchJobsPageQuery,
   FindJobByNumberQuery,
-} from "../../cqrs/queries";
+} from "../cqrs/queries";
 
 // --- ローカルエラー型 ---
 
@@ -62,6 +59,10 @@ const jobListQuerySchema = Schema.Struct({
   wageMax: Schema.optional(Schema.String),
   workPlace: Schema.optional(Schema.String),
   qualifications: Schema.optional(Schema.String),
+  jobCategory: Schema.optional(Schema.String),
+  wageType: Schema.optional(Schema.String),
+  education: Schema.optional(Schema.String),
+  industryClassification: Schema.optional(Schema.String),
   page: Schema.optional(Schema.String),
 });
 
@@ -310,6 +311,10 @@ const app = new Hono<{ Bindings: Env }>()
         wageMax: rawWageMax,
         workPlace: encodedWorkPlace,
         qualifications: encodedQualifications,
+        jobCategory: encodedJobCategory,
+        wageType: encodedWageType,
+        education: encodedEducation,
+        industryClassification: encodedIndustryClassification,
         page: rawPage,
       } = c.req.valid("query");
       const companyName = encodedCompanyName
@@ -334,6 +339,18 @@ const app = new Hono<{ Bindings: Env }>()
         : undefined;
       const qualifications = encodedQualifications
         ? decodeURIComponent(encodedQualifications)
+        : undefined;
+      const jobCategory = encodedJobCategory
+        ? decodeURIComponent(encodedJobCategory)
+        : undefined;
+      const wageType = encodedWageType
+        ? decodeURIComponent(encodedWageType)
+        : undefined;
+      const education = encodedEducation
+        ? decodeURIComponent(encodedEducation)
+        : undefined;
+      const industryClassification = encodedIndustryClassification
+        ? decodeURIComponent(encodedIndustryClassification)
         : undefined;
 
       const parsedPage = rawPage ? Number(rawPage) : 1;
@@ -391,6 +408,10 @@ const app = new Hono<{ Bindings: Env }>()
               wageMax,
               workPlace,
               qualifications,
+              jobCategory,
+              wageType,
+              education,
+              industryClassification,
             },
           });
           const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);

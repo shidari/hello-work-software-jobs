@@ -17,6 +17,8 @@ export {
 } from "./queries";
 // DB行スキーマ（Kysely 生成型との整合性を保証）
 export {
+  type DbCompanyRow,
+  DbCompanyRowSchema,
   type DbCrawlerRunRow,
   DbCrawlerRunRowSchema,
   type DbJobDetailRunRow,
