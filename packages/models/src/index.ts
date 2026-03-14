@@ -99,7 +99,7 @@ export const WageType = Schema.Union(
   });
 export type WageType = typeof WageType.Type;
 
-export const Wage = Schema.Number.pipe(Schema.brand("Wage"));
+export const Wage = Schema.NonNegativeInt.pipe(Schema.brand("Wage"));
 export type Wage = typeof Wage.Type;
 
 export const WageRange = Schema.Struct({
@@ -108,7 +108,14 @@ export const WageRange = Schema.Struct({
 });
 export type WageRange = typeof WageRange.Type;
 
-export const WorkingTime = Schema.String.pipe(Schema.brand("WorkingTime"));
+export const WorkingTime = Schema.String.pipe(
+  Schema.pattern(/^\d{2}:\d{2}:\d{2}$/),
+  Schema.brand("WorkingTime"),
+).annotations({
+  identifier: "WorkingTime",
+  title: "勤務時間",
+  description: "HH:MM:SS 形式の時刻（例: 09:00:00）",
+});
 export type WorkingTime = typeof WorkingTime.Type;
 
 export const WorkingHours = Schema.Struct({
@@ -117,7 +124,9 @@ export const WorkingHours = Schema.Struct({
 });
 export type WorkingHours = typeof WorkingHours.Type;
 
-export const EmployeeCount = Schema.Number.pipe(Schema.brand("EmployeeCount"));
+export const EmployeeCount = Schema.NonNegativeInt.pipe(
+  Schema.brand("EmployeeCount"),
+);
 export type EmployeeCount = typeof EmployeeCount.Type;
 
 // ── ドメインモデル: Company ──
