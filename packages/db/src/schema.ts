@@ -81,10 +81,8 @@ export const DbJobRowSchema = Schema.Struct({
 
 type _DbJobRow = typeof DbJobRowSchema.Type;
 type _SelectableJobsWithoutId = Omit<Selectable<Jobs>, "id">;
-const _check1: _DbJobRow extends _SelectableJobsWithoutId ? true : never =
-  true;
-const _check2: _SelectableJobsWithoutId extends _DbJobRow ? true : never =
-  true;
+const _check1: _DbJobRow extends _SelectableJobsWithoutId ? true : never = true;
+const _check2: _SelectableJobsWithoutId extends _DbJobRow ? true : never = true;
 
 // ── 型エクスポート ──
 
@@ -128,10 +126,7 @@ export const DbJobDetailRunRowSchema = Schema.Struct({
 });
 
 type _DbJobDetailRunRow = typeof DbJobDetailRunRowSchema.Type;
-type _SelectableJobDetailRunsWithoutId = Omit<
-  Selectable<JobDetailRuns>,
-  "id"
->;
+type _SelectableJobDetailRunsWithoutId = Omit<Selectable<JobDetailRuns>, "id">;
 const _check5: _DbJobDetailRunRow extends _SelectableJobDetailRunsWithoutId
   ? true
   : never = true;

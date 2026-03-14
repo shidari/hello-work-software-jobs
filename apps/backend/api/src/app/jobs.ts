@@ -10,10 +10,7 @@ import {
 } from "hono-openapi";
 import { PAGE_SIZE } from "../constant";
 import { JobStoreDB } from "../cqrs";
-import {
-  InsertJobCommand,
-  InsertJobDuplicationError,
-} from "../cqrs/commands";
+import { InsertJobCommand, InsertJobDuplicationError } from "../cqrs/commands";
 import {
   FetchJobError,
   FetchJobsPageQuery,

@@ -16,9 +16,7 @@ export class InsertJobDuplicationError extends Data.TaggedError(
   readonly errorType: "client" | "server";
 }> {}
 
-export class UpsertCompanyError extends Data.TaggedError(
-  "UpsertCompanyError",
-)<{
+export class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
   readonly message: string;
   readonly errorType: "client" | "server";
 }> {}

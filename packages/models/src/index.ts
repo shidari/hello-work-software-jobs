@@ -21,8 +21,7 @@ export const EstablishmentNumber = Schema.String.pipe(
 ).annotations({
   identifier: "EstablishmentNumber",
   title: "事業所番号",
-  description:
-    "ハローワーク事業所番号。形式: 4桁-6桁-1桁（例: 0101-626495-7）",
+  description: "ハローワーク事業所番号。形式: 4桁-6桁-1桁（例: 0101-626495-7）",
 });
 export type EstablishmentNumber = typeof EstablishmentNumber.Type;
 
@@ -118,9 +117,7 @@ export const WorkingHours = Schema.Struct({
 });
 export type WorkingHours = typeof WorkingHours.Type;
 
-export const EmployeeCount = Schema.Number.pipe(
-  Schema.brand("EmployeeCount"),
-);
+export const EmployeeCount = Schema.Number.pipe(Schema.brand("EmployeeCount"));
 export type EmployeeCount = typeof EmployeeCount.Type;
 
 // ── ドメインモデル: Company ──

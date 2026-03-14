@@ -11,9 +11,7 @@ export class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly responseStatusMessage?: string;
 }> {}
 
-export class UpsertCompanyError extends Data.TaggedError(
-  "UpsertCompanyError",
-)<{
+export class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
   readonly reason: string;
   readonly serializedPayload: string;
   readonly responseStatus?: number;

@@ -1,8 +1,4 @@
-import {
-  type createD1DB,
-  DbCompanyRowSchema,
-  DbJobRowSchema,
-} from "@sho/db";
+import { type createD1DB, DbCompanyRowSchema, DbJobRowSchema } from "@sho/db";
 import { Context, Schema } from "effect";
 
 // --- DB行 ↔ ドメインモデル 変換スキーマ ---
