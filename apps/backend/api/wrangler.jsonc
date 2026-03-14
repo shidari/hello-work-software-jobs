@@ -26,7 +26,8 @@
     {
       "binding": "DB",
       "database_name": "job-store",
-      "database_id": "99b54ef6-2e19-436e-8676-b50ef2d98dda"
+      "database_id": "99b54ef6-2e19-436e-8676-b50ef2d98dda",
+      "migrations_dir": "../../../packages/db/migrations"
     }
   ]
   /**
