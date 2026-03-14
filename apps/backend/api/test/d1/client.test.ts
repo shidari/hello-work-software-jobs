@@ -1,7 +1,8 @@
 import { env } from "cloudflare:test";
 import { createD1DB } from "@sho/db";
-import { Job as insertJobRequestBodySchema } from "@sho/models";
-import { Effect, Schema } from "effect";
+import { Job } from "@sho/models";
+import { Arbitrary, Effect } from "effect";
+import * as fc from "effect/FastCheck";
 import { expect, it } from "vitest";
 import { JobStoreDB } from "../../src/cqrs";
 import { InsertJobCommand } from "../../src/cqrs/commands";
@@ -13,24 +14,11 @@ declare module "cloudflare:test" {
   }
 }
 
+const sampleJob = () => fc.sample(Arbitrary.make(Job), 1)[0];
+
 it("求人データを挿入できる", async () => {
   const db = createD1DB(env.DB);
-  const jobNumber = "64455-10912";
-  const insertingJob = Schema.decodeUnknownSync(insertJobRequestBodySchema)({
-    jobNumber,
-    companyName: "Tech Corp",
-    jobDescription: "ソフトウェアエンジニアの募集です。",
-    workPlace: "東京",
-    wage: { min: 50000000, max: 80000000 },
-    employmentType: "正社員",
-    workingHours: { start: "09:00:00", end: "18:00:00" },
-    receivedDate: "2024-06-01T12:34:56Z",
-    expiryDate: "2024-12-31T23:59:59Z",
-    employeeCount: 200,
-    occupation: "IT",
-    homePage: "https://techcorp.example.com",
-    qualifications: " コンピュータサイエンスの学位、3年以上の経験",
-  });
+  const insertingJob = sampleJob();
 
   const result = await Effect.runPromise(
     Effect.gen(function* () {
@@ -41,17 +29,17 @@ it("求人データを挿入できる", async () => {
       Effect.provideService(JobStoreDB, db),
     ),
   );
-  expect(result.jobNumber).toEqual(jobNumber);
+  expect(result.jobNumber).toEqual(insertingJob.jobNumber);
 
   const result2 = await Effect.runPromise(
     Effect.gen(function* () {
       const query = yield* FindJobByNumberQuery;
-      return yield* query.run(jobNumber);
+      return yield* query.run(insertingJob.jobNumber);
     }).pipe(
       Effect.provide(FindJobByNumberQuery.Default),
       Effect.provideService(JobStoreDB, db),
     ),
   );
   expect(result2).not.toBeNull();
-  expect(result2?.jobNumber).toEqual(jobNumber);
+  expect(result2?.jobNumber).toEqual(insertingJob.jobNumber);
 });
