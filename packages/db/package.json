@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"effect": "^3.16.5",
-		"kysely": "^0.28.0",
+		"kysely": "^0.28.12",
 		"kysely-d1": "^0.3.0"
 	},
 	"devDependencies": {
