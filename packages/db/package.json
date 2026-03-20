@@ -20,7 +20,7 @@
 		"codegen": "rm -f local.db && sqlite3 local.db < schema.sql && kysely-codegen --dialect sqlite --url ./local.db --out-file src/generated/types.ts"
 	},
 	"dependencies": {
-		"effect": "^3.16.5",
+		"effect": "^3.20.0",
 		"kysely": "^0.28.0",
 		"kysely-d1": "^0.3.0"
 	},

@@ -12,7 +12,7 @@
   "dependencies": {
     "@sho/api": "workspace:*",
     "@sho/models": "workspace:*",
-    "effect": "^3.16.5",
+    "effect": "^3.20.0",
     "hono": "^4.8.3",
     "jotai": "^2.13.1",
     "neverthrow": "^8.2.0",
