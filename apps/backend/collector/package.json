@@ -27,7 +27,7 @@
     "@aws-sdk/client-sqs": "^3.800.0",
     "@sho/models": "workspace:*",
     "date-fns": "^4.1.0",
-    "effect": "^3.16.5",
+    "effect": "^3.20.0",
     "linkedom": "0.18.12",
     "playwright": "^1.58.2"
   }
