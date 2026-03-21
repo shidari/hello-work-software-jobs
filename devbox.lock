@@ -1,6 +1,54 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "aws-vault@7.9.9": {
+      "last_modified": "2026-03-07T23:46:50Z",
+      "resolved": "github:NixOS/nixpkgs/0e6cdd5be64608ef630c2e41f8d51d484468492f#aws-vault",
+      "source": "devbox-search",
+      "version": "7.9.9",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7x88zyvxmxgqwha5qz741kil4pg5mmgn-aws-vault-7.9.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7x88zyvxmxgqwha5qz741kil4pg5mmgn-aws-vault-7.9.9"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8gr8xgjb6pqxsd386xfijg019azsxdg3-aws-vault-7.9.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8gr8xgjb6pqxsd386xfijg019azsxdg3-aws-vault-7.9.9"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/p82m8xmnck28h57bx8cqn7bzwp15kq8a-aws-vault-7.9.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/p82m8xmnck28h57bx8cqn7bzwp15kq8a-aws-vault-7.9.9"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4iayjfx7syfr6a25riay226mhsxf5fpn-aws-vault-7.9.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4iayjfx7syfr6a25riay226mhsxf5fpn-aws-vault-7.9.9"
+        }
+      }
+    },
     "gh@2.87.3": {
       "last_modified": "2026-02-26T05:06:13Z",
       "resolved": "github:NixOS/nixpkgs/26eaeac4e409d7b5a6bf6f90a2a2dc223c78d915#gh",
@@ -46,6 +94,71 @@
             }
           ],
           "store_path": "/nix/store/x0nqj95k7dbxw4d1vvsckqgl6lhmxhf1-gh-2.87.3"
+        }
+      }
+    },
+    "ghc@9.8.4": {
+      "last_modified": "2025-09-18T16:33:27Z",
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/f4b140d5b253f5e2a1ff4e5506edbf8267724bde#ghc",
+      "source": "devbox-search",
+      "version": "9.8.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y28fs1fdzbax6hhyiw8b2qh7n1a0b000-ghc-9.8.4",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/4gdszwbazdrlsb4q3gw0hjnpw5qaayk7-ghc-9.8.4-doc"
+            }
+          ],
+          "store_path": "/nix/store/y28fs1fdzbax6hhyiw8b2qh7n1a0b000-ghc-9.8.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nxzc41n9vyflz28kjdgcpyg40safdsm7-ghc-9.8.4",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/r1xrn1iy5w2j715xibb462kjhl11rr7w-ghc-9.8.4-doc"
+            }
+          ],
+          "store_path": "/nix/store/nxzc41n9vyflz28kjdgcpyg40safdsm7-ghc-9.8.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qviwyxlzzj23rgjqlbwp92wzc3d1vhg0-ghc-9.8.4",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/ssrysrwmnb8vs3mb3jpkjvkg1xadja69-ghc-9.8.4-doc"
+            }
+          ],
+          "store_path": "/nix/store/qviwyxlzzj23rgjqlbwp92wzc3d1vhg0-ghc-9.8.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/w6awqpzhn1pmfzql7ba5ar8pvs0yq5s2-ghc-9.8.4",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/3v69mx1xbrn849wahk2klw8b0ajybycz-ghc-9.8.4-doc"
+            }
+          ],
+          "store_path": "/nix/store/w6awqpzhn1pmfzql7ba5ar8pvs0yq5s2-ghc-9.8.4"
         }
       }
     },

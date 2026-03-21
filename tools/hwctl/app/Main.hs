@@ -1,6 +1,6 @@
 module Main where
 
-import Hwctl.Command (runApp)
+import Hwctl.App (runApp)
 
 main :: IO ()
 main = runApp

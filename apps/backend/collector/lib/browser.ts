@@ -1,5 +1,5 @@
 import { Data, Effect, Layer } from "effect";
-import type { Browser, LaunchOptions } from "playwright";
+import { type Browser, chromium, type LaunchOptions } from "playwright";
 
 export type { Locator, Page } from "playwright";
 
@@ -19,21 +19,10 @@ export class PlaywrightBrowserConfig extends Effect.Service<PlaywrightBrowserCon
 
 // ── Chromium (Effect.Service — エンジン提供) ──
 
-class ImportError extends Data.TaggedError("ImportError")<{
-  readonly message: string;
-}> {}
-
 export class PlaywrightChromium extends Effect.Service<PlaywrightChromium>()(
   "PlaywrightChromium",
   {
     effect: Effect.gen(function* () {
-      const { chromium } = yield* Effect.tryPromise({
-        try: () => import("playwright"),
-        catch: (e) =>
-          new ImportError({
-            message: `Failed to import playwright: ${String(e)}`,
-          }),
-      });
       const config = yield* PlaywrightBrowserConfig;
       return {
         launch: () => chromium.launch(config) as Promise<Browser>,

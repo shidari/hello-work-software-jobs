@@ -11,8 +11,11 @@ dependencies:
   - modern-uri
   - optparse-applicative
   - prettyprinter
+  - process
   - req
+  - temporary
   - text
+  - transformers
 
 executables:
   hwctl:
