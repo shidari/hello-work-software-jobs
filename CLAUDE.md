@@ -40,12 +40,6 @@ stack build                       # Build
 stack exec hwctl -- jobs list     # List jobs (JSON)
 stack exec hwctl -- jobs get ID   # Get job by number (JSON)
 stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
-stack exec hwctl -- queue status  # Queue status (JSON)
-stack exec hwctl -- logs tail     # Create tail session (JSON)
-stack exec hwctl -- crawler run [OPTIONS_JSON]  # Trigger crawler (e.g., '{"period":"week","maxCount":50}')
-stack exec hwctl -- crawler history [FILTER_JSON]  # Crawler run history (JSON filter: since, until, status, trigger, limit)
-stack exec hwctl -- job-detail history [FILTER_JSON]  # Job detail ETL run history (JSON filter: since, until, status, limit)
-stack exec hwctl -- queue dlq [--table]  # DLQ status (JSON)
-stack exec hwctl -- queue dlq-pull [--batch-size N]  # DLQ messages pull (JSON)
-stack exec hwctl -- job-detail run JOB_NUMBER  # Send job number to ETL queue
+stack exec hwctl -- crawler run [OPTIONS_JSON]  # Trigger crawler via Lambda invoke
+stack exec hwctl -- crawler diagnose [--table]  # クローラーパイプライン診断 (EventBridge, Lambda, SQS, daily-stats)
 ```
