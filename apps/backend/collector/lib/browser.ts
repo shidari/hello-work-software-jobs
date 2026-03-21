@@ -1,4 +1,4 @@
-import { Data, Effect, Layer } from "effect";
+import { Console, Data, Effect, Layer } from "effect";
 import { type Browser, chromium, type LaunchOptions } from "playwright";
 
 export type { Locator, Page } from "playwright";
@@ -40,29 +40,44 @@ class BrowserError extends Data.TaggedError("BrowserError")<{
 
 export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   const { launch } = yield* PlaywrightChromium;
-  yield* Effect.logDebug("launching chromium browser...");
+  yield* Console.log(
+    `PLAYWRIGHT_BROWSERS_PATH=${process.env.PLAYWRIGHT_BROWSERS_PATH ?? "(unset)"}`,
+  );
+  yield* Console.log(`chromium.executablePath=${chromium.executablePath()}`);
+  yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
     Effect.tryPromise({
       try: () => launch(),
       catch: (e) =>
         new BrowserError({ message: `launch failed.\n${String(e)}` }),
     }),
-    (browser) => Effect.promise(() => browser.close()),
+    (browser) =>
+      Console.log("closing browser...").pipe(
+        Effect.andThen(Effect.promise(() => browser.close())),
+      ),
   );
+  yield* Console.log("browser launched, creating context...");
   const context = yield* Effect.acquireRelease(
     Effect.tryPromise({
       try: () => browser.newContext(),
       catch: (e) =>
         new BrowserError({ message: `newContext failed.\n${String(e)}` }),
     }),
-    (context) => Effect.promise(() => context.close()),
+    (context) =>
+      Console.log("closing context...").pipe(
+        Effect.andThen(Effect.promise(() => context.close())),
+      ),
   );
+  yield* Console.log("context created, opening page...");
   return yield* Effect.acquireRelease(
     Effect.tryPromise({
       try: () => context.newPage(),
       catch: (e) =>
         new BrowserError({ message: `newPage failed.\n${String(e)}` }),
     }),
-    (page) => Effect.promise(() => page.close()),
+    (page) =>
+      Console.log("closing page...").pipe(
+        Effect.andThen(Effect.promise(() => page.close())),
+      ),
   );
 });
