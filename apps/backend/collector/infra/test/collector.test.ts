@@ -9,8 +9,8 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  delete process.env.JOB_STORE_ENDPOINT;
-  delete process.env.API_KEY;
+  process.env.JOB_STORE_ENDPOINT = "";
+  process.env.API_KEY = "";
 });
 
 test("SQS Queue and DLQ created", () => {
