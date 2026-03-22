@@ -1,21 +1,19 @@
+import type { AppType } from "@sho/api/types";
 import type { Company } from "@sho/models";
 import { Config, Data, Effect } from "effect";
+import { hc } from "hono/client";
 import type { TransformedJob } from "./transformer";
 
 // ── エラー ──
 
 export class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly reason: string;
-  readonly serializedPayload: string;
-  readonly responseStatus?: number;
-  readonly responseStatusMessage?: string;
+  readonly error?: unknown;
 }> {}
 
 export class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
   readonly reason: string;
-  readonly serializedPayload: string;
-  readonly responseStatus?: number;
-  readonly responseStatusMessage?: string;
+  readonly error?: unknown;
 }> {}
 
 // ── JobStore API クライアント ──
@@ -26,73 +24,55 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
     effect: Effect.gen(function* () {
       const endpoint = yield* Config.string("JOB_STORE_ENDPOINT");
       const apiKey = yield* Config.string("API_KEY");
+      const client = hc<AppType>(endpoint, {
+        headers: { "x-api-key": apiKey },
+      });
 
-      const postJson = (
-        path: string,
-        body: unknown,
-        errorClass: typeof InsertJobError | typeof UpsertCompanyError,
-      ) =>
+      const insertJob = (job: TransformedJob) =>
         Effect.gen(function* () {
-          const serialized = JSON.stringify(body, null, 2);
+          yield* Effect.logDebug(
+            `executing insert job api. jobNumber=${job.jobNumber}`,
+          );
           const res = yield* Effect.tryPromise({
-            try: async () =>
-              fetch(`${endpoint}${path}`, {
-                method: "POST",
-                body: JSON.stringify(body),
-                headers: {
-                  "content-type": "application/json",
-                  "x-api-key": apiKey,
-                },
-              }),
-            catch: (e) =>
-              new errorClass({
-                reason: `${e instanceof Error ? e.message : String(e)}`,
-                serializedPayload: serialized,
-              }),
+            try: () => client.jobs.$post({ json: { ...job } }),
+            catch: (error) =>
+              new InsertJobError({ reason: "fetch failed", error }),
           });
           if (!res.ok) {
             const text = yield* Effect.tryPromise({
               try: () => res.text(),
               catch: () => "<unreadable>",
             });
-            yield* new errorClass({
+            yield* new InsertJobError({
               reason: `API responded with ${res.status}: ${text}`,
-              serializedPayload: serialized,
-              responseStatus: res.status,
-              responseStatusMessage: res.statusText,
             });
           }
-          const data = yield* Effect.tryPromise({
-            try: () => res.json(),
-            catch: (e) =>
-              new errorClass({
-                reason: `${e instanceof Error ? e.message : String(e)}`,
-                serializedPayload: serialized,
-                responseStatus: res.status,
-                responseStatusMessage: res.statusText,
-              }),
-          });
-          yield* Effect.logDebug(
-            `response data. ${JSON.stringify(data, null, 2)}`,
-          );
+          yield* Effect.logDebug("insert job succeeded");
         });
 
-      return {
-        insertJob: (job: TransformedJob) =>
-          Effect.gen(function* () {
-            yield* Effect.logDebug(
-              `executing insert job api. jobNumber=${job.jobNumber}`,
-            );
-            yield* postJson("/jobs", job, InsertJobError);
-          }),
-        upsertCompany: (company: Company) =>
-          Effect.gen(function* () {
-            yield* Effect.logDebug(
-              `executing upsert company api. establishmentNumber=${company.establishmentNumber}`,
-            );
-            yield* postJson("/companies", company, UpsertCompanyError);
-          }),
-      };
+      const upsertCompany = (company: Company) =>
+        Effect.gen(function* () {
+          yield* Effect.logDebug(
+            `executing upsert company api. establishmentNumber=${company.establishmentNumber}`,
+          );
+          const res = yield* Effect.tryPromise({
+            try: () => client.companies.$post({ json: { ...company } }),
+            catch: (error) =>
+              new UpsertCompanyError({ reason: "fetch failed", error }),
+          });
+          if (!res.ok) {
+            const text = yield* Effect.tryPromise({
+              try: () => res.text(),
+              catch: () => "<unreadable>",
+            });
+            yield* new UpsertCompanyError({
+              reason: `API responded with ${res.status}: ${text}`,
+            });
+          }
+          yield* Effect.logDebug("upsert company succeeded");
+        });
+
+      return { insertJob, upsertCompany };
     }),
   },
 ) {}

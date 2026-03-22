@@ -1,7 +1,7 @@
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
-import { Effect, Schema } from "effect";
-import { PlaywrightChromium } from "../../../lib/browser";
+import { Cause, Effect, Exit, Schema } from "effect";
+import { PlaywrightBrowserConfig } from "../../../lib/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -9,58 +9,62 @@ import {
   processJob,
 } from "../../../lib/job-detail-crawler";
 
+// ── SQS メッセージスキーマ ──
+
+const SqsJobMessage = Schema.Struct({
+  jobNumber: Schema.String,
+});
+
 // ── handleQueue ──
 
 const handleQueue = async (jobNumber: string) => {
   const startedAt = new Date().toISOString();
 
-  const program = Effect.gen(function* () {
-    const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
-    yield* processJob(parsed);
-  });
+  const program = Effect.scoped(
+    Effect.gen(function* () {
+      const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
+      yield* processJob(parsed);
+    }),
+  );
 
   const runnable = program.pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.Default),
-    Effect.provide(PlaywrightChromium.Default),
-    Effect.scoped,
+    Effect.provide(PlaywrightBrowserConfig.main),
   );
 
-  await runnable.pipe(
-    Effect.matchEffect({
-      onSuccess: () => {
-        console.log(
-          JSON.stringify({
-            event: "job_detail_run",
-            jobNumber,
-            status: "success",
-            startedAt,
-            finishedAt: new Date().toISOString(),
-          }),
-        );
-        return Effect.void;
-      },
-      onFailure: (error) => {
-        const errorMessage =
-          typeof error === "string"
-            ? error
-            : `${error._tag}: ${"reason" in error ? error.reason : error.message}`;
-        console.error(
-          JSON.stringify({
-            event: "job_detail_run",
-            jobNumber,
-            status: "failed",
-            startedAt,
-            finishedAt: new Date().toISOString(),
-            errorMessage,
-          }),
-        );
-        return Effect.void;
-      },
+  const exit = await Effect.runPromiseExit(runnable);
+
+  if (Exit.isSuccess(exit)) {
+    console.log(
+      JSON.stringify({
+        event: "job_detail_run",
+        jobNumber,
+        status: "success",
+        startedAt,
+        finishedAt: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+
+  for (const failure of Cause.failures(exit.cause)) {
+    if (typeof failure === "object" && "error" in failure && failure.error)
+      console.error(failure.error);
+  }
+  const errorMessage = Cause.pretty(exit.cause);
+  console.error(
+    JSON.stringify({
+      event: "job_detail_run",
+      jobNumber,
+      status: "failed",
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      errorMessage,
     }),
-    Effect.runPromise,
   );
+  throw new Error(`job-detail-handler failed: ${errorMessage}`);
 };
 
 // ── Lambda handler ──
@@ -73,6 +77,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
     return;
   }
 
-  const { jobNumber } = JSON.parse(record.body) as { jobNumber: string };
-  await handleQueue(jobNumber);
+  const parsed = Schema.decodeUnknownSync(SqsJobMessage)(
+    JSON.parse(record.body),
+  );
+  await handleQueue(parsed.jobNumber);
 };

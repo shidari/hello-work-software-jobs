@@ -27,6 +27,7 @@ export class JobDetailTransformError extends Data.TaggedError(
   "JobDetailTransformError",
 )<{
   readonly reason: string;
+  readonly error?: unknown;
   readonly rawFields: string;
 }> {}
 
@@ -34,6 +35,7 @@ export class CompanyTransformError extends Data.TaggedError(
   "CompanyTransformError",
 )<{
   readonly reason: string;
+  readonly error?: unknown;
   readonly rawFields: string;
 }> {}
 

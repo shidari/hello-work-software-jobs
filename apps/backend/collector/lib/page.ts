@@ -8,11 +8,6 @@ import type {
   JobSearchCriteria,
   SearchPeriod,
 } from "./job-number-crawler/crawl";
-import type {
-  EmploymentTypeSelector,
-  EngineeringLabelSelectorOpenerSibling,
-  EngineeringLabelSelectorRadioBtn,
-} from "./job-number-crawler/type";
 
 // ============================================================
 // Errors
@@ -20,6 +15,7 @@ import type {
 
 class PageActionError extends Data.TaggedError("PageActionError")<{
   readonly message: string;
+  readonly error?: unknown;
 }> {}
 
 // ============================================================
@@ -36,28 +32,6 @@ const _jobDetailPage: unique symbol = Symbol("JobDetailPage");
 export type JobDetailPage = Page & { [_jobDetailPage]: unknown };
 
 // ============================================================
-// Selector mappings (pure data)
-// ============================================================
-
-const employmentTypeSelectors = {
-  RegularEmployee: "#ID_LippanCKBox1",
-  PartTimeWorker: "#ID_LippanCKBox2",
-} as const;
-
-const engineeringLabelSelectors = {
-  "ソフトウェア開発技術者、プログラマー": {
-    radioBtn: "#ID_skCheck094",
-    openerSibling: "#ID_skHid09",
-  },
-} as const;
-
-const searchPeriodSelectors = {
-  today: "#ID_newArrivedCKBox1",
-  week: "#ID_newArrivedCKBox2",
-  all: null,
-} as const;
-
-// ============================================================
 // Page operations (Effect.fn with page argument)
 // ============================================================
 
@@ -65,19 +39,16 @@ const fillWorkType = Effect.fn("fillWorkType")(function* (
   page: JobSearchPage,
   employmentType: EmploymentType,
 ) {
-  const selector = employmentTypeSelectors[employmentType] as
-    | string
-    | undefined;
-  if (!selector) {
-    return yield* new PageActionError({
-      message: `unknown employment type: ${employmentType}`,
-    });
-  }
+  const selector =
+    employmentType === "RegularEmployee"
+      ? "#ID_LippanCKBox1"
+      : "#ID_LippanCKBox2";
   yield* Effect.tryPromise({
-    try: () => page.locator(selector as EmploymentTypeSelector).check(),
+    try: () => page.locator(selector).check(),
     catch: (e) =>
       new PageActionError({
-        message: `fillWorkType failed: employmentType=${employmentType} ${String(e)}`,
+        message: `fillWorkType failed: employmentType=${employmentType}`,
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>
@@ -100,7 +71,8 @@ const fillPrefectureField = Effect.fn("fillPrefectureField")(function* (
     try: () => page.locator("#ID_tDFK1CmbBox").selectOption(prefecture),
     catch: (e) =>
       new PageActionError({
-        message: `fillPrefectureField failed: workLocation=${JSON.stringify(workLocation)} ${String(e)}`,
+        message: `fillPrefectureField failed: workLocation=${JSON.stringify(workLocation)}`,
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>
@@ -113,16 +85,10 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
   page: JobSearchPage,
   label: EngineeringLabel,
 ) {
-  const selector = engineeringLabelSelectors[label] as
-    | { radioBtn: string; openerSibling: string }
-    | undefined;
-  if (!selector) {
-    return yield* new PageActionError({
-      message: `unknown engineering label: ${label}`,
-    });
-  }
+  const radioBtn = "#ID_skCheck094";
+  const openerSibling = "#ID_skHid09";
   yield* Effect.logDebug(
-    `will execute fillOccupationField\nlabel=${label}\nselector=${JSON.stringify(selector, null, 2)}`,
+    `will execute fillOccupationField\nlabel=${label}\nradioBtn=${radioBtn}, openerSibling=${openerSibling}`,
   );
   yield* Effect.tryPromise({
     try: async () => {
@@ -130,21 +96,18 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
         .locator("#ID_Btn", { hasText: /職種を選択/ })
         .first();
       await firstoccupationSelectionBtn.click();
-      const openerSibling = page.locator(
-        selector.openerSibling as EngineeringLabelSelectorOpenerSibling,
-      );
-      const opener = openerSibling.locator("..").locator("i.one_i");
+      const openerSiblingLoc = page.locator(openerSibling);
+      const opener = openerSiblingLoc.locator("..").locator("i.one_i");
       await opener.click();
-      const radioBtn = page.locator(
-        selector.radioBtn as EngineeringLabelSelectorRadioBtn,
-      );
-      await radioBtn.click();
+      const radioBtnLoc = page.locator(radioBtn);
+      await radioBtnLoc.click();
       const okBtn = page.locator("#ID_ok3");
       await okBtn.click();
     },
     catch: (e) =>
       new PageActionError({
-        message: `fillOccupationField failed: label=${label}\n${String(e)}`,
+        message: `fillOccupationField failed: label=${label}`,
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>
@@ -158,13 +121,19 @@ const fillJobPeriod = Effect.fn("fillJobPeriod")(function* (
   searchPeriod: SearchPeriod,
 ) {
   yield* Effect.logDebug(`fillJobPeriod: searchPeriod=${searchPeriod}`);
-  const id = searchPeriodSelectors[searchPeriod];
+  const id =
+    searchPeriod === "today"
+      ? "#ID_newArrivedCKBox1"
+      : searchPeriod === "week"
+        ? "#ID_newArrivedCKBox2"
+        : null;
   if (id) {
     yield* Effect.tryPromise({
       try: () => page.locator(id).check(),
       catch: (e) =>
         new PageActionError({
-          message: `fillJobPeriod failed: searchPeriod=${searchPeriod} ${String(e)}`,
+          message: `fillJobPeriod failed: searchPeriod=${searchPeriod}`,
+          error: e,
         }),
     });
   }
@@ -197,7 +166,8 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
     },
     catch: (e) =>
       new PageActionError({
-        message: `clickSearchNoBtn failed: ${String(e)}`,
+        message: "clickSearchNoBtn failed",
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>
@@ -219,7 +189,8 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
     },
     catch: (e) =>
       new PageActionError({
-        message: `clickSearchBtn failed: ${String(e)}`,
+        message: "clickSearchBtn failed",
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>
@@ -241,7 +212,8 @@ export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
       ),
     catch: (e) =>
       new PageActionError({
-        message: `navigation failed: ${String(e)}`,
+        message: "navigation failed",
+        error: e,
       }),
   }).pipe(Effect.tap(() => Effect.logDebug("navigated to job search page.")));
   return page as JobSearchPage;
@@ -267,7 +239,8 @@ export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
     },
     catch: (e) =>
       new PageActionError({
-        message: `byJobNumber failed: jobNumber=${jobNumber}\n${String(e)}`,
+        message: `byJobNumber failed: jobNumber=${jobNumber}`,
+        error: e,
       }),
   }).pipe(
     Effect.tap(() =>

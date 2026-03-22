@@ -9,29 +9,28 @@
 
 import * as fs from "node:fs";
 import { Effect, Layer, Logger, LogLevel } from "effect";
-import { PlaywrightBrowserConfig, PlaywrightChromium } from "../browser";
+import { PlaywrightBrowserConfig } from "../browser";
 import type { SearchPeriod } from "../job-number-crawler/crawl";
-import { JobNumberCrawlerConfig } from "../job-number-crawler/crawl";
+import {
+  decodeCrawlerConfig,
+  JobNumberCrawlerConfig,
+} from "../job-number-crawler/crawl";
 import { navigateByCriteria, openJobSearchPage } from "../page";
 
 const searchPeriod = (process.argv[2] ?? "today") as SearchPeriod;
 const outPath = "/tmp/hellowork-search-result.html";
 
 async function main() {
-  const devConfig = JobNumberCrawlerConfig.dev.config;
-  const overridden = {
-    config: {
-      ...devConfig,
-      jobSearchCriteria: {
-        ...devConfig.jobSearchCriteria,
-        searchPeriod:
-          searchPeriod as typeof devConfig.jobSearchCriteria.searchPeriod,
-      },
-    },
-  };
+  const crawlerConfigLayer = Layer.succeed(
+    JobNumberCrawlerConfig,
+    decodeCrawlerConfig({
+      roughMaxCount: 50,
+      jobSearchCriteria: { searchPeriod },
+    }),
+  );
 
   const program = Effect.gen(function* () {
-    const { config: cfg } = yield* JobNumberCrawlerConfig;
+    const cfg = yield* JobNumberCrawlerConfig;
     yield* Effect.logInfo(`searchPeriod=${cfg.jobSearchCriteria.searchPeriod}`);
     const jobSearchPage = yield* openJobSearchPage();
     const firstJobListPage = yield* navigateByCriteria(
@@ -56,13 +55,7 @@ async function main() {
   });
 
   const runnable = program.pipe(
-    Effect.provide(
-      Layer.succeed(
-        JobNumberCrawlerConfig,
-        new JobNumberCrawlerConfig(overridden),
-      ),
-    ),
-    Effect.provide(PlaywrightChromium.Default),
+    Effect.provide(crawlerConfigLayer),
     Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),

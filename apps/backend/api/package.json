@@ -24,7 +24,7 @@
 		"@types/node": "^24.0.15",
 		"tsdown": "^0.20.0",
 		"tsx": "^4.20.3",
-		"typescript": "^5.5.2",
+		"typescript": "catalog:",
 		"vitest": "~3.2.4",
 		"wrangler": "4.69.0"
 	},
@@ -34,8 +34,8 @@
 		"@sho/db": "workspace:*",
 		"@sho/models": "workspace:*",
 		"dotenv": "^17.0.0",
-		"effect": "^3.16.5",
-		"hono": "^4.11.9",
+		"effect": "catalog:",
+		"hono": "catalog:",
 		"hono-openapi": "^1.0.8",
 		"kysely": "^0.28.0",
 		"luxon": "^3.7.2"

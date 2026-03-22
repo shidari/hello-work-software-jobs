@@ -6,6 +6,7 @@ import { Config, Data, Effect } from "effect";
 
 export class QueueSendError extends Data.TaggedError("QueueSendError")<{
   readonly message: string;
+  readonly error?: unknown;
 }> {}
 
 // ── JobDetailQueue Effect.Service ──
@@ -33,7 +34,8 @@ export class JobDetailQueue extends Effect.Service<JobDetailQueue>()(
               ),
             catch: (e) =>
               new QueueSendError({
-                message: `Failed to send to SQS: ${String(e)}`,
+                message: "Failed to send to SQS",
+                error: e,
               }),
           }),
       };

@@ -467,6 +467,7 @@ const app = new Hono<{ Bindings: Env }>()
             400,
           );
         }
+        return undefined;
       },
     ),
     async (c) => {
