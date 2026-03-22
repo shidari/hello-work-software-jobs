@@ -2,7 +2,6 @@ resolver: lts-24.11
 
 system-ghc: true
 install-ghc: false
-skip-ghc-check: true
 
 packages:
   - .

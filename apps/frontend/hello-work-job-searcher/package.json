@@ -12,8 +12,8 @@
   "dependencies": {
     "@sho/api": "workspace:*",
     "@sho/models": "workspace:*",
-    "effect": "^3.16.5",
-    "hono": "^4.8.3",
+    "effect": "catalog:",
+    "hono": "catalog:",
     "jotai": "^2.13.1",
     "neverthrow": "^8.2.0",
     "next": "16.1.7",
@@ -25,6 +25,6 @@
     "@types/node": "24.12.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "typescript": "catalog:"
   }
 }

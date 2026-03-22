@@ -1,5 +1,14 @@
 import { JobNumber } from "@sho/models";
-import { Chunk, Data, Effect, Either, Option, Schema, Stream } from "effect";
+import {
+  Chunk,
+  Data,
+  Effect,
+  Either,
+  Layer,
+  Option,
+  Schema,
+  Stream,
+} from "effect";
 import type { Locator } from "../browser";
 import {
   type FirstJobListPage,
@@ -89,7 +98,7 @@ export type CrawlerConfig = typeof crawlerConfigSchema.Type;
 
 class JobListPageScraperError extends Data.TaggedError(
   "JobListPageScraperError",
-)<{ readonly message: string }> {}
+)<{ readonly message: string; readonly error?: unknown }> {}
 
 // ============================================================
 // Functions
@@ -129,7 +138,8 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
         },
         catch: (e) =>
           new JobListPageScraperError({
-            message: `failed to extract job number. ${String(e)}`,
+            message: "failed to extract job number",
+            error: e,
           }),
       }).pipe(
         Effect.tap((raw) =>
@@ -157,7 +167,8 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
     catch: (e) =>
       new JobListPageScraperError({
-        message: `failed to list job overview elements. ${String(e)}`,
+        message: "failed to list job overview elements",
+        error: e,
       }),
   }).pipe(
     Effect.tap((list) =>
@@ -176,7 +187,8 @@ const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
     },
     catch: (e) =>
       new JobListPageScraperError({
-        message: `failed to check next page. ${String(e)}`,
+        message: "failed to check next page",
+        error: e,
       }),
   }).pipe(
     Effect.tap((enabled) =>
@@ -195,7 +207,8 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
     },
     catch: (e) =>
       new JobListPageScraperError({
-        message: `failed to navigate to next page. ${String(e)}`,
+        message: "failed to navigate to next page",
+        error: e,
       }),
   }).pipe(
     Effect.tap(() => Effect.logDebug("navigated to next job list page.")),
@@ -242,25 +255,20 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
 // Config (Effect.Service — 環境切り替え)
 // ============================================================
 
-const decodeCrawlerConfig = Schema.decodeSync(crawlerConfigSchema);
+export const decodeCrawlerConfig = Schema.decodeSync(crawlerConfigSchema);
 
-export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfig>()(
+export class JobNumberCrawlerConfig extends Effect.Tag(
   "JobNumberCrawlerConfig",
-  {
-    effect: Effect.succeed({
-      config: decodeCrawlerConfig({}),
-    }),
-  },
-) {
-  static dev = new JobNumberCrawlerConfig({
-    config: decodeCrawlerConfig({ roughMaxCount: 50 }),
-  });
-
-  static weekly = new JobNumberCrawlerConfig({
-    config: decodeCrawlerConfig({
-      jobSearchCriteria: { searchPeriod: "week" },
-    }),
-  });
+)<JobNumberCrawlerConfig, CrawlerConfig>() {
+  static main = Layer.succeed(JobNumberCrawlerConfig, decodeCrawlerConfig({}));
+  static dev = Layer.succeed(
+    JobNumberCrawlerConfig,
+    decodeCrawlerConfig({ roughMaxCount: 50 }),
+  );
+  static weekly = Layer.succeed(
+    JobNumberCrawlerConfig,
+    decodeCrawlerConfig({ jobSearchCriteria: { searchPeriod: "week" } }),
+  );
 }
 
 // ============================================================
@@ -268,7 +276,7 @@ export class JobNumberCrawlerConfig extends Effect.Service<JobNumberCrawlerConfi
 // ============================================================
 
 export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
-  const config = (yield* JobNumberCrawlerConfig).config;
+  const config = yield* JobNumberCrawlerConfig;
   yield* Effect.logInfo(
     `building crawler: config=${JSON.stringify(config, null, 2)}`,
   );

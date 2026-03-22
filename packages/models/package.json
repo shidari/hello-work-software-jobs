@@ -18,10 +18,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "effect": "^3.16.5"
+    "effect": "catalog:"
   },
   "devDependencies": {
     "tsdown": "^0.20.0",
-    "typescript": "^5.8.3"
+    "typescript": "catalog:"
   }
 }

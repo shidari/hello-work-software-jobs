@@ -1,5 +1,4 @@
 import type { JobNumber } from "@sho/models";
-import { format } from "date-fns";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
 import {
@@ -74,137 +73,120 @@ export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   readonly jobNumber: string;
   readonly currentUrl: string;
   readonly reason: string;
+  readonly error?: unknown;
 }> {}
 
 class FromJobListToJobDetailPageError extends Data.TaggedError(
   "FromJobListToJobDetailPageError",
-)<{ readonly message: string }> {}
+)<{ readonly message: string; readonly error?: unknown }> {}
 
 class AssertSingleJobListedError extends Data.TaggedError(
   "AssertSingleJobListedError",
-)<{ readonly message: string }> {}
+)<{ readonly message: string; readonly error?: unknown }> {}
 
 class ListJobsError extends Data.TaggedError("ListJobsError")<{
   readonly message: string;
+  readonly error?: unknown;
 }> {}
 
 class JobDetailPageValidationError extends Data.TaggedError(
   "JobDetailPageValidationError",
-)<{ readonly reason: string; readonly currentUrl: string }> {}
-
-// ── DOM セレクタマップ ──
-
-const jobDetailSelectors = {
-  // 既存
-  jobNumber: "#ID_kjNo",
-  companyName: "#ID_jgshMei",
-  receivedDate: "#ID_uktkYmd",
-  expiryDate: "#ID_shkiKigenHi",
-  homePage: "#ID_hp",
-  occupation: "#ID_sksu",
-  employmentType: "#ID_koyoKeitai",
-  wage: "#ID_chgn",
-  workingHours: "#ID_shgJn1",
-  employeeCount: "#ID_jgisKigyoZentai",
-  workPlace: "#ID_shgBsJusho",
-  jobDescription: "#ID_shigotoNy",
-  qualifications: "#ID_hynaMenkyoSkku",
-  // 新規: 求人情報
-  establishmentNumber: "#ID_jgshNo",
-  jobCategory: "#ID_kjKbn",
-  industryClassification: "#ID_sngBrui",
-  publicEmploymentOffice: "#ID_juriAtsh",
-  onlineApplicationAccepted: "#ID_onlinJishuOboUktkKahi",
-  // 新規: 仕事内容
-  dispatchType: "#ID_hakenUkeoiToShgKeitai",
-  employmentPeriod: "#ID_koyoKikan",
-  ageRequirement: "#ID_nenreiSegn",
-  education: "#ID_grki",
-  requiredExperience: "#ID_hynaKiknt",
-  trialPeriod: "#ID_trialKikan",
-  carCommute: "#ID_mycarTskn",
-  transferPossibility: "#ID_tenkinNoKnsi",
-  // 新規: 賃金
-  wageType: "#ID_chgnKeitaiToKbn",
-  raise: "#ID_shokyuSd",
-  bonus: "#ID_shoyoSdNoUmu",
-  // 新規: その他条件
-  insurance: "#ID_knyHoken",
-  retirementBenefit: "#ID_tskinSd",
-} as const;
-
-const companyDetailSelectors = {
-  establishmentNumber: "#ID_jgshNo",
-  companyName: "#ID_jgshMei",
-  postalCode: "#ID_szciYbn",
-  address: "#ID_szci",
-  employeeCount: "#ID_jgisKigyoZentai",
-  foundedYear: "#ID_setsuritsuNen",
-  capital: "#ID_shkn",
-  businessDescription: "#ID_jigyoNy",
-  corporateNumber: "#ID_hoNinNo",
-} as const;
-
-// ── DOM テキスト抽出ヘルパー ──
-
-function textOf(document: Document, selector: string): string | null {
-  return document.querySelector(selector)?.textContent?.trim() || null;
-}
+)<{
+  readonly reason: string;
+  readonly currentUrl: string;
+  readonly error?: unknown;
+}> {}
 
 // ── DOM → RawJob 抽出 ──
 
 export function extractRawFieldsFromDocument(document: Document): RawJob {
-  const s = jobDetailSelectors;
   return {
-    jobNumber: textOf(document, s.jobNumber),
-    companyName: textOf(document, s.companyName),
-    receivedDate: textOf(document, s.receivedDate),
-    expiryDate: textOf(document, s.expiryDate),
-    homePage: textOf(document, s.homePage),
-    occupation: textOf(document, s.occupation),
-    employmentType: textOf(document, s.employmentType),
-    wage: textOf(document, s.wage),
-    workingHours: textOf(document, s.workingHours),
-    employeeCount: textOf(document, s.employeeCount),
-    workPlace: textOf(document, s.workPlace),
-    jobDescription: textOf(document, s.jobDescription),
-    qualifications: textOf(document, s.qualifications),
-    // 新規フィールド
-    establishmentNumber: textOf(document, s.establishmentNumber),
-    jobCategory: textOf(document, s.jobCategory),
-    industryClassification: textOf(document, s.industryClassification),
-    publicEmploymentOffice: textOf(document, s.publicEmploymentOffice),
-    onlineApplicationAccepted: textOf(document, s.onlineApplicationAccepted),
-    dispatchType: textOf(document, s.dispatchType),
-    employmentPeriod: textOf(document, s.employmentPeriod),
-    ageRequirement: textOf(document, s.ageRequirement),
-    education: textOf(document, s.education),
-    requiredExperience: textOf(document, s.requiredExperience),
-    trialPeriod: textOf(document, s.trialPeriod),
-    carCommute: textOf(document, s.carCommute),
-    transferPossibility: textOf(document, s.transferPossibility),
-    wageType: textOf(document, s.wageType),
-    raise: textOf(document, s.raise),
-    bonus: textOf(document, s.bonus),
-    insurance: textOf(document, s.insurance),
-    retirementBenefit: textOf(document, s.retirementBenefit),
+    jobNumber: document.querySelector("#ID_kjNo")?.textContent?.trim() || null,
+    companyName:
+      document.querySelector("#ID_jgshMei")?.textContent?.trim() || null,
+    receivedDate:
+      document.querySelector("#ID_uktkYmd")?.textContent?.trim() || null,
+    expiryDate:
+      document.querySelector("#ID_shkiKigenHi")?.textContent?.trim() || null,
+    homePage: document.querySelector("#ID_hp")?.textContent?.trim() || null,
+    occupation: document.querySelector("#ID_sksu")?.textContent?.trim() || null,
+    employmentType:
+      document.querySelector("#ID_koyoKeitai")?.textContent?.trim() || null,
+    wage: document.querySelector("#ID_chgn")?.textContent?.trim() || null,
+    workingHours:
+      document.querySelector("#ID_shgJn1")?.textContent?.trim() || null,
+    employeeCount:
+      document.querySelector("#ID_jgisKigyoZentai")?.textContent?.trim() ||
+      null,
+    workPlace:
+      document.querySelector("#ID_shgBsJusho")?.textContent?.trim() || null,
+    jobDescription:
+      document.querySelector("#ID_shigotoNy")?.textContent?.trim() || null,
+    qualifications:
+      document.querySelector("#ID_hynaMenkyoSkku")?.textContent?.trim() || null,
+    establishmentNumber:
+      document.querySelector("#ID_jgshNo")?.textContent?.trim() || null,
+    jobCategory:
+      document.querySelector("#ID_kjKbn")?.textContent?.trim() || null,
+    industryClassification:
+      document.querySelector("#ID_sngBrui")?.textContent?.trim() || null,
+    publicEmploymentOffice:
+      document.querySelector("#ID_juriAtsh")?.textContent?.trim() || null,
+    onlineApplicationAccepted:
+      document
+        .querySelector("#ID_onlinJishuOboUktkKahi")
+        ?.textContent?.trim() || null,
+    dispatchType:
+      document
+        .querySelector("#ID_hakenUkeoiToShgKeitai")
+        ?.textContent?.trim() || null,
+    employmentPeriod:
+      document.querySelector("#ID_koyoKikan")?.textContent?.trim() || null,
+    ageRequirement:
+      document.querySelector("#ID_nenreiSegn")?.textContent?.trim() || null,
+    education: document.querySelector("#ID_grki")?.textContent?.trim() || null,
+    requiredExperience:
+      document.querySelector("#ID_hynaKiknt")?.textContent?.trim() || null,
+    trialPeriod:
+      document.querySelector("#ID_trialKikan")?.textContent?.trim() || null,
+    carCommute:
+      document.querySelector("#ID_mycarTskn")?.textContent?.trim() || null,
+    transferPossibility:
+      document.querySelector("#ID_tenkinNoKnsi")?.textContent?.trim() || null,
+    wageType:
+      document.querySelector("#ID_chgnKeitaiToKbn")?.textContent?.trim() ||
+      null,
+    raise: document.querySelector("#ID_shokyuSd")?.textContent?.trim() || null,
+    bonus:
+      document.querySelector("#ID_shoyoSdNoUmu")?.textContent?.trim() || null,
+    insurance:
+      document.querySelector("#ID_knyHoken")?.textContent?.trim() || null,
+    retirementBenefit:
+      document.querySelector("#ID_tskinSd")?.textContent?.trim() || null,
   };
 }
 
 // ── DOM → RawCompany 抽出 ──
 
 export function extractRawCompanyFromDocument(document: Document): RawCompany {
-  const s = companyDetailSelectors;
   return {
-    establishmentNumber: textOf(document, s.establishmentNumber),
-    companyName: textOf(document, s.companyName),
-    postalCode: textOf(document, s.postalCode),
-    address: textOf(document, s.address),
-    employeeCount: textOf(document, s.employeeCount),
-    foundedYear: textOf(document, s.foundedYear),
-    capital: textOf(document, s.capital),
-    businessDescription: textOf(document, s.businessDescription),
-    corporateNumber: textOf(document, s.corporateNumber),
+    establishmentNumber:
+      document.querySelector("#ID_jgshNo")?.textContent?.trim() || null,
+    companyName:
+      document.querySelector("#ID_jgshMei")?.textContent?.trim() || null,
+    postalCode:
+      document.querySelector("#ID_szciYbn")?.textContent?.trim() || null,
+    address: document.querySelector("#ID_szci")?.textContent?.trim() || null,
+    employeeCount:
+      document.querySelector("#ID_jgisKigyoZentai")?.textContent?.trim() ||
+      null,
+    foundedYear:
+      document.querySelector("#ID_setsuritsuNen")?.textContent?.trim() || null,
+    capital: document.querySelector("#ID_shkn")?.textContent?.trim() || null,
+    businessDescription:
+      document.querySelector("#ID_jigyoNy")?.textContent?.trim() || null,
+    corporateNumber:
+      document.querySelector("#ID_hoNinNo")?.textContent?.trim() || null,
   };
 }
 
@@ -213,8 +195,7 @@ export function extractRawCompanyFromDocument(document: Document): RawCompany {
 function listJobOverviewElem(page: FirstJobListPage) {
   return Effect.tryPromise({
     try: () => page.locator("table.kyujin.mt1.noborder").all(),
-    catch: (e) =>
-      new ListJobsError({ message: `unexpected error.\n${String(e)}` }),
+    catch: (e) => new ListJobsError({ message: "unexpected error", error: e }),
   })
     .pipe(
       Effect.flatMap((tables) =>
@@ -259,7 +240,8 @@ function goToSingleJobDetailPage(page: FirstJobListPage) {
       },
       catch: (e) =>
         new FromJobListToJobDetailPageError({
-          message: `unexpected error.\n${String(e)}`,
+          message: "unexpected error",
+          error: e,
         }),
     }).pipe(
       Effect.tap(() => {
@@ -284,6 +266,7 @@ function validateJobDetailPage(page: JobDetailPage) {
         new JobDetailPageValidationError({
           reason: `${e instanceof Error ? e.message : String(e)}`,
           currentUrl: page.url(),
+          error: e,
         }),
     }).pipe(
       Effect.tap((jobTitle) => {
@@ -301,18 +284,12 @@ function validateJobDetailPage(page: JobDetailPage) {
 
 // ── ISODateString ヘルパー ──
 
-const i = Symbol();
-type ISODateString = string & { [i]: never };
-
-const nowISODateString = (): ISODateString =>
-  format(new Date(), "yyyy-MM-dd") as ISODateString;
-
 // ── Extractor サービス ──
 
 export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
   "JobDetailExtractor",
   {
-    effect: Effect.gen(function* () {
+    scoped: Effect.gen(function* () {
       const jobSearchPage = yield* openJobSearchPage();
 
       const extractRawHtml = Effect.fn("extractRawHtml")(function* (
@@ -333,18 +310,17 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
               jobNumber,
               currentUrl: jobDetailPage.url(),
               reason: `${error instanceof Error ? error.message : String(error)}`,
+              error,
             }),
         });
         return {
           rawHtml,
-          fetchedDate: nowISODateString(),
+          fetchedDate: new Date().toISOString().slice(0, 10),
           jobNumber,
         };
       });
 
-      return {
-        extractRawHtml: (jobNumber: JobNumber) => extractRawHtml(jobNumber),
-      };
+      return { extractRawHtml };
     }),
   },
 ) {}

@@ -4,29 +4,41 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    effect:
+      specifier: 3.20.0
+      version: 3.20.0
+    hono:
+      specifier: 4.12.8
+      version: 4.12.8
+    typescript:
+      specifier: 5.9.3
+      version: 5.9.3
+
 importers:
 
   .:
     dependencies:
       '@hono/swagger-ui':
         specifier: ^0.6.0
-        version: 0.6.1(hono@4.12.7)
+        version: 0.6.1(hono@4.12.8)
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.0.6
         version: 2.4.6
       typescript:
-        specifier: ^5.8.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   apps/backend/api:
     dependencies:
       '@hono/standard-validator':
         specifier: ^0.2.0
-        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7)
+        version: 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.8)
       '@hono/swagger-ui':
         specifier: ^0.6.0
-        version: 0.6.1(hono@4.12.7)
+        version: 0.6.1(hono@4.12.8)
       '@sho/db':
         specifier: workspace:*
         version: link:../../../packages/db
@@ -37,14 +49,14 @@ importers:
         specifier: ^17.0.0
         version: 17.3.1
       effect:
-        specifier: ^3.16.5
+        specifier: 'catalog:'
         version: 3.20.0
       hono:
-        specifier: ^4.11.9
-        version: 4.12.7
+        specifier: 'catalog:'
+        version: 4.12.8
       hono-openapi:
         specifier: ^1.0.8
-        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-schema/spec@1.1.0)(effect@3.20.0)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.7)(openapi-types@12.1.3)
+        version: 1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.8))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-schema/spec@1.1.0)(effect@3.20.0)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.8)(openapi-types@12.1.3)
       kysely:
         specifier: ^0.28.0
         version: 0.28.14
@@ -71,7 +83,7 @@ importers:
         specifier: ^4.20.3
         version: 4.21.0
       typescript:
-        specifier: ^5.5.2
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
         specifier: ~3.2.4
@@ -85,15 +97,18 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.800.0
         version: 3.1008.0
+      '@sho/api':
+        specifier: workspace:*
+        version: link:../api
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models
-      date-fns:
-        specifier: ^4.1.0
-        version: 4.1.0
       effect:
-        specifier: ^3.16.5
+        specifier: 'catalog:'
         version: 3.20.0
+      hono:
+        specifier: 'catalog:'
+        version: 4.12.8
       linkedom:
         specifier: 0.18.12
         version: 0.18.12
@@ -114,7 +129,7 @@ importers:
         specifier: ^4.20.3
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
         specifier: ~3.2.4
@@ -175,11 +190,11 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/models
       effect:
-        specifier: ^3.16.5
+        specifier: 'catalog:'
         version: 3.20.0
       hono:
-        specifier: ^4.8.3
-        version: 4.12.7
+        specifier: 'catalog:'
+        version: 4.12.8
       jotai:
         specifier: ^2.13.1
         version: 2.18.0(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(react@19.2.4)
@@ -209,13 +224,13 @@ importers:
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
       typescript:
-        specifier: ^5
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/db:
     dependencies:
       effect:
-        specifier: ^3.16.5
+        specifier: 'catalog:'
         version: 3.20.0
       kysely:
         specifier: ^0.28.0
@@ -240,20 +255,20 @@ importers:
         specifier: ^0.20.0
         version: 0.20.3(synckit@0.11.12)(typescript@5.9.3)
       typescript:
-        specifier: ^5.8.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/models:
     dependencies:
       effect:
-        specifier: ^3.16.5
+        specifier: 'catalog:'
         version: 3.20.0
     devDependencies:
       tsdown:
         specifier: ^0.20.0
         version: 0.20.3(synckit@0.11.12)(typescript@5.9.3)
       typescript:
-        specifier: ^5.8.3
+        specifier: 'catalog:'
         version: 5.9.3
 
 packages:
@@ -1852,8 +1867,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  baseline-browser-mapping@2.10.9:
-    resolution: {integrity: sha512-OZd0e2mU11ClX8+IdXe3r0dbqMEznRiT4TfbhYIbcRPZkqJ7Qwer8ij3GZAmLsRKa+II9V1v5czCkvmHH3XZBg==}
+  baseline-browser-mapping@2.10.10:
+    resolution: {integrity: sha512-sUoJ3IMxx4AyRqO4MLeHlnGDkyXRoUG0/AI9fjK+vS72ekpV0yWVY7O0BVjmBcRtkNcsAO2QDZ4tdKKGoI6YaQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -2182,8 +2197,8 @@ packages:
       hono:
         optional: true
 
-  hono@4.12.7:
-    resolution: {integrity: sha512-jq9l1DM0zVIvsm3lv9Nw9nlJnMNPOcAtsbsgiUhWcFzPE99Gvo6yRTlszSLLYacMeQ6quHD6hMfId8crVHvexw==}
+  hono@4.12.8:
+    resolution: {integrity: sha512-VJCEvtrezO1IAR+kqEYnxUOoStaQPGrCmX3j4wDTNOcD1uRPFpGlwQUIW8niPuvHXaTUxeOUl5MMDGrl+tmO9A==}
     engines: {node: '>=16.9.0'}
 
   hookable@6.0.1:
@@ -3720,14 +3735,14 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.8)':
     dependencies:
       '@standard-schema/spec': 1.1.0
-      hono: 4.12.7
+      hono: 4.12.8
 
-  '@hono/swagger-ui@0.6.1(hono@4.12.7)':
+  '@hono/swagger-ui@0.6.1(hono@4.12.8)':
     dependencies:
-      hono: 4.12.7
+      hono: 4.12.8
 
   '@img/colour@1.0.0': {}
 
@@ -4504,7 +4519,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.0: {}
 
-  baseline-browser-mapping@2.10.9:
+  baseline-browser-mapping@2.10.10:
     optional: true
 
   better-sqlite3@12.6.2:
@@ -4536,7 +4551,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.10.9
+      baseline-browser-mapping: 2.10.10
       caniuse-lite: 1.0.30001780
       electron-to-chromium: 1.5.321
       node-releases: 2.0.36
@@ -4830,17 +4845,17 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono-openapi@1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-schema/spec@1.1.0)(effect@3.20.0)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.7)(openapi-types@12.1.3):
+  hono-openapi@1.3.0(@hono/standard-validator@0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.8))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-schema/spec@1.1.0)(effect@3.20.0)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.8)(openapi-types@12.1.3):
     dependencies:
       '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6)
       '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.1.0)(@types/json-schema@7.0.15)(effect@3.20.0)(quansync@1.0.0)(zod@4.3.6))(@standard-schema/spec@1.1.0)(effect@3.20.0)(openapi-types@12.1.3)(zod@4.3.6)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.7)
-      hono: 4.12.7
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.1.0)(hono@4.12.8)
+      hono: 4.12.8
 
-  hono@4.12.7: {}
+  hono@4.12.8: {}
 
   hookable@6.0.1: {}
 
