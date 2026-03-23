@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { Schema } from "effect";
 import Link from "next/link";
 import { FavoriteButton } from "@/components/features/favorites/FavoriteButton";
-import { JobOverviewCard } from "@/components/features/list/JobOverview";
+import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
 import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
@@ -141,7 +141,7 @@ export default async function Page({
             >
               <Card>
                 {isNew && <span className={styles.newBadge}>新着</span>}
-                <JobOverviewCard
+                <JobOverviewSummary
                   jobNumber={job.jobNumber}
                   companyName={job.companyName}
                   occupation={job.occupation}

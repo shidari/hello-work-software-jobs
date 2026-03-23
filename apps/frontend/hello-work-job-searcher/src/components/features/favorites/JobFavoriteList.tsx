@@ -11,7 +11,7 @@ import {
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
 import styles from "./JobFavoriteList.module.css";
-import { JobOverviewCard } from "./JobOverview";
+import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 
 export function FavoriteJobOverviewList() {
   const items = useAtomValue(favoriteJobsSelector);
@@ -39,7 +39,7 @@ export function FavoriteJobOverviewList() {
         <Card key={item.jobNumber} className={styles.favoriteCard}>
           <div className={styles.sectionHeader}>
             <Link href={`/jobs/${item.jobNumber}`} className={styles.cardLink}>
-              <JobOverviewCard
+              <JobOverviewSummary
                 jobNumber={item.jobNumber}
                 companyName={item.companyName}
                 occupation={item.occupation}
