@@ -1,19 +1,22 @@
 "use client";
 import { Schema } from "effect";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import Link from "next/link";
 import { useEffect } from "react";
-import { favoriteJobsAtom } from "@/atom/atoms";
-import { favoriteRemoveWriter } from "@/atom/writers";
+import {
+  favoriteJobsAtom,
+  favoriteJobsSelector,
+  favoriteRemoveWriter,
+} from "@/atom";
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
 import styles from "./JobFavoriteList.module.css";
 import { JobOverviewCard } from "./JobOverview";
 
 export function FavoriteJobOverviewList() {
-  const items = useAtomValue(favoriteJobsAtom);
-  const [, removeFavorite] = useAtom(favoriteRemoveWriter);
-  const [, setFavoriteJobs] = useAtom(favoriteJobsAtom);
+  const items = useAtomValue(favoriteJobsSelector);
+  const removeFavorite = useSetAtom(favoriteRemoveWriter);
+  const setFavorites = useSetAtom(favoriteJobsAtom);
 
   useEffect(() => {
     try {
@@ -24,11 +27,11 @@ export function FavoriteJobOverviewList() {
       const validated = parsed.map((item) =>
         Schema.decodeUnknownSync(JobOverviewSchema)(item),
       );
-      setFavoriteJobs(validated);
+      setFavorites(validated);
     } catch {
       // ignore
     }
-  }, [setFavoriteJobs]);
+  }, [setFavorites]);
 
   return (
     <CardGroup>

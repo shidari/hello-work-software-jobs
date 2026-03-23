@@ -182,18 +182,14 @@ Next.js 16 + React 19。
 | `/jobs/[jobNumber]` | 求人詳細（戻るボタン付き） |
 | `/favorites` | お気に入り（localStorage 永続化） |
 
-### 状態管理 (Jotai)
+### 状態管理
 
-```
-atom/
-  atoms.ts      — state atoms (searchFilter, jobList, favoriteJobs)
-  selectors.ts  — derived read atoms (jobTotalCountSelector, jobOverviewListSelector)
-  writers.ts    — write atoms (jobListInitWriter, jobListWriter, favoriteAppendWriter, favoriteRemoveWriter)
-```
+- **求人データ**: RSC で API から取得。URL searchParams が Source of Truth（フィルター・ページネーション）
+- **お気に入り**: Jotai + localStorage（`atom.ts` に Source of Truth / Selectors / Writers を集約）
 
 ### 主な機能
 
-- ページ遷移ベースのUI（一覧 → 詳細）
-- ページ番号ページネーション（shadcn 風 Pagination コンポーネント）
-- 14種フィルター検索
+- RSC ベースのデータ取得（`/api` プロキシ廃止、サーバーから直接 API 呼び出し）
+- URL searchParams ベースのフィルター検索（検索ボタンで遷移）
+- ページ番号ページネーション（Link による RSC 再取得）
 - お気に入り（localStorage 永続化）
