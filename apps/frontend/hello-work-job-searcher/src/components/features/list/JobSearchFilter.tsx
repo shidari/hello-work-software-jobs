@@ -1,123 +1,100 @@
 "use client";
-import { useAtom, useAtomValue } from "jotai";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { type SearchFilter, searchFilterAtom } from "@/atom/atoms";
-import { jobListInitWriter } from "@/atom/writers";
+
+import { Schema } from "effect";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import styles from "./JobSearchFilter.module.css";
 
-function toEmployeeCountRange(filter: SearchFilter): string {
-  const gt = filter.employeeCountGt;
-  const lt = filter.employeeCountLt;
-  if (gt === "0" && lt === "10") return "1-9";
-  if (gt === "9" && lt === "31") return "10-30";
-  if (gt === "29" && lt === "101") return "30-100";
-  if (gt === "100" && lt === undefined) return "100+";
-  return "";
-}
+export const SearchFilterSchema = Schema.Struct({
+  companyName: Schema.optional(Schema.String),
+  jobDescription: Schema.optional(Schema.String),
+  jobDescriptionExclude: Schema.optional(Schema.String),
+  occupation: Schema.optional(Schema.String),
+  workPlace: Schema.optional(Schema.String),
+  qualifications: Schema.optional(Schema.String),
+  employmentType: Schema.optional(Schema.String),
+  wageMin: Schema.optional(Schema.String),
+  wageMax: Schema.optional(Schema.String),
+  addedSince: Schema.optional(Schema.String),
+  addedUntil: Schema.optional(Schema.String),
+  orderByReceiveDate: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.String),
+  employeeCountGt: Schema.optional(Schema.String),
+  employeeCountLt: Schema.optional(Schema.String),
+});
+export type SearchFilter = Schema.Schema.Type<typeof SearchFilterSchema>;
 
-export const JobsSearchfilter = () => {
-  const formRef = useRef<HTMLFormElement>(null);
-  const debounceRef = useRef<number | null>(null);
-  const [, initializeJobList] = useAtom(jobListInitWriter);
-  const currentFilter = useAtomValue(searchFilterAtom);
-  const router = useRouter();
+export function JobSearchFilter({
+  defaultValue,
+  onSubmit,
+}: {
+  defaultValue: SearchFilter;
+  onSubmit: (filter: SearchFilter) => void;
+}) {
+  const action = (formData: FormData) => {
+    let employeeCountGt: string | undefined;
+    let employeeCountLt: string | undefined;
+    switch (formData.get("employeeCountRange")) {
+      case "1-9":
+        employeeCountGt = "0";
+        employeeCountLt = "10";
+        break;
+      case "10-30":
+        employeeCountGt = "9";
+        employeeCountLt = "31";
+        break;
+      case "30-100":
+        employeeCountGt = "29";
+        employeeCountLt = "101";
+        break;
+      case "100+":
+        employeeCountGt = "100";
+        break;
+    }
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
+    const parsed = Schema.decodeUnknownSync(SearchFilterSchema)({
+      companyName: formData.get("companyName"),
+      jobDescription: formData.get("jobDescription"),
+      jobDescriptionExclude: formData.get("jobDescriptionExclude"),
+      occupation: formData.get("occupation"),
+      workPlace: formData.get("workPlace"),
+      qualifications: formData.get("qualifications"),
+      employmentType: formData.get("employmentType"),
+      wageMin: formData.get("wageMin"),
+      wageMax: formData.get("wageMax"),
+      addedSince: formData.get("addedSince"),
+      addedUntil: formData.get("addedUntil"),
+      orderByReceiveDate: formData.get("orderByReceiveDate"),
+      onlyNotExpired:
+        formData.get("onlyNotExpired") === "on" ? "true" : undefined,
+      employeeCountGt,
+      employeeCountLt,
+    });
 
-  const handleChange = () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = window.setTimeout(() => {
-      if (formRef.current === null) return;
-      const formData = new FormData(formRef.current);
-      const companyName = formData.get("companyName");
-      const jobDescription = formData.get("jobDescription");
-      const jobDescriptionExclude = formData.get("jobDescriptionExclude");
-      const employeeCountRange = formData.get("employeeCountRange");
-      let employeeCountFilter: Record<string, number> = {};
-
-      switch (employeeCountRange) {
-        case "1-9":
-          employeeCountFilter = { employeeCountGt: 0, employeeCountLt: 10 };
-          break;
-        case "10-30":
-          employeeCountFilter = { employeeCountGt: 9, employeeCountLt: 31 };
-          break;
-        case "30-100":
-          employeeCountFilter = { employeeCountGt: 29, employeeCountLt: 101 };
-          break;
-        case "100+":
-          employeeCountFilter = { employeeCountGt: 100 };
-          break;
-        default:
-          employeeCountFilter = {};
-      }
-
-      const addedSince = formData.get("addedSince");
-      const addedUntil = formData.get("addedUntil");
-      const orderByReceiveDate = formData.get("orderByReceiveDate");
-      const onlyNotExpired = formData.get("onlyNotExpired") === "on";
-      const occupation = formData.get("occupation");
-      const employmentType = formData.get("employmentType");
-      const wageMin = formData.get("wageMin");
-      const wageMax = formData.get("wageMax");
-      const workPlace = formData.get("workPlace");
-      const qualifications = formData.get("qualifications");
-
-      const searchFilter = {
-        ...(typeof companyName === "string" && companyName
-          ? { companyName }
-          : {}),
-        ...(typeof jobDescription === "string" && jobDescription
-          ? { jobDescription }
-          : {}),
-        ...(typeof jobDescriptionExclude === "string" && jobDescriptionExclude
-          ? { jobDescriptionExclude }
-          : {}),
-        ...employeeCountFilter,
-        ...(typeof addedSince === "string" && addedSince ? { addedSince } : {}),
-        ...(typeof addedUntil === "string" && addedUntil ? { addedUntil } : {}),
-        ...(typeof orderByReceiveDate === "string" && orderByReceiveDate
-          ? { orderByReceiveDate }
-          : {}),
-        ...(onlyNotExpired ? { onlyNotExpired: "true" } : {}),
-        ...(typeof occupation === "string" && occupation ? { occupation } : {}),
-        ...(typeof employmentType === "string" && employmentType
-          ? { employmentType }
-          : {}),
-        ...(typeof wageMin === "string" && wageMin ? { wageMin } : {}),
-        ...(typeof wageMax === "string" && wageMax ? { wageMax } : {}),
-        ...(typeof workPlace === "string" && workPlace ? { workPlace } : {}),
-        ...(typeof qualifications === "string" && qualifications
-          ? { qualifications }
-          : {}),
-      };
-
-      // URL クエリパラメータを更新
-      const params = new URLSearchParams();
-      for (const [key, value] of Object.entries(searchFilter)) {
-        if (value !== undefined && value !== "") {
-          params.set(key, String(value));
-        }
-      }
-      const query = params.toString();
-      router.replace(query ? `/jobs?${query}` : "/jobs", { scroll: false });
-
-      initializeJobList(searchFilter);
-    }, 300);
+    onSubmit(parsed);
   };
 
-  const defaultRange = toEmployeeCountRange(currentFilter);
+  const defaultRange = (() => {
+    switch (
+      `${defaultValue.employeeCountGt ?? ""},${defaultValue.employeeCountLt ?? ""}`
+    ) {
+      case "0,10":
+        return "1-9";
+      case "9,31":
+        return "10-30";
+      case "29,101":
+        return "30-100";
+      case "100,":
+        return "100+";
+      default:
+        return "";
+    }
+  })();
 
   return (
-    <form ref={formRef} className={styles.formGrid}>
+    <form action={action} className={styles.formGrid}>
       <div className={styles.section}>
         <span className={styles.sectionTitle}>検索</span>
         <div className={styles.fieldGroup}>
@@ -127,8 +104,7 @@ export const JobsSearchfilter = () => {
             placeholder="会社名で検索"
             name="companyName"
             aria-label="会社名"
-            defaultValue={currentFilter.companyName ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.companyName ?? ""}
           />
         </div>
         <div className={styles.fieldGroup}>
@@ -138,8 +114,7 @@ export const JobsSearchfilter = () => {
             placeholder="キーワードを入力"
             name="jobDescription"
             aria-label="求人内容キーワード"
-            defaultValue={currentFilter.jobDescription ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.jobDescription ?? ""}
           />
         </div>
         <div className={styles.fieldGroup}>
@@ -149,8 +124,7 @@ export const JobsSearchfilter = () => {
             placeholder="除外するキーワードを入力"
             name="jobDescriptionExclude"
             aria-label="除外キーワード"
-            defaultValue={currentFilter.jobDescriptionExclude ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.jobDescriptionExclude ?? ""}
           />
         </div>
         <div className={styles.fieldGroup}>
@@ -160,8 +134,7 @@ export const JobsSearchfilter = () => {
             placeholder="職種で検索"
             name="occupation"
             aria-label="職種"
-            defaultValue={currentFilter.occupation ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.occupation ?? ""}
           />
         </div>
         <div className={styles.fieldGroup}>
@@ -171,8 +144,7 @@ export const JobsSearchfilter = () => {
             placeholder="勤務地で検索"
             name="workPlace"
             aria-label="勤務地"
-            defaultValue={currentFilter.workPlace ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.workPlace ?? ""}
           />
         </div>
         <div className={styles.fieldGroup}>
@@ -182,8 +154,7 @@ export const JobsSearchfilter = () => {
             placeholder="必要な資格・経験で検索"
             name="qualifications"
             aria-label="資格・経験"
-            defaultValue={currentFilter.qualifications ?? ""}
-            onChange={handleChange}
+            defaultValue={defaultValue.qualifications ?? ""}
           />
         </div>
       </div>
@@ -195,8 +166,7 @@ export const JobsSearchfilter = () => {
             <Select
               name="employmentType"
               aria-label="雇用形態"
-              defaultValue={currentFilter.employmentType ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.employmentType ?? ""}
             >
               <option value="">すべて</option>
               <option value="正社員">正社員</option>
@@ -211,7 +181,6 @@ export const JobsSearchfilter = () => {
               name="employeeCountRange"
               aria-label="従業員数"
               defaultValue={defaultRange}
-              onChange={handleChange}
             >
               <option value="">すべて</option>
               <option value="1-9">1~9人</option>
@@ -229,8 +198,7 @@ export const JobsSearchfilter = () => {
               placeholder="最低賃金"
               name="wageMin"
               aria-label="賃金下限"
-              defaultValue={currentFilter.wageMin ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.wageMin ?? ""}
             />
           </div>
           <div className={styles.fieldGroup}>
@@ -240,8 +208,7 @@ export const JobsSearchfilter = () => {
               placeholder="最高賃金"
               name="wageMax"
               aria-label="賃金上限"
-              defaultValue={currentFilter.wageMax ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.wageMax ?? ""}
             />
           </div>
         </div>
@@ -251,8 +218,7 @@ export const JobsSearchfilter = () => {
             <Select
               name="orderByReceiveDate"
               aria-label="受付日ソート"
-              defaultValue={currentFilter.orderByReceiveDate ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.orderByReceiveDate ?? ""}
             >
               <option value="">デフォルト</option>
               <option value="desc">新しい順</option>
@@ -267,8 +233,7 @@ export const JobsSearchfilter = () => {
               type="date"
               name="addedSince"
               aria-label="追加日（から）"
-              defaultValue={currentFilter.addedSince ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.addedSince ?? ""}
             />
           </div>
           <div className={styles.fieldGroup}>
@@ -277,21 +242,20 @@ export const JobsSearchfilter = () => {
               type="date"
               name="addedUntil"
               aria-label="追加日（まで）"
-              defaultValue={currentFilter.addedUntil ?? ""}
-              onChange={handleChange}
+              defaultValue={defaultValue.addedUntil ?? ""}
             />
           </div>
         </div>
-        <label className={styles.checkboxLabel}>
+        <Label className={styles.checkboxLabel}>
           <input
             type="checkbox"
             name="onlyNotExpired"
-            defaultChecked={currentFilter.onlyNotExpired === "true"}
-            onChange={handleChange}
+            defaultChecked={defaultValue.onlyNotExpired === "true"}
           />
           有効な求人のみ
-        </label>
+        </Label>
       </div>
+      <Button type="submit">検索</Button>
     </form>
   );
-};
+}

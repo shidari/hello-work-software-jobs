@@ -1,19 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.JOB_STORE_ENDPOINT}/:path*`,
-      },
-    ];
-  },
-
   experimental: {
     staleTimes: {
-      dynamic: process.env.NODE_ENV === "development" ? 0 : undefined, // 動的ページのキャッシュ時間を0に
-      static: process.env.NODE_ENV === "development" ? 0 : undefined, // 静的ページのキャッシュ時間を0に
+      dynamic: process.env.NODE_ENV === "development" ? 0 : undefined,
+      static: process.env.NODE_ENV === "development" ? 0 : undefined,
     },
   },
 };

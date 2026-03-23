@@ -1,6 +1,7 @@
 import type { JobOverview } from "@/dto";
 
-export function JobOverviewCard(props: JobOverview) {
+// TODO: UI の Card との責務分担を見直す
+export function JobOverviewSummary(props: JobOverview) {
   const { companyName, occupation, employmentType, workPlace, employeeCount } =
     props;
   return (
