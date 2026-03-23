@@ -8,10 +8,10 @@ import {
   favoriteJobsSelector,
   favoriteRemoveWriter,
 } from "@/atom";
+import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
 import styles from "./JobFavoriteList.module.css";
-import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 
 export function FavoriteJobOverviewList() {
   const items = useAtomValue(favoriteJobsSelector);
