@@ -5,17 +5,12 @@
     "pnpm@10.30.0",
     "gh@2.87.3",
     "pinact@3.8.0",
-    "stack@3.9.1",
-    "jq@1.8.1",
-    "aws-vault@7.9.9",
-    "ghc@9.8.4"
+    "jq@1.8.1"
   ],
   "shell": {
     "init_hook": [
       "echo 'devbox ready' > /dev/null"
     ],
-    "scripts": {
-      "hwctl": "stack exec --stack-yaml tools/hwctl/stack.yaml hwctl -- \"$@\""
-    }
+    "scripts": {}
   }
 }

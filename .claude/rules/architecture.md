@@ -14,8 +14,6 @@ hello-work-software-jobs/
 ├── packages/
 │   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
 │   └── models/                      # ドメインモデル定義
-├── tools/
-│   └── hwctl/                       # Haskell admin CLI (Stack)
 ```
 
 ## Tech Stack
@@ -26,8 +24,7 @@ hello-work-software-jobs/
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
 | Crawler | Playwright, Effect, AWS Lambda (Docker), SQS, EventBridge, CDK |
 | Shared | TypeScript 5.8, Effect Schema |
-| Admin CLI | Haskell (Stack), optparse-applicative, aeson, req, dotenv-hs |
-| Secrets | dotenvx (API, Frontend), dotenv-hs (hwctl) |
+| Secrets | dotenvx (API, Frontend) |
 | Quality | Biome, Playwright/Vitest |
 
 ## データフロー
@@ -125,7 +122,7 @@ AWS Lambda (Docker) + SQS + EventBridge + Playwright + Effect サービスパタ
 
 1. **求人番号抽出** — EventBridge (平日 01:00 JST) → Lambda `job-number-crawler` → Playwright で検索ページ走査 → SQS 送信
 2. **求人詳細 ETL** — SQS (batchSize: 1) → Lambda `job-detail-etl` → Playwright で HTML 取得 → linkedom でパース → API に POST
-3. **手動トリガー** — hwctl → Lambda invoke（未実装）
+3. **手動トリガー** — AWS CLI で Lambda invoke
 
 ### 設計
 
@@ -144,29 +141,6 @@ AWS Lambda (Docker) + SQS + EventBridge + Playwright + Effect サービスパタ
 ### CI/CD
 
 - `deploy-collector.yml`: main push → OIDC 認証 → `cdk deploy`
-
----
-
-## `tools/hwctl`
-
-Haskell (Stack) 製の admin CLI。AI エージェントフレンドリー設計（JSON デフォルト出力）。
-
-### コマンド
-
-| コマンド | 概要 |
-|---------|------|
-| `hwctl jobs list [--page N] [--keyword TEXT] [--table]` | 求人一覧取得 |
-| `hwctl jobs get <jobNumber> [--table]` | 個別求人取得 |
-| `hwctl stats daily [FILTER_JSON] [--table]` | 日ごとの新着求人数サマリー |
-| `hwctl crawler run [OPTIONS_JSON]` | クローラー手動トリガー（Lambda invoke） |
-| `hwctl crawler diagnose [--table]` | クローラーパイプライン診断 (EventBridge, Lambda, SQS, daily-stats) |
-
-### 設計
-
-- **デフォルト JSON 出力**: `--table` で human-readable テーブル表示に切替
-- **構造化エラー**: `{ "error": { "code": "...", "message": "..." } }` を stderr に出力
-- **終了コード**: 0=成功, 1=エラー
-- **設定**: `.env` ファイル（dotenv-hs で自動読み込み）+ 環境変数。`HWCTL_ENDPOINT` (デフォルト: `http://localhost:8787`)
 
 ---
 

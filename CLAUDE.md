@@ -34,12 +34,4 @@ pnpm dev:invoke-detail   # 求人詳細 ETL 手動実行
 pnpm dev:e2e             # E2E パイプライン検証 (crawler → SQS → ETL → API)
 pnpm test              # Vitest tests (PBT)
 pnpm build             # tsdown ビルド
-
-# Admin CLI (tools/hwctl)
-stack build                       # Build
-stack exec hwctl -- jobs list     # List jobs (JSON)
-stack exec hwctl -- jobs get ID   # Get job by number (JSON)
-stack exec hwctl -- stats daily   # Daily stats (JSON, filter with JSON arg)
-stack exec hwctl -- crawler run [OPTIONS_JSON]  # Trigger crawler via Lambda invoke
-stack exec hwctl -- crawler diagnose [--table]  # クローラーパイプライン診断 (EventBridge, Lambda, SQS, daily-stats)
 ```
