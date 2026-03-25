@@ -34,4 +34,8 @@ pnpm dev:invoke-detail   # 求人詳細 ETL 手動実行
 pnpm dev:e2e             # E2E パイプライン検証 (crawler → SQS → ETL → API)
 pnpm test              # Vitest tests (PBT)
 pnpm build             # tsdown ビルド
+
+# 診断スクリプト (AWS_PROFILE=crawler-debug が必要)
+devbox run crawler-diagnose          # クローラーパイプライン全体診断
+devbox run crawler-logs [DAYS]       # 直近 N 日のエラーログ (デフォルト 3 日)
 ```

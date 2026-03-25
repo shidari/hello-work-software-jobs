@@ -5,12 +5,16 @@
     "pnpm@10.30.0",
     "gh@2.87.3",
     "pinact@3.8.0",
-    "jq@1.8.1"
+    "jq@1.8.1",
+    "awscli2@2.33.2"
   ],
   "shell": {
     "init_hook": [
       "echo 'devbox ready' > /dev/null"
     ],
-    "scripts": {}
+    "scripts": {
+      "crawler-diagnose": "bash scripts/crawler-diagnose.sh",
+      "crawler-logs": "bash scripts/check-crawler-logs.sh \"$@\""
+    }
   }
 }
