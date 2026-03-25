@@ -236,8 +236,8 @@ importers:
         specifier: ^0.28.0
         version: 0.28.14
       kysely-d1:
-        specifier: ^0.3.0
-        version: 0.3.0(kysely@0.28.14)
+        specifier: ^0.4.0
+        version: 0.4.0(kysely@0.28.14)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250317.0
@@ -2380,8 +2380,8 @@ packages:
       tedious:
         optional: true
 
-  kysely-d1@0.3.0:
-    resolution: {integrity: sha512-9wTbE6ooLiYtBa4wPg9e4fjfcmvRtgE/2j9pAjYrIq+iz+EsH/Hj9YbtxpEXA6JoRgfulVQ1EtGj6aycGGRpYw==}
+  kysely-d1@0.4.0:
+    resolution: {integrity: sha512-wUcVvQNtm30OTfuo7Ad5vYJ1qHqPXOCZc+zWchVKNyuvqY3u8OuGw4gmUx1Ypdx2wRVFLHVQC9I7v0pTmF7Nkw==}
     peerDependencies:
       kysely: '*'
 
@@ -4991,7 +4991,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  kysely-d1@0.3.0(kysely@0.28.14):
+  kysely-d1@0.4.0(kysely@0.28.14):
     dependencies:
       kysely: 0.28.14
 
