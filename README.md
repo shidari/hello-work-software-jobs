@@ -17,8 +17,7 @@ apps/
 packages/
   ├── db/                           # Kysely + D1 client factory & types
   └── models/                       # ドメインモデル定義
-tools/
-  └── hwctl/                        # Haskell admin CLI (Stack)
+scripts/                            # クローラー診断スクリプト
 ```
 
 ## 技術スタック
@@ -28,7 +27,7 @@ tools/
 - **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: AWS Lambda (Docker), SQS, EventBridge, Playwright, Effect, CDK
 - **型管理**: Effect Schema, @sho/models
-- **Admin CLI**: Haskell (Stack), optparse-applicative, aeson, req
+- **診断**: シェルスクリプト + AWS CLI + jq
 
 ## セットアップ
 
