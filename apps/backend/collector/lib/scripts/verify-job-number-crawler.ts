@@ -6,9 +6,11 @@ import {
 } from "../job-number-crawler/crawl";
 
 async function main() {
-  const program = Effect.scoped(Effect.gen(function* () {
-    return yield* crawlJobLinks();
-  }));
+  const program = Effect.scoped(
+    Effect.gen(function* () {
+      return yield* crawlJobLinks();
+    }),
+  );
 
   const runnable = program.pipe(
     Effect.provide(JobNumberCrawlerConfig.dev),

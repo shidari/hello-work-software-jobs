@@ -27,6 +27,8 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
       ),
   );
   yield* Console.log("browser launched, creating context...");
-  const context = yield* Effect.promise(() => browser.newContext()).pipe(Effect.orDie);
+  const context = yield* Effect.promise(() => browser.newContext()).pipe(
+    Effect.orDie,
+  );
   return yield* Effect.promise(() => context.newPage()).pipe(Effect.orDie);
 });
