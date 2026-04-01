@@ -10,7 +10,7 @@ import {
 
 async function main() {
   const program = Effect.gen(function* () {
-    const jobNumber = "01010-06778561" as JobNumber;
+    const jobNumber = "13010-35021361" as JobNumber;
     yield* Effect.logInfo(`verifying job detail crawler for ${jobNumber}...`);
     return yield* processJob(jobNumber);
   });
@@ -18,7 +18,7 @@ async function main() {
   const runnable = program.pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
-    Effect.provide(JobDetailLoader.Default),
+    Effect.provide(JobDetailLoader.noop),
     Effect.provide(PlaywrightBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),

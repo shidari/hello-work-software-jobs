@@ -194,7 +194,7 @@ export function extractRawCompanyFromDocument(document: Document): RawCompany {
 
 function listJobOverviewElem(page: FirstJobListPage) {
   return Effect.tryPromise({
-    try: () => page.locator("table.kyujin.mt1.noborder").all(),
+    try: () => page.locator("table.kyujin").all(),
     catch: (e) => new ListJobsError({ message: "unexpected error", error: e }),
   })
     .pipe(

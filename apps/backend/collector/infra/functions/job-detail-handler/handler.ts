@@ -30,7 +30,7 @@ const handleQueue = async (jobNumber: string) => {
   const runnable = program.pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
-    Effect.provide(JobDetailLoader.Default),
+    Effect.provide(JobDetailLoader.main),
     Effect.provide(PlaywrightBrowserConfig.main),
   );
 

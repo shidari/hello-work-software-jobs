@@ -12,7 +12,7 @@ import { Effect, Logger, LogLevel } from "effect";
 import { PlaywrightBrowserConfig } from "../browser";
 import { navigateByJobNumber, openJobSearchPage } from "../page";
 
-const jobNumber = (process.argv[2] ?? "01010-10336561") as JobNumber;
+const jobNumber = (process.argv[2] ?? "13010-35021361") as JobNumber;
 const outPath = `/tmp/hellowork-job-detail-${jobNumber}.html`;
 
 async function main() {

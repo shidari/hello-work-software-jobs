@@ -11,48 +11,25 @@ import {
 } from "effect";
 import type { Locator } from "../browser";
 import {
-  type FirstJobListPage,
   navigateByCriteria,
   openJobSearchPage,
 } from "../page";
 import { delay, formatParseError } from "../util";
+import type { JobListPage } from "./type";
 
 // ============================================================
 // Schemas
 // ============================================================
 
-export const partialWorkLocationSchema = Schema.Struct({
-  prefecture: Schema.Literal("東京都"),
-});
-
-export const partialEmploymentTypeSchema = Schema.Union(
-  Schema.Literal("RegularEmployee"),
-  Schema.Literal("PartTimeWorker"),
-);
-
-export const paritalEngineeringLabelSchema = Schema.Literal(
+export const engineeringLabelSchema = Schema.Literal(
   "ソフトウェア開発技術者、プログラマー",
-);
-
-export const searchPeriodSchema = Schema.Union(
-  Schema.Literal("all"),
-  Schema.Literal("today"),
-  Schema.Literal("week"),
-);
-
-export const maxCountSchema = Schema.Int.pipe(
-  Schema.greaterThanOrEqualTo(1),
-  Schema.lessThanOrEqualTo(1000),
 );
 
 export const jobSearchCriteriaSchema = Schema.Struct({
   jobNumber: Schema.optional(JobNumber),
-  workLocation: Schema.optionalWith(partialWorkLocationSchema, {
-    default: () => ({ prefecture: "東京都" as const }),
-  }),
   desiredOccupation: Schema.optionalWith(
     Schema.Struct({
-      occupationSelection: Schema.optional(paritalEngineeringLabelSchema),
+      occupationSelection: Schema.optional(engineeringLabelSchema),
     }),
     {
       default: () => ({
@@ -60,24 +37,27 @@ export const jobSearchCriteriaSchema = Schema.Struct({
       }),
     },
   ),
-  employmentType: Schema.optionalWith(partialEmploymentTypeSchema, {
-    default: () => "RegularEmployee" as const,
-  }),
-  searchPeriod: Schema.optionalWith(searchPeriodSchema, {
-    default: () => "today" as const,
-  }),
 });
 
 export const crawlerConfigSchema = Schema.Struct({
   jobSearchCriteria: Schema.optionalWith(jobSearchCriteriaSchema, {
-    default: () => Schema.decodeSync(jobSearchCriteriaSchema)({}),
+    default: () => ({
+      desiredOccupation: {
+        occupationSelection:
+          "ソフトウェア開発技術者、プログラマー" as const,
+      },
+    }),
   }),
   nextPageDelayMs: Schema.optionalWith(Schema.Number, {
     default: () => 3000,
   }),
-  roughMaxCount: Schema.optionalWith(maxCountSchema, {
-    default: () => 1000,
-  }),
+  roughMaxCount: Schema.optionalWith(
+    Schema.Int.pipe(
+      Schema.greaterThanOrEqualTo(1),
+      Schema.lessThanOrEqualTo(1000),
+    ),
+    { default: () => 1000 },
+  ),
 });
 
 // ============================================================
@@ -85,11 +65,7 @@ export const crawlerConfigSchema = Schema.Struct({
 // ============================================================
 
 export type JobSearchCriteria = typeof jobSearchCriteriaSchema.Type;
-export type DirtyWorkLocation = typeof partialWorkLocationSchema.Type;
-export type EmploymentType = typeof partialEmploymentTypeSchema.Type;
-export type EngineeringLabel = typeof paritalEngineeringLabelSchema.Type;
-export type SearchPeriod = typeof searchPeriodSchema.Type;
-export type MaxCount = typeof maxCountSchema.Type;
+export type EngineeringLabel = typeof engineeringLabelSchema.Type;
 export type CrawlerConfig = typeof crawlerConfigSchema.Type;
 
 // ============================================================
@@ -128,12 +104,8 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
       const rawJobNumber = yield* Effect.tryPromise({
         try: async () => {
           const text = await table
-            .locator("div.right-side")
-            .locator("tr")
-            .nth(3)
-            .locator("td")
-            .nth(1)
-            .textContent();
+            .locator("button.qr_btn[data-id]")
+            .getAttribute("data-id");
           return text;
         },
         catch: (e) =>
@@ -161,10 +133,10 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
 });
 
 const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   return yield* Effect.tryPromise({
-    try: () => page.locator("table.kyujin.mt1.noborder").all(),
+    try: () => page.locator("table.kyujin").all(),
     catch: (e) =>
       new JobListPageScraperError({
         message: "failed to list job overview elements",
@@ -178,7 +150,7 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
 });
 
 const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   return yield* Effect.tryPromise({
     try: async () => {
@@ -198,7 +170,7 @@ const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
 });
 
 const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
 ) {
   yield* Effect.tryPromise({
     try: async () => {
@@ -216,7 +188,7 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
 });
 
 const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
-  page: FirstJobListPage,
+  page: JobListPage,
   args: {
     count: number;
     roughMaxCount: number;
@@ -265,10 +237,6 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
     JobNumberCrawlerConfig,
     decodeCrawlerConfig({ roughMaxCount: 50 }),
   );
-  static weekly = Layer.succeed(
-    JobNumberCrawlerConfig,
-    decodeCrawlerConfig({ jobSearchCriteria: { searchPeriod: "week" } }),
-  );
 }
 
 // ============================================================
@@ -292,7 +260,8 @@ export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
       roughMaxCount: config.roughMaxCount,
       nextPageDelayMs: config.nextPageDelayMs,
     },
-    (args) => fetchJobMetaData(firstJobListPage, args),
+    // 後で対処する
+    (args) => fetchJobMetaData(firstJobListPage as unknown as JobListPage, args),
   );
   const chunk = yield* Stream.runCollect(stream);
   const jobLinks = Chunk.toArray(chunk);
