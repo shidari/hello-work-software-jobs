@@ -1,6 +1,6 @@
 import type { AppType } from "@sho/api/types";
 import type { Company } from "@sho/models";
-import { Config, Data, Effect } from "effect";
+import { Config, Context, Data, Effect, Layer } from "effect";
 import { hc } from "hono/client";
 import type { TransformedJob } from "./transformer";
 
@@ -41,7 +41,8 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
           if (!res.ok) {
             const text = yield* Effect.tryPromise({
               try: () => res.text(),
-              catch: () => "<unreadable>",
+              catch: () =>
+                new InsertJobError({ reason: "failed to read response body" }),
             });
             yield* new InsertJobError({
               reason: `API responded with ${res.status}: ${text}`,
@@ -63,7 +64,10 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
           if (!res.ok) {
             const text = yield* Effect.tryPromise({
               try: () => res.text(),
-              catch: () => "<unreadable>",
+              catch: () =>
+                new UpsertCompanyError({
+                  reason: "failed to read response body",
+                }),
             });
             yield* new UpsertCompanyError({
               reason: `API responded with ${res.status}: ${text}`,
@@ -79,24 +83,40 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
 
 // ── Loader サービス ──
 
-export class JobDetailLoader extends Effect.Service<JobDetailLoader>()(
-  "JobDetailLoader",
+export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
+  JobDetailLoader,
   {
-    effect: Effect.gen(function* () {
+    readonly load: (
+      data: TransformedJob,
+    ) => Effect.Effect<void, InsertJobError>;
+    readonly loadCompany: (
+      company: Company,
+    ) => Effect.Effect<void, UpsertCompanyError>;
+  }
+>() {
+  static main = Layer.effect(
+    JobDetailLoader,
+    Effect.gen(function* () {
       const client = yield* JobStoreClient;
       return {
-        load: (data: TransformedJob) =>
+        load: (data: TransformedJob): Effect.Effect<void, InsertJobError> =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading job detail...");
             yield* client.insertJob(data);
           }),
-        loadCompany: (company: Company) =>
+        loadCompany: (
+          company: Company,
+        ): Effect.Effect<void, UpsertCompanyError> =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading company...");
             yield* client.upsertCompany(company);
           }),
       };
     }),
-    dependencies: [JobStoreClient.Default],
-  },
-) {}
+  ).pipe(Layer.provide(JobStoreClient.Default));
+
+  static noop = Layer.succeed(JobDetailLoader, {
+    load: (_data) => Effect.logInfo("noop: skipping job detail load"),
+    loadCompany: (_company) => Effect.logInfo("noop: skipping company load"),
+  });
+}
