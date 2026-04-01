@@ -10,10 +10,7 @@ import {
   Stream,
 } from "effect";
 import type { Locator } from "../browser";
-import {
-  navigateByCriteria,
-  openJobSearchPage,
-} from "../page";
+import { navigateByCriteria, openJobSearchPage } from "../page";
 import { delay, formatParseError } from "../util";
 import type { JobListPage } from "./type";
 
@@ -43,8 +40,7 @@ export const crawlerConfigSchema = Schema.Struct({
   jobSearchCriteria: Schema.optionalWith(jobSearchCriteriaSchema, {
     default: () => ({
       desiredOccupation: {
-        occupationSelection:
-          "ソフトウェア開発技術者、プログラマー" as const,
+        occupationSelection: "ソフトウェア開発技術者、プログラマー" as const,
       },
     }),
   }),
@@ -261,7 +257,8 @@ export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
       nextPageDelayMs: config.nextPageDelayMs,
     },
     // 後で対処する
-    (args) => fetchJobMetaData(firstJobListPage as unknown as JobListPage, args),
+    (args) =>
+      fetchJobMetaData(firstJobListPage as unknown as JobListPage, args),
   );
   const chunk = yield* Stream.runCollect(stream);
   const jobLinks = Chunk.toArray(chunk);

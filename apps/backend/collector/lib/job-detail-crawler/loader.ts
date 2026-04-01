@@ -65,7 +65,9 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
             const text = yield* Effect.tryPromise({
               try: () => res.text(),
               catch: () =>
-                new UpsertCompanyError({ reason: "failed to read response body" }),
+                new UpsertCompanyError({
+                  reason: "failed to read response body",
+                }),
             });
             yield* new UpsertCompanyError({
               reason: `API responded with ${res.status}: ${text}`,
@@ -102,7 +104,9 @@ export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
             yield* Effect.logInfo("start loading job detail...");
             yield* client.insertJob(data);
           }),
-        loadCompany: (company: Company): Effect.Effect<void, UpsertCompanyError> =>
+        loadCompany: (
+          company: Company,
+        ): Effect.Effect<void, UpsertCompanyError> =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading company...");
             yield* client.upsertCompany(company);
@@ -112,9 +116,7 @@ export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
   ).pipe(Layer.provide(JobStoreClient.Default));
 
   static noop = Layer.succeed(JobDetailLoader, {
-    load: (_data) =>
-      Effect.logInfo("noop: skipping job detail load"),
-    loadCompany: (_company) =>
-      Effect.logInfo("noop: skipping company load"),
+    load: (_data) => Effect.logInfo("noop: skipping job detail load"),
+    loadCompany: (_company) => Effect.logInfo("noop: skipping company load"),
   });
 }
