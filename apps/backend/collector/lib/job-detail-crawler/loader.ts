@@ -109,7 +109,7 @@ export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
           }),
       };
     }),
-  );
+  ).pipe(Layer.provide(JobStoreClient.Default));
 
   static noop = Layer.succeed(JobDetailLoader, {
     load: (_data) =>
