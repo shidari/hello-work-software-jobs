@@ -6,14 +6,12 @@
  *   pnpm tsx lib/scripts/dump-job-detail.ts [jobNumber]
  */
 
-import * as fs from "node:fs";
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
 import { PlaywrightBrowserConfig } from "../browser";
 import { navigateByJobNumber, openJobSearchPage } from "../page";
 
 const jobNumber = (process.argv[2] ?? "13010-35021361") as JobNumber;
-const outPath = `/tmp/hellowork-job-detail-${jobNumber}.html`;
 
 async function main() {
   const program = Effect.gen(function* () {
@@ -45,8 +43,7 @@ async function main() {
       catch: (e) => new Error(`Failed to get content: ${e}`),
     });
 
-    fs.writeFileSync(outPath, html);
-    yield* Effect.logInfo(`HTML dumped to ${outPath} (${html.length} bytes)`);
+    console.log(html);
   });
 
   const runnable = program.pipe(

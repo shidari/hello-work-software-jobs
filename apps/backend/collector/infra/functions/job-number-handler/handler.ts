@@ -20,7 +20,7 @@ export const handler = async () => {
 
   const runnable = program.pipe(
     Effect.provide(JobNumberCrawlerConfig.main),
-    Effect.provide(PlaywrightBrowserConfig.main),
+    Effect.provide(PlaywrightBrowserConfig.lambda),
     Effect.provide(JobDetailQueue.Default),
   );
   const exit = await Effect.runPromiseExit(runnable);

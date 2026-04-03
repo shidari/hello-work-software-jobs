@@ -1,14 +1,42 @@
-import { Console, Effect, Layer } from "effect";
+import { Console, Data, Effect, Layer } from "effect";
 import { chromium, type LaunchOptions } from "playwright";
 
 export type { Locator, Page } from "playwright";
+
+// ── Errors ──
+
+export class BrowserLaunchError extends Data.TaggedError("BrowserLaunchError")<{
+  readonly message: string;
+  readonly error: unknown;
+}> {}
+
+export class BrowserContextError extends Data.TaggedError(
+  "BrowserContextError",
+)<{
+  readonly message: string;
+  readonly error: unknown;
+}> {}
+
+export class BrowserNewPageError extends Data.TaggedError(
+  "BrowserNewPageError",
+)<{
+  readonly message: string;
+  readonly error: unknown;
+}> {}
 
 // ── Config (Context.Tag — ブラウザ設定) ──
 
 export class PlaywrightBrowserConfig extends Effect.Tag(
   "PlaywrightBrowserConfig",
 )<PlaywrightBrowserConfig, LaunchOptions>() {
-  static main = Layer.succeed(PlaywrightBrowserConfig, {});
+  static lambda = Layer.succeed(PlaywrightBrowserConfig, {
+    args: [
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--single-process",
+    ],
+  });
   static dev = Layer.succeed(PlaywrightBrowserConfig, { headless: false });
 }
 
@@ -18,7 +46,11 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   const config = yield* PlaywrightBrowserConfig;
   yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
-    Effect.promise(() => chromium.launch(config)).pipe(Effect.orDie),
+    Effect.tryPromise({
+      try: () => chromium.launch(config),
+      catch: (error) =>
+        new BrowserLaunchError({ message: "chromium.launch failed", error }),
+    }),
     (browser) =>
       Console.log("closing browser...").pipe(
         Effect.andThen(
@@ -27,8 +59,20 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
       ),
   );
   yield* Console.log("browser launched, creating context...");
-  const context = yield* Effect.promise(() => browser.newContext()).pipe(
-    Effect.orDie,
-  );
-  return yield* Effect.promise(() => context.newPage()).pipe(Effect.orDie);
+  const context = yield* Effect.tryPromise({
+    try: () => browser.newContext(),
+    catch: (error) =>
+      new BrowserContextError({
+        message: "browser.newContext failed",
+        error,
+      }),
+  });
+  return yield* Effect.tryPromise({
+    try: () => context.newPage(),
+    catch: (error) =>
+      new BrowserNewPageError({
+        message: "context.newPage failed",
+        error,
+      }),
+  });
 });
