@@ -5,13 +5,10 @@
  *   pnpm verify:dump-html
  */
 
-import * as fs from "node:fs";
 import { Effect, Logger, LogLevel } from "effect";
 import { PlaywrightBrowserConfig } from "../browser";
 import { JobNumberCrawlerConfig } from "../job-number-crawler/crawl";
 import { navigateByCriteria, openJobSearchPage } from "../page";
-
-const outPath = "/tmp/hellowork-search-result.html";
 
 async function main() {
   const program = Effect.scoped(
@@ -26,8 +23,7 @@ async function main() {
         try: () => firstJobListPage.content(),
         catch: (e) => new Error(`Failed to get content: ${String(e)}`),
       });
-      fs.writeFileSync(outPath, html);
-      yield* Effect.logInfo(`HTML dumped to ${outPath} (${html.length} bytes)`);
+      console.log(html);
 
       const selectors = [
         "table.kyujin.mt1.noborder",

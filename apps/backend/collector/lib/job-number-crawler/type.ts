@@ -1,48 +1,17 @@
-import type { Locator, Page } from "../browser";
+import type { Page } from "../browser";
 
-// ── Phantom Types（ページ種別・セレクタ） ──
+// ── ページ種別（branded type + _tag で判別可能な union） ──
 
-const jobDetailPage = Symbol();
-export type JobDetailPage = Page & { [jobDetailPage]: unknown };
-
-const jobSearchPage = Symbol();
-
-export type JobSearchPage = Page & {
-  [jobSearchPage]: unknown;
+declare const _firstJobListPage: unique symbol;
+export type FirstJobListPage = Page & {
+  readonly _tag: "FirstJobListPage";
+  readonly [_firstJobListPage]: unknown;
 };
 
-const firstJobListPage = Symbol();
-
-export type FirstJobListPage = Page & { [firstJobListPage]: unknown };
-
-const jobListPage = Symbol();
-
-export type JobListPage =
-  | FirstJobListPage
-  | (Page & { [jobListPage]: unknown });
-
-export type EngineeringLabelSelector = {
-  radioBtn: EngineeringLabelSelectorRadioBtn;
-  openerSibling: EngineeringLabelSelectorOpenerSibling;
+declare const _nextJobListPage: unique symbol;
+export type NextJobListPage = Page & {
+  readonly _tag: "NextJobListPage";
+  readonly [_nextJobListPage]: unknown;
 };
 
-const engineeringLabelSelectorRadioBtn = Symbol();
-export type EngineeringLabelSelectorRadioBtn = string & {
-  [engineeringLabelSelectorRadioBtn]: unknown;
-};
-const engineeringLabelSelectorOpener = Symbol();
-
-//　直接openerのセレクタをとってこれないため
-export type EngineeringLabelSelectorOpenerSibling = string & {
-  [engineeringLabelSelectorOpener]: unknown;
-};
-
-const jobOverviewList = Symbol();
-export type JobOverViewList = Locator[] & {
-  [jobOverviewList]: unknown;
-};
-
-const emplomentTypeSelector = Symbol();
-export type EmploymentTypeSelector = string & {
-  [emplomentTypeSelector]: unknown;
-};
+export type JobListPage = FirstJobListPage | NextJobListPage;

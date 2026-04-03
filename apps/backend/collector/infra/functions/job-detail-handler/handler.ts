@@ -31,7 +31,7 @@ const handleQueue = async (jobNumber: string) => {
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
-    Effect.provide(PlaywrightBrowserConfig.main),
+    Effect.provide(PlaywrightBrowserConfig.lambda),
   );
 
   const exit = await Effect.runPromiseExit(runnable);
