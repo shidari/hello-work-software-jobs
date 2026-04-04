@@ -99,12 +99,12 @@ export class CollectorStack extends cdk.Stack {
         API_KEY: apiKey,
       },
       logGroup: jobDetailEtlLogGroup,
-      reservedConcurrentExecutions: 3,
     });
 
     jobDetailEtl.addEventSource(
       new eventsources.SqsEventSource(queue, {
         batchSize: 1,
+        maxConcurrency: 3,
       }),
     );
 
