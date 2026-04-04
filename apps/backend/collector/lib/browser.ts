@@ -46,11 +46,17 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   const config = yield* PlaywrightBrowserConfig;
   yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
-    Effect.tryPromise({
-      try: () => chromium.launch(config),
-      catch: (error) =>
-        new BrowserLaunchError({ message: "chromium.launch failed", error }),
-    }),
+    Effect.orDieWith(
+      Effect.tryPromise({
+        try: () => chromium.launch(config),
+        catch: (error) =>
+          new BrowserLaunchError({ message: "chromium.launch failed", error }),
+      }),
+      (e) =>
+        new Error(
+          `failed to launch browser: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+        ),
+    ),
     (browser) =>
       Console.log("closing browser...").pipe(
         Effect.andThen(
@@ -59,20 +65,32 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
       ),
   );
   yield* Console.log("browser launched, creating context...");
-  const context = yield* Effect.tryPromise({
-    try: () => browser.newContext(),
-    catch: (error) =>
-      new BrowserContextError({
-        message: "browser.newContext failed",
-        error,
-      }),
-  });
-  return yield* Effect.tryPromise({
-    try: () => context.newPage(),
-    catch: (error) =>
-      new BrowserNewPageError({
-        message: "context.newPage failed",
-        error,
-      }),
-  });
+  const context = yield* Effect.orDieWith(
+    Effect.tryPromise({
+      try: () => browser.newContext(),
+      catch: (error) =>
+        new BrowserContextError({
+          message: "browser.newContext failed",
+          error,
+        }),
+    }),
+    (e) =>
+      new Error(
+        `failed to create context: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+      ),
+  );
+  return yield* Effect.orDieWith(
+    Effect.tryPromise({
+      try: () => context.newPage(),
+      catch: (error) =>
+        new BrowserNewPageError({
+          message: "context.newPage failed",
+          error,
+        }),
+    }),
+    (e) =>
+      new Error(
+        `failed to create new page: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+      ),
+  );
 });

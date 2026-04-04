@@ -4,9 +4,9 @@ import { Config, Data, Effect } from "effect";
 
 // ── エラー ──
 
-export class QueueSendError extends Data.TaggedError("QueueSendError")<{
+class QueueSendError extends Data.TaggedError("QueueSendError")<{
   readonly message: string;
-  readonly error?: unknown;
+  readonly error: unknown;
 }> {}
 
 // ── JobDetailQueue Effect.Service ──
@@ -24,20 +24,26 @@ export class JobDetailQueue extends Effect.Service<JobDetailQueue>()(
       });
       return {
         send: (payload: { jobNumber: JobNumber }) =>
-          Effect.tryPromise({
-            try: () =>
-              client.send(
-                new SendMessageCommand({
-                  QueueUrl: queueUrl,
-                  MessageBody: JSON.stringify(payload),
+          Effect.orDieWith(
+            Effect.tryPromise({
+              try: () =>
+                client.send(
+                  new SendMessageCommand({
+                    QueueUrl: queueUrl,
+                    MessageBody: JSON.stringify(payload),
+                  }),
+                ),
+              catch: (e) =>
+                new QueueSendError({
+                  message: "Failed to send to SQS",
+                  error: e,
                 }),
+            }),
+            (e) =>
+              new Error(
+                `SQS send failed: ${e.message}, error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
               ),
-            catch: (e) =>
-              new QueueSendError({
-                message: "Failed to send to SQS",
-                error: e,
-              }),
-          }),
+          ),
       };
     }),
   },

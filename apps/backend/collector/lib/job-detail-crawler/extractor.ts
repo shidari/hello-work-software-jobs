@@ -25,7 +25,7 @@ export const RawJob = Schema.Struct({
   workPlace: Schema.NullOr(Schema.String),
   jobDescription: Schema.NullOr(Schema.String),
   qualifications: Schema.NullOr(Schema.String),
-  // 新規: 求人情報
+  // 新���: 求人情報
   establishmentNumber: Schema.NullOr(Schema.String),
   jobCategory: Schema.NullOr(Schema.String),
   industryClassification: Schema.NullOr(Schema.String),
@@ -44,7 +44,7 @@ export const RawJob = Schema.Struct({
   wageType: Schema.NullOr(Schema.String),
   raise: Schema.NullOr(Schema.String),
   bonus: Schema.NullOr(Schema.String),
-  // 新規: その他条件
+  // 新規: ��の他条件
   insurance: Schema.NullOr(Schema.String),
   retirementBenefit: Schema.NullOr(Schema.String),
 });
@@ -78,15 +78,11 @@ export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
 
 class FromJobListToJobDetailPageError extends Data.TaggedError(
   "FromJobListToJobDetailPageError",
-)<{ readonly message: string; readonly error?: unknown }> {}
-
-class AssertSingleJobListedError extends Data.TaggedError(
-  "AssertSingleJobListedError",
-)<{ readonly message: string; readonly error?: unknown }> {}
+)<{ readonly message: string; readonly error: unknown }> {}
 
 class ListJobsError extends Data.TaggedError("ListJobsError")<{
   readonly message: string;
-  readonly error?: unknown;
+  readonly error: unknown;
 }> {}
 
 class JobDetailPageValidationError extends Data.TaggedError(
@@ -94,7 +90,7 @@ class JobDetailPageValidationError extends Data.TaggedError(
 )<{
   readonly reason: string;
   readonly currentUrl: string;
-  readonly error?: unknown;
+  readonly error: unknown;
 }> {}
 
 // ── DOM → RawJob 抽出 ──
@@ -193,24 +189,28 @@ export function extractRawCompanyFromDocument(document: Document): RawCompany {
 // ── ページ操作ヘルパー ──
 
 function listJobOverviewElem(page: FirstJobListPage) {
-  return Effect.tryPromise({
-    try: () => page.locator("table.kyujin").all(),
-    catch: (e) => new ListJobsError({ message: "unexpected error", error: e }),
-  })
-    .pipe(
-      Effect.flatMap((tables) =>
-        tables.length === 0
-          ? Effect.fail(new ListJobsError({ message: "jobOverList is empty." }))
-          : Effect.succeed(tables),
+  return Effect.orDieWith(
+    Effect.tryPromise({
+      try: () => page.locator("table.kyujin").all(),
+      catch: (e) =>
+        new ListJobsError({ message: "unexpected error", error: e }),
+    }),
+    (e) =>
+      new Error(
+        `listJobOverviewElem failed: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
       ),
-    )
-    .pipe(
-      Effect.tap((jobOverViewList) => {
-        return Effect.logDebug(
-          `succeeded to list job overview elements. count=${jobOverViewList.length}`,
-        );
-      }),
-    );
+  ).pipe(
+    Effect.flatMap((tables) =>
+      tables.length === 0
+        ? Effect.die(new Error("jobOverList is empty."))
+        : Effect.succeed(tables),
+    ),
+    Effect.tap((jobOverViewList) =>
+      Effect.logDebug(
+        `succeeded to list job overview elements. count=${jobOverViewList.length}`,
+      ),
+    ),
+  );
 }
 
 function assertSingleJobListed(page: FirstJobListPage) {
@@ -220,10 +220,8 @@ function assertSingleJobListed(page: FirstJobListPage) {
       yield* Effect.logDebug(
         `failed to assert single job listed. job count=${jobOverViewList.length}`,
       );
-      return yield* Effect.fail(
-        new AssertSingleJobListedError({
-          message: `job list count should be 1 but ${jobOverViewList.length}`,
-        }),
+      return yield* Effect.die(
+        new Error(`job list count should be 1 but ${jobOverViewList.length}`),
       );
     }
   });
@@ -232,24 +230,27 @@ function assertSingleJobListed(page: FirstJobListPage) {
 function goToSingleJobDetailPage(page: FirstJobListPage) {
   return Effect.gen(function* () {
     yield* assertSingleJobListed(page);
-    yield* Effect.tryPromise({
-      try: async () => {
-        const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
-        showDetailBtn.evaluate((elm: Element) => elm.removeAttribute("target"));
-        await showDetailBtn.click();
-      },
-      catch: (e) =>
-        new FromJobListToJobDetailPageError({
-          message: "unexpected error",
-          error: e,
-        }),
-    }).pipe(
-      Effect.tap(() => {
-        return Effect.logDebug(
-          "navigated to job detail page from job list page.",
-        );
+    yield* Effect.orDieWith(
+      Effect.tryPromise({
+        try: async () => {
+          const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
+          showDetailBtn.evaluate((elm: Element) =>
+            elm.removeAttribute("target"),
+          );
+          await showDetailBtn.click();
+        },
+        catch: (e) =>
+          new FromJobListToJobDetailPageError({
+            message: "unexpected error",
+            error: e,
+          }),
       }),
+      (e) =>
+        new Error(
+          `goToSingleJobDetailPage failed: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+        ),
     );
+    yield* Effect.logDebug("navigated to job detail page from job list page.");
     const _page: Page = page;
     return _page as JobDetailPage;
   });
@@ -257,32 +258,34 @@ function goToSingleJobDetailPage(page: FirstJobListPage) {
 
 function validateJobDetailPage(page: JobDetailPage) {
   return Effect.gen(function* () {
-    const jobTitle = yield* Effect.tryPromise({
-      try: async () => {
-        const jobTitle = await page.locator("div.page_title").textContent();
-        return jobTitle;
-      },
-      catch: (e) =>
-        new JobDetailPageValidationError({
-          reason: `${e instanceof Error ? e.message : String(e)}`,
-          currentUrl: page.url(),
-          error: e,
-        }),
-    }).pipe(
-      Effect.tap((jobTitle) => {
-        return Effect.logDebug(`extracted job title: ${jobTitle}`);
+    const jobTitle = yield* Effect.orDieWith(
+      Effect.tryPromise({
+        try: async () => {
+          const jobTitle = await page.locator("div.page_title").textContent();
+          return jobTitle;
+        },
+        catch: (e) =>
+          new JobDetailPageValidationError({
+            reason: `${e instanceof Error ? e.message : String(e)}`,
+            currentUrl: page.url(),
+            error: e,
+          }),
       }),
+      (e) =>
+        new Error(
+          `validateJobDetailPage failed: ${e.reason}, url=${e.currentUrl}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+        ),
     );
+    yield* Effect.logDebug(`extracted job title: ${jobTitle}`);
     if (jobTitle !== "求人情報")
-      return yield* new JobDetailPageValidationError({
-        reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
-        currentUrl: page.url(),
-      });
+      return yield* Effect.die(
+        new Error(
+          `textContent of div.page_title should be 求人情報 but got: "${jobTitle}", url=${page.url()}`,
+        ),
+      );
     return page;
   });
 }
-
-// ── ISODateString ヘルパー ──
 
 // ── Extractor サービス ──
 
@@ -303,16 +306,22 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
         yield* Effect.logDebug("now on job List page.");
         const jobDetailPage = yield* goToSingleJobDetailPage(firstJobListPage);
         yield* validateJobDetailPage(jobDetailPage);
-        const rawHtml = yield* Effect.tryPromise({
-          try: () => jobDetailPage.content(),
-          catch: (error) =>
-            new ExtractJobDetailRawHtmlError({
-              jobNumber,
-              currentUrl: jobDetailPage.url(),
-              reason: `${error instanceof Error ? error.message : String(error)}`,
-              error,
-            }),
-        });
+        const rawHtml = yield* Effect.orDieWith(
+          Effect.tryPromise({
+            try: () => jobDetailPage.content(),
+            catch: (error) =>
+              new ExtractJobDetailRawHtmlError({
+                jobNumber,
+                currentUrl: jobDetailPage.url(),
+                reason: `${error instanceof Error ? error.message : String(error)}`,
+                error,
+              }),
+          }),
+          (e) =>
+            new Error(
+              `extractRawHtml failed: jobNumber=${e.jobNumber}, url=${e.currentUrl}, reason=${e.reason}`,
+            ),
+        );
         return {
           rawHtml,
           fetchedDate: new Date().toISOString().slice(0, 10),
