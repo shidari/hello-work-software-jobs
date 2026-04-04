@@ -6,6 +6,15 @@ This file provides guidance for Claude Code to understand this repository.
 
 A monorepo application for collecting, managing, and searching Hello Work (Japanese job center) job listings.
 
+## Documentation
+
+- [AGENTS.md](AGENTS.md) — AI エージェント行動指針
+- [ARCHITECTURE.md](ARCHITECTURE.md) — アーキテクチャ全体像
+- [docs/FRONTEND.md](docs/FRONTEND.md) — フロントエンド設計
+- [docs/QUALITY.md](docs/QUALITY.md) — テスト・品質方針
+- [docs/SECURITY.md](docs/SECURITY.md) — セキュリティ方針
+- [docs/references/conventions.md](docs/references/conventions.md) — コーディング規約・PR ルール
+
 ## Common Commands
 
 ```bash
