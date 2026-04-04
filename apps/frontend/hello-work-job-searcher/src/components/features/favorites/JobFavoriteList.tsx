@@ -9,6 +9,7 @@ import {
   favoriteRemoveWriter,
 } from "@/atom";
 import { JobOverviewSummary } from "@/components/features/list/JobOverview";
+import { Button } from "@/components/ui/Button";
 import { Card, CardGroup } from "@/components/ui/Card";
 import { JobOverviewSchema } from "@/dto";
 import styles from "./JobFavoriteList.module.css";
@@ -50,13 +51,14 @@ export function FavoriteJobOverviewList() {
               />
             </Link>
           </div>
-          <button
+          <Button
+            variant="danger"
+            size="sm"
             className={styles.removeButton}
             onClick={() => removeFavorite(item.jobNumber)}
-            type="button"
           >
             お気に入り解除
-          </button>
+          </Button>
         </Card>
       ))}
     </CardGroup>
