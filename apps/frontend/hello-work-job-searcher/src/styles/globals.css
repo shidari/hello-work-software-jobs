@@ -5,6 +5,7 @@
 }
 
 :root {
+  /* --- App-specific tokens --- */
   --color-nav-bg: #4b5563;
   --color-nav-bg-hover: #374151;
   --color-nav-bg-disabled: #1f2937;
@@ -46,6 +47,21 @@
   --transition-normal: 0.2s ease;
   --sidebar-width: 420px;
   --sidebar-width-mobile: 85vw;
+
+  /* --- UI component tokens (ported from github-repo-explorer) --- */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --border: var(--color-border);
+  --border-strong: #d0d7de;
+  --muted: #f3f4f6;
+  --muted-foreground: var(--color-text-muted);
+  --accent: var(--color-accent);
+  --accent-fg: #ffffff;
+  --focus-ring: rgba(59, 130, 246, 0.3);
+  --hover-bg: #f6f8fa;
+  --disabled-fg: #8c959f;
+  --skeleton: #f0f0f0;
+  --badge-bg: #ddf4ff;
 }
 
 html,

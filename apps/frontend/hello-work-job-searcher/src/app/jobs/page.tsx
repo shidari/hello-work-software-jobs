@@ -7,12 +7,8 @@ import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
 import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/Pagination";
 import { jobStoreClient } from "@/lib/backend-client";
+import { JobsPagination } from "./JobsPagination_client";
 import styles from "./JobsPageClient.module.css";
 import { SearchFilterForm } from "./SearchFilterForm_client";
 
@@ -97,35 +93,11 @@ export default async function Page({
         </Collapsible>
       </div>
       {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              {page > 1 ? (
-                <Link
-                  href={`/jobs?${new URLSearchParams([...filterParams, ["page", String(page - 1)]])}`}
-                >
-                  &lsaquo; 前へ
-                </Link>
-              ) : (
-                <span>&lsaquo; 前へ</span>
-              )}
-            </PaginationItem>
-            <PaginationItem>
-              {page} / {totalPages}
-            </PaginationItem>
-            <PaginationItem>
-              {page < totalPages ? (
-                <Link
-                  href={`/jobs?${new URLSearchParams([...filterParams, ["page", String(page + 1)]])}`}
-                >
-                  次へ &rsaquo;
-                </Link>
-              ) : (
-                <span>次へ &rsaquo;</span>
-              )}
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <JobsPagination
+          currentPage={page}
+          totalPages={totalPages}
+          filterParams={filterParams}
+        />
       )}
       <div className={styles.items}>
         {data.jobs.map((job) => {
@@ -167,35 +139,11 @@ export default async function Page({
         })}
       </div>
       {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              {page > 1 ? (
-                <Link
-                  href={`/jobs?${new URLSearchParams([...filterParams, ["page", String(page - 1)]])}`}
-                >
-                  &lsaquo; 前へ
-                </Link>
-              ) : (
-                <span>&lsaquo; 前へ</span>
-              )}
-            </PaginationItem>
-            <PaginationItem>
-              {page} / {totalPages}
-            </PaginationItem>
-            <PaginationItem>
-              {page < totalPages ? (
-                <Link
-                  href={`/jobs?${new URLSearchParams([...filterParams, ["page", String(page + 1)]])}`}
-                >
-                  次へ &rsaquo;
-                </Link>
-              ) : (
-                <span>次へ &rsaquo;</span>
-              )}
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <JobsPagination
+          currentPage={page}
+          totalPages={totalPages}
+          filterParams={filterParams}
+        />
       )}
     </div>
   );

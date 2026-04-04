@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@sho/api": "workspace:*",
@@ -22,9 +24,14 @@
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.54.1",
+    "@storybook/addon-a11y": "^10.2.19",
+    "@storybook/addon-docs": "^10.2.19",
+    "@storybook/addon-vitest": "^10.2.19",
+    "@storybook/nextjs-vite": "^10.2.19",
     "@types/node": "24.12.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "storybook": "^10.2.19",
     "typescript": "catalog:"
   }
 }

@@ -18,6 +18,8 @@ pnpm format            # Format
 # Frontend (apps/frontend/hello-work-job-searcher)
 pnpm dev               # Dev server (port 9002)
 pnpm build             # Build
+pnpm storybook         # Storybook dev server (port 6006)
+pnpm build-storybook   # Storybook ビルド
 
 # API (apps/backend/api)
 pnpm dev               # Wrangler dev server (port 8787)

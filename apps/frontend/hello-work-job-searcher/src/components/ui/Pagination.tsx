@@ -1,81 +1,105 @@
+"use client";
+
 import type { ComponentProps } from "react";
+import { naturals } from "@/util";
 import styles from "./Pagination.module.css";
 
-export function Pagination({ className, ...props }: ComponentProps<"nav">) {
+export type PaginationProps = ComponentProps<"nav"> & {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+};
+
+/**
+ * ページネーションに表示するページ番号の配列を生成する。
+ *
+ * - 7ページ以下: 全ページを表示
+ * - 8ページ以上: [1, ..., current-1, current, current+1, ..., last] の形式
+ *
+ * @example
+ * pageNumbers(1, 5)   // [1, 2, 3, 4, 5]
+ * pageNumbers(5, 50)  // [1, "...", 4, 5, 6, "...", 50]
+ * pageNumbers(1, 50)  // [1, 2, 3, "...", 50]
+ * pageNumbers(50, 50) // [1, "...", 49, 50]
+ */
+export function pageNumbers(
+  current: number,
+  total: number,
+): (number | "...")[] {
+  if (total <= 7) {
+    return Iterator.from(naturals()).drop(1).take(total).toArray();
+  }
+
+  const pages: (number | "...")[] = [1];
+
+  if (current > 3) pages.push("...");
+
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  if (current < total - 2) pages.push("...");
+
+  pages.push(total);
+  return pages;
+}
+
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+  ...props
+}: PaginationProps) {
+  if (totalPages <= 1) return null;
+
+  const pages = pageNumbers(currentPage, totalPages);
+
   return (
     <nav
-      aria-label="pagination"
+      data-slot="pagination"
       className={`${styles.pagination}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function PaginationContent({
-  className,
-  ...props
-}: ComponentProps<"ul">) {
-  return (
-    <ul
-      className={`${styles.paginationContent}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function PaginationItem(props: ComponentProps<"li">) {
-  return <li {...props} />;
-}
-
-export function PaginationLink({
-  isActive,
-  className,
-  ...props
-}: ComponentProps<"button"> & { isActive?: boolean }) {
-  return (
-    <button
-      type="button"
-      aria-current={isActive ? "page" : undefined}
-      className={`${styles.paginationLink}${isActive ? ` ${styles.active}` : ""}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function PaginationPrevious({
-  className,
-  ...props
-}: ComponentProps<"button">) {
-  return (
-    <PaginationLink
-      aria-label="前のページ"
-      className={`${styles.nav}${className ? ` ${className}` : ""}`}
+      aria-label="Pagination"
       {...props}
     >
-      &lsaquo; 前へ
-    </PaginationLink>
-  );
-}
-
-export function PaginationNext({
-  className,
-  ...props
-}: ComponentProps<"button">) {
-  return (
-    <PaginationLink
-      aria-label="次のページ"
-      className={`${styles.nav}${className ? ` ${className}` : ""}`}
-      {...props}
-    >
-      次へ &rsaquo;
-    </PaginationLink>
-  );
-}
-
-export function PaginationEllipsis() {
-  return (
-    <span className={styles.ellipsis} aria-hidden>
-      &hellip;
-    </span>
+      <button
+        type="button"
+        className={`${styles.page} ${currentPage <= 1 ? styles.disabled : ""}`}
+        disabled={currentPage <= 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        前へ
+      </button>
+      {pages.map((p, i) =>
+        p === "..." ? (
+          <span
+            key={i < pages.length / 2 ? "ellipsis-left" : "ellipsis-right"}
+            className={styles.ellipsis}
+          >
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            className={`${styles.page} ${p === currentPage ? styles.active : ""}`}
+            aria-current={p === currentPage ? "page" : undefined}
+            onClick={() => onPageChange(p)}
+          >
+            {p}
+          </button>
+        ),
+      )}
+      <button
+        type="button"
+        className={`${styles.page} ${currentPage >= totalPages ? styles.disabled : ""}`}
+        disabled={currentPage >= totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        次へ
+      </button>
+    </nav>
   );
 }

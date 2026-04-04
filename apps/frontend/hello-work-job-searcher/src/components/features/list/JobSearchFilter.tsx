@@ -3,7 +3,6 @@
 import { Schema } from "effect";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import styles from "./JobSearchFilter.module.css";
 
@@ -98,7 +97,7 @@ export function JobSearchFilter({
       <div className={styles.section}>
         <span className={styles.sectionTitle}>検索</span>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>会社名</Label>
+          <span className={styles.fieldLabel}>会社名</span>
           <Input
             type="text"
             placeholder="会社名で検索"
@@ -108,7 +107,7 @@ export function JobSearchFilter({
           />
         </div>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>求人内容（キーワード）</Label>
+          <span className={styles.fieldLabel}>求人内容（キーワード）</span>
           <Input
             type="text"
             placeholder="キーワードを入力"
@@ -118,7 +117,7 @@ export function JobSearchFilter({
           />
         </div>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>除外キーワード</Label>
+          <span className={styles.fieldLabel}>除外キーワード</span>
           <Input
             type="text"
             placeholder="除外するキーワードを入力"
@@ -128,7 +127,7 @@ export function JobSearchFilter({
           />
         </div>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>職種</Label>
+          <span className={styles.fieldLabel}>職種</span>
           <Input
             type="text"
             placeholder="職種で検索"
@@ -138,7 +137,7 @@ export function JobSearchFilter({
           />
         </div>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>勤務地</Label>
+          <span className={styles.fieldLabel}>勤務地</span>
           <Input
             type="text"
             placeholder="勤務地で検索"
@@ -148,7 +147,7 @@ export function JobSearchFilter({
           />
         </div>
         <div className={styles.fieldGroup}>
-          <Label className={styles.fieldLabel}>資格・経験</Label>
+          <span className={styles.fieldLabel}>資格・経験</span>
           <Input
             type="text"
             placeholder="必要な資格・経験で検索"
@@ -162,7 +161,7 @@ export function JobSearchFilter({
         <span className={styles.sectionTitle}>絞り込み</span>
         <div className={styles.row}>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>雇用形態</Label>
+            <span className={styles.fieldLabel}>雇用形態</span>
             <Select
               name="employmentType"
               aria-label="雇用形態"
@@ -176,7 +175,7 @@ export function JobSearchFilter({
             </Select>
           </div>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>従業員数</Label>
+            <span className={styles.fieldLabel}>従業員数</span>
             <Select
               name="employeeCountRange"
               aria-label="従業員数"
@@ -192,7 +191,7 @@ export function JobSearchFilter({
         </div>
         <div className={styles.row}>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>賃金（下限）</Label>
+            <span className={styles.fieldLabel}>賃金（下限）</span>
             <Input
               type="number"
               placeholder="最低賃金"
@@ -202,7 +201,7 @@ export function JobSearchFilter({
             />
           </div>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>賃金（上限）</Label>
+            <span className={styles.fieldLabel}>賃金（上限）</span>
             <Input
               type="number"
               placeholder="最高賃金"
@@ -214,7 +213,7 @@ export function JobSearchFilter({
         </div>
         <div className={styles.row}>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>受付日ソート</Label>
+            <span className={styles.fieldLabel}>受付日ソート</span>
             <Select
               name="orderByReceiveDate"
               aria-label="受付日ソート"
@@ -228,7 +227,7 @@ export function JobSearchFilter({
         </div>
         <div className={styles.row}>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>追加日（から）</Label>
+            <span className={styles.fieldLabel}>追加日（から）</span>
             <Input
               type="date"
               name="addedSince"
@@ -237,7 +236,7 @@ export function JobSearchFilter({
             />
           </div>
           <div className={styles.fieldGroup}>
-            <Label className={styles.fieldLabel}>追加日（まで）</Label>
+            <span className={styles.fieldLabel}>追加日（まで）</span>
             <Input
               type="date"
               name="addedUntil"
@@ -246,14 +245,14 @@ export function JobSearchFilter({
             />
           </div>
         </div>
-        <Label className={styles.checkboxLabel}>
+        <label className={styles.checkboxLabel}>
           <input
             type="checkbox"
             name="onlyNotExpired"
             defaultChecked={defaultValue.onlyNotExpired === "true"}
           />
           有効な求人のみ
-        </Label>
+        </label>
       </div>
       <Button type="submit">検索</Button>
     </form>

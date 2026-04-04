@@ -1,20 +1,25 @@
 import type { ComponentProps } from "react";
 import styles from "./Label.module.css";
 
-export function Label({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.label}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
+export type LabelProps = ComponentProps<"dl"> & {
+  term: string;
+};
 
-export function LabelGroup({ className, ...props }: ComponentProps<"div">) {
+/**
+ * ラベル付きの値を表示するコンポーネント。
+ * セマンティクスは dl（description list）を使用。
+ * - dt（description term）: ラベル部分
+ * - dd（description details）: 値部分
+ */
+export function Label({ term, children, className, ...props }: LabelProps) {
   return (
-    <div
-      className={`${styles.group}${className ? ` ${className}` : ""}`}
+    <dl
+      data-slot="label"
+      className={`${styles.root}${className ? ` ${className}` : ""}`}
       {...props}
-    />
+    >
+      <dt className={styles.term}>{term}:</dt>
+      <dd className={styles.definition}>{children}</dd>
+    </dl>
   );
 }

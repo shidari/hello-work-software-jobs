@@ -1,93 +1,135 @@
 import type { ComponentProps } from "react";
 import styles from "./Item.module.css";
 
+function cn(base: string, className?: string) {
+  return `${base}${className ? ` ${className}` : ""}`;
+}
+
+export type ItemProps = ComponentProps<"div"> & {
+  variant?: "default" | "outline" | "muted";
+  size?: "default" | "sm" | "xs";
+};
+
 export function Item({
   variant = "default",
   size = "default",
   className,
   ...props
-}: ComponentProps<"div"> & {
-  variant?: "default" | "outline" | "muted";
-  size?: "default" | "sm" | "xs";
-}) {
-  const variantClass = variant !== "default" ? ` ${styles[variant]}` : "";
-  const sizeClass = size !== "default" ? ` ${styles[size]}` : "";
+}: ItemProps) {
   return (
     <div
-      className={`${styles.item}${variantClass}${sizeClass}${className ? ` ${className}` : ""}`}
+      data-slot="item"
+      className={cn(styles.item, className)}
+      data-variant={variant}
+      data-size={size}
       {...props}
     />
   );
 }
 
-export function ItemMedia({
-  variant = "default",
-  className,
-  ...props
-}: ComponentProps<"div"> & {
-  variant?: "default" | "icon" | "image";
-}) {
-  const variantClass = variant === "icon" ? ` ${styles.mediaIcon}` : "";
+export type ItemMediaProps = ComponentProps<"div">;
+
+export function ItemMedia({ className, ...props }: ItemMediaProps) {
   return (
     <div
-      className={`${styles.media}${variantClass}${className ? ` ${className}` : ""}`}
+      data-slot="item-media"
+      className={cn(styles.media, className)}
       {...props}
     />
   );
 }
 
-export function ItemContent({ className, ...props }: ComponentProps<"div">) {
+export type ItemContentProps = ComponentProps<"div">;
+
+export function ItemContent({ className, ...props }: ItemContentProps) {
   return (
     <div
-      className={`${styles.content}${className ? ` ${className}` : ""}`}
+      data-slot="item-content"
+      className={cn(styles.content, className)}
       {...props}
     />
   );
 }
 
-export function ItemTitle({ className, ...props }: ComponentProps<"div">) {
+export type ItemTitleProps = ComponentProps<"span">;
+
+export function ItemTitle({ className, ...props }: ItemTitleProps) {
   return (
-    <div
-      className={`${styles.title}${className ? ` ${className}` : ""}`}
+    <span
+      data-slot="item-title"
+      className={cn(styles.title, className)}
       {...props}
     />
   );
 }
 
-export function ItemDescription({
-  className,
-  ...props
-}: ComponentProps<"div">) {
+export type ItemDescriptionProps = ComponentProps<"p">;
+
+export function ItemDescription({ className, ...props }: ItemDescriptionProps) {
   return (
-    <div
-      className={`${styles.description}${className ? ` ${className}` : ""}`}
+    <p
+      data-slot="item-description"
+      className={cn(styles.description, className)}
       {...props}
     />
   );
 }
 
-export function ItemActions({ className, ...props }: ComponentProps<"div">) {
+export type ItemActionsProps = ComponentProps<"div">;
+
+export function ItemActions({ className, ...props }: ItemActionsProps) {
   return (
     <div
-      className={`${styles.actions}${className ? ` ${className}` : ""}`}
+      data-slot="item-actions"
+      className={cn(styles.actions, className)}
       {...props}
     />
   );
 }
 
-export function ItemGroup({ className, ...props }: ComponentProps<"div">) {
+export type ItemHeaderProps = ComponentProps<"div">;
+
+export function ItemHeader({ className, ...props }: ItemHeaderProps) {
   return (
     <div
-      className={`${styles.group}${className ? ` ${className}` : ""}`}
+      data-slot="item-header"
+      className={cn(styles.header, className)}
       {...props}
     />
   );
 }
 
-export function ItemSeparator({ className, ...props }: ComponentProps<"div">) {
+export type ItemFooterProps = ComponentProps<"div">;
+
+export function ItemFooter({ className, ...props }: ItemFooterProps) {
   return (
     <div
-      className={`${styles.separator}${className ? ` ${className}` : ""}`}
+      data-slot="item-footer"
+      className={cn(styles.footer, className)}
+      {...props}
+    />
+  );
+}
+
+export type ItemGroupProps = ComponentProps<"div">;
+
+export function ItemGroup({ className, ...props }: ItemGroupProps) {
+  return (
+    <div
+      data-slot="item-group"
+      className={cn(styles.group, className)}
+      {...props}
+    />
+  );
+}
+
+export type ItemSeparatorProps = ComponentProps<"hr">;
+
+export function ItemSeparator({ className, ...props }: ItemSeparatorProps) {
+  return (
+    <hr
+      data-slot="item-separator"
+      className={cn(styles.separator, className)}
       {...props}
     />
   );

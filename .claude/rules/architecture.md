@@ -20,7 +20,7 @@ hello-work-software-jobs/
 
 | Layer | Technologies |
 |-------|--------------|
-| Frontend | Next.js 16, React 19, Jotai, Hono RPC |
+| Frontend | Next.js 16, React 19, Jotai, Hono RPC, Storybook 10 |
 | API | Cloudflare Workers, Hono, Kysely, D1 (SQLite), Effect |
 | Crawler | Playwright, Effect, AWS Lambda (Docker), SQS, EventBridge, CDK |
 | Shared | TypeScript 5.8, Effect Schema |
@@ -161,9 +161,35 @@ Next.js 16 + React 19。
 - **求人データ**: RSC で API から取得。URL searchParams が Source of Truth（フィルター・ページネーション）
 - **お気に入り**: Jotai + localStorage（`atom.ts` に Source of Truth / Selectors / Writers を集約）
 
+### UI コンポーネント (`src/components/ui/`)
+
+CSS Modules + CSS Custom Properties によるス���イリング。各コンポーネントに `.stories.tsx` を同梱。
+
+| コンポーネント | 概要 |
+|--------------|------|
+| Avatar | 画像 + フォールバック（sm/default/lg） |
+| Badge | ラ��ル/タグ（default/secondary/outline） |
+| Button | バリアント（primary/outline/ghost/danger��+ サイズ |
+| Card, CardGroup | カードコンテナ |
+| Collapsible | 展開/折りたたみ |
+| Input | テキスト入力（invalid バリデーション状態対応） |
+| Item, ItemContent, ItemTitle, ItemDescription, ItemMedia, ItemActions, ItemHeader, ItemFooter, ItemGroup, ItemSeparator | コンポジット リストアイテム |
+| Label | `<dl>` ベースの key-value 表示 |
+| Loading | スピナー |
+| Navbar | ヘッダーナビゲーション |
+| Pagination | ページ番号 + ellipsis ロジック内蔵（onPageChange コールバック） |
+| Select | セレクトボックス |
+| Skeleton | ローディングプレースホルダー |
+
+### Storybook
+
+- `.storybook/` に設定（`@storybook/nextjs-vite`）
+- `pnpm storybook` でローカル起動（port 6006）
+- アドオン: a11y, docs, vitest
+
 ### 主な機能
 
 - RSC ベースのデータ取得（`/api` プロキシ廃止、サーバーから直接 API 呼び出し）
 - URL searchParams ベースのフィルター検索（検索ボタンで遷移）
-- ページ番号ページネーション（Link による RSC 再取得）
+- ページ番号ページネーション（onPageChange + useRouter による遷移）
 - お気に入り（localStorage 永続化）
