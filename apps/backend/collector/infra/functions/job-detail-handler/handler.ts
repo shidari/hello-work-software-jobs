@@ -1,6 +1,7 @@
+import { readdir, rm } from "node:fs/promises";
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
-import { Cause, Effect, Exit, Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { PlaywrightBrowserConfig } from "../../../lib/browser";
 import {
   JobDetailExtractor,
@@ -18,53 +19,19 @@ const SqsJobMessage = Schema.Struct({
 // ── handleQueue ──
 
 const handleQueue = async (jobNumber: string) => {
-  const startedAt = new Date().toISOString();
-
-  const program = Effect.scoped(
+  await Effect.scoped(
     Effect.gen(function* () {
       const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
       yield* processJob(parsed);
     }),
-  );
-
-  const runnable = program.pipe(
+  ).pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.runPromise,
   );
-
-  const exit = await Effect.runPromiseExit(runnable);
-
-  if (Exit.isSuccess(exit)) {
-    console.log(
-      JSON.stringify({
-        event: "job_detail_run",
-        jobNumber,
-        status: "success",
-        startedAt,
-        finishedAt: new Date().toISOString(),
-      }),
-    );
-    return;
-  }
-
-  for (const failure of Cause.failures(exit.cause)) {
-    if (typeof failure === "object" && "error" in failure && failure.error)
-      console.error(failure.error);
-  }
-  const errorMessage = Cause.pretty(exit.cause);
-  console.error(
-    JSON.stringify({
-      event: "job_detail_run",
-      jobNumber,
-      status: "failed",
-      startedAt,
-      finishedAt: new Date().toISOString(),
-      errorMessage,
-    }),
-  );
-  throw new Error(`job-detail-handler failed: ${errorMessage}`);
+  console.log(`${jobNumber} success`);
 };
 
 // ── Lambda handler ──
@@ -80,5 +47,20 @@ export const handler = async (event: SQSEvent): Promise<void> => {
   const parsed = Schema.decodeUnknownSync(SqsJobMessage)(
     JSON.parse(record.body),
   );
-  await handleQueue(parsed.jobNumber);
+  await handleQueue(parsed.jobNumber).catch((error) => {
+    console.error(`${parsed.jobNumber} failed:`, error);
+    throw error;
+  });
+
+  // Playwright が /tmp/playwright_* にプロファイルを生成し browser.close() 後も残る。
+  // Warm Start でコンテナ再利用時に蓄積し /tmp 容量枯渇 → newPage() クラッシュの原因になると判断。
+  try {
+    for (const entry of await readdir("/tmp")) {
+      if (entry.startsWith("playwright_")) {
+        await rm(`/tmp/${entry}`, { recursive: true, force: true });
+      }
+    }
+  } catch (e) {
+    console.error("cleanup /tmp/playwright_* failed", e);
+  }
 };

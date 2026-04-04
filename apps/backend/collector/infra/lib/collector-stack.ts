@@ -30,7 +30,7 @@ export class CollectorStack extends cdk.Stack {
       visibilityTimeout: cdk.Duration.seconds(360),
       deadLetterQueue: {
         queue: dlq,
-        maxReceiveCount: 3,
+        maxReceiveCount: 1,
       },
     });
 
@@ -99,6 +99,7 @@ export class CollectorStack extends cdk.Stack {
         API_KEY: apiKey,
       },
       logGroup: jobDetailEtlLogGroup,
+      reservedConcurrentExecutions: 3,
     });
 
     jobDetailEtl.addEventSource(

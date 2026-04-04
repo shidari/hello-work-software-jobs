@@ -6,14 +6,14 @@ import type { TransformedJob } from "./transformer";
 
 // ── エラー ──
 
-export class InsertJobError extends Data.TaggedError("InsertJobError")<{
+class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly reason: string;
-  readonly error?: unknown;
+  readonly error: unknown;
 }> {}
 
-export class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
+class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
   readonly reason: string;
-  readonly error?: unknown;
+  readonly error: unknown;
 }> {}
 
 // ── JobStore API クライアント ──
@@ -33,20 +33,24 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
           yield* Effect.logDebug(
             `executing insert job api. jobNumber=${job.jobNumber}`,
           );
-          const res = yield* Effect.tryPromise({
-            try: () => client.jobs.$post({ json: { ...job } }),
-            catch: (error) =>
-              new InsertJobError({ reason: "fetch failed", error }),
-          });
+          const res = yield* Effect.orDieWith(
+            Effect.tryPromise({
+              try: () => client.jobs.$post({ json: { ...job } }),
+              catch: (error) =>
+                new InsertJobError({ reason: "fetch failed", error }),
+            }),
+            (e) =>
+              new Error(
+                `insertJob fetch failed: ${e.reason}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+              ),
+          );
           if (!res.ok) {
-            const text = yield* Effect.tryPromise({
-              try: () => res.text(),
-              catch: () =>
-                new InsertJobError({ reason: "failed to read response body" }),
-            });
-            yield* new InsertJobError({
-              reason: `API responded with ${res.status}: ${text}`,
-            });
+            const text = yield* Effect.promise(() =>
+              res.text().catch(() => "<unreadable>"),
+            );
+            return yield* Effect.die(
+              new Error(`insertJob API responded with ${res.status}: ${text}`),
+            );
           }
           yield* Effect.logDebug("insert job succeeded");
         });
@@ -56,22 +60,26 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
           yield* Effect.logDebug(
             `executing upsert company api. establishmentNumber=${company.establishmentNumber}`,
           );
-          const res = yield* Effect.tryPromise({
-            try: () => client.companies.$post({ json: { ...company } }),
-            catch: (error) =>
-              new UpsertCompanyError({ reason: "fetch failed", error }),
-          });
+          const res = yield* Effect.orDieWith(
+            Effect.tryPromise({
+              try: () => client.companies.$post({ json: { ...company } }),
+              catch: (error) =>
+                new UpsertCompanyError({ reason: "fetch failed", error }),
+            }),
+            (e) =>
+              new Error(
+                `upsertCompany fetch failed: ${e.reason}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
+              ),
+          );
           if (!res.ok) {
-            const text = yield* Effect.tryPromise({
-              try: () => res.text(),
-              catch: () =>
-                new UpsertCompanyError({
-                  reason: "failed to read response body",
-                }),
-            });
-            yield* new UpsertCompanyError({
-              reason: `API responded with ${res.status}: ${text}`,
-            });
+            const text = yield* Effect.promise(() =>
+              res.text().catch(() => "<unreadable>"),
+            );
+            return yield* Effect.die(
+              new Error(
+                `upsertCompany API responded with ${res.status}: ${text}`,
+              ),
+            );
           }
           yield* Effect.logDebug("upsert company succeeded");
         });
@@ -86,12 +94,8 @@ export class JobStoreClient extends Effect.Service<JobStoreClient>()(
 export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
   JobDetailLoader,
   {
-    readonly load: (
-      data: TransformedJob,
-    ) => Effect.Effect<void, InsertJobError>;
-    readonly loadCompany: (
-      company: Company,
-    ) => Effect.Effect<void, UpsertCompanyError>;
+    readonly load: (data: TransformedJob) => Effect.Effect<void>;
+    readonly loadCompany: (company: Company) => Effect.Effect<void>;
   }
 >() {
   static main = Layer.effect(
@@ -99,14 +103,12 @@ export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
     Effect.gen(function* () {
       const client = yield* JobStoreClient;
       return {
-        load: (data: TransformedJob): Effect.Effect<void, InsertJobError> =>
+        load: (data: TransformedJob): Effect.Effect<void> =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading job detail...");
             yield* client.insertJob(data);
           }),
-        loadCompany: (
-          company: Company,
-        ): Effect.Effect<void, UpsertCompanyError> =>
+        loadCompany: (company: Company): Effect.Effect<void> =>
           Effect.gen(function* () {
             yield* Effect.logInfo("start loading company...");
             yield* client.upsertCompany(company);
