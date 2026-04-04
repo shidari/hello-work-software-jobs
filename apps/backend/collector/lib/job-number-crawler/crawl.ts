@@ -211,7 +211,7 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
       },
     },
     nextPageDelayMs: 3000,
-    roughMaxCount: 1,
+    roughMaxCount: 1000,
   });
   static dev = Layer.succeed(JobNumberCrawlerConfig, {
     jobSearchCriteria: {
