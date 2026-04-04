@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
 import { jobStoreClient } from "@/lib/backend-client";
+import { JobsPagination } from "./JobsPagination_client";
 import styles from "./JobsPageClient.module.css";
 import { JobsPagination } from "./JobsPagination_client";
 import { SearchFilterForm } from "./SearchFilterForm_client";
