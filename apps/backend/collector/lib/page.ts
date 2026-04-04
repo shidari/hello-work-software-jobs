@@ -84,8 +84,8 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
       try: async () => {
         await Promise.all([
           page.waitForURL("**/kensaku/*.do"),
-          // ページ内に #ID_searchNoBtn が2つ存在するため visible なものに絞り込む
-          page.locator("#ID_searchNoBtn >> visible=true").click(),
+          // ページ内に #ID_searchNoBtn が複数存在するため visible かつ先頭要素に絞り込む
+          page.locator("#ID_searchNoBtn >> visible=true").first().click(),
         ]);
       },
       catch: (error) =>
