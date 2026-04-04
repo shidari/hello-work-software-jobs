@@ -10,6 +10,12 @@
   border-bottom: 2px solid var(--color-accent);
 }
 
+.labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .layout-job-detail {
     padding: 1rem;

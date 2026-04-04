@@ -1,0 +1,17 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.companyName {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}

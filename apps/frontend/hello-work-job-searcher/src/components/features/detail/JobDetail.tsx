@@ -1,10 +1,4 @@
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemTitle,
-} from "@/components/ui/Item";
+import { Label } from "@/components/ui/Label";
 import type { JobDetail } from "@/dto";
 import { formatDate } from "@/util";
 import styles from "./JobDetail.module.css";
@@ -26,69 +20,24 @@ export function JobDetailCard(props: { jobDetail: JobDetail }) {
   return (
     <article className={styles["layout-job-detail"]}>
       <h2>求人番号: {jobNumber}</h2>
-      <ItemGroup>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>企業名</ItemTitle>
-            <ItemDescription>{companyName ?? "未記載"}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>職種</ItemTitle>
-            <ItemDescription>{occupation}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>求人区分</ItemTitle>
-            <ItemDescription>{employmentType}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>職務概要</ItemTitle>
-            <ItemDescription>{jobDescription ?? "未記載"}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>賃金</ItemTitle>
-            <ItemDescription>
-              {wage ? `${wage.min}円〜${wage.max}円` : "未記載"}
-            </ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>就業場所</ItemTitle>
-            <ItemDescription>{workPlace ?? "未記載"}</ItemDescription>
-          </ItemContent>
-        </Item>
+      <div className={styles.labels}>
+        <Label term="企業名">{companyName ?? "未記載"}</Label>
+        <Label term="職種">{occupation}</Label>
+        <Label term="求人区分">{employmentType}</Label>
+        <Label term="職務概要">{jobDescription ?? "未記載"}</Label>
+        <Label term="賃金">
+          {wage ? `${wage.min}円〜${wage.max}円` : "未記載"}
+        </Label>
+        <Label term="就業場所">{workPlace ?? "未記載"}</Label>
         {workPlace && <WorkPlaceMap address={workPlace} />}
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>紹介期限</ItemTitle>
-            <ItemDescription>{formatDate(expiryDate)}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>勤務時間</ItemTitle>
-            <ItemDescription>
-              {workingHours
-                ? `${workingHours.start ?? "?"}〜${workingHours.end ?? "?"}`
-                : "未記載"}
-            </ItemDescription>
-          </ItemContent>
-        </Item>
-        <Item variant="outline">
-          <ItemContent>
-            <ItemTitle>必須資格</ItemTitle>
-            <ItemDescription>{qualifications ?? "未記載"}</ItemDescription>
-          </ItemContent>
-        </Item>
-      </ItemGroup>
+        <Label term="紹介期限">{formatDate(expiryDate)}</Label>
+        <Label term="勤務時間">
+          {workingHours
+            ? `${workingHours.start ?? "?"}〜${workingHours.end ?? "?"}`
+            : "未記載"}
+        </Label>
+        <Label term="必須資格">{qualifications ?? "未記載"}</Label>
+      </div>
     </article>
   );
 }

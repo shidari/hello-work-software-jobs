@@ -5,10 +5,10 @@ import Link from "next/link";
 import { FavoriteButton } from "@/components/features/favorites/FavoriteButton";
 import { JobOverviewSummary } from "@/components/features/list/JobOverview";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
 import { jobStoreClient } from "@/lib/backend-client";
-import { JobsPagination } from "./JobsPagination_client";
 import styles from "./JobsPageClient.module.css";
 import { JobsPagination } from "./JobsPagination_client";
 import { SearchFilterForm } from "./SearchFilterForm_client";
@@ -113,7 +113,7 @@ export default async function Page({
               className={styles.cardLink}
             >
               <Card>
-                {isNew && <span className={styles.newBadge}>新着</span>}
+                {isNew && <Badge className={styles.newBadge}>新着</Badge>}
                 <JobOverviewSummary
                   jobNumber={job.jobNumber}
                   companyName={job.companyName}
