@@ -23,7 +23,7 @@ scripts/                            # クローラー診断スクリプト
 ## 技術スタック
 
 - **共通**: TypeScript, pnpm workspace
-- **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC)
+- **フロントエンド**: Next.js 16, React 19, Jotai, Hono (RPC), Storybook 10
 - **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: AWS Lambda (Docker), SQS, EventBridge, Playwright, Effect, CDK
 - **型管理**: Effect Schema, @sho/models
@@ -37,6 +37,7 @@ pnpm install
 
 # 各パッケージの開発サーバー起動
 cd apps/frontend/hello-work-job-searcher && pnpm dev   # フロントエンド (port 9002)
+cd apps/frontend/hello-work-job-searcher && pnpm storybook  # Storybook (port 6006)
 cd apps/backend/api && pnpm dev                        # API (port 8787)
 
 # クローラー検証

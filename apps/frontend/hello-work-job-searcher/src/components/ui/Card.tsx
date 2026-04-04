@@ -1,64 +1,20 @@
-import type { ComponentProps } from "react";
+import type { HTMLAttributes } from "react";
 import styles from "./Card.module.css";
 
-export function Card({ className, ...props }: ComponentProps<"div">) {
+type CardProps = HTMLAttributes<HTMLDivElement>;
+
+export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
       className={`${styles.card}${className ? ` ${className}` : ""}`}
       {...props}
-    />
+    >
+      {children}
+    </div>
   );
 }
 
-export function CardHeader({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.header}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function CardTitle({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.title}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function CardDescription({
-  className,
-  ...props
-}: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.description}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function CardContent({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.content}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function CardFooter({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={`${styles.footer}${className ? ` ${className}` : ""}`}
-      {...props}
-    />
-  );
-}
-
-export function CardGroup({ className, ...props }: ComponentProps<"div">) {
+export function CardGroup({ className, ...props }: CardProps) {
   return (
     <div
       className={`${styles.group}${className ? ` ${className}` : ""}`}
