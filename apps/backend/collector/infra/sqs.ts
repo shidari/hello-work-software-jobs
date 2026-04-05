@@ -1,13 +1,11 @@
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import type { JobNumber } from "@sho/models";
 import { Config, Data, Effect } from "effect";
+import type { SystemError } from "../lib/error";
 
 // ── エラー ──
 
-class QueueSendError extends Data.TaggedError("QueueSendError")<{
-  readonly message: string;
-  readonly error: unknown;
-}> {}
+class QueueSendError extends Data.TaggedError("QueueSendError")<SystemError> {}
 
 // ── JobDetailQueue Effect.Service ──
 
@@ -24,26 +22,20 @@ export class JobDetailQueue extends Effect.Service<JobDetailQueue>()(
       });
       return {
         send: (payload: { jobNumber: JobNumber }) =>
-          Effect.orDieWith(
-            Effect.tryPromise({
-              try: () =>
-                client.send(
-                  new SendMessageCommand({
-                    QueueUrl: queueUrl,
-                    MessageBody: JSON.stringify(payload),
-                  }),
-                ),
-              catch: (e) =>
-                new QueueSendError({
-                  message: "Failed to send to SQS",
-                  error: e,
+          Effect.tryPromise({
+            try: () =>
+              client.send(
+                new SendMessageCommand({
+                  QueueUrl: queueUrl,
+                  MessageBody: JSON.stringify(payload),
                 }),
-            }),
-            (e) =>
-              new Error(
-                `SQS send failed: ${e.message}, error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
               ),
-          ),
+            catch: (e) =>
+              new QueueSendError({
+                reason: "Failed to send to SQS",
+                error: e instanceof Error ? e : new Error(String(e)),
+              }),
+          }),
       };
     }),
   },

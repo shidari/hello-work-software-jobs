@@ -1,6 +1,7 @@
 import type { JobNumber } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
 import type { Page } from "../browser";
+import type { DomainError, SystemError } from "../error";
 import {
   type FirstJobListPage,
   type JobDetailPage,
@@ -11,7 +12,6 @@ import {
 // ── RawJob スキーマ: DOM から抽出した生テキスト ──
 
 export const RawJob = Schema.Struct({
-  // 既存フィールド
   jobNumber: Schema.NullOr(Schema.String),
   companyName: Schema.NullOr(Schema.String),
   receivedDate: Schema.NullOr(Schema.String),
@@ -25,13 +25,11 @@ export const RawJob = Schema.Struct({
   workPlace: Schema.NullOr(Schema.String),
   jobDescription: Schema.NullOr(Schema.String),
   qualifications: Schema.NullOr(Schema.String),
-  // 新���: 求人情報
   establishmentNumber: Schema.NullOr(Schema.String),
   jobCategory: Schema.NullOr(Schema.String),
   industryClassification: Schema.NullOr(Schema.String),
   publicEmploymentOffice: Schema.NullOr(Schema.String),
   onlineApplicationAccepted: Schema.NullOr(Schema.String),
-  // 新規: 仕事内容
   dispatchType: Schema.NullOr(Schema.String),
   employmentPeriod: Schema.NullOr(Schema.String),
   ageRequirement: Schema.NullOr(Schema.String),
@@ -40,11 +38,9 @@ export const RawJob = Schema.Struct({
   trialPeriod: Schema.NullOr(Schema.String),
   carCommute: Schema.NullOr(Schema.String),
   transferPossibility: Schema.NullOr(Schema.String),
-  // 新規: 賃金
   wageType: Schema.NullOr(Schema.String),
   raise: Schema.NullOr(Schema.String),
   bonus: Schema.NullOr(Schema.String),
-  // 新規: ��の他条件
   insurance: Schema.NullOr(Schema.String),
   retirementBenefit: Schema.NullOr(Schema.String),
 });
@@ -69,29 +65,25 @@ export type RawCompany = typeof RawCompany.Type;
 
 export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   "ExtractJobDetailRawHtmlError",
-)<{
-  readonly jobNumber: string;
-  readonly currentUrl: string;
-  readonly reason: string;
-  readonly error?: unknown;
-}> {}
+)<SystemError & { readonly jobNumber: string; readonly currentUrl: string }> {}
 
-class FromJobListToJobDetailPageError extends Data.TaggedError(
-  "FromJobListToJobDetailPageError",
-)<{ readonly message: string; readonly error: unknown }> {}
+class PageNavigationError extends Data.TaggedError(
+  "PageNavigationError",
+)<SystemError> {}
 
-class ListJobsError extends Data.TaggedError("ListJobsError")<{
-  readonly message: string;
-  readonly error: unknown;
-}> {}
+class ListJobsError extends Data.TaggedError("ListJobsError")<SystemError> {}
 
 class JobDetailPageValidationError extends Data.TaggedError(
   "JobDetailPageValidationError",
-)<{
-  readonly reason: string;
-  readonly currentUrl: string;
-  readonly error: unknown;
-}> {}
+)<DomainError & { readonly currentUrl: string }> {}
+
+class EmptyJobListError extends Data.TaggedError(
+  "EmptyJobListError",
+)<DomainError> {}
+
+class UnexpectedJobCountError extends Data.TaggedError(
+  "UnexpectedJobCountError",
+)<DomainError> {}
 
 // ── DOM → RawJob 抽出 ──
 
@@ -189,20 +181,19 @@ export function extractRawCompanyFromDocument(document: Document): RawCompany {
 // ── ページ操作ヘルパー ──
 
 function listJobOverviewElem(page: FirstJobListPage) {
-  return Effect.orDieWith(
-    Effect.tryPromise({
-      try: () => page.locator("table.kyujin").all(),
-      catch: (e) =>
-        new ListJobsError({ message: "unexpected error", error: e }),
-    }),
-    (e) =>
-      new Error(
-        `listJobOverviewElem failed: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-      ),
-  ).pipe(
+  return Effect.tryPromise({
+    try: () => page.locator("table.kyujin").all(),
+    catch: (e) =>
+      new ListJobsError({
+        reason: "failed to list job overview elements",
+        error: e instanceof Error ? e : new Error(String(e)),
+      }),
+  }).pipe(
     Effect.flatMap((tables) =>
       tables.length === 0
-        ? Effect.die(new Error("jobOverList is empty."))
+        ? Effect.fail(
+            new EmptyJobListError({ reason: "jobOverList is empty." }),
+          )
         : Effect.succeed(tables),
     ),
     Effect.tap((jobOverViewList) =>
@@ -220,8 +211,10 @@ function assertSingleJobListed(page: FirstJobListPage) {
       yield* Effect.logDebug(
         `failed to assert single job listed. job count=${jobOverViewList.length}`,
       );
-      return yield* Effect.die(
-        new Error(`job list count should be 1 but ${jobOverViewList.length}`),
+      return yield* Effect.fail(
+        new UnexpectedJobCountError({
+          reason: `job list count should be 1 but ${jobOverViewList.length}`,
+        }),
       );
     }
   });
@@ -230,26 +223,18 @@ function assertSingleJobListed(page: FirstJobListPage) {
 function goToSingleJobDetailPage(page: FirstJobListPage) {
   return Effect.gen(function* () {
     yield* assertSingleJobListed(page);
-    yield* Effect.orDieWith(
-      Effect.tryPromise({
-        try: async () => {
-          const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
-          showDetailBtn.evaluate((elm: Element) =>
-            elm.removeAttribute("target"),
-          );
-          await showDetailBtn.click();
-        },
-        catch: (e) =>
-          new FromJobListToJobDetailPageError({
-            message: "unexpected error",
-            error: e,
-          }),
-      }),
-      (e) =>
-        new Error(
-          `goToSingleJobDetailPage failed: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-        ),
-    );
+    yield* Effect.tryPromise({
+      try: async () => {
+        const showDetailBtn = page.locator("#ID_dispDetailBtn").first();
+        showDetailBtn.evaluate((elm: Element) => elm.removeAttribute("target"));
+        await showDetailBtn.click();
+      },
+      catch: (e) =>
+        new PageNavigationError({
+          reason: "goToSingleJobDetailPage failed",
+          error: e instanceof Error ? e : new Error(String(e)),
+        }),
+    });
     yield* Effect.logDebug("navigated to job detail page from job list page.");
     const _page: Page = page;
     return _page as JobDetailPage;
@@ -258,30 +243,24 @@ function goToSingleJobDetailPage(page: FirstJobListPage) {
 
 function validateJobDetailPage(page: JobDetailPage) {
   return Effect.gen(function* () {
-    const jobTitle = yield* Effect.orDieWith(
-      Effect.tryPromise({
-        try: async () => {
-          const jobTitle = await page.locator("div.page_title").textContent();
-          return jobTitle;
-        },
-        catch: (e) =>
-          new JobDetailPageValidationError({
-            reason: `${e instanceof Error ? e.message : String(e)}`,
-            currentUrl: page.url(),
-            error: e,
-          }),
-      }),
-      (e) =>
-        new Error(
-          `validateJobDetailPage failed: ${e.reason}, url=${e.currentUrl}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-        ),
-    );
+    const jobTitle = yield* Effect.tryPromise({
+      try: async () => {
+        const jobTitle = await page.locator("div.page_title").textContent();
+        return jobTitle;
+      },
+      catch: (e) =>
+        new PageNavigationError({
+          reason: "failed to extract page title",
+          error: e instanceof Error ? e : new Error(String(e)),
+        }),
+    });
     yield* Effect.logDebug(`extracted job title: ${jobTitle}`);
     if (jobTitle !== "求人情報")
-      return yield* Effect.die(
-        new Error(
-          `textContent of div.page_title should be 求人情報 but got: "${jobTitle}", url=${page.url()}`,
-        ),
+      return yield* Effect.fail(
+        new JobDetailPageValidationError({
+          reason: `textContent of div.page_title should be 求人情報 but got: "${jobTitle}"`,
+          currentUrl: page.url(),
+        }),
       );
     return page;
   });
@@ -306,22 +285,16 @@ export class JobDetailExtractor extends Effect.Service<JobDetailExtractor>()(
         yield* Effect.logDebug("now on job List page.");
         const jobDetailPage = yield* goToSingleJobDetailPage(firstJobListPage);
         yield* validateJobDetailPage(jobDetailPage);
-        const rawHtml = yield* Effect.orDieWith(
-          Effect.tryPromise({
-            try: () => jobDetailPage.content(),
-            catch: (error) =>
-              new ExtractJobDetailRawHtmlError({
-                jobNumber,
-                currentUrl: jobDetailPage.url(),
-                reason: `${error instanceof Error ? error.message : String(error)}`,
-                error,
-              }),
-          }),
-          (e) =>
-            new Error(
-              `extractRawHtml failed: jobNumber=${e.jobNumber}, url=${e.currentUrl}, reason=${e.reason}`,
-            ),
-        );
+        const rawHtml = yield* Effect.tryPromise({
+          try: () => jobDetailPage.content(),
+          catch: (e) =>
+            new ExtractJobDetailRawHtmlError({
+              reason: "failed to extract raw HTML",
+              error: e instanceof Error ? e : new Error(String(e)),
+              jobNumber,
+              currentUrl: jobDetailPage.url(),
+            }),
+        });
         return {
           rawHtml,
           fetchedDate: new Date().toISOString().slice(0, 10),
