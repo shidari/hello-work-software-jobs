@@ -38,11 +38,25 @@ const processJobDetail = async (jobNumber: string) => {
         }
       }),
     ),
-    Effect.retry({ times: 2 }),
+    Effect.retry({
+      times: 2,
+      while: (e) => {
+        switch (e._tag) {
+          case "PageActionError":
+          case "PageNavigationError":
+          case "ListJobsError":
+          case "ApiResponseError":
+            return true;
+          default:
+            return false;
+        }
+      },
+    }),
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.orDie,
     Effect.runPromise,
   );
   console.log(`${jobNumber} success`);

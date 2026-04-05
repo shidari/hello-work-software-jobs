@@ -20,6 +20,7 @@ export const handler = async () => {
       Effect.provide(JobNumberCrawlerConfig.main),
       Effect.provide(PlaywrightBrowserConfig.lambda),
       Effect.provide(JobDetailQueue.Default),
+      Effect.orDie,
       Effect.runPromise,
     )
     .catch((error) => {

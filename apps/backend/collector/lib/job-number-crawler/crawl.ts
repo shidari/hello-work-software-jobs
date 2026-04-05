@@ -10,6 +10,7 @@ import {
   Stream,
 } from "effect";
 import type { Locator } from "../browser";
+import type { DomainError, SystemError } from "../error";
 import {
   type JobSearchCriteria,
   navigateByCriteria,
@@ -32,7 +33,11 @@ export type CrawlerConfig = {
 
 class JobListPageScraperError extends Data.TaggedError(
   "JobListPageScraperError",
-)<{ readonly message: string; readonly error?: unknown }> {}
+)<SystemError> {}
+
+class JobNumberValidationError extends Data.TaggedError(
+  "JobNumberValidationError",
+)<DomainError> {}
 
 // ============================================================
 // Functions
@@ -46,10 +51,10 @@ const validateJobNumber = Effect.fn("validateJobNumber")(function* (
   );
   const result = Schema.decodeUnknownEither(JobNumber)(val);
   if (Either.isLeft(result))
-    return yield* Effect.die(
-      new Error(
-        `job number validation failed. val=${JSON.stringify(val, null, 2)}\n${formatParseError(result.left)}`,
-      ),
+    return yield* Effect.fail(
+      new JobNumberValidationError({
+        reason: `job number validation failed. val=${JSON.stringify(val, null, 2)}\n${formatParseError(result.left)}`,
+      }),
     );
   return result.right;
 });
@@ -59,30 +64,28 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
 ) {
   return yield* Effect.forEach(jobOverviewList, (table) =>
     Effect.gen(function* () {
-      const rawJobNumber = yield* Effect.orDieWith(
-        Effect.tryPromise({
-          try: async () => {
-            const text = await table
-              .locator("button.qr_btn[data-id]")
-              .getAttribute("data-id");
-            return text;
-          },
-          catch: (e) =>
-            new JobListPageScraperError({
-              message: "failed to extract job number",
-              error: e,
-            }),
-        }),
-        (e) =>
-          new Error(
-            `failed to extract job number: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-          ),
-      );
+      const rawJobNumber = yield* Effect.tryPromise({
+        try: async () => {
+          const text = await table
+            .locator("button.qr_btn[data-id]")
+            .getAttribute("data-id");
+          return text;
+        },
+        catch: (e) =>
+          new JobListPageScraperError({
+            reason: "failed to extract job number",
+            error: e instanceof Error ? e : new Error(String(e)),
+          }),
+      });
       yield* rawJobNumber === null
         ? Effect.logDebug("Warning: jobNumber textContent is null")
         : Effect.logDebug(`rawJobNumber=${rawJobNumber}`);
       if (rawJobNumber === null) {
-        return yield* Effect.die(new Error("jobNumber is null"));
+        return yield* Effect.fail(
+          new JobNumberValidationError({
+            reason: "jobNumber is null",
+          }),
+        );
       }
       return yield* validateJobNumber(rawJobNumber.trim());
     }),
@@ -92,20 +95,14 @@ const extractJobNumbers = Effect.fn("extractJobNumbers")(function* (
 const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
   page: JobListPage,
 ) {
-  return yield* Effect.orDieWith(
-    Effect.tryPromise({
-      try: () => page.locator("table.kyujin").all(),
-      catch: (e) =>
-        new JobListPageScraperError({
-          message: "failed to list job overview elements",
-          error: e,
-        }),
-    }),
-    (e) =>
-      new Error(
-        `failed to list job overview elements: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-      ),
-  ).pipe(
+  return yield* Effect.tryPromise({
+    try: () => page.locator("table.kyujin").all(),
+    catch: (e) =>
+      new JobListPageScraperError({
+        reason: "failed to list job overview elements",
+        error: e instanceof Error ? e : new Error(String(e)),
+      }),
+  }).pipe(
     Effect.tap((list) =>
       Effect.logDebug(`listed job overview elements. count=${list.length}`),
     ),
@@ -115,23 +112,17 @@ const listJobOverviewElem = Effect.fn("listJobOverviewElem")(function* (
 const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
   page: JobListPage,
 ) {
-  return yield* Effect.orDieWith(
-    Effect.tryPromise({
-      try: async () => {
-        const nextPageBtn = page.locator('input[value="次へ＞"]').first();
-        return !(await nextPageBtn.isDisabled());
-      },
-      catch: (e) =>
-        new JobListPageScraperError({
-          message: "failed to check next page",
-          error: e,
-        }),
-    }),
-    (e) =>
-      new Error(
-        `failed to check next page: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-      ),
-  ).pipe(
+  return yield* Effect.tryPromise({
+    try: async () => {
+      const nextPageBtn = page.locator('input[value="次へ＞"]').first();
+      return !(await nextPageBtn.isDisabled());
+    },
+    catch: (e) =>
+      new JobListPageScraperError({
+        reason: "failed to check next page",
+        error: e instanceof Error ? e : new Error(String(e)),
+      }),
+  }).pipe(
     Effect.tap((enabled) =>
       Effect.logDebug(`is next page enabled: ${enabled}`),
     ),
@@ -141,23 +132,17 @@ const isNextPageEnabled = Effect.fn("isNextPageEnabled")(function* (
 const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
   page: JobListPage,
 ) {
-  yield* Effect.orDieWith(
-    Effect.tryPromise({
-      try: async () => {
-        const nextButton = page.locator('input[value="次へ＞"]').first();
-        await nextButton.click();
-      },
-      catch: (e) =>
-        new JobListPageScraperError({
-          message: "failed to navigate to next page",
-          error: e,
-        }),
-    }),
-    (e) =>
-      new Error(
-        `failed to navigate to next page: ${e.message}, original error: ${e.error instanceof Error ? e.error.message : JSON.stringify(e.error)}`,
-      ),
-  );
+  yield* Effect.tryPromise({
+    try: async () => {
+      const nextButton = page.locator('input[value="次へ＞"]').first();
+      await nextButton.click();
+    },
+    catch: (e) =>
+      new JobListPageScraperError({
+        reason: "failed to navigate to next page",
+        error: e instanceof Error ? e : new Error(String(e)),
+      }),
+  });
   yield* Effect.logDebug("navigated to next job list page.");
 });
 
