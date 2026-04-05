@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "pnpm exec storybook dev -p 6006",
+    "build-storybook": "pnpm exec storybook build"
   },
   "dependencies": {
     "@sho/api": "workspace:*",
