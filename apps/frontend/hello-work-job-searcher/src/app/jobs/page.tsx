@@ -2,11 +2,8 @@ export const dynamic = "force-dynamic";
 
 import { Schema } from "effect";
 import Link from "next/link";
-import { FavoriteButton } from "@/components/features/favorites/FavoriteButton";
-import { JobOverviewSummary } from "@/components/features/list/JobOverview";
+import { JobCard } from "@/components/features/list/JobCard";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/Card";
 import { Collapsible } from "@/components/ui/Collapsible";
 import { jobStoreClient } from "@/lib/backend-client";
 import styles from "./JobsPageClient.module.css";
@@ -112,29 +109,7 @@ export default async function Page({
               href={`/jobs/${job.jobNumber}`}
               className={styles.cardLink}
             >
-              <Card>
-                {isNew && <Badge className={styles.newBadge}>新着</Badge>}
-                <JobOverviewSummary
-                  jobNumber={job.jobNumber}
-                  companyName={job.companyName}
-                  occupation={job.occupation}
-                  employmentType={job.employmentType}
-                  workPlace={job.workPlace}
-                  employeeCount={job.employeeCount}
-                  receivedDate={job.receivedDate}
-                />
-                <FavoriteButton
-                  job={{
-                    jobNumber: job.jobNumber,
-                    companyName: job.companyName,
-                    occupation: job.occupation,
-                    employmentType: job.employmentType,
-                    workPlace: job.workPlace,
-                    employeeCount: job.employeeCount,
-                    receivedDate: job.receivedDate,
-                  }}
-                />
-              </Card>
+              <JobCard job={job} isNew={isNew} />
             </Link>
           );
         })}
