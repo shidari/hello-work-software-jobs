@@ -24,8 +24,8 @@
 }
 
 .items {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  justify-items: center;
   gap: 0.5rem;
   padding: 0.25rem 0.5rem;
 }
