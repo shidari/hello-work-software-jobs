@@ -14,7 +14,7 @@
     ],
     "scripts": {
       "crawler-diagnose": "bash scripts/crawler-diagnose.sh",
-      "crawler-logs": "bash scripts/check-crawler-logs.sh \"$@\""
+      "crawler-logs": "bash scripts/check-job-detail-etl-logs.sh \"$@\""
     }
   }
 }

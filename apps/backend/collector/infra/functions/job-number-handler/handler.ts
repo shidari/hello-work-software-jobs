@@ -30,16 +30,16 @@ export const handler = async () => {
 
   console.log(`crawler success: ${jobs.length} jobs`);
 
-  // Playwright が /tmp/playwright_* にプロファイルを生成し browser.close() 後も残る。
+  // Playwright が /tmp/playwright* にプロファイルを生成し browser.close() 後も残る。
   // Warm Start でコンテナ再利用時に蓄積し /tmp 容量枯渇 → newPage() クラッシュの原因になると判断。
   try {
     for (const entry of await readdir("/tmp")) {
-      if (entry.startsWith("playwright_")) {
+      if (entry.startsWith("playwright")) {
         await rm(`/tmp/${entry}`, { recursive: true, force: true });
       }
     }
   } catch (e) {
-    console.error("cleanup /tmp/playwright_* failed", e);
+    console.error("cleanup /tmp/playwright* failed", e);
   }
 
   return jobs;
