@@ -29,12 +29,12 @@ const processJobDetail = async (jobNumber: string) => {
       Effect.promise(async function cleanup() {
         try {
           for (const entry of await readdir("/tmp")) {
-            if (entry.startsWith("playwright_")) {
+            if (entry.startsWith("playwright")) {
               await rm(`/tmp/${entry}`, { recursive: true, force: true });
             }
           }
         } catch (e) {
-          console.log("cleanup /tmp/playwright_* failed:", e);
+          console.log("cleanup /tmp/playwright* failed:", e);
         }
       }),
     ),
