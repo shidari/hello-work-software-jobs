@@ -48,5 +48,5 @@ pnpm build             # tsdown ビルド
 
 # 診断スクリプト (AWS_PROFILE=crawler-debug が必要)
 devbox run crawler-diagnose          # クローラーパイプライン全体診断
-devbox run crawler-logs [DAYS]       # 直近 N 日のエラーログ (デフォルト 3 日)
+devbox run crawler-logs [MINUTES]     # 直近 N 分の ETL エラーログ (デフォルト 30 分)
 ```
