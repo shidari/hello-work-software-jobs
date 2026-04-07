@@ -8,7 +8,7 @@
 
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
-import { PlaywrightBrowserConfig } from "../browser";
+import { ChromiumBrowserConfig } from "../browser";
 import { navigateByJobNumber, openJobSearchPage } from "../page";
 
 const jobNumber = (process.argv[2] ?? "13010-35021361") as JobNumber;
@@ -47,7 +47,7 @@ async function main() {
   });
 
   const runnable = program.pipe(
-    Effect.provide(PlaywrightBrowserConfig.dev),
+    Effect.provide(ChromiumBrowserConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );

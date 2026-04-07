@@ -25,8 +25,4 @@ RUN pnpm --filter @sho/models build
 COPY apps/backend/collector/ apps/backend/collector/
 RUN pnpm --filter collector build
 
-# Playwright Chromium をインストール
-ENV PLAYWRIGHT_BROWSERS_PATH=${LAMBDA_TASK_ROOT}/pw-browsers
-RUN pnpm --filter collector exec playwright install chromium
-
 CMD ["apps/backend/collector/dist/job-number-handler.handler"]

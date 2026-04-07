@@ -1,5 +1,5 @@
 import { Effect, Logger, LogLevel } from "effect";
-import { PlaywrightBrowserConfig } from "../browser";
+import { ChromiumBrowserConfig } from "../browser";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
@@ -14,7 +14,7 @@ async function main() {
 
   const runnable = program.pipe(
     Effect.provide(JobNumberCrawlerConfig.dev),
-    Effect.provide(PlaywrightBrowserConfig.dev),
+    Effect.provide(ChromiumBrowserConfig.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
   Effect.runPromise(runnable).then((jobNumbers) =>

@@ -1,8 +1,9 @@
-import { Console, Data, Effect, Layer } from "effect";
-import { chromium, type LaunchOptions } from "playwright";
+import { Console, Context, Data, Effect, Layer } from "effect";
+import type { LaunchOptions } from "playwright-core";
+import { chromium } from "playwright-core";
 import type { SystemError } from "./error";
 
-export type { Locator, Page } from "playwright";
+export type { Locator, Page } from "playwright-core";
 
 // ── Errors ──
 
@@ -18,26 +19,39 @@ export class BrowserNewPageError extends Data.TaggedError(
   "BrowserNewPageError",
 )<SystemError> {}
 
-// ── Config (Context.Tag — ブラウザ設定) ──
+// ── BrowserConfig (Context.Tag — playwright launch options) ──
 
-export class PlaywrightBrowserConfig extends Effect.Tag(
-  "PlaywrightBrowserConfig",
-)<PlaywrightBrowserConfig, LaunchOptions>() {
-  static lambda = Layer.succeed(PlaywrightBrowserConfig, {
-    args: [
-      "--no-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--single-process",
-    ],
-  });
-  static dev = Layer.succeed(PlaywrightBrowserConfig, { headless: false });
+export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
+  ChromiumBrowserConfig,
+  LaunchOptions
+>() {
+  static lambda = Layer.effect(
+    ChromiumBrowserConfig,
+    Effect.tryPromise({
+      try: async () => {
+        const { default: mod } = await import("@sparticuz/chromium");
+        return {
+          executablePath: await mod.executablePath(),
+          args: mod.args,
+        } satisfies LaunchOptions;
+      },
+      catch: (e) =>
+        new BrowserLaunchError({
+          reason: "failed to resolve chromium config",
+          error: e instanceof Error ? e : new Error(String(e)),
+        }),
+    }),
+  );
+
+  static dev = Layer.succeed(ChromiumBrowserConfig, {
+    headless: false,
+  } satisfies LaunchOptions);
 }
 
-// ── Browser / Page (Effect.fn — ライフサイクル管理) ──
+// ── openBrowserPage (Effect.fn) ──
 
 export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
-  const config = yield* PlaywrightBrowserConfig;
+  const config = yield* ChromiumBrowserConfig;
   yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
     Effect.tryPromise({
