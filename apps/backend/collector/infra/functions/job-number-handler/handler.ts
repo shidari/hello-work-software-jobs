@@ -1,6 +1,6 @@
 import { readdir, rm } from "node:fs/promises";
 import { Effect } from "effect";
-import { PlaywrightBrowserConfig } from "../../../lib/browser";
+import { ChromiumBrowserConfig } from "../../../lib/browser";
 import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
@@ -18,7 +18,7 @@ export const handler = async () => {
   )
     .pipe(
       Effect.provide(JobNumberCrawlerConfig.main),
-      Effect.provide(PlaywrightBrowserConfig.lambda),
+      Effect.provide(ChromiumBrowserConfig.lambda),
       Effect.provide(JobDetailQueue.Default),
       Effect.orDie,
       Effect.runPromise,

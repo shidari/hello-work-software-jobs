@@ -2,7 +2,7 @@ import { readdir, rm } from "node:fs/promises";
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
-import { PlaywrightBrowserConfig } from "../../../lib/browser";
+import { ChromiumBrowserConfig } from "../../../lib/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -19,12 +19,10 @@ const SqsJobMessage = Schema.Struct({
 // ── processJobDetail ──
 
 const processJobDetail = async (jobNumber: string) => {
-  await Effect.scoped(
-    Effect.gen(function* () {
-      const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
-      yield* processJob(parsed);
-    }),
-  ).pipe(
+  await Effect.gen(function* () {
+    const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
+    yield* processJob(parsed);
+  }).pipe(
     Effect.ensuring(
       Effect.promise(async function cleanup() {
         try {
@@ -55,7 +53,7 @@ const processJobDetail = async (jobNumber: string) => {
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
-    Effect.provide(PlaywrightBrowserConfig.lambda),
+    Effect.provide(ChromiumBrowserConfig.lambda),
     Effect.orDie,
     Effect.runPromise,
   );

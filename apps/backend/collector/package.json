@@ -27,9 +27,10 @@
     "@aws-sdk/client-sqs": "^3.800.0",
     "@sho/api": "workspace:*",
     "@sho/models": "workspace:*",
-"effect": "catalog:",
+    "@sparticuz/chromium": "^143.0.4",
+    "effect": "catalog:",
     "hono": "catalog:",
     "linkedom": "0.18.12",
-    "playwright": "^1.58.2"
+    "playwright-core": "^1.59.1"
   }
 }
