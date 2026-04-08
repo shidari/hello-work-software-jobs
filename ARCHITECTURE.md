@@ -12,7 +12,7 @@ hello-work-software-jobs/
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
-│   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
+│   ├── db/                          # Kysely DB factory & DB行スキーマ（Dialect 非依存）
 │   └── models/                      # ドメインモデル定義
 ├── docs/                            # プロジェクトドキュメント
 └── scripts/                         # 診断スクリプト
@@ -82,7 +82,7 @@ Job = {
 
 ## `packages/db`
 
-Kysely 型定義 + DB行スキーマ。D1 (SQLite) 向け。
+Kysely 型定義 + DB行スキーマ。Dialect 非依存（`createDB(dialect)` で DB クライアントを生成）。D1 固有の Dialect 組み立ては `api/src/infra/db.ts` で行う。
 
 - `schema.sql` が DDL の Source of Truth
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
@@ -111,6 +111,7 @@ Cloudflare Workers + Hono。
 ### 設計
 
 - **CQRS**: 各操作が独立した `Effect.Service`。コマンド（`InsertJobCommand`, `UpsertCompanyCommand`）とクエリ（`FindJobByNumberQuery`, `FetchJobsPageQuery`, `FetchDailyStatsQuery`, `FindCompanyQuery`）に分離。
+- **インフラ層**: `src/infra/db.ts` に `JobStoreDB`（Effect Context.Tag）と `createD1DB`（D1Dialect 組み立て）を集約。`JobStoreDB.main(binding)` で DB クライアントを生成。
 - **エラー**: `Data.TaggedError` で型安全なエラーハンドリング。コントローラーで `Effect.match` により分岐。
 - **ページネーション**: ページ番号方式。
 

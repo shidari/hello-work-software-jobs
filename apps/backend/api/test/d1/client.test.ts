@@ -1,12 +1,11 @@
 import { env } from "cloudflare:test";
-import { createD1DB } from "@sho/db";
 import { Job } from "@sho/models";
 import { Arbitrary, Effect } from "effect";
 import * as fc from "effect/FastCheck";
 import { expect, it } from "vitest";
-import { JobStoreDB } from "../../src/cqrs";
 import { InsertJobCommand } from "../../src/cqrs/commands";
 import { FindJobByNumberQuery } from "../../src/cqrs/queries";
+import { JobStoreDB } from "../../src/infra/db";
 
 declare module "cloudflare:test" {
   interface ProvidedEnv {
@@ -17,7 +16,7 @@ declare module "cloudflare:test" {
 const sampleJob = () => fc.sample(Arbitrary.make(Job), 1)[0];
 
 it("求人データを挿入できる", async () => {
-  const db = createD1DB(env.DB);
+  const db = JobStoreDB.main(env.DB);
   const insertingJob = sampleJob();
 
   const result = await Effect.runPromise(

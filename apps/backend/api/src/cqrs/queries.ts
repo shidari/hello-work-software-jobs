@@ -2,12 +2,12 @@ import { selectDailyStats } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
 import { DateTime } from "luxon";
 import { PAGE_SIZE } from "../constant";
+import { JobStoreDB } from "../infra/db";
 import {
   type Company,
   DbCompanySchema,
   DbJobSchema,
   type Job,
-  JobStoreDB,
   type SearchFilter,
 } from ".";
 
@@ -129,11 +129,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   qb.where("occupation", "like", `%${filter.occupation}%`),
                 )
                 .$if(!!filter.employmentType, (qb) =>
-                  qb.where(
-                    "employmentType",
-                    "like",
-                    `%${filter.employmentType}%`,
-                  ),
+                  qb.where("employmentType", "=", filter.employmentType!),
                 )
                 .$if(filter.wageMin !== undefined, (qb) =>
                   qb.where("wageMin", ">=", filter.wageMin!),

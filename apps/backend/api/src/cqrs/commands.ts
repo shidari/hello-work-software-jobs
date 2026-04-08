@@ -1,6 +1,7 @@
 import type { Company, Job } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
-import { DbCompanySchema, DbJobSchema, JobStoreDB } from ".";
+import { JobStoreDB } from "../infra/db";
+import { DbCompanySchema, DbJobSchema } from ".";
 
 // --- エラー ---
 

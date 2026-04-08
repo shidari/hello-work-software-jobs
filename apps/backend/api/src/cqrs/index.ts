@@ -1,5 +1,5 @@
-import { type createD1DB, DbCompanyRowSchema, DbJobRowSchema } from "@sho/db";
-import { Context, Schema } from "effect";
+import { DbCompanyRowSchema, DbJobRowSchema } from "@sho/db";
+import { Schema } from "effect";
 
 // --- DB行 ↔ ドメインモデル 変換スキーマ ---
 
@@ -174,15 +174,6 @@ export const DbCompanySchema = Schema.transform(
 );
 
 export type Company = typeof DbCompanySchema.Type;
-
-// --- DB 注入 ---
-
-export type KyselyD1Client = ReturnType<typeof createD1DB>;
-
-export class JobStoreDB extends Context.Tag("JobStoreDB")<
-  JobStoreDB,
-  KyselyD1Client
->() {}
 
 // --- 型定義 ---
 

@@ -1,9 +1,8 @@
-import { createD1DB } from "@sho/db";
 import { Effect, Schema } from "effect";
 import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
-import { JobStoreDB } from "../cqrs";
 import { FetchDailyStatsQuery } from "../cqrs/queries";
+import { JobStoreDB } from "../infra/db";
 
 const dailyStatsSuccessResponseSchema = Schema.Struct({
   stats: Schema.Array(
@@ -44,7 +43,7 @@ const app = new Hono<{ Bindings: Env }>().get(
   "/daily",
   dailyStatsRoute,
   (c) => {
-    const db = createD1DB(c.env.DB);
+    const db = JobStoreDB.main(c.env.DB);
 
     return Effect.runPromise(
       Effect.gen(function* () {

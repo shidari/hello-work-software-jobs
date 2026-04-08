@@ -1,4 +1,3 @@
-import { createD1DB } from "@sho/db";
 import { Job, JobNumber } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
 import { TreeFormatter } from "effect/ParseResult";
@@ -9,13 +8,13 @@ import {
   resolver,
 } from "hono-openapi";
 import { PAGE_SIZE } from "../constant";
-import { JobStoreDB } from "../cqrs";
 import { InsertJobCommand, InsertJobDuplicationError } from "../cqrs/commands";
 import {
   FetchJobError,
   FetchJobsPageQuery,
   FindJobByNumberQuery,
 } from "../cqrs/queries";
+import { JobStoreDB } from "../infra/db";
 
 // --- ローカルエラー型 ---
 
@@ -43,7 +42,7 @@ const jobListQuerySchema = Schema.Struct({
   employeeCountGt: Schema.optional(Schema.String),
   jobDescription: Schema.optional(Schema.String),
   jobDescriptionExclude: Schema.optional(Schema.String),
-  onlyNotExpired: Schema.optional(Schema.Boolean),
+  onlyNotExpired: Schema.optional(Schema.String),
   orderByReceiveDate: Schema.optional(
     Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
   ),
@@ -98,7 +97,7 @@ const errorResponses = {
   },
 } as const;
 
-const jobListSuccessResponseSchema = Schema.Struct({
+export const jobListSuccessResponseSchema = Schema.Struct({
   jobs: Schema.Array(Job),
   meta: Schema.Struct({
     totalCount: Schema.Number,
@@ -301,7 +300,7 @@ const app = new Hono<{ Bindings: Env }>()
         employeeCountLt: rawEmployeeCountLt,
         jobDescription: encodedJobDescription,
         jobDescriptionExclude: encodedJobDescriptionExclude,
-        onlyNotExpired,
+        onlyNotExpired: rawOnlyNotExpired,
         orderByReceiveDate,
         addedSince,
         addedUntil,
@@ -358,7 +357,7 @@ const app = new Hono<{ Bindings: Env }>()
         ? 1
         : Math.max(1, Math.floor(parsedPage));
 
-      const db = createD1DB(c.env.DB);
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {
@@ -398,7 +397,7 @@ const app = new Hono<{ Bindings: Env }>()
               employeeCountLt,
               jobDescription,
               jobDescriptionExclude,
-              onlyNotExpired,
+              onlyNotExpired: rawOnlyNotExpired === "true",
               orderByReceiveDate,
               addedSince,
               addedUntil,
@@ -473,7 +472,7 @@ const app = new Hono<{ Bindings: Env }>()
     async (c) => {
       console.log("in job insert route");
       const body = c.req.valid("json");
-      const db = createD1DB(c.env.DB);
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {
@@ -517,7 +516,7 @@ const app = new Hono<{ Bindings: Env }>()
     effectValidator("param", Schema.standardSchemaV1(jobFetchParamSchema)),
     (c) => {
       const { jobNumber } = c.req.valid("param");
-      const db = createD1DB(c.env.DB);
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {
