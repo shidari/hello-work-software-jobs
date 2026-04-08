@@ -11,6 +11,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./raw": {
+      "import": {
+        "types": "./dist/raw.d.mts",
+        "default": "./dist/raw.mjs"
+      },
+      "require": {
+        "types": "./dist/raw.d.cts",
+        "default": "./dist/raw.cjs"
+      }
     }
   },
   "scripts": {

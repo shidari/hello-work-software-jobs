@@ -1,15 +1,14 @@
 import { selectDailyStats } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
-import { DateTime } from "luxon";
 import { PAGE_SIZE } from "../constant";
-import { JobStoreDB } from "../infra/db";
 import {
-  type Company,
-  DbCompanySchema,
-  DbJobSchema,
-  type Job,
-  type SearchFilter,
-} from ".";
+  CompanyToCompanyTable,
+  type DbCompany,
+  type DbJob,
+  JobStoreDB,
+  JobToJobTable,
+} from "../infra/db";
+import type { SearchFilter } from "./schema";
 
 // --- エラー ---
 
@@ -37,15 +36,16 @@ export class FindJobByNumberQuery extends Effect.Service<FindJobByNumberQuery>()
       return {
         run: (jobNumber: string) =>
           Effect.tryPromise({
-            try: async (): Promise<Job | null> => {
+            try: async (): Promise<DbJob | null> => {
               const data = await db
                 .selectFrom("jobs")
                 .selectAll()
                 .where("jobNumber", "=", jobNumber)
                 .limit(1)
                 .execute();
-              const decodeDbRow = Schema.decodeUnknownSync(DbJobSchema);
-              return data.length > 0 ? decodeDbRow(data[0]) : null;
+              return data.length > 0
+                ? Schema.encodeUnknownSync(JobToJobTable)(data[0])
+                : null;
             },
             catch: (e) =>
               new FetchJobError({
@@ -67,7 +67,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
         run: (options: { page: number; filter: SearchFilter }) =>
           Effect.tryPromise({
             try: async (): Promise<{
-              jobs: Job[];
+              jobs: DbJob[];
               meta: { totalCount: number; page: number };
             }> => {
               const { page, filter } = options;
@@ -108,22 +108,16 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   qb.where("expiryDate", ">", new Date().toISOString()),
                 )
                 .$if(!!filter.addedSince, (qb) => {
-                  const result = DateTime.fromISO(filter.addedSince!, {
-                    zone: "Asia/Tokyo",
-                  })
-                    .startOf("day")
-                    .toUTC()
-                    .toISO();
-                  return result ? qb.where("createdAt", ">", result) : qb;
+                  const d = new Date(`${filter.addedSince!}T00:00:00+09:00`);
+                  return Number.isNaN(d.getTime())
+                    ? qb
+                    : qb.where("createdAt", ">", d.toISOString());
                 })
                 .$if(!!filter.addedUntil, (qb) => {
-                  const result = DateTime.fromISO(filter.addedUntil!, {
-                    zone: "Asia/Tokyo",
-                  })
-                    .endOf("day")
-                    .toUTC()
-                    .toISO();
-                  return result ? qb.where("createdAt", "<", result) : qb;
+                  const d = new Date(`${filter.addedUntil!}T23:59:59.999+09:00`);
+                  return Number.isNaN(d.getTime())
+                    ? qb
+                    : qb.where("createdAt", "<", d.toISOString());
                 })
                 .$if(!!filter.occupation, (qb) =>
                   qb.where("occupation", "like", `%${filter.occupation}%`),
@@ -175,10 +169,10 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .executeTakeFirstOrThrow();
               const totalCount = countResult.count;
-
-              const decodeDbRow = Schema.decodeUnknownSync(DbJobSchema);
               return {
-                jobs: jobList.map((row) => decodeDbRow(row)),
+                jobs: jobList.map((row) =>
+                  Schema.encodeUnknownSync(JobToJobTable)(row),
+                ),
                 meta: { totalCount, page },
               };
             },
@@ -207,15 +201,16 @@ export class FindCompanyQuery extends Effect.Service<FindCompanyQuery>()(
       return {
         run: (establishmentNumber: string) =>
           Effect.tryPromise({
-            try: async (): Promise<Company | null> => {
+            try: async (): Promise<DbCompany | null> => {
               const data = await db
                 .selectFrom("companies")
                 .selectAll()
                 .where("establishmentNumber", "=", establishmentNumber)
                 .limit(1)
                 .execute();
-              const decodeDbRow = Schema.decodeUnknownSync(DbCompanySchema);
-              return data.length > 0 ? decodeDbRow(data[0]) : null;
+              return data.length > 0
+                ? Schema.encodeUnknownSync(CompanyToCompanyTable)(data[0])
+                : null;
             },
             catch: (e) =>
               new FetchJobError({
