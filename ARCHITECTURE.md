@@ -12,7 +12,7 @@ hello-work-software-jobs/
 │   └── frontend/
 │       └── hello-work-job-searcher/ # Next.js web app
 ├── packages/
-│   ├── db/                          # Kysely + D1 client factory & DB行スキーマ
+│   ├── db/                          # Kysely DB factory & DB行スキーマ（Dialect 非依存）
 │   └── models/                      # ドメインモデル定義
 ├── docs/                            # プロジェクトドキュメント
 └── scripts/                         # 診断スクリプト
@@ -46,10 +46,17 @@ EventBridge (平日 01:00 JST = UTC 16:00 SUN-THU)
 
 ## `packages/models`
 
-ドメインモデル定義。全レイヤーから参照。
+ドメインモデル定義。全レイヤーから参照。2 層構造:
+
+- **`src/raw.ts`**: バリデーション付き Raw スキーマ（brand なし）。パターン・フィルター・Union リテラル等のバリデーションをここで定義。DB 行や API レスポンスなど branded type が不要な場面で使用。
+- **`src/index.ts`**: branded ドメインスキーマ。Raw スキーマに `Schema.brand()` と `.annotations()` を付与するだけ。
 
 ```typescript
-// branded types
+// raw フィールドスキーマ（brand なし、バリデーションあり）
+RawJobNumber, RawEstablishmentNumber, RawCorporateNumber, RawReceivedDate, RawExpiryDate,
+RawEmploymentType, RawJobCategory, RawWageType, RawWage, RawWorkingTime, RawEmployeeCount, RawHomePageUrl
+
+// branded types（Raw に brand + annotations を付与）
 JobNumber, EstablishmentNumber, CorporateNumber, ReceivedDate, ExpiryDate,
 EmploymentType, JobCategory, WageType, Wage, WorkingTime, EmployeeCount, HomePageUrl
 
@@ -82,12 +89,12 @@ Job = {
 
 ## `packages/db`
 
-Kysely 型定義 + DB行スキーマ。D1 (SQLite) 向け。
+Kysely 型定義 + DB行スキーマ。Dialect 非依存（`createDB(dialect)` で DB クライアントを生成）。D1 固有の Dialect 組み立ては `api/src/infra/db.ts` で行う。
 
 - `schema.sql` が DDL の Source of Truth
 - `kysely-codegen` で `src/generated/types.ts` を自動生成（`pnpm codegen`）
 - `src/schema.ts` に `DbJobRowSchema`・`DbCompanyRowSchema`・`DbCrawlerRunRowSchema`・`DbJobDetailRunRowSchema`（フラットDB行スキーマ）を定義。型レベルチェックで Kysely 生成型との整合性を保証
-- ドメインモデルへの変換（`DbJobSchema`）は `api/src/cqrs/index.ts` で行う
+- ドメインモデルへの変換（`JobToJobTable`, `CompanyToCompanyTable`）は `api/src/infra/db.ts` で行う
 - `src/queries.ts` に集計クエリユーティリティ（`selectDailyStats`, `selectCrawlerRuns`, `selectJobDetailRuns` 等）を提供。API 層から `sql` を直接 import しない設計
 - Migrations: `packages/db/migrations/` (wrangler d1 migrations で管理)
 
@@ -111,6 +118,7 @@ Cloudflare Workers + Hono。
 ### 設計
 
 - **CQRS**: 各操作が独立した `Effect.Service`。コマンド（`InsertJobCommand`, `UpsertCompanyCommand`）とクエリ（`FindJobByNumberQuery`, `FetchJobsPageQuery`, `FetchDailyStatsQuery`, `FindCompanyQuery`）に分離。
+- **インフラ層**: `src/infra/db.ts` に `JobStoreDB`（Effect Context.Tag）と `createD1DB`（D1Dialect 組み立て）を集約。`JobStoreDB.main(binding)` で DB クライアントを生成。
 - **エラー**: `Data.TaggedError` で型安全なエラーハンドリング。コントローラーで `Effect.match` により分岐。
 - **ページネーション**: ページ番号方式。
 

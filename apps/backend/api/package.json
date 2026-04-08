@@ -20,7 +20,6 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "~0.12.21",
 		"@dotenvx/dotenvx": "^1.54.1",
-		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.0.15",
 		"tsdown": "^0.20.0",
 		"tsx": "^4.20.3",
@@ -38,6 +37,6 @@
 		"hono": "catalog:",
 		"hono-openapi": "^1.0.8",
 		"kysely": "^0.28.0",
-		"luxon": "^3.7.2"
+		"kysely-d1": "^0.4.0"
 	}
 }

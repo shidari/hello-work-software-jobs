@@ -1,7 +1,6 @@
-import { createD1DB } from "@sho/db";
 import { Job, JobNumber } from "@sho/models";
-import { Data, Effect, Schema } from "effect";
-import { TreeFormatter } from "effect/ParseResult";
+import { RawEmployeeCount, RawWage } from "@sho/models/raw";
+import { Effect, Schema } from "effect";
 import { Hono } from "hono";
 import {
   describeRoute,
@@ -9,27 +8,14 @@ import {
   resolver,
 } from "hono-openapi";
 import { PAGE_SIZE } from "../constant";
-import { JobStoreDB } from "../cqrs";
 import { InsertJobCommand, InsertJobDuplicationError } from "../cqrs/commands";
 import {
   FetchJobError,
   FetchJobsPageQuery,
   FindJobByNumberQuery,
 } from "../cqrs/queries";
-
-// --- ローカルエラー型 ---
-
-class EmployeeCountGtValidationError extends Data.TaggedError(
-  "EmployeeCountGtValidationError",
-)<{
-  readonly message: string;
-}> {}
-
-class EmployeeCountLtValidationError extends Data.TaggedError(
-  "EmployeeCountLtValidationError",
-)<{
-  readonly message: string;
-}> {}
+import { SearchFilterSchema } from "../cqrs/schema";
+import { JobStoreDB } from "../infra/db";
 
 // --- スキーマ ---
 
@@ -37,22 +23,17 @@ const jobFetchParamSchema = Schema.Struct({
   jobNumber: JobNumber,
 });
 
-const jobListQuerySchema = Schema.Struct({
+/** クエリパラメータ（文字列） → SearchFilter + page への一括変換 */
+const SearchQueryParams = Schema.Struct({
   companyName: Schema.optional(Schema.String),
   employeeCountLt: Schema.optional(Schema.String),
   employeeCountGt: Schema.optional(Schema.String),
   jobDescription: Schema.optional(Schema.String),
   jobDescriptionExclude: Schema.optional(Schema.String),
-  onlyNotExpired: Schema.optional(Schema.Boolean),
-  orderByReceiveDate: Schema.optional(
-    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
-  ),
-  addedSince: Schema.optional(
-    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
-  ),
-  addedUntil: Schema.optional(
-    Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/)),
-  ),
+  onlyNotExpired: Schema.optional(Schema.String),
+  orderByReceiveDate: Schema.optional(Schema.String),
+  addedSince: Schema.optional(Schema.String),
+  addedUntil: Schema.optional(Schema.String),
   occupation: Schema.optional(Schema.String),
   employmentType: Schema.optional(Schema.String),
   wageMin: Schema.optional(Schema.String),
@@ -66,12 +47,68 @@ const jobListQuerySchema = Schema.Struct({
   page: Schema.optional(Schema.String),
 });
 
-const insertJobRequestBodySchema = Job;
+const SearchFilterQuerySchema = Schema.transform(
+  SearchQueryParams,
+  Schema.Struct({
+    filter: SearchFilterSchema,
+    page: Schema.Number,
+  }),
+  {
+    strict: true,
+    decode: (raw) => {
+      const EmployeeCountFromString = Schema.compose(
+        Schema.NumberFromString,
+        RawEmployeeCount,
+      );
+      const WageFromString = Schema.compose(Schema.NumberFromString, RawWage);
 
-const employeeCountSchema = Schema.Number.pipe(
-  Schema.int(),
-  Schema.greaterThanOrEqualTo(0),
+      const parsedPage = raw.page ? Number(raw.page) : 1;
+      return {
+        filter: Schema.decodeUnknownSync(SearchFilterSchema)({
+          companyName: raw.companyName,
+          employeeCountLt: raw.employeeCountLt
+            ? Schema.decodeUnknownSync(EmployeeCountFromString)(
+                raw.employeeCountLt,
+              )
+            : undefined,
+          employeeCountGt: raw.employeeCountGt
+            ? Schema.decodeUnknownSync(EmployeeCountFromString)(
+                raw.employeeCountGt,
+              )
+            : undefined,
+          jobDescription: raw.jobDescription,
+          jobDescriptionExclude: raw.jobDescriptionExclude,
+          onlyNotExpired: raw.onlyNotExpired === "true" ? true : undefined,
+          orderByReceiveDate: raw.orderByReceiveDate,
+          addedSince: raw.addedSince,
+          addedUntil: raw.addedUntil,
+          occupation: raw.occupation,
+          employmentType: raw.employmentType,
+          wageMin: raw.wageMin
+            ? Schema.decodeUnknownSync(WageFromString)(raw.wageMin)
+            : undefined,
+          wageMax: raw.wageMax
+            ? Schema.decodeUnknownSync(WageFromString)(raw.wageMax)
+            : undefined,
+          workPlace: raw.workPlace,
+          qualifications: raw.qualifications,
+          jobCategory: raw.jobCategory,
+          wageType: raw.wageType,
+          education: raw.education,
+          industryClassification: raw.industryClassification,
+        }),
+        page: Number.isNaN(parsedPage)
+          ? 1
+          : Math.max(1, Math.floor(parsedPage)),
+      };
+    },
+    encode: () => {
+      throw new Error("encode not supported");
+    },
+  },
 );
+
+const insertJobRequestBodySchema = Job;
 
 // --- ルーティングスキーマ ---
 
@@ -98,7 +135,7 @@ const errorResponses = {
   },
 } as const;
 
-const jobListSuccessResponseSchema = Schema.Struct({
+export const jobListSuccessResponseSchema = Schema.Struct({
   jobs: Schema.Array(Job),
   meta: Schema.Struct({
     totalCount: Schema.Number,
@@ -293,127 +330,15 @@ const app = new Hono<{ Bindings: Env }>()
   .get(
     "/",
     jobListRoute,
-    effectValidator("query", Schema.standardSchemaV1(jobListQuerySchema)),
+    effectValidator("query", Schema.standardSchemaV1(SearchFilterQuerySchema)),
     (c) => {
-      const {
-        companyName: encodedCompanyName,
-        employeeCountGt: rawEmployeeCountGt,
-        employeeCountLt: rawEmployeeCountLt,
-        jobDescription: encodedJobDescription,
-        jobDescriptionExclude: encodedJobDescriptionExclude,
-        onlyNotExpired,
-        orderByReceiveDate,
-        addedSince,
-        addedUntil,
-        occupation: encodedOccupation,
-        employmentType: encodedEmploymentType,
-        wageMin: rawWageMin,
-        wageMax: rawWageMax,
-        workPlace: encodedWorkPlace,
-        qualifications: encodedQualifications,
-        jobCategory: encodedJobCategory,
-        wageType: encodedWageType,
-        education: encodedEducation,
-        industryClassification: encodedIndustryClassification,
-        page: rawPage,
-      } = c.req.valid("query");
-      const companyName = encodedCompanyName
-        ? decodeURIComponent(encodedCompanyName)
-        : undefined;
-      const jobDescription = encodedJobDescription
-        ? decodeURIComponent(encodedJobDescription)
-        : undefined;
-      const jobDescriptionExclude = encodedJobDescriptionExclude
-        ? decodeURIComponent(encodedJobDescriptionExclude)
-        : undefined;
-      const occupation = encodedOccupation
-        ? decodeURIComponent(encodedOccupation)
-        : undefined;
-      const employmentType = encodedEmploymentType
-        ? decodeURIComponent(encodedEmploymentType)
-        : undefined;
-      const wageMin = rawWageMin ? Number(rawWageMin) : undefined;
-      const wageMax = rawWageMax ? Number(rawWageMax) : undefined;
-      const workPlace = encodedWorkPlace
-        ? decodeURIComponent(encodedWorkPlace)
-        : undefined;
-      const qualifications = encodedQualifications
-        ? decodeURIComponent(encodedQualifications)
-        : undefined;
-      const jobCategory = encodedJobCategory
-        ? decodeURIComponent(encodedJobCategory)
-        : undefined;
-      const wageType = encodedWageType
-        ? decodeURIComponent(encodedWageType)
-        : undefined;
-      const education = encodedEducation
-        ? decodeURIComponent(encodedEducation)
-        : undefined;
-      const industryClassification = encodedIndustryClassification
-        ? decodeURIComponent(encodedIndustryClassification)
-        : undefined;
-
-      const parsedPage = rawPage ? Number(rawPage) : 1;
-      const page = Number.isNaN(parsedPage)
-        ? 1
-        : Math.max(1, Math.floor(parsedPage));
-
-      const db = createD1DB(c.env.DB);
+      const { filter, page } = c.req.valid("query");
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {
-          const employeeCountGt =
-            rawEmployeeCountGt !== undefined
-              ? yield* Schema.decode(employeeCountSchema)(
-                  Number(rawEmployeeCountGt),
-                ).pipe(
-                  Effect.mapError(
-                    (parseError) =>
-                      new EmployeeCountGtValidationError({
-                        message: `Invalid employeeCountGt. received: ${JSON.stringify(rawEmployeeCountGt)}\n${TreeFormatter.formatErrorSync(parseError)}`,
-                      }),
-                  ),
-                )
-              : undefined;
-          const employeeCountLt =
-            rawEmployeeCountLt !== undefined
-              ? yield* Schema.decode(employeeCountSchema)(
-                  Number(rawEmployeeCountLt),
-                ).pipe(
-                  Effect.mapError(
-                    (parseError) =>
-                      new EmployeeCountLtValidationError({
-                        message: `Invalid employeeCountLt. received: ${JSON.stringify(rawEmployeeCountLt)}\n${TreeFormatter.formatErrorSync(parseError)}`,
-                      }),
-                  ),
-                )
-              : undefined;
-
           const query = yield* FetchJobsPageQuery;
-          const { jobs, meta } = yield* query.run({
-            page,
-            filter: {
-              companyName,
-              employeeCountGt,
-              employeeCountLt,
-              jobDescription,
-              jobDescriptionExclude,
-              onlyNotExpired,
-              orderByReceiveDate,
-              addedSince,
-              addedUntil,
-              occupation,
-              employmentType,
-              wageMin,
-              wageMax,
-              workPlace,
-              qualifications,
-              jobCategory,
-              wageType,
-              education,
-              industryClassification,
-            },
-          });
+          const { jobs, meta } = yield* query.run({ page, filter });
           const totalPages = Math.ceil(meta.totalCount / PAGE_SIZE);
           return {
             jobs,
@@ -426,18 +351,7 @@ const app = new Hono<{ Bindings: Env }>()
             onSuccess: (data) => c.json(data),
             onFailure: (error) => {
               console.error(error);
-              switch (error._tag) {
-                case "EmployeeCountGtValidationError":
-                case "EmployeeCountLtValidationError":
-                  return c.json(
-                    {
-                      message: `Invalid employee count Gt: ${rawEmployeeCountGt}, Lt: ${rawEmployeeCountLt}`,
-                    },
-                    400,
-                  );
-                default:
-                  return c.json({ message: "internal server error" }, 500);
-              }
+              return c.json({ message: "internal server error" }, 500);
             },
           }),
         ),
@@ -473,7 +387,7 @@ const app = new Hono<{ Bindings: Env }>()
     async (c) => {
       console.log("in job insert route");
       const body = c.req.valid("json");
-      const db = createD1DB(c.env.DB);
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {
@@ -517,7 +431,7 @@ const app = new Hono<{ Bindings: Env }>()
     effectValidator("param", Schema.standardSchemaV1(jobFetchParamSchema)),
     (c) => {
       const { jobNumber } = c.req.valid("param");
-      const db = createD1DB(c.env.DB);
+      const db = JobStoreDB.main(c.env.DB);
 
       return Effect.runPromise(
         Effect.gen(function* () {

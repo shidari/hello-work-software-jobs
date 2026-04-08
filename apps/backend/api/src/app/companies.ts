@@ -1,15 +1,14 @@
-import { createD1DB } from "@sho/db";
 import { Company } from "@sho/models";
 import { Effect, Schema } from "effect";
 import { Hono } from "hono";
-import { JobStoreDB } from "../cqrs";
 import { UpsertCompanyCommand } from "../cqrs/commands";
 import { FetchJobError, FindCompanyQuery } from "../cqrs/queries";
+import { JobStoreDB } from "../infra/db";
 
 const app = new Hono<{ Bindings: Env }>()
   .get("/:establishmentNumber", (c) => {
     const establishmentNumber = c.req.param("establishmentNumber");
-    const db = createD1DB(c.env.DB);
+    const db = JobStoreDB.main(c.env.DB);
 
     return Effect.runPromise(
       Effect.gen(function* () {
@@ -50,7 +49,7 @@ const app = new Hono<{ Bindings: Env }>()
   })
   .post("/", async (c) => {
     const body = await c.req.json();
-    const db = createD1DB(c.env.DB);
+    const db = JobStoreDB.main(c.env.DB);
 
     return Effect.runPromise(
       Effect.gen(function* () {

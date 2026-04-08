@@ -1,15 +1,14 @@
 import { selectDailyStats } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
-import { DateTime } from "luxon";
 import { PAGE_SIZE } from "../constant";
 import {
-  type Company,
-  DbCompanySchema,
-  DbJobSchema,
-  type Job,
+  CompanyToCompanyTable,
+  type DbCompany,
+  type DbJob,
   JobStoreDB,
-  type SearchFilter,
-} from ".";
+  JobToJobTable,
+} from "../infra/db";
+import type { SearchFilter } from "./schema";
 
 // --- エラー ---
 
@@ -37,15 +36,16 @@ export class FindJobByNumberQuery extends Effect.Service<FindJobByNumberQuery>()
       return {
         run: (jobNumber: string) =>
           Effect.tryPromise({
-            try: async (): Promise<Job | null> => {
+            try: async (): Promise<DbJob | null> => {
               const data = await db
                 .selectFrom("jobs")
                 .selectAll()
                 .where("jobNumber", "=", jobNumber)
                 .limit(1)
                 .execute();
-              const decodeDbRow = Schema.decodeUnknownSync(DbJobSchema);
-              return data.length > 0 ? decodeDbRow(data[0]) : null;
+              return data.length > 0
+                ? Schema.encodeUnknownSync(JobToJobTable)(data[0])
+                : null;
             },
             catch: (e) =>
               new FetchJobError({
@@ -67,7 +67,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
         run: (options: { page: number; filter: SearchFilter }) =>
           Effect.tryPromise({
             try: async (): Promise<{
-              jobs: Job[];
+              jobs: DbJob[];
               meta: { totalCount: number; page: number };
             }> => {
               const { page, filter } = options;
@@ -79,110 +79,132 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   ? ("asc" as const)
                   : ("desc" as const);
 
-              const filtered = db
-                .selectFrom("jobs")
-                .$if(!!filter.companyName, (qb) =>
-                  qb.where("companyName", "like", `%${filter.companyName}%`),
-                )
-                .$if(filter.employeeCountGt !== undefined, (qb) =>
-                  qb.where("employeeCount", ">", filter.employeeCountGt!),
-                )
-                .$if(filter.employeeCountLt !== undefined, (qb) =>
-                  qb.where("employeeCount", "<", filter.employeeCountLt!),
-                )
-                .$if(!!filter.jobDescription, (qb) =>
-                  qb.where(
-                    "jobDescription",
-                    "like",
-                    `%${filter.jobDescription}%`,
-                  ),
-                )
-                .$if(!!filter.jobDescriptionExclude, (qb) =>
-                  qb.where(
-                    "jobDescription",
-                    "not like",
-                    `%${filter.jobDescriptionExclude}%`,
-                  ),
-                )
-                .$if(!!filter.onlyNotExpired, (qb) =>
-                  qb.where("expiryDate", ">", new Date().toISOString()),
-                )
-                .$if(!!filter.addedSince, (qb) => {
-                  const result = DateTime.fromISO(filter.addedSince!, {
-                    zone: "Asia/Tokyo",
-                  })
-                    .startOf("day")
-                    .toUTC()
-                    .toISO();
-                  return result ? qb.where("createdAt", ">", result) : qb;
-                })
-                .$if(!!filter.addedUntil, (qb) => {
-                  const result = DateTime.fromISO(filter.addedUntil!, {
-                    zone: "Asia/Tokyo",
-                  })
-                    .endOf("day")
-                    .toUTC()
-                    .toISO();
-                  return result ? qb.where("createdAt", "<", result) : qb;
-                })
-                .$if(!!filter.occupation, (qb) =>
-                  qb.where("occupation", "like", `%${filter.occupation}%`),
-                )
-                .$if(!!filter.employmentType, (qb) =>
-                  qb.where(
-                    "employmentType",
-                    "like",
-                    `%${filter.employmentType}%`,
-                  ),
-                )
-                .$if(filter.wageMin !== undefined, (qb) =>
-                  qb.where("wageMin", ">=", filter.wageMin!),
-                )
-                .$if(filter.wageMax !== undefined, (qb) =>
-                  qb.where("wageMax", "<=", filter.wageMax!),
-                )
-                .$if(!!filter.workPlace, (qb) =>
-                  qb.where("workPlace", "like", `%${filter.workPlace}%`),
-                )
-                .$if(!!filter.qualifications, (qb) =>
-                  qb.where(
-                    "qualifications",
-                    "like",
-                    `%${filter.qualifications}%`,
-                  ),
-                )
-                .$if(!!filter.jobCategory, (qb) =>
-                  qb.where("jobCategory", "=", filter.jobCategory!),
-                )
-                .$if(!!filter.wageType, (qb) =>
-                  qb.where("wageType", "=", filter.wageType!),
-                )
-                .$if(!!filter.education, (qb) =>
-                  qb.where("education", "like", `%${filter.education}%`),
-                )
-                .$if(!!filter.industryClassification, (qb) =>
-                  qb.where(
-                    "industryClassification",
-                    "like",
-                    `%${filter.industryClassification}%`,
-                  ),
-                );
+              let query = db.selectFrom("jobs");
 
-              const jobList = await filtered
+              if (filter.companyName) {
+                query = query.where(
+                  "companyName",
+                  "like",
+                  `%${filter.companyName}%`,
+                );
+              }
+              if (filter.employeeCountGt !== undefined) {
+                query = query.where(
+                  "employeeCount",
+                  ">",
+                  filter.employeeCountGt,
+                );
+              }
+              if (filter.employeeCountLt !== undefined) {
+                query = query.where(
+                  "employeeCount",
+                  "<",
+                  filter.employeeCountLt,
+                );
+              }
+              if (filter.jobDescription) {
+                query = query.where(
+                  "jobDescription",
+                  "like",
+                  `%${filter.jobDescription}%`,
+                );
+              }
+              if (filter.jobDescriptionExclude) {
+                query = query.where(
+                  "jobDescription",
+                  "not like",
+                  `%${filter.jobDescriptionExclude}%`,
+                );
+              }
+              if (filter.onlyNotExpired) {
+                query = query.where(
+                  "expiryDate",
+                  ">",
+                  new Date().toISOString(),
+                );
+              }
+              if (filter.addedSince) {
+                const d = new Date(`${filter.addedSince}T00:00:00+09:00`);
+                if (!Number.isNaN(d.getTime())) {
+                  query = query.where("createdAt", ">", d.toISOString());
+                }
+              }
+              if (filter.addedUntil) {
+                const d = new Date(`${filter.addedUntil}T23:59:59.999+09:00`);
+                if (!Number.isNaN(d.getTime())) {
+                  query = query.where("createdAt", "<", d.toISOString());
+                }
+              }
+              if (filter.occupation) {
+                query = query.where(
+                  "occupation",
+                  "like",
+                  `%${filter.occupation}%`,
+                );
+              }
+              if (filter.employmentType) {
+                query = query.where(
+                  "employmentType",
+                  "=",
+                  filter.employmentType,
+                );
+              }
+              if (filter.wageMin !== undefined) {
+                query = query.where("wageMin", ">=", filter.wageMin);
+              }
+              if (filter.wageMax !== undefined) {
+                query = query.where("wageMax", "<=", filter.wageMax);
+              }
+              if (filter.workPlace) {
+                query = query.where(
+                  "workPlace",
+                  "like",
+                  `%${filter.workPlace}%`,
+                );
+              }
+              if (filter.qualifications) {
+                query = query.where(
+                  "qualifications",
+                  "like",
+                  `%${filter.qualifications}%`,
+                );
+              }
+              if (filter.jobCategory) {
+                query = query.where("jobCategory", "=", filter.jobCategory);
+              }
+              if (filter.wageType) {
+                query = query.where("wageType", "=", filter.wageType);
+              }
+              if (filter.education) {
+                query = query.where(
+                  "education",
+                  "like",
+                  `%${filter.education}%`,
+                );
+              }
+              if (filter.industryClassification) {
+                query = query.where(
+                  "industryClassification",
+                  "like",
+                  `%${filter.industryClassification}%`,
+                );
+              }
+
+              const jobList = await query
                 .selectAll()
                 .orderBy("receivedDate", order)
                 .limit(PAGE_SIZE)
                 .offset(offset)
                 .execute();
 
-              const countResult = await filtered
+              const countResult = await query
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .executeTakeFirstOrThrow();
               const totalCount = countResult.count;
-
-              const decodeDbRow = Schema.decodeUnknownSync(DbJobSchema);
               return {
-                jobs: jobList.map((row) => decodeDbRow(row)),
+                jobs: jobList.map((row) =>
+                  Schema.encodeUnknownSync(JobToJobTable)(row),
+                ),
                 meta: { totalCount, page },
               };
             },
@@ -211,15 +233,16 @@ export class FindCompanyQuery extends Effect.Service<FindCompanyQuery>()(
       return {
         run: (establishmentNumber: string) =>
           Effect.tryPromise({
-            try: async (): Promise<Company | null> => {
+            try: async (): Promise<DbCompany | null> => {
               const data = await db
                 .selectFrom("companies")
                 .selectAll()
                 .where("establishmentNumber", "=", establishmentNumber)
                 .limit(1)
                 .execute();
-              const decodeDbRow = Schema.decodeUnknownSync(DbCompanySchema);
-              return data.length > 0 ? decodeDbRow(data[0]) : null;
+              return data.length > 0
+                ? Schema.encodeUnknownSync(CompanyToCompanyTable)(data[0])
+                : null;
             },
             catch: (e) =>
               new FetchJobError({

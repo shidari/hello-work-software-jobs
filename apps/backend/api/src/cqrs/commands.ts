@@ -1,6 +1,6 @@
-import type { Company, Job } from "@sho/models";
+import type { RawCompany, RawJob } from "@sho/models/raw";
 import { Data, Effect, Schema } from "effect";
-import { DbCompanySchema, DbJobSchema, JobStoreDB } from ".";
+import { CompanyToCompanyTable, JobStoreDB, JobToJobTable } from "../infra/db";
 
 // --- エラー ---
 
@@ -29,16 +29,10 @@ export class InsertJobCommand extends Effect.Service<InsertJobCommand>()(
     effect: Effect.gen(function* () {
       const db = yield* JobStoreDB;
       return {
-        run: (payload: Job) =>
+        run: (payload: RawJob) =>
           Effect.tryPromise({
             try: async () => {
-              const now = new Date().toISOString();
-              const dbValues = Schema.encodeSync(DbJobSchema)({
-                ...payload,
-                status: "active",
-                createdAt: now,
-                updatedAt: now,
-              });
+              const dbValues = Schema.decodeSync(JobToJobTable)(payload);
               await db.insertInto("jobs").values(dbValues).execute();
               return { jobNumber: payload.jobNumber };
             },
@@ -59,15 +53,12 @@ export class UpsertCompanyCommand extends Effect.Service<UpsertCompanyCommand>()
     effect: Effect.gen(function* () {
       const db = yield* JobStoreDB;
       return {
-        run: (payload: Company) =>
+        run: (payload: RawCompany) =>
           Effect.tryPromise({
             try: async () => {
-              const now = new Date().toISOString();
-              const dbValues = Schema.encodeSync(DbCompanySchema)({
-                ...payload,
-                createdAt: now,
-                updatedAt: now,
-              });
+              const dbValues = Schema.decodeSync(CompanyToCompanyTable)(
+                payload,
+              );
               await db
                 .insertInto("companies")
                 .values(dbValues)
@@ -81,7 +72,7 @@ export class UpsertCompanyCommand extends Effect.Service<UpsertCompanyCommand>()
                     capital: dbValues.capital,
                     businessDescription: dbValues.businessDescription,
                     corporateNumber: dbValues.corporateNumber,
-                    updatedAt: now,
+                    updatedAt: dbValues.updatedAt,
                   }),
                 )
                 .execute();
