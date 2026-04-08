@@ -11,9 +11,9 @@ export function JobCard({ job }: { job: JobOverview; isNew?: boolean }) {
   const { companyName, occupation, employmentType, workPlace, employeeCount } =
     job;
   const isNew =
-            !!job.receivedDate &&
-            Date.now() - new Date(job.receivedDate).getTime() <=
-              3 * 24 * 60 * 60 * 1000;
+    !!job.receivedDate &&
+    Date.now() - new Date(job.receivedDate).getTime() <=
+      3 * 24 * 60 * 60 * 1000;
   return (
     <Card className={styles.card}>
       <div className={styles.header}>

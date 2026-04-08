@@ -79,93 +79,125 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   ? ("asc" as const)
                   : ("desc" as const);
 
-              const filtered = db
-                .selectFrom("jobs")
-                .$if(!!filter.companyName, (qb) =>
-                  qb.where("companyName", "like", `%${filter.companyName}%`),
-                )
-                .$if(filter.employeeCountGt !== undefined, (qb) =>
-                  qb.where("employeeCount", ">", filter.employeeCountGt!),
-                )
-                .$if(filter.employeeCountLt !== undefined, (qb) =>
-                  qb.where("employeeCount", "<", filter.employeeCountLt!),
-                )
-                .$if(!!filter.jobDescription, (qb) =>
-                  qb.where(
-                    "jobDescription",
-                    "like",
-                    `%${filter.jobDescription}%`,
-                  ),
-                )
-                .$if(!!filter.jobDescriptionExclude, (qb) =>
-                  qb.where(
-                    "jobDescription",
-                    "not like",
-                    `%${filter.jobDescriptionExclude}%`,
-                  ),
-                )
-                .$if(!!filter.onlyNotExpired, (qb) =>
-                  qb.where("expiryDate", ">", new Date().toISOString()),
-                )
-                .$if(!!filter.addedSince, (qb) => {
-                  const d = new Date(`${filter.addedSince!}T00:00:00+09:00`);
-                  return Number.isNaN(d.getTime())
-                    ? qb
-                    : qb.where("createdAt", ">", d.toISOString());
-                })
-                .$if(!!filter.addedUntil, (qb) => {
-                  const d = new Date(`${filter.addedUntil!}T23:59:59.999+09:00`);
-                  return Number.isNaN(d.getTime())
-                    ? qb
-                    : qb.where("createdAt", "<", d.toISOString());
-                })
-                .$if(!!filter.occupation, (qb) =>
-                  qb.where("occupation", "like", `%${filter.occupation}%`),
-                )
-                .$if(!!filter.employmentType, (qb) =>
-                  qb.where("employmentType", "=", filter.employmentType!),
-                )
-                .$if(filter.wageMin !== undefined, (qb) =>
-                  qb.where("wageMin", ">=", filter.wageMin!),
-                )
-                .$if(filter.wageMax !== undefined, (qb) =>
-                  qb.where("wageMax", "<=", filter.wageMax!),
-                )
-                .$if(!!filter.workPlace, (qb) =>
-                  qb.where("workPlace", "like", `%${filter.workPlace}%`),
-                )
-                .$if(!!filter.qualifications, (qb) =>
-                  qb.where(
-                    "qualifications",
-                    "like",
-                    `%${filter.qualifications}%`,
-                  ),
-                )
-                .$if(!!filter.jobCategory, (qb) =>
-                  qb.where("jobCategory", "=", filter.jobCategory!),
-                )
-                .$if(!!filter.wageType, (qb) =>
-                  qb.where("wageType", "=", filter.wageType!),
-                )
-                .$if(!!filter.education, (qb) =>
-                  qb.where("education", "like", `%${filter.education}%`),
-                )
-                .$if(!!filter.industryClassification, (qb) =>
-                  qb.where(
-                    "industryClassification",
-                    "like",
-                    `%${filter.industryClassification}%`,
-                  ),
-                );
+              let query = db.selectFrom("jobs");
 
-              const jobList = await filtered
+              if (filter.companyName) {
+                query = query.where(
+                  "companyName",
+                  "like",
+                  `%${filter.companyName}%`,
+                );
+              }
+              if (filter.employeeCountGt !== undefined) {
+                query = query.where(
+                  "employeeCount",
+                  ">",
+                  filter.employeeCountGt,
+                );
+              }
+              if (filter.employeeCountLt !== undefined) {
+                query = query.where(
+                  "employeeCount",
+                  "<",
+                  filter.employeeCountLt,
+                );
+              }
+              if (filter.jobDescription) {
+                query = query.where(
+                  "jobDescription",
+                  "like",
+                  `%${filter.jobDescription}%`,
+                );
+              }
+              if (filter.jobDescriptionExclude) {
+                query = query.where(
+                  "jobDescription",
+                  "not like",
+                  `%${filter.jobDescriptionExclude}%`,
+                );
+              }
+              if (filter.onlyNotExpired) {
+                query = query.where(
+                  "expiryDate",
+                  ">",
+                  new Date().toISOString(),
+                );
+              }
+              if (filter.addedSince) {
+                const d = new Date(`${filter.addedSince}T00:00:00+09:00`);
+                if (!Number.isNaN(d.getTime())) {
+                  query = query.where("createdAt", ">", d.toISOString());
+                }
+              }
+              if (filter.addedUntil) {
+                const d = new Date(`${filter.addedUntil}T23:59:59.999+09:00`);
+                if (!Number.isNaN(d.getTime())) {
+                  query = query.where("createdAt", "<", d.toISOString());
+                }
+              }
+              if (filter.occupation) {
+                query = query.where(
+                  "occupation",
+                  "like",
+                  `%${filter.occupation}%`,
+                );
+              }
+              if (filter.employmentType) {
+                query = query.where(
+                  "employmentType",
+                  "=",
+                  filter.employmentType,
+                );
+              }
+              if (filter.wageMin !== undefined) {
+                query = query.where("wageMin", ">=", filter.wageMin);
+              }
+              if (filter.wageMax !== undefined) {
+                query = query.where("wageMax", "<=", filter.wageMax);
+              }
+              if (filter.workPlace) {
+                query = query.where(
+                  "workPlace",
+                  "like",
+                  `%${filter.workPlace}%`,
+                );
+              }
+              if (filter.qualifications) {
+                query = query.where(
+                  "qualifications",
+                  "like",
+                  `%${filter.qualifications}%`,
+                );
+              }
+              if (filter.jobCategory) {
+                query = query.where("jobCategory", "=", filter.jobCategory);
+              }
+              if (filter.wageType) {
+                query = query.where("wageType", "=", filter.wageType);
+              }
+              if (filter.education) {
+                query = query.where(
+                  "education",
+                  "like",
+                  `%${filter.education}%`,
+                );
+              }
+              if (filter.industryClassification) {
+                query = query.where(
+                  "industryClassification",
+                  "like",
+                  `%${filter.industryClassification}%`,
+                );
+              }
+
+              const jobList = await query
                 .selectAll()
                 .orderBy("receivedDate", order)
                 .limit(PAGE_SIZE)
                 .offset(offset)
                 .execute();
 
-              const countResult = await filtered
+              const countResult = await query
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .executeTakeFirstOrThrow();
               const totalCount = countResult.count;
