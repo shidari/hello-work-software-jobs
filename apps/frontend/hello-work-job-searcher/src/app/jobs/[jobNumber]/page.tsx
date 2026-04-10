@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { jobStoreClient } from "@/lib/backend-client";
+import { jobStoreClient } from "#lib/backend-client";
 import { JobDetailPage } from "./JobDetailPage_client";
 
 export default async function Page({

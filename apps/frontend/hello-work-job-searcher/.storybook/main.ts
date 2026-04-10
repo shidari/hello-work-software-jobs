@@ -9,5 +9,9 @@ const config: StorybookConfig = {
   ],
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
+  env: (config) => ({
+    ...config,
+    JOB_STORE_ENDPOINT: "http://localhost:8787",
+  }),
 };
 export default config;

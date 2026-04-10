@@ -9,9 +9,11 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-
     a11y: {
       test: "todo",
+    },
+    react: {
+      rsc: true,
     },
   },
 };
