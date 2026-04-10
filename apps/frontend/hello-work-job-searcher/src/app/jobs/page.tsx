@@ -2,10 +2,10 @@ export const dynamic = "force-dynamic";
 
 import { Schema } from "effect";
 import Link from "next/link";
+import { jobStoreClient } from "#lib/backend-client";
 import { JobCard } from "@/components/features/list/JobCard";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
 import { Collapsible } from "@/components/ui/Collapsible";
-import { jobStoreClient } from "@/lib/backend-client";
 import styles from "./JobsPageClient.module.css";
 import { JobsPagination } from "./JobsPagination_client";
 import { SearchFilterForm } from "./SearchFilterForm_client";
