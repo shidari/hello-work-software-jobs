@@ -16,6 +16,7 @@ import {
 } from "../cqrs/queries";
 import { SearchFilterSchema } from "../cqrs/schema";
 import { JobStoreDB } from "../infra/db";
+import { verifyApiKey } from "../middleware/api-key";
 
 // --- スキーマ ---
 
@@ -361,14 +362,7 @@ const app = new Hono<{ Bindings: Env }>()
   .post(
     "/",
     jobInsertRoute,
-    (c, next) => {
-      const apiKey = c.req.header("x-api-key");
-      const validApiKey = c.env.API_KEY;
-      if (!apiKey || apiKey !== validApiKey) {
-        return c.json({ message: "Invalid API key" }, 401);
-      }
-      return next();
-    },
+    verifyApiKey,
     effectValidator(
       "json",
       Schema.standardSchemaV1(insertJobRequestBodySchema),

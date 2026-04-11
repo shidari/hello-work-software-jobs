@@ -170,3 +170,50 @@ describe("求人詳細", () => {
     expect(response.status).toBe(200);
   });
 });
+
+// --- セキュリティ ---
+
+describe("セキュリティ", () => {
+  it("レスポンスにセキュリティヘッダーが含まれる", async () => {
+    const response = await workerFetch("/jobs");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("x-frame-options")).toBe("DENY");
+    expect(response.headers.get("referrer-policy")).toBe(
+      "strict-origin-when-cross-origin",
+    );
+  });
+
+  it("レート制限を超えると 429 を返す", async () => {
+    // まず1回リクエストしてテーブルを確実に作成
+    await workerFetch("/jobs");
+    // トークンを枯渇させて refill されないよう last_refill を現在時刻に
+    const db = MOCK_ENV.DB;
+    await db
+      .prepare(
+        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'global'",
+      )
+      .run();
+    const response = await workerFetch("/jobs");
+    expect(response.status).toBe(429);
+  });
+
+  it("LIKE ワイルドカードがエスケープされる", async () => {
+    const response = await workerFetch("/jobs?companyName=%25%25%25");
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    // %%% はリテラル文字として扱われるため結果は 0 件
+    expect(data.meta.totalCount).toBe(0);
+  });
+
+  it("Companies POST に不正な JSON を送ると 400 を返す", async () => {
+    const response = await workerFetch("/companies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
+      body: "{broken",
+    });
+    expect(response.status).toBe(400);
+  });
+});

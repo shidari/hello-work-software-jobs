@@ -4,8 +4,12 @@ import { openAPIRouteHandler } from "hono-openapi";
 import companies from "./app/companies";
 import jobs from "./app/jobs";
 import stats from "./app/stats";
+import { rateLimit } from "./middleware/rate-limit";
+import { securityHeaders } from "./middleware/security-headers";
 
 const app = new Hono()
+  .use("*", rateLimit)
+  .use("*", securityHeaders)
   .use("*", async (c, next) => {
     const start = Date.now();
 

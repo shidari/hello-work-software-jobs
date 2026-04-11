@@ -10,6 +10,11 @@ import {
 } from "../infra/db";
 import type { SearchFilter } from "./schema";
 
+/** LIKE クエリ用: % と _ をエスケープしてワイルドカードインジェクションを防止 */
+function escapeLike(value: string): string {
+  return value.replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
 // --- エラー ---
 
 export class FetchJobError extends Data.TaggedError("FetchJobError")<{
@@ -85,7 +90,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where(
                   "companyName",
                   "like",
-                  `%${filter.companyName}%`,
+                  `%${escapeLike(filter.companyName)}%`,
                 );
               }
               if (filter.employeeCountGt !== undefined) {
@@ -106,14 +111,14 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where(
                   "jobDescription",
                   "like",
-                  `%${filter.jobDescription}%`,
+                  `%${escapeLike(filter.jobDescription)}%`,
                 );
               }
               if (filter.jobDescriptionExclude) {
                 query = query.where(
                   "jobDescription",
                   "not like",
-                  `%${filter.jobDescriptionExclude}%`,
+                  `%${escapeLike(filter.jobDescriptionExclude)}%`,
                 );
               }
               if (filter.onlyNotExpired) {
@@ -139,7 +144,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where(
                   "occupation",
                   "like",
-                  `%${filter.occupation}%`,
+                  `%${escapeLike(filter.occupation)}%`,
                 );
               }
               if (filter.employmentType) {
@@ -159,14 +164,14 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where(
                   "workPlace",
                   "like",
-                  `%${filter.workPlace}%`,
+                  `%${escapeLike(filter.workPlace)}%`,
                 );
               }
               if (filter.qualifications) {
                 query = query.where(
                   "qualifications",
                   "like",
-                  `%${filter.qualifications}%`,
+                  `%${escapeLike(filter.qualifications)}%`,
                 );
               }
               if (filter.jobCategory) {
@@ -179,14 +184,14 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where(
                   "education",
                   "like",
-                  `%${filter.education}%`,
+                  `%${escapeLike(filter.education)}%`,
                 );
               }
               if (filter.industryClassification) {
                 query = query.where(
                   "industryClassification",
                   "like",
-                  `%${filter.industryClassification}%`,
+                  `%${escapeLike(filter.industryClassification)}%`,
                 );
               }
 
