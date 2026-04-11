@@ -25,28 +25,12 @@ export interface Companies {
   updatedAt: string;
 }
 
-export interface CrawlerRuns {
+export interface JobAttachments {
   createdAt: string;
-  errorMessage: string | null;
-  failedCount: Generated<number>;
-  fetchedCount: Generated<number>;
-  finishedAt: string | null;
-  id: Generated<number>;
-  queuedCount: Generated<number>;
-  startedAt: string;
-  status: string;
-  trigger: string;
-}
-
-export interface JobDetailRuns {
-  createdAt: string;
-  errorMessage: string | null;
-  finishedAt: string | null;
   id: Generated<number>;
   jobNumber: string;
-  stage: string | null;
-  startedAt: string;
-  status: string;
+  r2Key: string;
+  sizeBytes: number;
 }
 
 export interface Jobs {
@@ -91,7 +75,6 @@ export interface Jobs {
 
 export interface DB {
   companies: Companies;
-  crawler_runs: CrawlerRuns;
-  job_detail_runs: JobDetailRuns;
+  job_attachments: JobAttachments;
   jobs: Jobs;
 }

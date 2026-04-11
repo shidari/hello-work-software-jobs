@@ -6,20 +6,13 @@ export function createDB(dialect: Dialect): Kysely<DB> {
 }
 
 // クエリユーティリティ
-export {
-  type DailyStatRow,
-  selectCrawlerRuns,
-  selectDailyStats,
-  selectJobDetailRuns,
-} from "./queries";
+export { type DailyStatRow, selectDailyStats } from "./queries";
 // DB行スキーマ（Kysely 生成型との整合性を保証）
 export {
   type DbCompanyRow,
   DbCompanyRowSchema,
-  type DbCrawlerRunRow,
-  DbCrawlerRunRowSchema,
-  type DbJobDetailRunRow,
-  DbJobDetailRunRowSchema,
+  type DbJobAttachmentRow,
+  DbJobAttachmentRowSchema,
   type DbJobRow,
   DbJobRowSchema,
 } from "./schema";
