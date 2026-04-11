@@ -122,6 +122,7 @@ Cloudflare Workers + Hono。
 - **インフラ層**: `src/infra/db.ts` に `JobStoreDB`（Effect Context.Tag）と `createD1DB`（D1Dialect 組み立て）を集約。`JobStoreDB.main(binding)` で DB クライアントを生成。
 - **エラー**: `Data.TaggedError` で型安全なエラーハンドリング。コントローラーで `Effect.match` により分岐。
 - **ページネーション**: ページ番号方式。
+- **ミドルウェア**: `src/middleware/` に共通ミドルウェアを集約。API キー検証（`api-key.ts`）、D1 Token Bucket レート制限（`rate-limit.ts`）、セキュリティヘッダー（`security-headers.ts`）。
 
 ---
 

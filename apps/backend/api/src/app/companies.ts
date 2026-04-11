@@ -1,9 +1,14 @@
 import { Company } from "@sho/models";
-import { Effect, Schema } from "effect";
+import { Data, Effect, Schema } from "effect";
 import { Hono } from "hono";
 import { UpsertCompanyCommand } from "../cqrs/commands";
 import { FetchJobError, FindCompanyQuery } from "../cqrs/queries";
 import { JobStoreDB } from "../infra/db";
+import { verifyApiKey } from "../middleware/api-key";
+
+class InvalidJsonError extends Data.TaggedError("InvalidJsonError")<{
+  readonly message: string;
+}> {}
 
 const app = new Hono<{ Bindings: Env }>()
   .get("/:establishmentNumber", (c) => {
@@ -39,20 +44,16 @@ const app = new Hono<{ Bindings: Env }>()
       ),
     );
   })
-  .post("/", (c, next) => {
-    const apiKey = c.req.header("x-api-key");
-    const validApiKey = c.env.API_KEY;
-    if (!apiKey || apiKey !== validApiKey) {
-      return c.json({ message: "Invalid API key" }, 401);
-    }
-    return next();
-  })
-  .post("/", async (c) => {
-    const body = await c.req.json();
+  .post("/", verifyApiKey)
+  .post("/", (c) => {
     const db = JobStoreDB.main(c.env.DB);
 
     return Effect.runPromise(
       Effect.gen(function* () {
+        const body = yield* Effect.tryPromise({
+          try: () => c.req.json(),
+          catch: () => new InvalidJsonError({ message: "Invalid JSON body" }),
+        });
         const company = yield* Schema.decodeUnknown(Company)(body);
         const cmd = yield* UpsertCompanyCommand;
         return yield* cmd.run(company);
@@ -62,8 +63,14 @@ const app = new Hono<{ Bindings: Env }>()
         Effect.match({
           onSuccess: (result) => c.json(result),
           onFailure: (error) => {
-            console.error(error);
-            return c.json({ message: "internal server error" }, 500);
+            switch (error._tag) {
+              case "ParseError":
+              case "InvalidJsonError":
+                return c.json({ message: error.message }, 400);
+              default:
+                console.error(error);
+                return c.json({ message: "internal server error" }, 500);
+            }
           },
         }),
       ),
