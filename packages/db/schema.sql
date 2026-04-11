@@ -53,25 +53,12 @@ CREATE TABLE `jobs` (
 	`updatedAt` text NOT NULL
 );
 CREATE UNIQUE INDEX `jobs_jobNumber_unique` ON `jobs` (`jobNumber`);
-CREATE TABLE `crawler_runs` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`status` text NOT NULL CHECK(`status` IN ('success', 'failed')),
-	`trigger` text NOT NULL CHECK(`trigger` IN ('cron', 'manual')),
-	`startedAt` text NOT NULL,
-	`finishedAt` text,
-	`fetchedCount` integer DEFAULT 0 NOT NULL,
-	`queuedCount` integer DEFAULT 0 NOT NULL,
-	`failedCount` integer DEFAULT 0 NOT NULL,
-	`errorMessage` text,
-	`createdAt` text NOT NULL
-);
-CREATE TABLE `job_detail_runs` (
+CREATE TABLE `job_attachments` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`jobNumber` text NOT NULL,
-	`status` text NOT NULL CHECK(`status` IN ('success', 'failed')),
-	`stage` text,
-	`startedAt` text NOT NULL,
-	`finishedAt` text,
-	`errorMessage` text,
-	`createdAt` text NOT NULL
+	`r2Key` text NOT NULL,
+	`sizeBytes` integer NOT NULL,
+	`createdAt` text NOT NULL,
+	FOREIGN KEY (`jobNumber`) REFERENCES `jobs`(`jobNumber`)
 );
+CREATE UNIQUE INDEX `job_attachments_jobNumber_unique` ON `job_attachments` (`jobNumber`);
