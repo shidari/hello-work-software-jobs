@@ -15,6 +15,20 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [docs/SECURITY.md](docs/SECURITY.md) — セキュリティ方針
 - [docs/references/conventions.md](docs/references/conventions.md) — コーディング規約・PR ルール
 
+## Rules (パッケージスコープ)
+
+- [.claude/rules/api.md](.claude/rules/api.md) — API 固有ルール
+- [.claude/rules/frontend.md](.claude/rules/frontend.md) — Frontend 固有ルール
+- [.claude/rules/collector.md](.claude/rules/collector.md) — Collector 固有ルール
+- [.claude/rules/db.md](.claude/rules/db.md) — DB 固有ルール
+- [.claude/rules/models.md](.claude/rules/models.md) — Models 固有ルール
+
+## Skills
+
+- `/commit-and-pr` — コミット → PR 作成の自動化
+- `/pentest` — 攻撃者視点のペネトレーションテスト
+- `/crawler-diagnose` — クローラーパイプライン診断
+
 ## Common Commands
 
 ```bash
@@ -46,7 +60,5 @@ pnpm dev:e2e             # E2E パイプライン検証 (crawler → SQS → ETL
 pnpm test              # Vitest tests (PBT)
 pnpm build             # tsdown ビルド
 
-# 診断スクリプト (AWS_PROFILE=crawler-debug が必要)
-devbox run crawler-diagnose          # クローラーパイプライン全体診断
-devbox run crawler-logs [MINUTES]     # 直近 N 分の ETL エラーログ (デフォルト 30 分)
+# 診断は /crawler-diagnose skill を使用
 ```

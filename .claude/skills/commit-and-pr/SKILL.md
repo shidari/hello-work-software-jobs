@@ -1,3 +1,8 @@
+---
+name: commit-and-pr
+description: コミットから PR 作成までを一貫して実行する。pre-commit チェック、セキュリティレビュー、Conventional Commits、ブランチ作成、PR 作成を自動化。
+---
+
 # Commit and PR
 
 コミットからPR作成までを一貫して実行する。
