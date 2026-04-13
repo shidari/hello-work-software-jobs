@@ -13,7 +13,7 @@ import {
   WageType,
   WorkingHours,
 } from "@sho/models";
-import { Data, Effect, Either, Schema } from "effect";
+import { Data, Effect, Either, ParseResult, Schema } from "effect";
 import { parseHTML } from "linkedom";
 import { formatParseError } from "../util";
 import {
@@ -41,17 +41,23 @@ export class CompanyTransformError extends Data.TaggedError(
 
 // ── フィールド単位の transform ──
 
-const japaneseDateToISOStr = Schema.transform(Schema.String, Schema.String, {
-  strict: true,
-  decode: (val) => {
-    // "2025年7月23日" → "2025-07-23"
-    const dateStr = val.replace("年", "-").replace("月", "-").replace("日", "");
-    return new Date(dateStr).toISOString();
+const japaneseDateToISOStr = Schema.transformOrFail(
+  Schema.String,
+  Schema.String,
+  {
+    strict: true,
+    decode: (val) => {
+      // "2025年7月23日" → "2025-07-23"
+      const dateStr = val
+        .replace("年", "-")
+        .replace("月", "-")
+        .replace("日", "");
+      return ParseResult.succeed(new Date(dateStr).toISOString());
+    },
+    encode: (val, _, ast) =>
+      ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
-});
+);
 
 const receivedDateTransform = japaneseDateToISOStr.pipe(
   Schema.compose(ReceivedDate),
@@ -61,72 +67,89 @@ const expiryDateTransform = japaneseDateToISOStr.pipe(
   Schema.compose(ExpiryDate),
 );
 
-const homePageTransform = Schema.transform(Schema.String, HomePageUrl, {
+const homePageTransform = Schema.transformOrFail(Schema.String, HomePageUrl, {
   strict: true,
-  decode: (val) => {
-    if (/^https?:\/\//i.test(val)) return val;
-    return `https://${val}`;
-  },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
+  decode: (val) =>
+    ParseResult.succeed(/^https?:\/\//i.test(val) ? val : `https://${val}`),
+  encode: (val, _, ast) =>
+    ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
 });
 
-const wageRangeTransform = Schema.transform(Schema.String, WageRange, {
+const wageRangeTransform = Schema.transformOrFail(Schema.String, WageRange, {
   strict: true,
-  decode: (val) => {
+  decode: (val, _, ast) => {
     const match = val.match(/^(\d{1,3}(?:,\d{3})*)円〜(\d{1,3}(?:,\d{3})*)円$/);
-    if (!match) throw new Error(`Invalid wage format: "${val}"`);
-    return {
+    if (!match)
+      return ParseResult.fail(
+        new ParseResult.Type(ast, val, `Invalid wage format: "${val}"`),
+      );
+    return ParseResult.succeed({
       min: Number.parseInt(match[1].replace(/,/g, ""), 10),
       max: Number.parseInt(match[2].replace(/,/g, ""), 10),
-    };
+    });
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
+  encode: (val, _, ast) =>
+    ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
 });
 
-const workingHoursTransform = Schema.transform(Schema.String, WorkingHours, {
-  strict: true,
-  decode: (val) => {
-    const match = val.match(/^(\d{1,2})時(\d{1,2})分〜(\d{1,2})時(\d{1,2})分$/);
-    if (!match)
-      throw new Error(
-        `Invalid working hours format, should be '9時00分〜18時00分': "${val}"`,
+const workingHoursTransform = Schema.transformOrFail(
+  Schema.String,
+  WorkingHours,
+  {
+    strict: true,
+    decode: (val, _, ast) => {
+      const match = val.match(
+        /^(\d{1,2})時(\d{1,2})分〜(\d{1,2})時(\d{1,2})分$/,
       );
-    const [_, startH, startM, endH, endM] = match;
-    return {
-      start: `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`,
-      end: `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`,
-    };
+      if (!match)
+        return ParseResult.fail(
+          new ParseResult.Type(
+            ast,
+            val,
+            `Invalid working hours format, should be '9時00分〜18時00分': "${val}"`,
+          ),
+        );
+      const [, startH, startM, endH, endM] = match;
+      return ParseResult.succeed({
+        start: `${startH.padStart(2, "0")}:${startM.padStart(2, "0")}:00`,
+        end: `${endH.padStart(2, "0")}:${endM.padStart(2, "0")}:00`,
+      });
+    },
+    encode: (val, _, ast) =>
+      ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
-});
+);
 
-const employeeCountTransform = Schema.transform(Schema.String, EmployeeCount, {
-  strict: true,
-  decode: (val) => {
-    const match = val.match(/\d+/);
-    if (!match) throw new Error(`Invalid employee count format: "${val}"`);
-    return Number(match[0]);
+const employeeCountTransform = Schema.transformOrFail(
+  Schema.String,
+  EmployeeCount,
+  {
+    strict: true,
+    decode: (val, _, ast) => {
+      const match = val.match(/\d+/);
+      if (!match)
+        return ParseResult.fail(
+          new ParseResult.Type(
+            ast,
+            val,
+            `Invalid employee count format: "${val}"`,
+          ),
+        );
+      return ParseResult.succeed(Number(match[0]));
+    },
+    encode: (val, _, ast) =>
+      ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
   },
-  encode: () => {
-    throw new Error("encode not supported");
-  },
-});
+);
 
-const onlineApplicationTransform = Schema.transform(
+const onlineApplicationTransform = Schema.transformOrFail(
   Schema.String,
   Schema.Boolean,
   {
     strict: true,
-    decode: (val) => val === "可",
-    encode: () => {
-      throw new Error("encode not supported");
-    },
+    decode: (val) => ParseResult.succeed(val === "可"),
+    encode: (val, _, ast) =>
+      ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
   },
 );
 

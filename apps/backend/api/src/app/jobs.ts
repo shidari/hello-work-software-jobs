@@ -1,6 +1,6 @@
 import { Job, JobNumber } from "@sho/models";
 import { RawEmployeeCount, RawWage } from "@sho/models/raw";
-import { Effect, Schema } from "effect";
+import { Effect, ParseResult, Schema } from "effect";
 import { Hono } from "hono";
 import {
   describeRoute,
@@ -48,7 +48,7 @@ const SearchQueryParams = Schema.Struct({
   page: Schema.optional(Schema.String),
 });
 
-const SearchFilterQuerySchema = Schema.transform(
+const SearchFilterQuerySchema = Schema.transformOrFail(
   SearchQueryParams,
   Schema.Struct({
     filter: SearchFilterSchema,
@@ -64,7 +64,7 @@ const SearchFilterQuerySchema = Schema.transform(
       const WageFromString = Schema.compose(Schema.NumberFromString, RawWage);
 
       const parsedPage = raw.page ? Number(raw.page) : 1;
-      return {
+      return ParseResult.succeed({
         filter: Schema.decodeUnknownSync(SearchFilterSchema)({
           companyName: raw.companyName,
           employeeCountLt: raw.employeeCountLt
@@ -101,11 +101,10 @@ const SearchFilterQuerySchema = Schema.transform(
         page: Number.isNaN(parsedPage)
           ? 1
           : Math.max(1, Math.floor(parsedPage)),
-      };
+      });
     },
-    encode: () => {
-      throw new Error("encode not supported");
-    },
+    encode: (val, _, ast) =>
+      ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
   },
 );
 
