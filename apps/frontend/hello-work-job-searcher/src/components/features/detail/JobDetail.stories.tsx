@@ -11,6 +11,7 @@ type Story = StoryObj<typeof meta>;
 
 export const FullData: Story = {
   args: {
+    relatedJobs: [],
     jobDetail: {
       jobNumber: "13080-12345678",
       companyName: "株式会社サンプル",
@@ -50,6 +51,7 @@ export const FullData: Story = {
 
 export const LongDescription: Story = {
   args: {
+    relatedJobs: [],
     jobDetail: {
       jobNumber: "13080-11111111",
       companyName: "株式会社ロングテキスト",
@@ -90,6 +92,7 @@ export const LongDescription: Story = {
 
 export const MinimalData: Story = {
   args: {
+    relatedJobs: [],
     jobDetail: {
       jobNumber: "27010-87654321",
       companyName: null,

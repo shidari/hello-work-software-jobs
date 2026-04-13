@@ -20,5 +20,16 @@ export default async function Page({
   if (!job) {
     return <div>求人が見つかりませんでした。</div>;
   }
-  return <JobDetailPage job={job} />;
+
+  const relatedJobs = job.companyName
+    ? await jobStoreClient.jobs
+        .$get({ query: { companyName: job.companyName } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) =>
+          data ? data.jobs.filter((j) => j.jobNumber !== job.jobNumber) : [],
+        )
+        .catch(() => [])
+    : [];
+
+  return <JobDetailPage job={job} relatedJobs={relatedJobs} />;
 }

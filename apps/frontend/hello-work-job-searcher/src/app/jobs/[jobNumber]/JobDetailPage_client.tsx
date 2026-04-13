@@ -5,7 +5,13 @@ import { JobDetailCard } from "@/components/features/detail/JobDetail";
 import type { JobDetail } from "@/dto";
 import styles from "./JobDetailPage.module.css";
 
-export function JobDetailPage({ job }: { job: JobDetail }) {
+export function JobDetailPage({
+  job,
+  relatedJobs,
+}: {
+  job: JobDetail;
+  relatedJobs: JobDetail[];
+}) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -13,7 +19,7 @@ export function JobDetailPage({ job }: { job: JobDetail }) {
           &larr; 求人一覧に戻る
         </Link>
       </div>
-      <JobDetailCard jobDetail={job} />
+      <JobDetailCard jobDetail={job} relatedJobs={relatedJobs} />
     </div>
   );
 }
