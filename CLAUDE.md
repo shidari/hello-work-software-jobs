@@ -22,6 +22,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [.claude/rules/collector.md](.claude/rules/collector.md) — Collector 固有ルール
 - [.claude/rules/db.md](.claude/rules/db.md) — DB 固有ルール
 - [.claude/rules/models.md](.claude/rules/models.md) — Models 固有ルール
+- [.claude/rules/general.md](.claude/rules/general.md) — 全体共通ルール（devbox 等）
 
 ## Skills
 
