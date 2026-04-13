@@ -9,6 +9,7 @@ import {
   JobDetailTransformer,
   processJob,
 } from "../../../lib/job-detail-crawler";
+import { logTmpUsage } from "../tmp-usage";
 
 // ── SQS メッセージスキーマ ──
 
@@ -69,6 +70,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
     console.error("No records in SQS event");
     return;
   }
+
+  await logTmpUsage("job-detail-etl:start");
 
   const parsed = Schema.decodeUnknownSync(SqsJobMessage)(
     JSON.parse(record.body),

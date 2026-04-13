@@ -5,9 +5,12 @@ import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../../lib/job-number-crawler/crawl";
+import { logTmpUsage } from "../tmp-usage";
 import { JobDetailQueue } from "../../sqs";
 
 export const handler = async () => {
+  await logTmpUsage("job-number-crawler:start");
+
   const jobs = await Effect.scoped(
     Effect.gen(function* () {
       const queue = yield* JobDetailQueue;
