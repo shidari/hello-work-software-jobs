@@ -14,6 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     job: mockJobs[0],
+    relatedJobs: [],
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -28,6 +29,7 @@ export const Default: Story = {
 export const AnotherJob: Story = {
   args: {
     job: mockJobs[4],
+    relatedJobs: [],
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

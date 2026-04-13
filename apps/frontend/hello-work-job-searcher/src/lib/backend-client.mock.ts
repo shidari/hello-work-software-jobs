@@ -7,7 +7,6 @@ export type JobDetailResponse = InferResponseType<
   Client["jobs"][":jobNumber"]["$get"],
   200
 >;
-
 // --- モックデータ ---
 
 const baseJob: JobDetailResponse = {
@@ -118,8 +117,20 @@ function makeResponse<T>(data: T, status = 200) {
 
 export const jobStoreClient = {
   jobs: {
-    $get: async () => makeResponse(_jobList),
-    [":jobNumber"]: {
+    $get: async (opts?: { query?: { companyName?: string } }) => {
+      const companyName = opts?.query?.companyName;
+      if (companyName) {
+        const filtered = _jobList.jobs.filter(
+          (j) => j.companyName === companyName,
+        );
+        return makeResponse({
+          jobs: filtered,
+          meta: { totalCount: filtered.length, page: 1, totalPages: 1 },
+        });
+      }
+      return makeResponse(_jobList);
+    },
+    ":jobNumber": {
       $get: async ({ param }: { param: { jobNumber: string } }) => {
         const job = _jobMap.get(param.jobNumber);
         return makeResponse(job ?? null);

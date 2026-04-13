@@ -36,6 +36,41 @@
   font-size: 0.9375rem;
 }
 
+.related-jobs {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.related-jobs li a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border, gainsboro);
+  border-radius: 0.375rem;
+  background: var(--background, #fff);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+
+.related-jobs li a:hover {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+.related-occupation {
+  font-weight: 600;
+}
+
+.related-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
 @media (max-width: 768px) {
   .layout-job-detail {
     padding: 1rem;
