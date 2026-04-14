@@ -5,8 +5,8 @@ import {
   crawlJobLinks,
   JobNumberCrawlerConfig,
 } from "../../../lib/job-number-crawler/crawl";
-import { logTmpUsage } from "../tmp-usage";
 import { JobDetailQueue } from "../../sqs";
+import { logTmpUsage } from "../tmp-usage";
 
 export const handler = async () => {
   await logTmpUsage("job-number-crawler:start");
