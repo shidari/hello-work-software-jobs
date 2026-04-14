@@ -6,7 +6,7 @@
     "gh@2.87.3",
     "pinact@3.8.0",
     "jq@1.8.1",
-    "awscli2@2.33.2",
+    "awscli2@2.34.24",
     "wrangler@4.62.0",
     "nodePackages.vercel@41.4.1"
   ],
