@@ -16,7 +16,7 @@ check_aws_auth() {
 
 check_wrangler_auth() {
   if ! command -v wrangler >/dev/null 2>&1; then
-    echo "ERROR: wrangler not found. Activate Nix dev shell: direnv allow (or 'nix develop')" >&2
+    echo "ERROR: wrangler not found. Enter Nix dev shell: 'nix develop'" >&2
     return 1
   fi
   if ! wrangler whoami >/dev/null 2>&1; then
@@ -28,7 +28,7 @@ check_wrangler_auth() {
 
 check_vercel_auth() {
   if ! command -v vercel >/dev/null 2>&1; then
-    echo "ERROR: vercel CLI not found. Activate Nix dev shell: direnv allow (or 'nix develop')" >&2
+    echo "ERROR: vercel CLI not found. Enter Nix dev shell: 'nix develop'" >&2
     return 1
   fi
   if ! vercel whoami >/dev/null 2>&1; then

@@ -5,5 +5,3 @@ TODO.md
 .env
 .env.keys
 *.tsbuildinfo
-.direnv
-.envrc.local

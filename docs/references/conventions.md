@@ -16,7 +16,7 @@
 - **Validation**: Runtime validation with Effect Schema (`import { Schema } from "effect"`)
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
-- **コマンドが見つからない場合**: `command not found` になったら `direnv allow` でプロジェクトの dev shell を有効化するか、`nix develop --command <command>` で実行する。パッケージが足りなければ `flake.nix` の `devShells.default.packages` に追加する
+- **コマンドが見つからない場合**: `command not found` になったら `nix develop --command <command>` で実行するか、`nix develop` でシェルに入ってから実行する。パッケージが足りなければ `flake.nix` の `devShells.default.packages` に追加する
 - **修正作業の開始前**: コードの修正・追加を始める前に、まず `git pull --rebase` で最新の状態にすること
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`/commit-and-pr` コマンドの手順に従うこと
 - **コミット後の自動PR**: コミット完了後、以下を自動実行する

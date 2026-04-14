@@ -1,6 +1,6 @@
 # CLI ツール
 
-このプロジェクトでは **`nodejs` / `pnpm` / `gh` / `pinact` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` が Nix flake で管理されている**（[flake.nix](../../flake.nix)）。`direnv` + `nix-direnv` が導入済みであればプロジェクトディレクトリに入った時点で自動で PATH が通り、コマンドを直接叩ける。未導入なら `nix develop --command <command>` または `nix develop` でシェルに入って実行。グローバル版を直接叩かない。
+このプロジェクトでは **`nodejs` / `pnpm` / `gh` / `pinact` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` が Nix flake で管理されている**（[flake.nix](../../flake.nix)）。`nix develop --command <command>` 経由で単発実行するか、`nix develop` でシェルに入ってから直接叩く。グローバル版を直接叩かない。
 
 ## 用途
 
@@ -22,7 +22,7 @@
 | 基盤 | CLI | 認証 |
 |------|-----|------|
 | Collector | `aws logs` | `AWS_PROFILE=crawler-debug` |
-| API (Workers) | `wrangler tail job-store` | `wrangler login` |
-| Frontend (Vercel) | `vercel logs` | `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行） |
+| API (Workers) | `wrangler tail job-store` | `nix develop --command wrangler login` |
+| Frontend (Vercel) | `vercel logs` | `nix develop --command vercel login` + `nix develop --command vercel link`（`apps/frontend/hello-work-job-searcher` で実行） |
 
 認証が切れている場合は `/debug` skill が検知して再ログインを促す。
