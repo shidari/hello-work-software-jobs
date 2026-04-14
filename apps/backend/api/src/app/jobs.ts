@@ -16,6 +16,7 @@ import {
 } from "../cqrs/queries";
 import { SearchFilterSchema } from "../cqrs/schema";
 import { JobStoreDB } from "../infra/db";
+import { LoggerLayer, logErrorCause, runLog } from "../log";
 import { verifyApiKey } from "../middleware/api-key";
 
 // --- スキーマ ---
@@ -347,13 +348,14 @@ const app = new Hono<{ Bindings: Env }>()
         }).pipe(
           Effect.provide(FetchJobsPageQuery.Default),
           Effect.provideService(JobStoreDB, db),
+          Effect.tapErrorCause((cause) =>
+            logErrorCause("fetch jobs failed", cause),
+          ),
           Effect.match({
             onSuccess: (data) => c.json(data),
-            onFailure: (error) => {
-              console.error(error);
-              return c.json({ message: "internal server error" }, 500);
-            },
+            onFailure: () => c.json({ message: "internal server error" }, 500),
           }),
+          Effect.provide(LoggerLayer),
         ),
       );
     },
@@ -368,7 +370,11 @@ const app = new Hono<{ Bindings: Env }>()
       (result, c) => {
         if (!result.success) {
           const detail = result.error.map((issue) => issue.message).join("\n");
-          console.log(`Invalid request body. detail: ${detail}`);
+          void runLog(
+            Effect.logWarning("invalid job insert request body").pipe(
+              Effect.annotateLogs({ detail }),
+            ),
+          );
           return c.json(
             { message: `Invalid request body. detail: ${detail}` },
             400,
@@ -378,7 +384,6 @@ const app = new Hono<{ Bindings: Env }>()
       },
     ),
     async (c) => {
-      console.log("in job insert route");
       const body = c.req.valid("json");
       const db = JobStoreDB.main(c.env.DB);
 
@@ -398,10 +403,14 @@ const app = new Hono<{ Bindings: Env }>()
           Effect.provide(InsertJobCommand.Default),
           Effect.provide(FindJobByNumberQuery.Default),
           Effect.provideService(JobStoreDB, db),
+          Effect.tapErrorCause((cause) =>
+            logErrorCause("insert job failed", cause).pipe(
+              Effect.annotateLogs({ jobNumber: body.jobNumber }),
+            ),
+          ),
           Effect.match({
             onSuccess: (job) => c.json(job),
             onFailure: (error) => {
-              console.error(error);
               switch (error._tag) {
                 case "InsertJobDuplicationError":
                   return c.json({ message: error.message }, 409);
@@ -414,6 +423,7 @@ const app = new Hono<{ Bindings: Env }>()
               }
             },
           }),
+          Effect.provide(LoggerLayer),
         ),
       );
     },
@@ -440,10 +450,14 @@ const app = new Hono<{ Bindings: Env }>()
         }).pipe(
           Effect.provide(FindJobByNumberQuery.Default),
           Effect.provideService(JobStoreDB, db),
+          Effect.tapErrorCause((cause) =>
+            logErrorCause("fetch job failed", cause).pipe(
+              Effect.annotateLogs({ jobNumber }),
+            ),
+          ),
           Effect.match({
             onSuccess: (job) => c.json(job),
             onFailure: (error) => {
-              console.error(error);
               switch (error._tag) {
                 case "FetchJobError":
                   return c.json({ message: "Job not found" }, 404);
@@ -452,6 +466,7 @@ const app = new Hono<{ Bindings: Env }>()
               }
             },
           }),
+          Effect.provide(LoggerLayer),
         ),
       );
     },

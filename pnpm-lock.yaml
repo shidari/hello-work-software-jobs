@@ -42,6 +42,9 @@ importers:
       '@sho/db':
         specifier: workspace:*
         version: link:../../../packages/db
+      '@sho/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models
@@ -140,6 +143,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.800.0
         version: 3.1024.0
+      '@sho/logger':
+        specifier: workspace:*
+        version: link:../../../../packages/logger
       '@sho/models':
         specifier: workspace:*
         version: link:../../../../packages/models
@@ -186,6 +192,9 @@ importers:
       '@sho/api':
         specifier: workspace:*
         version: link:../../backend/api
+      '@sho/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models
@@ -275,6 +284,19 @@ importers:
       kysely-codegen:
         specifier: ^0.20.0
         version: 0.20.0(better-sqlite3@12.8.0)(kysely@0.28.15)(typescript@5.9.3)
+      tsdown:
+        specifier: ^0.21.0
+        version: 0.21.7(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/logger:
+    dependencies:
+      effect:
+        specifier: 'catalog:'
+        version: 3.20.0
+    devDependencies:
       tsdown:
         specifier: ^0.21.0
         version: 0.21.7(synckit@0.11.12)(typescript@5.9.3)

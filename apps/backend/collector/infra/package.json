@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.800.0",
+    "@sho/logger": "workspace:*",
     "@sho/models": "workspace:*",
     "aws-cdk-lib": "2.243.0",
     "constructs": "^10.0.0",

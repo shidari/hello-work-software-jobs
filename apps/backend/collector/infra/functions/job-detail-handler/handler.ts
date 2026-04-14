@@ -9,6 +9,7 @@ import {
   JobDetailTransformer,
   processJob,
 } from "../../../lib/job-detail-crawler";
+import { LoggerLayer, logErrorCause } from "../logger";
 import { logTmpUsage } from "../tmp-usage";
 
 // ── SQS メッセージスキーマ ──
@@ -17,26 +18,34 @@ const SqsJobMessage = Schema.Struct({
   jobNumber: Schema.String,
 });
 
+// ── /tmp クリーンアップ ──
+
+const cleanupTmp = Effect.tryPromise({
+  try: async () => {
+    for (const entry of await readdir("/tmp")) {
+      if (entry.startsWith("playwright")) {
+        await rm(`/tmp/${entry}`, { recursive: true, force: true });
+      }
+    }
+  },
+  catch: (e) => e,
+}).pipe(
+  Effect.catchAll((e) =>
+    Effect.logError("cleanup /tmp/playwright* failed").pipe(
+      Effect.annotateLogs({ error: { message: String(e) } }),
+    ),
+  ),
+);
+
 // ── processJobDetail ──
 
-const processJobDetail = async (jobNumber: string) => {
-  await Effect.gen(function* () {
+const processJobDetail = (jobNumber: string) =>
+  Effect.gen(function* () {
     const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
     yield* processJob(parsed);
+    yield* Effect.logInfo("job detail success");
   }).pipe(
-    Effect.ensuring(
-      Effect.promise(async function cleanup() {
-        try {
-          for (const entry of await readdir("/tmp")) {
-            if (entry.startsWith("playwright")) {
-              await rm(`/tmp/${entry}`, { recursive: true, force: true });
-            }
-          }
-        } catch (e) {
-          console.log("cleanup /tmp/playwright* failed:", e);
-        }
-      }),
-    ),
+    Effect.ensuring(cleanupTmp),
     Effect.retry({
       times: 2,
       while: (e) => {
@@ -51,33 +60,34 @@ const processJobDetail = async (jobNumber: string) => {
         }
       },
     }),
+    Effect.tapErrorCause((cause) => logErrorCause("job detail failed", cause)),
+    Effect.annotateLogs({ jobNumber }),
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(ChromiumBrowserConfig.lambda),
+    Effect.provide(LoggerLayer),
     Effect.orDie,
-    Effect.runPromise,
   );
-  console.log(`${jobNumber} success`);
-};
 
 // ── Lambda handler ──
 
-export const handler = async (event: SQSEvent): Promise<void> => {
-  // batchSize: 1 なので Records は常に1件
-  const record = event.Records[0];
-  if (!record) {
-    console.error("No records in SQS event");
-    return;
-  }
+const handlerProgram = (event: SQSEvent) =>
+  Effect.gen(function* () {
+    // batchSize: 1 なので Records は常に1件
+    const record = event.Records[0];
+    if (!record) {
+      yield* Effect.logWarning("no records in SQS event");
+      return;
+    }
 
-  await logTmpUsage("job-detail-etl:start");
+    yield* Effect.promise(() => logTmpUsage("job-detail-etl:start"));
 
-  const parsed = Schema.decodeUnknownSync(SqsJobMessage)(
-    JSON.parse(record.body),
-  );
-  await processJobDetail(parsed.jobNumber).catch((error) => {
-    console.error(`${parsed.jobNumber} failed:`, error);
-    throw error;
-  });
-};
+    const parsed = Schema.decodeUnknownSync(SqsJobMessage)(
+      JSON.parse(record.body),
+    );
+    yield* processJobDetail(parsed.jobNumber);
+  }).pipe(Effect.provide(LoggerLayer));
+
+export const handler = async (event: SQSEvent): Promise<void> =>
+  Effect.runPromise(handlerProgram(event));

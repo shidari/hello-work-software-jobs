@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { UpsertCompanyCommand } from "../cqrs/commands";
 import { FetchJobError, FindCompanyQuery } from "../cqrs/queries";
 import { JobStoreDB } from "../infra/db";
+import { LoggerLayer, logErrorCause } from "../log";
 import { verifyApiKey } from "../middleware/api-key";
 
 class InvalidJsonError extends Data.TaggedError("InvalidJsonError")<{
@@ -29,10 +30,14 @@ const app = new Hono<{ Bindings: Env }>()
       }).pipe(
         Effect.provide(FindCompanyQuery.Default),
         Effect.provideService(JobStoreDB, db),
+        Effect.tapErrorCause((cause) =>
+          logErrorCause("fetch company failed", cause).pipe(
+            Effect.annotateLogs({ establishmentNumber }),
+          ),
+        ),
         Effect.match({
           onSuccess: (company) => c.json(company),
           onFailure: (error) => {
-            console.error(error);
             switch (error._tag) {
               case "FetchJobError":
                 return c.json({ message: "Company not found" }, 404);
@@ -41,6 +46,7 @@ const app = new Hono<{ Bindings: Env }>()
             }
           },
         }),
+        Effect.provide(LoggerLayer),
       ),
     );
   })
@@ -60,6 +66,19 @@ const app = new Hono<{ Bindings: Env }>()
       }).pipe(
         Effect.provide(UpsertCompanyCommand.Default),
         Effect.provideService(JobStoreDB, db),
+        Effect.tapError((error) =>
+          error._tag === "ParseError" || error._tag === "InvalidJsonError"
+            ? Effect.logWarning("invalid company upsert request").pipe(
+                Effect.annotateLogs({
+                  _tag: error._tag,
+                  error: { message: error.message },
+                }),
+              )
+            : Effect.void,
+        ),
+        Effect.tapErrorCause((cause) =>
+          logErrorCause("upsert company failed", cause),
+        ),
         Effect.match({
           onSuccess: (result) => c.json(result),
           onFailure: (error) => {
@@ -68,11 +87,11 @@ const app = new Hono<{ Bindings: Env }>()
               case "InvalidJsonError":
                 return c.json({ message: error.message }, 400);
               default:
-                console.error(error);
                 return c.json({ message: "internal server error" }, 500);
             }
           },
         }),
+        Effect.provide(LoggerLayer),
       ),
     );
   });
