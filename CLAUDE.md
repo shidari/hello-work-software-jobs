@@ -24,7 +24,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [.claude/rules/db.md](.claude/rules/db.md) — DB 固有ルール
 - [.claude/rules/models.md](.claude/rules/models.md) — Models 固有ルール
 - [.claude/rules/logger.md](.claude/rules/logger.md) — Logger 固有ルール（@sho/logger）
-- [.claude/rules/cli.md](.claude/rules/cli.md) — CLI ツール（devbox 管理対象）
+- [.claude/rules/cli.md](.claude/rules/cli.md) — CLI ツール（Nix flake 管理対象）
 - [.claude/rules/general.md](.claude/rules/general.md) — 全体共通ルール
 
 ## Skills

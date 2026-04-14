@@ -55,7 +55,7 @@ staging されたファイルに対して、security-review コマンドの Chec
 
 ### 5. PR 作成
 
-- そのブランチの PR が未作成なら `devbox run gh pr create` で作成
+- そのブランチの PR が未作成なら `nix develop --command gh pr create` で作成
   - タイトル: コミットメッセージの1行目
   - body: `docs/references/conventions.md` の PR テンプレートに従って作成する（Summary, Background & Motivation, Design Decisions, Changes, Test Plan）
   - body にバッククォート等の特殊文字を含む場合は `--body-file` を使う
@@ -74,4 +74,4 @@ staging されたファイルに対して、security-review コマンドの Chec
 
 - 変更がない場合は何もしない
 - secrets を含むファイル (.env, credentials.json 等) はコミットしない
-- `devbox run gh` で GitHub CLI を実行する（`gh` 直接実行は不可）
+- `gh` は `nix develop --command gh` 経由で実行する。グローバル版の直接実行は不可

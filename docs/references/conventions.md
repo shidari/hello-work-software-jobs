@@ -2,7 +2,7 @@
 
 ## General Rules
 
-- **プロジェクト外のファイル参照禁止**: 原則として、このリポジトリ外のファイル（`~/devbox.json` 等）を参照・編集しないこと。ツールチェーンはプロジェクトレベルの `devbox.json` で管理する
+- **プロジェクト外のファイル参照禁止**: 原則として、このリポジトリ外のファイル（`~/.config/nixpkgs/...` 等）を参照・編集しないこと。ツールチェーンはプロジェクトレベルの `flake.nix` で管理する
 - **ad-hoc スクリプト禁止**: コマンド出力の加工に `python3 -c`, `node -e` 等のワンライナーを使わないこと。`jq` 等の専用ツールを使う
 
 ## Coding Conventions
@@ -16,7 +16,7 @@
 - **Validation**: Runtime validation with Effect Schema (`import { Schema } from "effect"`)
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
-- **コマンドが見つからない場合**: `command not found` になったら `devbox run <command>` で実行する。パッケージが足りなければ `devbox add` で追加する
+- **コマンドが見つからない場合**: `command not found` になったら `nix develop --command <command>` で実行するか、`nix develop` でシェルに入ってから実行する。パッケージが足りなければ `flake.nix` の `devShells.default.packages` に追加する
 - **修正作業の開始前**: コードの修正・追加を始める前に、まず `git pull --rebase` で最新の状態にすること
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`/commit-and-pr` コマンドの手順に従うこと
 - **コミット後の自動PR**: コミット完了後、以下を自動実行する

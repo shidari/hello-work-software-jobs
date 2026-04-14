@@ -4,7 +4,7 @@
 
 ## CLI ツール
 
-devbox で管理している CLI（`gh` / `aws` / `wrangler` / `vercel` 等）の一覧と実行方法は [.claude/rules/cli.md](./cli.md) を参照。
+Nix flake で管理している CLI（`gh` / `aws` / `wrangler` / `vercel` 等）の一覧と実行方法は [.claude/rules/cli.md](./cli.md) を参照。
 
 ## ロギング
 
