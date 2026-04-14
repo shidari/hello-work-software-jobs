@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import Link from "next/link";
 import { jobStoreClient } from "#lib/backend-client";
 import { JobCard } from "@/components/features/list/JobCard";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
 import { Collapsible } from "@/components/ui/Collapsible";
+import { runLog } from "@/lib/log";
 import styles from "./JobsPageClient.module.css";
 import { JobsPagination } from "./JobsPagination_client";
 import { SearchFilterForm } from "./SearchFilterForm_client";
@@ -33,8 +34,11 @@ export default async function Page({
     },
   });
   if (!res.ok) {
-    if (process.env.NODE_ENV === "development")
-      console.error("Failed to fetch jobs:", res.status);
+    await runLog(
+      Effect.logError("fetch jobs list failed").pipe(
+        Effect.annotateLogs({ status: res.status, path: "/jobs" }),
+      ),
+    );
     return <main>求人情報の取得に失敗しました。</main>;
   }
   const data = await res.json();

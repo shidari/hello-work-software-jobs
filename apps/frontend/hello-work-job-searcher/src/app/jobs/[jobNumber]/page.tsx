@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import { Effect } from "effect";
 import { jobStoreClient } from "#lib/backend-client";
+import { runLog } from "@/lib/log";
 import { JobDetailPage } from "./JobDetailPage_client";
 
 export default async function Page({
@@ -13,7 +15,11 @@ export default async function Page({
     param: { jobNumber },
   });
   if (!res.ok) {
-    console.error("Failed to fetch job detail:", res.status);
+    await runLog(
+      Effect.logError("fetch job detail failed").pipe(
+        Effect.annotateLogs({ jobNumber, status: res.status }),
+      ),
+    );
     return <div>求人情報の取得に失敗しました。</div>;
   }
   const job = await res.json();

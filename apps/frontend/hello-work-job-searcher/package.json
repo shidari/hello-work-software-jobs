@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@sho/api": "workspace:*",
+    "@sho/logger": "workspace:*",
     "@sho/models": "workspace:*",
     "effect": "catalog:",
     "hono": "catalog:",

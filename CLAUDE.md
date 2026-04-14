@@ -13,6 +13,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [docs/FRONTEND.md](docs/FRONTEND.md) — フロントエンド設計
 - [docs/QUALITY.md](docs/QUALITY.md) — テスト・品質方針
 - [docs/SECURITY.md](docs/SECURITY.md) — セキュリティ方針
+- [docs/LOGGING.md](docs/LOGGING.md) — ロギング規約（横断トレース用キー名）
 - [docs/references/conventions.md](docs/references/conventions.md) — コーディング規約・PR ルール
 
 ## Rules (パッケージスコープ)
@@ -22,6 +23,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [.claude/rules/collector.md](.claude/rules/collector.md) — Collector 固有ルール
 - [.claude/rules/db.md](.claude/rules/db.md) — DB 固有ルール
 - [.claude/rules/models.md](.claude/rules/models.md) — Models 固有ルール
+- [.claude/rules/logger.md](.claude/rules/logger.md) — Logger 固有ルール（@sho/logger）
 - [.claude/rules/general.md](.claude/rules/general.md) — 全体共通ルール（devbox 等）
 
 ## Skills
@@ -29,6 +31,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - `/commit-and-pr` — コミット → PR 作成の自動化
 - `/pentest` — 攻撃者視点のペネトレーションテスト
 - `/crawler-diagnose` — クローラーパイプライン診断
+- `/debug` — 3 基盤横断ログ検索（CloudWatch / Workers / Vercel）
 
 ## Common Commands
 
@@ -62,4 +65,5 @@ pnpm test              # Vitest tests (PBT)
 pnpm build             # tsdown ビルド
 
 # 診断は /crawler-diagnose skill を使用
+# 横断ログ検索は /debug skill を使用
 ```

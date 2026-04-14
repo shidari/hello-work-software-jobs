@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver } from "hono-openapi";
 import { FetchDailyStatsQuery } from "../cqrs/queries";
 import { JobStoreDB } from "../infra/db";
+import { LoggerLayer, logErrorCause } from "../log";
 
 const dailyStatsSuccessResponseSchema = Schema.Struct({
   stats: Schema.Array(
@@ -52,13 +53,14 @@ const app = new Hono<{ Bindings: Env }>().get(
       }).pipe(
         Effect.provide(FetchDailyStatsQuery.Default),
         Effect.provideService(JobStoreDB, db),
+        Effect.tapErrorCause((cause) =>
+          logErrorCause("fetch daily stats failed", cause),
+        ),
         Effect.match({
           onSuccess: (stats) => c.json({ stats }),
-          onFailure: (error) => {
-            console.error(error);
-            return c.json({ message: "internal server error" }, 500);
-          },
+          onFailure: () => c.json({ message: "internal server error" }, 500),
         }),
+        Effect.provide(LoggerLayer),
       ),
     );
   },
