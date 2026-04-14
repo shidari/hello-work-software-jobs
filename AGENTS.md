@@ -46,4 +46,4 @@ docs/
 | testing.md | → [docs/QUALITY.md](docs/QUALITY.md) |
 | pull-request.md | → [docs/references/conventions.md](docs/references/conventions.md)（PR セクション） |
 | frontend.md | → [docs/FRONTEND.md](docs/FRONTEND.md) |
-| general.md | → [.claude/rules/general.md](.claude/rules/general.md)（devbox 等） |
+| general.md | → [.claude/rules/general.md](.claude/rules/general.md)（Nix flake 等） |
