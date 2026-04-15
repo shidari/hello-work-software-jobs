@@ -100,6 +100,9 @@ importers:
       '@sho/api':
         specifier: workspace:*
         version: link:../api
+      '@sho/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@sho/models':
         specifier: workspace:*
         version: link:../../../packages/models

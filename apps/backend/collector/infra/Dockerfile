@@ -14,12 +14,14 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/models/package.json packages/models/
+COPY packages/logger/package.json packages/logger/
 COPY apps/backend/collector/package.json apps/backend/collector/
 RUN pnpm install --frozen-lockfile
 
-# models をビルド
+# workspace パッケージをビルド
 COPY packages/models/ packages/models/
-RUN pnpm --filter @sho/models build
+COPY packages/logger/ packages/logger/
+RUN pnpm --filter @sho/models --filter @sho/logger build
 
 # collector をビルド (tsdown)
 COPY apps/backend/collector/ apps/backend/collector/

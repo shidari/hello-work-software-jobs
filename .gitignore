@@ -7,3 +7,4 @@ TODO.md
 .env.sandbox
 *.tsbuildinfo
 .claude/settings.local.json
+.pnpm-store
