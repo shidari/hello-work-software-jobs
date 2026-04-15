@@ -24,7 +24,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 - [.claude/rules/db.md](.claude/rules/db.md) — DB 固有ルール
 - [.claude/rules/models.md](.claude/rules/models.md) — Models 固有ルール
 - [.claude/rules/logger.md](.claude/rules/logger.md) — Logger 固有ルール（@sho/logger）
-- [.claude/rules/cli.md](.claude/rules/cli.md) — CLI ツール（Nix flake 管理対象）
+- [.claude/rules/cli.md](.claude/rules/cli.md) — CLI ツール（Apple container サンドボックス管理対象）
 - [.claude/rules/general.md](.claude/rules/general.md) — 全体共通ルール
 
 ## Skills
@@ -37,6 +37,11 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 ## Common Commands
 
 ```bash
+# Sandbox (Apple container) — Claude Code / CLI ツールはすべてこの中で実行
+./scripts/sandbox.sh          # 引数なし: Claude Code を起動
+./scripts/sandbox.sh shell    # bash シェル
+./scripts/sandbox.sh stop     # 停止・破棄
+
 # Root
 pnpm test              # Run all tests
 pnpm type-check        # Type check
