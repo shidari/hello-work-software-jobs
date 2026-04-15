@@ -4,5 +4,6 @@ TODO.md
 .stack-work
 .env
 .env.keys
+.env.sandbox
 *.tsbuildinfo
 .claude/settings.local.json
