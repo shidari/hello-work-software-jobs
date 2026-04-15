@@ -5,3 +5,4 @@ TODO.md
 .env
 .env.keys
 *.tsbuildinfo
+.claude/settings.local.json
