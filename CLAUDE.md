@@ -38,9 +38,9 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 
 ```bash
 # Sandbox (Apple container) — Claude Code / CLI ツールはすべてこの中で実行
-./scripts/sandbox.sh          # 引数なし: Claude Code を起動
-./scripts/sandbox.sh shell    # bash シェル
-./scripts/sandbox.sh stop     # 停止・破棄
+./scripts/sandbox-create.sh   # 作成（初回 or 破棄後）
+./scripts/sandbox.sh          # 既存コンテナに bash で入る
+./scripts/sandbox-stop.sh     # 停止・破棄
 
 # Root
 pnpm test              # Run all tests

@@ -2,41 +2,46 @@
 
 このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている（[Dockerfile](../../Dockerfile) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
 
-## 初回セットアップ
-
-```bash
-cp .env.sandbox.example .env.sandbox
-# エディタで .env.sandbox を開き、各 PAT/トークンを記入する
-```
-
 ## 起動
 
 ```bash
-./scripts/sandbox.sh              # 引数なし: Claude Code をコンテナ内で起動
-./scripts/sandbox.sh shell        # bash シェルに入る
-./scripts/sandbox.sh <cmd> [...]  # 任意コマンドをコンテナ内で実行
-./scripts/sandbox.sh stop         # 停止・破棄
+./scripts/sandbox-create.sh  # image build + コンテナ作成（初回 or 破棄後）
+./scripts/sandbox.sh         # 既存コンテナに bash で入る
+./scripts/sandbox-stop.sh    # 停止・破棄
 ```
+
+初回は `sandbox-create.sh` でセットアップ後、`sandbox.sh` で中に入って `gh auth login` / `wrangler login` / `vercel login` / `claude /login` を手動で実行する。
 
 ## 認証情報の扱い
 
-ブラスト半径を最小化するため、マウントは最小限に留め、基本は環境変数で渡す。
+ブラスト半径を最小化するため、ホストの認証情報は直接触らせない。方式は 2 つ:
 
 | 方式 | 対象 | 理由 |
 |------|------|------|
-| 環境変数（`.env.sandbox` → `--env-file`） | `gh` / `wrangler` / `vercel` / `claude` | PAT/API Token で完結。scope を絞れる |
-| read-only マウント | `~/.aws` | AWS CLI はプロファイル設定ファイル（`config` / `credentials`）を参照するため |
+| `~/.sho-sandbox/` 以下を read-write bind mount | `gh` / `claude` / `wrangler` / `vercel` | コンテナ内で各 CLI の `login` を実行し、結果をホストから隔離して永続化。OAuth トークンリフレッシュのため書き込み可 |
+| `~/.aws` を read-only マウント | `aws` | AWS CLI のプロファイル設定ファイルを参照するため。SSO ログインはホスト側で行う |
 
-環境変数は以下を使う（`.env.sandbox.example` 参照）:
+### 初回セットアップ
 
-| ツール | 環境変数 |
-|--------|---------|
-| `gh` | `GH_TOKEN` |
-| `wrangler` | `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` |
-| `vercel` | `VERCEL_TOKEN` |
-| `claude` | `CLAUDE_CODE_OAUTH_TOKEN` もしくは `ANTHROPIC_API_KEY` |
+サンドボックス内でブラウザ OAuth を一度ずつ実行すれば、`~/.sho-sandbox/` に保存されて次回以降も有効:
 
-`aws` のログイン操作（アクセスキー設定など）はホスト側で行い、コンテナは `~/.aws` を read-only で参照する方針。
+```bash
+./scripts/sandbox-create.sh   # 初回のみ: コンテナ作成
+./scripts/sandbox.sh          # bash で中に入る
+gh auth login       # ブラウザで GitHub 承認
+wrangler login      # ブラウザで Cloudflare 承認
+vercel login        # ブラウザで Vercel 承認
+claude /login       # または `claude setup-token`
+```
+
+永続化パス:
+
+| ツール | ホスト側 | コンテナ内 |
+|--------|---------|-----------|
+| `gh` | `~/.sho-sandbox/gh/` | `~/.config/gh/` |
+| `claude` | `~/.sho-sandbox/claude/` | `~/.claude/` |
+| `wrangler` | `~/.sho-sandbox/wrangler/` | `~/.config/.wrangler/` |
+| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `~/.local/share/com.vercel.cli/`, `~/.config/com.vercel.cli/` |
 
 ## 用途
 
@@ -58,7 +63,7 @@ cp .env.sandbox.example .env.sandbox
 | 基盤 | CLI | 認証 |
 |------|-----|------|
 | Collector | `aws logs` | `AWS_PROFILE=crawler-debug`（`~/.aws` はホスト側で整備） |
-| API (Workers) | `wrangler tail job-store` | `.env.sandbox` の `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` |
-| Frontend (Vercel) | `vercel logs` | `.env.sandbox` の `VERCEL_TOKEN` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
+| API (Workers) | `wrangler tail job-store` | サンドボックス内で `wrangler login`（`~/.sho-sandbox/wrangler/` に永続化） |
+| Frontend (Vercel) | `vercel logs` | サンドボックス内で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
 
 認証が切れている場合は `/debug` skill が検知して再ログインを促す。
