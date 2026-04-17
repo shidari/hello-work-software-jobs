@@ -32,7 +32,12 @@ export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
         const { default: mod } = await import("@sparticuz/chromium");
         return {
           executablePath: await mod.executablePath(),
-          args: mod.args,
+          args: [
+            ...mod.args,
+            "--disable-gpu-shader-disk-cache",
+            "--disk-cache-size=0",
+            "--disk-cache-dir=/dev/null",
+          ],
         } satisfies LaunchOptions;
       },
       catch: (e) =>
