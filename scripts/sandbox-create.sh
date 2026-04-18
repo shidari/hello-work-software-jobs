@@ -44,6 +44,7 @@ MOUNTS=(
 [[ -e "$HOME/.aws" ]] && MOUNTS+=( -v "$HOME/.aws:/home/node/.aws:ro" )
 
 container run -d --name "$NAME" \
+  -m 6g \
   "${MOUNTS[@]}" \
   -e GIT_AUTHOR_NAME="$GIT_NAME" \
   -e GIT_AUTHOR_EMAIL="$GIT_EMAIL" \
