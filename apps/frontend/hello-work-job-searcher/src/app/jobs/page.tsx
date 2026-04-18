@@ -4,7 +4,7 @@ import { Effect, Schema } from "effect";
 import Link from "next/link";
 import { jobStoreClient } from "#lib/backend-client";
 import { JobCard } from "@/components/features/list/JobCard";
-import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter";
+import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter.schema";
 import { Collapsible } from "@/components/ui/Collapsible";
 import { runLog } from "@/lib/log";
 import styles from "./JobsPageClient.module.css";

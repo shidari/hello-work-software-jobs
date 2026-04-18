@@ -84,3 +84,4 @@ export const Empty: Story = {
     await expect(canvas.getByText(/0 件/)).toBeInTheDocument();
   },
 };
+
