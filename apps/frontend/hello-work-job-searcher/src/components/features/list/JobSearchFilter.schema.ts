@@ -1,3 +1,8 @@
+import {
+  RawEmploymentType,
+  RawJobCategory,
+  RawWageType,
+} from "@sho/models/raw";
 import { Schema } from "effect";
 
 export const SearchFilterSchema = Schema.Struct({
@@ -7,13 +12,17 @@ export const SearchFilterSchema = Schema.Struct({
   occupation: Schema.optional(Schema.String),
   workPlace: Schema.optional(Schema.String),
   qualifications: Schema.optional(Schema.String),
-  employmentType: Schema.optional(Schema.String),
+  employmentType: Schema.optional(RawEmploymentType),
+  jobCategory: Schema.optional(RawJobCategory),
+  wageType: Schema.optional(RawWageType),
   wageMin: Schema.optional(Schema.String),
   wageMax: Schema.optional(Schema.String),
   addedSince: Schema.optional(Schema.String),
   addedUntil: Schema.optional(Schema.String),
-  orderByReceiveDate: Schema.optional(Schema.String),
-  onlyNotExpired: Schema.optional(Schema.String),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
+  onlyNotExpired: Schema.optional(Schema.Literal("true")),
   employeeCountGt: Schema.optional(Schema.String),
   employeeCountLt: Schema.optional(Schema.String),
 });
