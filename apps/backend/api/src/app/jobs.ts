@@ -1,5 +1,11 @@
 import { Job, JobNumber } from "@sho/models";
-import { RawEmployeeCount, RawWage } from "@sho/models/raw";
+import {
+  RawEmployeeCount,
+  RawEmploymentType,
+  RawJobCategory,
+  RawWage,
+  RawWageType,
+} from "@sho/models/raw";
 import { Effect, ParseResult, Schema } from "effect";
 import { Hono } from "hono";
 import {
@@ -32,18 +38,20 @@ const SearchQueryParams = Schema.Struct({
   employeeCountGt: Schema.optional(Schema.String),
   jobDescription: Schema.optional(Schema.String),
   jobDescriptionExclude: Schema.optional(Schema.String),
-  onlyNotExpired: Schema.optional(Schema.String),
-  orderByReceiveDate: Schema.optional(Schema.String),
+  onlyNotExpired: Schema.optional(Schema.Literal("true")),
+  orderByReceiveDate: Schema.optional(
+    Schema.Union(Schema.Literal("asc"), Schema.Literal("desc")),
+  ),
   addedSince: Schema.optional(Schema.String),
   addedUntil: Schema.optional(Schema.String),
   occupation: Schema.optional(Schema.String),
-  employmentType: Schema.optional(Schema.String),
+  employmentType: Schema.optional(RawEmploymentType),
   wageMin: Schema.optional(Schema.String),
   wageMax: Schema.optional(Schema.String),
   workPlace: Schema.optional(Schema.String),
   qualifications: Schema.optional(Schema.String),
-  jobCategory: Schema.optional(Schema.String),
-  wageType: Schema.optional(Schema.String),
+  jobCategory: Schema.optional(RawJobCategory),
+  wageType: Schema.optional(RawWageType),
   education: Schema.optional(Schema.String),
   industryClassification: Schema.optional(Schema.String),
   page: Schema.optional(Schema.String),

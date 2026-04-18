@@ -1,9 +1,11 @@
 "use client";
 
 import { Schema } from "effect";
+import type { hc, InferRequestType } from "hono/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import type { AppType } from "@/lib/backend-client";
 import styles from "./JobSearchFilter.module.css";
 import {
   type SearchFilter,
@@ -11,6 +13,23 @@ import {
 } from "./JobSearchFilter.schema";
 
 export { type SearchFilter, SearchFilterSchema };
+
+type JobsQuery = InferRequestType<
+  ReturnType<typeof hc<AppType>>["jobs"]["$get"]
+>["query"];
+
+type EmploymentTypeValue = NonNullable<JobsQuery["employmentType"]>;
+
+const EMPLOYMENT_TYPE_OPTIONS = [
+  { value: "", label: "すべて" },
+  { value: "正社員", label: "正社員" },
+  { value: "パート労働者", label: "パート" },
+  { value: "正社員以外", label: "正社員以外" },
+  { value: "有期雇用派遣労働者", label: "派遣" },
+] as const satisfies readonly {
+  value: EmploymentTypeValue | "";
+  label: string;
+}[];
 
 export function JobSearchFilter({
   defaultValue,
@@ -40,21 +59,13 @@ export function JobSearchFilter({
         break;
     }
 
+    const raw = Object.fromEntries(
+      [...formData.entries()].filter(([, v]) => v !== ""),
+    );
+
     const parsed = Schema.decodeUnknownSync(SearchFilterSchema)({
-      companyName: formData.get("companyName"),
-      jobDescription: formData.get("jobDescription"),
-      jobDescriptionExclude: formData.get("jobDescriptionExclude"),
-      occupation: formData.get("occupation"),
-      workPlace: formData.get("workPlace"),
-      qualifications: formData.get("qualifications"),
-      employmentType: formData.get("employmentType"),
-      wageMin: formData.get("wageMin"),
-      wageMax: formData.get("wageMax"),
-      addedSince: formData.get("addedSince"),
-      addedUntil: formData.get("addedUntil"),
-      orderByReceiveDate: formData.get("orderByReceiveDate"),
-      onlyNotExpired:
-        formData.get("onlyNotExpired") === "on" ? "true" : undefined,
+      ...raw,
+      onlyNotExpired: raw.onlyNotExpired === "on" ? "true" : undefined,
       employeeCountGt,
       employeeCountLt,
     });
@@ -154,11 +165,11 @@ export function JobSearchFilter({
               aria-label="雇用形態"
               defaultValue={defaultValue.employmentType ?? ""}
             >
-              <option value="">すべて</option>
-              <option value="正社員">正社員</option>
-              <option value="パート">パート</option>
-              <option value="契約社員">契約社員</option>
-              <option value="派遣">派遣</option>
+              {EMPLOYMENT_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </Select>
           </div>
           <div className={styles.fieldGroup}>
