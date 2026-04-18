@@ -1,4 +1,3 @@
-import { readdir, rm } from "node:fs/promises";
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
@@ -10,32 +9,13 @@ import {
   processJob,
 } from "../../../lib/job-detail-crawler";
 import { LoggerLayer, logErrorCause } from "../logger";
-import { logTmpUsage } from "../tmp-usage";
+import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
 
 // ── SQS メッセージスキーマ ──
 
 const SqsJobMessage = Schema.Struct({
   jobNumber: Schema.String,
 });
-
-// ── /tmp クリーンアップ ──
-
-const cleanupTmp = Effect.tryPromise({
-  try: async () => {
-    for (const entry of await readdir("/tmp")) {
-      if (entry.startsWith("playwright")) {
-        await rm(`/tmp/${entry}`, { recursive: true, force: true });
-      }
-    }
-  },
-  catch: (e) => e,
-}).pipe(
-  Effect.catchAll((e) =>
-    Effect.logError("cleanup /tmp/playwright* failed").pipe(
-      Effect.annotateLogs({ error: { message: String(e) } }),
-    ),
-  ),
-);
 
 // ── processJobDetail ──
 
@@ -81,6 +61,8 @@ const handlerProgram = (event: SQSEvent) =>
       return;
     }
 
+    yield* disableCoreDump;
+    yield* cleanupTmp;
     yield* Effect.promise(() => logTmpUsage("job-detail-etl:start"));
 
     const parsed = Schema.decodeUnknownSync(SqsJobMessage)(

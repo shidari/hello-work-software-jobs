@@ -36,7 +36,6 @@ export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
             ...mod.args,
             "--disable-gpu-shader-disk-cache",
             "--disk-cache-size=0",
-            "--disk-cache-dir=/dev/null",
           ],
         } satisfies LaunchOptions;
       },
