@@ -11,6 +11,26 @@ RUN apt-get update \
       gnupg \
       jq \
       unzip \
+      libglib2.0-0 \
+      libnspr4 \
+      libnss3 \
+      libatk1.0-0 \
+      libdbus-1-3 \
+      libatspi2.0-0 \
+      libx11-6 \
+      libxcomposite1 \
+      libxdamage1 \
+      libxext6 \
+      libxfixes3 \
+      libxrandr2 \
+      libgbm1 \
+      libxcb1 \
+      libxkbcommon0 \
+      libasound2 \
+      libatk-bridge2.0-0 \
+      libcups2 \
+      libcairo2 \
+      libpango-1.0-0 \
  && mkdir -p -m 755 /etc/apt/keyrings \
  && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \

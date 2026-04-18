@@ -8,3 +8,5 @@ TODO.md
 *.tsbuildinfo
 .claude/settings.local.json
 .pnpm-store
+.vercel
+.env*.local
