@@ -1,9 +1,9 @@
-import { Schema } from "effect";
 import {
   RawEmploymentType,
   RawJobCategory,
   RawWageType,
 } from "@sho/models/raw";
+import { Schema } from "effect";
 
 export const SearchFilterSchema = Schema.Struct({
   companyName: Schema.optional(Schema.String),
