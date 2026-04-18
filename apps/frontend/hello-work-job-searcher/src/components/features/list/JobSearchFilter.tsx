@@ -4,13 +4,13 @@ import { Schema } from "effect";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import styles from "./JobSearchFilter.module.css";
 import {
   type SearchFilter,
   SearchFilterSchema,
 } from "./JobSearchFilter.schema";
-import styles from "./JobSearchFilter.module.css";
 
-export { SearchFilterSchema, type SearchFilter };
+export { type SearchFilter, SearchFilterSchema };
 
 export function JobSearchFilter({
   defaultValue,
