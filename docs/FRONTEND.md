@@ -13,6 +13,8 @@
 ## 状態管理
 
 - **求人データ**: RSC で API から取得。URL searchParams が Source of Truth（フィルター・ページネーション）
+  - `/jobs` は Suspense + `use(jobsPromise)` でストリーミング（shell はヘッダ + フィルターフォーム、リストは `<JobsListSkeleton />` を fallback にしてロード）
+  - 失敗時は `error.tsx` がキャッチ
 - **お気に入り**: Jotai + localStorage（`atom.ts` に Source of Truth / Selectors / Writers を集約）
 
 ## UI コンポーネント (`src/components/ui/`)

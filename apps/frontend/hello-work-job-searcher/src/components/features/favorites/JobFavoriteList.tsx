@@ -34,6 +34,17 @@ export function FavoriteJobOverviewList() {
     }
   }, [setFavorites]);
 
+  if (items.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <p className={styles.emptyMessage}>お気に入りはまだありません</p>
+        <Link href="/jobs" className={styles.emptyCta}>
+          求人情報を探す
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <CardGroup>
       {items.map((item) => (

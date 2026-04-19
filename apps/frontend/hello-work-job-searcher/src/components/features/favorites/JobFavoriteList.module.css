@@ -40,3 +40,34 @@
   color: inherit;
   display: block;
 }
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+}
+
+.emptyMessage {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.emptyCta {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--transition-normal),
+    color var(--transition-normal);
+}
+
+.emptyCta:hover {
+  background: var(--color-accent);
+  color: var(--color-bg-surface);
+}
