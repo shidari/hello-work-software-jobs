@@ -7,7 +7,10 @@ import type { Job } from "@sho/models";
 import { Effect, Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 import worker from "../src";
-import { jobListSuccessResponseSchema } from "../src/app/jobs";
+import {
+  jobListSuccessResponseSchema,
+  jobsExistsSuccessResponseSchema,
+} from "../src/app/jobs";
 import { InsertJobCommand } from "../src/cqrs/commands";
 import { JobStoreDB } from "../src/infra/db";
 import { sampleJobs } from "./mock";
@@ -155,6 +158,62 @@ describe("求人登録", () => {
         "x-api-key": "test-api-key",
       },
       body: JSON.stringify({}),
+    });
+    expect(response.status).toBe(400);
+  });
+});
+
+// --- 求人番号の存在確認 ---
+
+describe("求人番号の存在確認", () => {
+  it("登録済みの求人番号のみが existing に含まれる", async () => {
+    const [registered, unregistered] = sampleJobs({ num: 2 });
+    await insertJob(registered);
+
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jobNumbers: [registered.jobNumber, unregistered.jobNumber],
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    const data = Schema.decodeUnknownSync(jobsExistsSuccessResponseSchema)(
+      await response.json(),
+    );
+    expect(data.existing).toContain(registered.jobNumber);
+    expect(data.existing).not.toContain(unregistered.jobNumber);
+  });
+
+  it("全件未登録なら existing は空配列", async () => {
+    const [job] = sampleJobs({ num: 1 });
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobNumbers: [job.jobNumber] }),
+    });
+    expect(response.status).toBe(200);
+    const data = Schema.decodeUnknownSync(jobsExistsSuccessResponseSchema)(
+      await response.json(),
+    );
+    expect(data.existing).toEqual([]);
+  });
+
+  it("空配列は 400 を返す", async () => {
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobNumbers: [] }),
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it("不正な形式の求人番号を含むと 400 を返す", async () => {
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobNumbers: ["invalid"] }),
     });
     expect(response.status).toBe(400);
   });
