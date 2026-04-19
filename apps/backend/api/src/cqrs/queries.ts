@@ -229,6 +229,13 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                   `%${escapeLike(filter.industryClassification)}%`,
                 );
               }
+              if (filter.establishmentNumber) {
+                query = query.where(
+                  "establishmentNumber",
+                  "=",
+                  filter.establishmentNumber,
+                );
+              }
 
               const jobList = await query
                 .selectAll()

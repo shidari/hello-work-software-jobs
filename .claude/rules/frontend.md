@@ -8,6 +8,7 @@ Next.js 16 + React 19。
 |------|------|
 | `/jobs` | 求人一覧（検索フィルター + ページネーション + カードリスト） |
 | `/jobs/[jobNumber]` | 求人詳細 |
+| `/companies/[establishmentNumber]` | 事業所詳細（事業所情報 + その事業所の求人一覧） |
 | `/favorites` | お気に入り（localStorage 永続化） |
 
 ## 設計
