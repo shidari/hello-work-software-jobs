@@ -22,8 +22,50 @@
   opacity: 0.7;
 }
 
+.detailArticle {
+  padding: 1.5rem 2rem;
+}
+
+.detailTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.detailTitleNumber {
+  display: inline-block;
+  width: 8rem;
+  height: 1.1rem;
+}
+
+.detailLabels {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailValueSkeleton {
+  display: inline-block;
+  width: 60%;
+  min-width: 8rem;
+  height: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 0.75rem 1rem 0;
+  }
+
+  .detailArticle {
+    padding: 1rem;
+  }
+
+  .detailTitle {
+    font-size: 1.1rem;
   }
 }

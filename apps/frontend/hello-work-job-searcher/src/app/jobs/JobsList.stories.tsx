@@ -5,8 +5,6 @@ import { mockJobs } from "@/lib/backend-client.mock";
 import { JobsList, type JobsListData } from "./JobsList_client";
 import { JobsListSkeleton } from "./JobsListSkeleton";
 
-const filterParams = new URLSearchParams();
-
 const listData: JobsListData = {
   jobs: mockJobs.slice(0, 5) as unknown as JobsListData["jobs"],
   meta: { totalCount: mockJobs.length, page: 1, totalPages: 2 },
@@ -36,7 +34,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     jobsPromise: Promise.resolve(listData),
-    filterParams,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -51,6 +48,5 @@ export const LoadingState: Story = {
   name: "Loading (Suspense fallback)",
   args: {
     jobsPromise: new Promise<JobsListData>(() => {}),
-    filterParams,
   },
 };

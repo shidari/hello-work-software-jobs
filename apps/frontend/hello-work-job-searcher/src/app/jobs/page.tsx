@@ -62,31 +62,6 @@ export default async function Page({
     !!filter.employeeCountGt ||
     !!filter.employeeCountLt;
 
-  const filterParams = new URLSearchParams();
-  if (filter.companyName) filterParams.set("companyName", filter.companyName);
-  if (filter.jobDescription)
-    filterParams.set("jobDescription", filter.jobDescription);
-  if (filter.jobDescriptionExclude)
-    filterParams.set("jobDescriptionExclude", filter.jobDescriptionExclude);
-  if (filter.occupation) filterParams.set("occupation", filter.occupation);
-  if (filter.workPlace) filterParams.set("workPlace", filter.workPlace);
-  if (filter.qualifications)
-    filterParams.set("qualifications", filter.qualifications);
-  if (filter.employmentType)
-    filterParams.set("employmentType", filter.employmentType);
-  if (filter.wageMin) filterParams.set("wageMin", filter.wageMin);
-  if (filter.wageMax) filterParams.set("wageMax", filter.wageMax);
-  if (filter.addedSince) filterParams.set("addedSince", filter.addedSince);
-  if (filter.addedUntil) filterParams.set("addedUntil", filter.addedUntil);
-  if (filter.orderByReceiveDate)
-    filterParams.set("orderByReceiveDate", filter.orderByReceiveDate);
-  if (filter.onlyNotExpired)
-    filterParams.set("onlyNotExpired", filter.onlyNotExpired);
-  if (filter.employeeCountGt)
-    filterParams.set("employeeCountGt", filter.employeeCountGt);
-  if (filter.employeeCountLt)
-    filterParams.set("employeeCountLt", filter.employeeCountLt);
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -96,7 +71,7 @@ export default async function Page({
         </Collapsible>
       </div>
       <Suspense fallback={<JobsListSkeleton />}>
-        <JobsList jobsPromise={jobsPromise} filterParams={filterParams} />
+        <JobsList jobsPromise={jobsPromise} />
       </Suspense>
     </div>
   );

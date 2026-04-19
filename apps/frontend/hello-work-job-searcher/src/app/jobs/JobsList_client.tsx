@@ -15,10 +15,8 @@ export type JobsListData = InferResponseType<
 
 export function JobsList({
   jobsPromise,
-  filterParams,
 }: {
   jobsPromise: Promise<JobsListData>;
-  filterParams: URLSearchParams;
 }) {
   const data = use(jobsPromise);
   const { page, totalPages, totalCount } = data.meta;
@@ -27,11 +25,7 @@ export function JobsList({
     <>
       <div>求人情報の総数: {totalCount} 件</div>
       {totalPages > 1 && (
-        <JobsPagination
-          currentPage={page}
-          totalPages={totalPages}
-          filterParams={filterParams}
-        />
+        <JobsPagination currentPage={page} totalPages={totalPages} />
       )}
       <div className={styles.items}>
         {data.jobs.map((job) => {
@@ -51,11 +45,7 @@ export function JobsList({
         })}
       </div>
       {totalPages > 1 && (
-        <JobsPagination
-          currentPage={page}
-          totalPages={totalPages}
-          filterParams={filterParams}
-        />
+        <JobsPagination currentPage={page} totalPages={totalPages} />
       )}
     </>
   );

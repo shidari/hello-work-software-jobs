@@ -47,6 +47,17 @@
   color: var(--disabled-fg);
   pointer-events: none;
   border-color: var(--border-strong);
+  cursor: not-allowed;
+}
+
+.pagination:has(.pending) {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.pending {
+  --is-pending: 1;
 }
 
 .ellipsis {
