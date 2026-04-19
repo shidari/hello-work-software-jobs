@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { CompanyDetailSkeleton } from "./CompanyDetailSkeleton";
 import styles from "./CompanyDetailPage.module.css";
+import { CompanyDetailSkeleton } from "./CompanyDetailSkeleton";
 
 export default function Loading() {
   return (
