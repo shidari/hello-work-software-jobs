@@ -1,14 +1,14 @@
 export const dynamic = "force-dynamic";
 
 import { Effect, Schema } from "effect";
-import Link from "next/link";
+import { Suspense } from "react";
 import { jobStoreClient } from "#lib/backend-client";
-import { JobCard } from "@/components/features/list/JobCard";
 import { SearchFilterSchema } from "@/components/features/list/JobSearchFilter.schema";
 import { Collapsible } from "@/components/ui/Collapsible";
 import { runLog } from "@/lib/log";
+import { JobsList } from "./JobsList_client";
+import { JobsListSkeleton } from "./JobsListSkeleton";
 import styles from "./JobsPageClient.module.css";
-import { JobsPagination } from "./JobsPagination_client";
 import { SearchFilterForm } from "./SearchFilterForm_client";
 
 const SearchParams = Schema.Struct({
@@ -25,24 +25,26 @@ export default async function Page({
   const { page: pageStr, ...filter } =
     Schema.decodeUnknownSync(SearchParams)(raw);
 
-  const res = await jobStoreClient.jobs.$get({
-    query: {
-      ...filter,
-      onlyNotExpired: filter.onlyNotExpired === "true" ? "true" : undefined,
-      orderByReceiveDate: filter.orderByReceiveDate ?? ("desc" as const),
-      page: pageStr ?? "1",
-    },
-  });
-  if (!res.ok) {
-    await runLog(
-      Effect.logError("fetch jobs list failed").pipe(
-        Effect.annotateLogs({ status: res.status, path: "/jobs" }),
-      ),
-    );
-    return <main>求人情報の取得に失敗しました。</main>;
-  }
-  const data = await res.json();
-  const { page, totalPages, totalCount } = data.meta;
+  const jobsPromise = (async () => {
+    const res = await jobStoreClient.jobs.$get({
+      query: {
+        ...filter,
+        onlyNotExpired: filter.onlyNotExpired === "true" ? "true" : undefined,
+        orderByReceiveDate: filter.orderByReceiveDate ?? ("desc" as const),
+        page: pageStr ?? "1",
+      },
+    });
+    if (!res.ok) {
+      await runLog(
+        Effect.logError("fetch jobs list failed").pipe(
+          Effect.annotateLogs({ status: res.status, path: "/jobs" }),
+        ),
+      );
+      throw new Error(`fetch jobs list failed: ${res.status}`);
+    }
+    return await res.json();
+  })();
+
   const hasFilter =
     !!filter.companyName ||
     !!filter.jobDescription ||
@@ -89,42 +91,13 @@ export default async function Page({
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>求人情報一覧</h1>
-        <div>求人情報の総数: {totalCount} 件</div>
         <Collapsible title="絞り込み" defaultOpen={hasFilter}>
           <SearchFilterForm defaultValue={filter} />
         </Collapsible>
       </div>
-      {totalPages > 1 && (
-        <JobsPagination
-          currentPage={page}
-          totalPages={totalPages}
-          filterParams={filterParams}
-        />
-      )}
-      <div className={styles.items}>
-        {data.jobs.map((job) => {
-          const isNew =
-            !!job.receivedDate &&
-            Date.now() - new Date(job.receivedDate).getTime() <=
-              3 * 24 * 60 * 60 * 1000;
-          return (
-            <Link
-              key={job.jobNumber}
-              href={`/jobs/${job.jobNumber}`}
-              className={styles.cardLink}
-            >
-              <JobCard job={job} isNew={isNew} />
-            </Link>
-          );
-        })}
-      </div>
-      {totalPages > 1 && (
-        <JobsPagination
-          currentPage={page}
-          totalPages={totalPages}
-          filterParams={filterParams}
-        />
-      )}
+      <Suspense fallback={<JobsListSkeleton />}>
+        <JobsList jobsPromise={jobsPromise} filterParams={filterParams} />
+      </Suspense>
     </div>
   );
 }
