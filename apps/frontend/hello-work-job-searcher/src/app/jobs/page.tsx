@@ -25,6 +25,8 @@ export default async function Page({
   const { page: pageStr, ...filter } =
     Schema.decodeUnknownSync(SearchParams)(raw);
 
+  const suspenseKey = JSON.stringify({ page: pageStr ?? "1", ...filter });
+
   const jobsPromise = (async () => {
     const res = await jobStoreClient.jobs.$get({
       query: {
@@ -70,7 +72,7 @@ export default async function Page({
           <SearchFilterForm defaultValue={filter} />
         </Collapsible>
       </div>
-      <Suspense fallback={<JobsListSkeleton />}>
+      <Suspense key={suspenseKey} fallback={<JobsListSkeleton />}>
         <JobsList jobsPromise={jobsPromise} />
       </Suspense>
     </div>

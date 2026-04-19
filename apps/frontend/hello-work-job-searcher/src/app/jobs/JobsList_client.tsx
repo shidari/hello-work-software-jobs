@@ -37,6 +37,7 @@ export function JobsList({
             <Link
               key={job.jobNumber}
               href={`/jobs/${job.jobNumber}`}
+              prefetch={true}
               className={styles.cardLink}
             >
               <JobCard job={job} isNew={isNew} />
