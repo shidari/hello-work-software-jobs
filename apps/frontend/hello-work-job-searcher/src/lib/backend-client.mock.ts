@@ -7,6 +7,10 @@ export type JobDetailResponse = InferResponseType<
   Client["jobs"][":jobNumber"]["$get"],
   200
 >;
+export type CompanyResponse = InferResponseType<
+  Client["companies"][":establishmentNumber"]["$get"],
+  200
+>;
 // --- モックデータ ---
 
 const baseJob: JobDetailResponse = {
@@ -92,6 +96,7 @@ let _jobList: JobListResponse = {
   meta: { totalCount: 0, page: 1, totalPages: 0 },
 };
 let _jobMap = new Map<string, JobDetailResponse>();
+let _companyMap = new Map<string, CompanyResponse>();
 
 export function setMockJobs(jobs: JobDetailResponse[]) {
   _jobMap = new Map(jobs.map((j) => [j.jobNumber, j]));
@@ -103,6 +108,10 @@ export function setMockJobs(jobs: JobDetailResponse[]) {
 
 export function setMockJobList(response: JobListResponse) {
   _jobList = response;
+}
+
+export function setMockCompanies(companies: CompanyResponse[]) {
+  _companyMap = new Map(companies.map((c) => [c.establishmentNumber, c]));
 }
 
 // --- モッククライアント ---
@@ -117,8 +126,19 @@ function makeResponse<T>(data: T, status = 200) {
 
 export const jobStoreClient = {
   jobs: {
-    $get: async (opts?: { query?: { companyName?: string } }) => {
-      const companyName = opts?.query?.companyName;
+    $get: async (opts?: {
+      query?: { companyName?: string; establishmentNumber?: string };
+    }) => {
+      const { companyName, establishmentNumber } = opts?.query ?? {};
+      if (establishmentNumber) {
+        const filtered = _jobList.jobs.filter(
+          (j) => j.establishmentNumber === establishmentNumber,
+        );
+        return makeResponse({
+          jobs: filtered,
+          meta: { totalCount: filtered.length, page: 1, totalPages: 1 },
+        });
+      }
       if (companyName) {
         const filtered = _jobList.jobs.filter(
           (j) => j.companyName === companyName,
@@ -134,6 +154,16 @@ export const jobStoreClient = {
       $get: async ({ param }: { param: { jobNumber: string } }) => {
         const job = _jobMap.get(param.jobNumber);
         return makeResponse(job ?? null);
+      },
+    },
+  },
+  companies: {
+    ":establishmentNumber": {
+      $get: async ({ param }: { param: { establishmentNumber: string } }) => {
+        const company = _companyMap.get(param.establishmentNumber);
+        return company
+          ? makeResponse(company)
+          : makeResponse({ message: "Company not found" }, 404);
       },
     },
   },

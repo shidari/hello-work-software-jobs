@@ -13,6 +13,7 @@ export function JobDetailCard(props: {
   const {
     jobNumber,
     companyName,
+    establishmentNumber,
     occupation,
     employmentType,
     wage,
@@ -27,7 +28,15 @@ export function JobDetailCard(props: {
     <article className={styles["layout-job-detail"]}>
       <h2>求人番号: {jobNumber}</h2>
       <div className={styles.labels}>
-        <Label term="企業名">{companyName ?? "未記載"}</Label>
+        <Label term="企業名">
+          {establishmentNumber ? (
+            <Link href={`/companies/${establishmentNumber}`}>
+              {companyName ?? "未記載"}
+            </Link>
+          ) : (
+            (companyName ?? "未記載")
+          )}
+        </Label>
         <Label term="職種">{occupation}</Label>
         <Label term="求人区分">{employmentType}</Label>
         <Label term="職務概要">{jobDescription ?? "未記載"}</Label>

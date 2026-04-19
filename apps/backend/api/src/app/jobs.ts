@@ -2,6 +2,7 @@ import { Job, JobNumber } from "@sho/models";
 import {
   RawEmployeeCount,
   RawEmploymentType,
+  RawEstablishmentNumber,
   RawJobCategory,
   RawWage,
   RawWageType,
@@ -55,6 +56,7 @@ const SearchQueryParams = Schema.Struct({
   wageType: Schema.optional(RawWageType),
   education: Schema.optional(Schema.String),
   industryClassification: Schema.optional(Schema.String),
+  establishmentNumber: Schema.optional(RawEstablishmentNumber),
   page: Schema.optional(Schema.String),
 });
 
@@ -107,6 +109,7 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
           wageType: raw.wageType,
           education: raw.education,
           industryClassification: raw.industryClassification,
+          establishmentNumber: raw.establishmentNumber,
         }),
         page: Number.isNaN(parsedPage)
           ? 1
@@ -218,6 +221,13 @@ const jobListRoute = describeRoute({
     },
     { name: "workPlace", in: "query", required: false },
     { name: "qualifications", in: "query", required: false },
+    {
+      name: "establishmentNumber",
+      in: "query",
+      description: "事業所番号（完全一致）",
+      example: "0101-626495-7",
+      required: false,
+    },
     {
       name: "page",
       in: "query",

@@ -3,7 +3,7 @@ import {
   env,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import type { Job } from "@sho/models";
+import { EstablishmentNumber, type Job } from "@sho/models";
 import { Effect, Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 import worker from "../src";
@@ -68,6 +68,28 @@ describe("求人一覧", () => {
       await response.json(),
     );
     expect(data.meta.totalCount).toBeGreaterThanOrEqual(20);
+  });
+
+  it("事業所番号で絞り込める（完全一致）", async () => {
+    const [job] = sampleJobs({ num: 1 });
+    const establishmentNumber =
+      Schema.decodeSync(EstablishmentNumber)("9999-999999-9");
+    await insertJob({ ...job, establishmentNumber });
+
+    const response = await workerFetch(
+      `/jobs?establishmentNumber=${establishmentNumber}`,
+    );
+    expect(response.status).toBe(200);
+    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
+      await response.json(),
+    );
+    expect(data.meta.totalCount).toBe(1);
+    expect(data.jobs[0].establishmentNumber).toBe(establishmentNumber);
+  });
+
+  it("不正な形式の事業所番号では 400 を返す", async () => {
+    const response = await workerFetch("/jobs?establishmentNumber=invalid");
+    expect(response.status).toBe(400);
   });
 
   it("雇用形態で絞り込める", async () => {

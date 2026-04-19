@@ -1,4 +1,9 @@
-import { EmploymentType, JobCategory, WageType } from "@sho/models";
+import {
+  EmploymentType,
+  EstablishmentNumber,
+  JobCategory,
+  WageType,
+} from "@sho/models";
 import { Schema } from "effect";
 
 const DatePattern = Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}$/));
@@ -25,6 +30,7 @@ export const SearchFilterSchema = Schema.Struct({
   wageType: Schema.optional(WageType),
   education: Schema.optional(Schema.String),
   industryClassification: Schema.optional(Schema.String),
+  establishmentNumber: Schema.optional(EstablishmentNumber),
 });
 
 export type SearchFilter = typeof SearchFilterSchema.Type;
