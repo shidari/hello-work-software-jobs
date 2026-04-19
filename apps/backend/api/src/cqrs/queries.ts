@@ -63,6 +63,41 @@ export class FindJobByNumberQuery extends Effect.Service<FindJobByNumberQuery>()
   },
 ) {}
 
+export class FindExistingJobNumbersQuery extends Effect.Service<FindExistingJobNumbersQuery>()(
+  "FindExistingJobNumbersQuery",
+  {
+    effect: Effect.gen(function* () {
+      const db = yield* JobStoreDB;
+      return {
+        run: (jobNumbers: readonly string[]) =>
+          Effect.tryPromise({
+            try: async (): Promise<string[]> => {
+              if (jobNumbers.length === 0) return [];
+              // D1/SQLite のパラメータ上限に備えてチャンクに分割
+              const CHUNK_SIZE = 100;
+              const existing: string[] = [];
+              for (let i = 0; i < jobNumbers.length; i += CHUNK_SIZE) {
+                const chunk = jobNumbers.slice(i, i + CHUNK_SIZE);
+                const rows = await db
+                  .selectFrom("jobs")
+                  .select("jobNumber")
+                  .where("jobNumber", "in", chunk)
+                  .execute();
+                for (const row of rows) existing.push(row.jobNumber);
+              }
+              return existing;
+            },
+            catch: (e) =>
+              new FetchJobListError({
+                message: String(e),
+                errorType: "server",
+              }),
+          }),
+      };
+    }),
+  },
+) {}
+
 export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
   "FetchJobsPageQuery",
   {

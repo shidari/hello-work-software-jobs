@@ -18,6 +18,7 @@ import { InsertJobCommand, InsertJobDuplicationError } from "../cqrs/commands";
 import {
   FetchJobError,
   FetchJobsPageQuery,
+  FindExistingJobNumbersQuery,
   FindJobByNumberQuery,
 } from "../cqrs/queries";
 import { SearchFilterSchema } from "../cqrs/schema";
@@ -118,6 +119,19 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
 );
 
 const insertJobRequestBodySchema = Job;
+
+const MAX_EXISTS_BATCH = 2000;
+
+const jobsExistsRequestBodySchema = Schema.Struct({
+  jobNumbers: Schema.Array(JobNumber).pipe(
+    Schema.minItems(1),
+    Schema.maxItems(MAX_EXISTS_BATCH),
+  ),
+});
+
+export const jobsExistsSuccessResponseSchema = Schema.Struct({
+  existing: Schema.Array(JobNumber),
+});
 
 // --- ルーティングスキーマ ---
 
@@ -319,6 +333,46 @@ const jobInsertRoute = describeRoute({
   },
 });
 
+const jobsExistsRoute = describeRoute({
+  requestBody: {
+    description: "Existence check for a list of jobNumbers",
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          properties: {
+            jobNumbers: {
+              type: "array",
+              items: {
+                type: "string",
+                pattern: "^\\d{5}-\\d{0,8}$",
+              },
+              minItems: 1,
+              maxItems: MAX_EXISTS_BATCH,
+              description: "存在確認したい求人番号の配列",
+            },
+          },
+          required: ["jobNumbers"],
+        },
+      },
+    },
+  },
+  responses: {
+    "200": {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: resolver(
+            Schema.standardSchemaV1(jobsExistsSuccessResponseSchema),
+          ),
+        },
+      },
+    },
+    ...errorResponses,
+  },
+});
+
 const jobFetchRoute = describeRoute({
   responses: {
     "200": {
@@ -430,6 +484,52 @@ const app = new Hono<{ Bindings: Env }>()
                   return c.json({ message: "internal server error" }, 500);
               }
             },
+          }),
+          Effect.provide(LoggerLayer),
+        ),
+      );
+    },
+  )
+  .post(
+    "/exists",
+    jobsExistsRoute,
+    effectValidator(
+      "json",
+      Schema.standardSchemaV1(jobsExistsRequestBodySchema),
+      (result, c) => {
+        if (!result.success) {
+          const detail = result.error.map((issue) => issue.message).join("\n");
+          void runLog(
+            Effect.logWarning("invalid jobs exists request body").pipe(
+              Effect.annotateLogs({ detail }),
+            ),
+          );
+          return c.json(
+            { message: `Invalid request body. detail: ${detail}` },
+            400,
+          );
+        }
+        return undefined;
+      },
+    ),
+    (c) => {
+      const { jobNumbers } = c.req.valid("json");
+      const db = JobStoreDB.main(c.env.DB);
+
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const query = yield* FindExistingJobNumbersQuery;
+          const existing = yield* query.run(jobNumbers);
+          return { existing };
+        }).pipe(
+          Effect.provide(FindExistingJobNumbersQuery.Default),
+          Effect.provideService(JobStoreDB, db),
+          Effect.tapErrorCause((cause) =>
+            logErrorCause("find existing job numbers failed", cause),
+          ),
+          Effect.match({
+            onSuccess: (data) => c.json(data),
+            onFailure: () => c.json({ message: "internal server error" }, 500),
           }),
           Effect.provide(LoggerLayer),
         ),
