@@ -101,6 +101,38 @@
   color: var(--color-text-muted, #666);
 }
 
+.titleSkeleton {
+  display: inline-block;
+  width: 14rem;
+  height: 1.1rem;
+}
+
+.subtitleSkeleton {
+  display: inline-block;
+  width: 8rem;
+  height: 0.7rem;
+  vertical-align: middle;
+}
+
+.valueSkeleton {
+  display: inline-block;
+  width: 60%;
+  min-width: 8rem;
+  height: 0.9rem;
+}
+
+.jobOccupationSkeleton {
+  width: 40%;
+  min-width: 10rem;
+  height: 1rem;
+}
+
+.jobMetaSkeleton {
+  width: 30%;
+  min-width: 8rem;
+  height: 0.8rem;
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 0.75rem 1rem 0;
