@@ -6,13 +6,15 @@ import type { SystemError } from "../error";
 import type { TransformedJob } from "../job-detail-crawler/transformer";
 import { APIConfig } from "./config";
 
-class InsertJobError extends Data.TaggedError("InsertJobError")<SystemError> {}
+export class InsertJobError extends Data.TaggedError(
+  "InsertJobError",
+)<SystemError> {}
 
-class UpsertCompanyError extends Data.TaggedError(
+export class UpsertCompanyError extends Data.TaggedError(
   "UpsertCompanyError",
 )<SystemError> {}
 
-class ApiResponseError extends Data.TaggedError("ApiResponseError")<{
+export class ApiResponseError extends Data.TaggedError("ApiResponseError")<{
   readonly reason: string;
   readonly operation: string;
   readonly status: number;

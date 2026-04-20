@@ -1,7 +1,13 @@
 import type { Company } from "@sho/models";
 import { Context, Effect, Layer } from "effect";
 import { APIConfig } from "../apiClient/config";
-import { insertJob, upsertCompany } from "../apiClient/mutation";
+import {
+  ApiResponseError,
+  InsertJobError,
+  UpsertCompanyError,
+  insertJob,
+  upsertCompany,
+} from "../apiClient/mutation";
 import type { TransformedJob } from "./transformer";
 
 // ── Loader サービス ──
@@ -9,8 +15,12 @@ import type { TransformedJob } from "./transformer";
 export class JobDetailLoader extends Context.Tag("JobDetailLoader")<
   JobDetailLoader,
   {
-    readonly load: (data: TransformedJob) => Effect.Effect<void, unknown>;
-    readonly loadCompany: (company: Company) => Effect.Effect<void, unknown>;
+    readonly load: (
+      data: TransformedJob,
+    ) => Effect.Effect<void, InsertJobError | ApiResponseError>;
+    readonly loadCompany: (
+      company: Company,
+    ) => Effect.Effect<void, UpsertCompanyError | ApiResponseError>;
   }
 >() {
   static main = Layer.effect(
