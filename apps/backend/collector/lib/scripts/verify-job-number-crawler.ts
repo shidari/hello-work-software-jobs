@@ -1,4 +1,5 @@
 import { Effect, Logger, LogLevel } from "effect";
+import { APIConfig } from "../apiClient/config";
 import { ChromiumBrowserConfig } from "../browser";
 import {
   crawlJobLinks,
@@ -13,6 +14,7 @@ async function main() {
   );
 
   const runnable = program.pipe(
+    Effect.provide(APIConfig.main),
     Effect.provide(JobNumberCrawlerConfig.dev),
     Effect.provide(ChromiumBrowserConfig.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),

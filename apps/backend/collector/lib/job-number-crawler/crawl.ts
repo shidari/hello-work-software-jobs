@@ -9,6 +9,7 @@ import {
   Schema,
   Stream,
 } from "effect";
+import { filterUnregistered } from "../apiClient/query";
 import type { Locator } from "../browser";
 import type { DomainError, SystemError } from "../error";
 import {
@@ -16,20 +17,12 @@ import {
   navigateByCriteria,
   openJobSearchPage,
 } from "../page";
-import { delay, formatParseError } from "../util";
+import { formatParseError } from "../util";
 import type { JobListPage } from "./type";
 
 // ============================================================
-// Types
+// Errors
 // ============================================================
-
-export type CrawlerConfig = {
-  readonly jobSearchCriteria: JobSearchCriteria;
-  readonly nextPageDelayMs: number;
-  readonly roughMaxCount: number;
-};
-
-// ── Errors ──
 
 class JobListPageScraperError extends Data.TaggedError(
   "JobListPageScraperError",
@@ -146,38 +139,30 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
   yield* Effect.logDebug("navigated to next job list page.");
 });
 
-const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
-  page: JobListPage,
-  args: {
-    count: number;
-    roughMaxCount: number;
-    nextPageDelayMs: number;
-  },
-) {
-  const { count, roughMaxCount, nextPageDelayMs } = args;
+const fetchAndDedupeAndPaginateAndDelay = Effect.fn(
+  "fetchAndDedupeAndPaginateAndDelay",
+)(function* (page: JobListPage, count: number) {
+  const { roughMaxCount } = yield* JobNumberCrawlerConfig;
   const jobOverviewList = yield* listJobOverviewElem(page);
   if (jobOverviewList.length === 0) {
     yield* Effect.logInfo("no job listings found on this page. finishing.");
     return [Chunk.empty(), Option.none()] as const;
   }
-  const jobNumbers = (yield* extractJobNumbers(jobOverviewList)).map(
-    (jobNumber) => ({ jobNumber }),
-  );
-  const chunked = Chunk.fromIterable(jobNumbers);
+  const jobNumbers = yield* extractJobNumbers(jobOverviewList);
+  const unregistered = yield* filterUnregistered(jobNumbers);
+
+  const chunked = Chunk.fromIterable(unregistered);
   const tmpTotal = count + jobNumbers.length;
   const nextPageEnabled = yield* isNextPageEnabled(page);
   if (nextPageEnabled) {
-    yield* goToNextJobListPage(page);
+    yield* goToNextJobListPage(page).pipe(
+      Effect.andThen(Effect.sleep("2 seconds")),
+    );
   }
-  yield* delay(nextPageDelayMs);
   return [
     chunked,
     nextPageEnabled && tmpTotal <= roughMaxCount
-      ? Option.some({
-          count: tmpTotal,
-          roughMaxCount,
-          nextPageDelayMs,
-        })
+      ? Option.some(tmpTotal)
       : Option.none(),
   ] as const;
 });
@@ -188,14 +173,19 @@ const fetchJobMetaData = Effect.fn("fetchJobMetaData")(function* (
 
 export class JobNumberCrawlerConfig extends Effect.Tag(
   "JobNumberCrawlerConfig",
-)<JobNumberCrawlerConfig, CrawlerConfig>() {
+)<
+  JobNumberCrawlerConfig,
+  {
+    readonly jobSearchCriteria: JobSearchCriteria;
+    readonly roughMaxCount: number;
+  }
+>() {
   static main = Layer.succeed(JobNumberCrawlerConfig, {
     jobSearchCriteria: {
       desiredOccupation: {
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
     },
-    nextPageDelayMs: 3000,
     roughMaxCount: 2000,
   });
   static dev = Layer.succeed(JobNumberCrawlerConfig, {
@@ -204,7 +194,6 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
     },
-    nextPageDelayMs: 3000,
     roughMaxCount: 50,
   });
 }
@@ -225,14 +214,9 @@ export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
     config.jobSearchCriteria,
   );
   const stream = Stream.paginateChunkEffect(
-    {
-      count: 0,
-      roughMaxCount: config.roughMaxCount,
-      nextPageDelayMs: config.nextPageDelayMs,
-    },
+    0,
     // 後で対処する
-    (args) =>
-      fetchJobMetaData(firstJobListPage as unknown as JobListPage, args),
+    (count) => fetchAndDedupeAndPaginateAndDelay(firstJobListPage, count),
   );
   const chunk = yield* Stream.runCollect(stream);
   const jobLinks = Chunk.toArray(chunk);
