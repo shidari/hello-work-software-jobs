@@ -3,6 +3,7 @@ import { Data, Effect } from "effect";
 import type { Page } from "./browser";
 import { openBrowserPage } from "./browser";
 import type { DomainError, SystemError } from "./error";
+import type { FirstJobListPage } from "./job-number-crawler/type";
 
 // ============================================================
 // Page operation types
@@ -33,9 +34,6 @@ class InvalidJobNumberFormatError extends Data.TaggedError(
 
 const _jobSearchPage: unique symbol = Symbol("JobSearchPage");
 export type JobSearchPage = Page & { [_jobSearchPage]: unknown };
-
-const _firstJobListPage: unique symbol = Symbol("FirstJobListPage");
-export type FirstJobListPage = Page & { [_firstJobListPage]: unknown };
 
 const _jobDetailPage: unique symbol = Symbol("JobDetailPage");
 export type JobDetailPage = Page & { [_jobDetailPage]: unknown };
