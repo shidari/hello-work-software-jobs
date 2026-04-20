@@ -9,7 +9,7 @@ export {
   ExtractJobDetailRawHtmlError,
   JobDetailExtractor,
 } from "./extractor";
-export { JobDetailLoader, JobStoreClient } from "./loader";
+export { JobDetailLoader } from "./loader";
 export {
   CompanyTransformError,
   JobDetailTransformError,
