@@ -1,13 +1,12 @@
 import type { Company } from "@sho/models";
 import { Context, Effect, Layer } from "effect";
 import { APIConfig } from "../apiClient/config";
-import {
+import type {
   ApiResponseError,
   InsertJobError,
   UpsertCompanyError,
-  insertJob,
-  upsertCompany,
 } from "../apiClient/mutation";
+import { insertJob, upsertCompany } from "../apiClient/mutation";
 import type { TransformedJob } from "./transformer";
 
 // ── Loader サービス ──
