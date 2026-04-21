@@ -1,16 +1,15 @@
-import { Effect, Logger, LogLevel } from "effect";
+import { Console, Effect, Logger, LogLevel, Stream } from "effect";
 import { APIConfig } from "../apiClient/config";
 import { ChromiumBrowserConfig } from "../browser";
 import {
-  crawlJobLinks,
   JobNumberCrawlerConfig,
+  paginatedJobNumbers,
 } from "../job-number-crawler/crawl";
 
 async function main() {
-  const program = Effect.scoped(
-    Effect.gen(function* () {
-      return yield* crawlJobLinks();
-    }),
+  const program = paginatedJobNumbers().pipe(
+    Stream.runForEach((unregistered) => Console.log(unregistered)),
+    Effect.scoped,
   );
 
   const runnable = program.pipe(
@@ -19,9 +18,7 @@ async function main() {
     Effect.provide(ChromiumBrowserConfig.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
-  Effect.runPromise(runnable).then((jobNumbers) =>
-    console.dir({ jobNumbers }, { depth: null }),
-  );
+  await Effect.runPromise(runnable);
 }
 
 main();

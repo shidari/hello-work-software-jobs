@@ -1,6 +1,5 @@
 import { JobNumber } from "@sho/models";
 import {
-  Chunk,
   Data,
   Effect,
   Either,
@@ -9,7 +8,6 @@ import {
   Schema,
   Stream,
 } from "effect";
-import { filterUnregistered } from "../apiClient/query";
 import type { Locator } from "../browser";
 import type { DomainError, SystemError } from "../error";
 import {
@@ -139,32 +137,15 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
   yield* Effect.logDebug("navigated to next job list page.");
 });
 
-const fetchAndDedupeAndPaginateAndDelay = Effect.fn(
-  "fetchAndDedupeAndPaginateAndDelay",
-)(function* (page: JobListPage, count: number) {
-  const { roughMaxCount } = yield* JobNumberCrawlerConfig;
+const fetchJobNumbers = Effect.fn("fetchJobNumbers")(function* (
+  page: JobListPage,
+) {
   const jobOverviewList = yield* listJobOverviewElem(page);
   if (jobOverviewList.length === 0) {
     yield* Effect.logInfo("no job listings found on this page. finishing.");
-    return [Chunk.empty(), Option.none()] as const;
+    return [] as readonly JobNumber[];
   }
-  const jobNumbers = yield* extractJobNumbers(jobOverviewList);
-  const unregistered = yield* filterUnregistered(jobNumbers);
-
-  const chunked = Chunk.fromIterable(unregistered);
-  const tmpTotal = count + jobNumbers.length;
-  const nextPageEnabled = yield* isNextPageEnabled(page);
-  if (nextPageEnabled) {
-    yield* goToNextJobListPage(page).pipe(
-      Effect.andThen(Effect.sleep("2 seconds")),
-    );
-  }
-  return [
-    chunked,
-    nextPageEnabled && tmpTotal <= roughMaxCount
-      ? Option.some(tmpTotal)
-      : Option.none(),
-  ] as const;
+  return yield* extractJobNumbers(jobOverviewList);
 });
 
 // ============================================================
@@ -177,7 +158,6 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
   JobNumberCrawlerConfig,
   {
     readonly jobSearchCriteria: JobSearchCriteria;
-    readonly roughMaxCount: number;
   }
 >() {
   static main = Layer.succeed(JobNumberCrawlerConfig, {
@@ -186,7 +166,6 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
     },
-    roughMaxCount: 2000,
   });
   static dev = Layer.succeed(JobNumberCrawlerConfig, {
     jobSearchCriteria: {
@@ -194,7 +173,6 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
     },
-    roughMaxCount: 50,
   });
 }
 
@@ -202,24 +180,36 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
 // Crawler (Effect.fn — 手続き的オーケストレーション)
 // ============================================================
 
-export const crawlJobLinks = Effect.fn("crawlJobLinks")(function* () {
-  const config = yield* JobNumberCrawlerConfig;
-  yield* Effect.logInfo(
-    `building crawler: config=${JSON.stringify(config, null, 2)}`,
+export const paginatedJobNumbers = () =>
+  Stream.unwrap(
+    Effect.gen(function* () {
+      const config = yield* JobNumberCrawlerConfig;
+      yield* Effect.logInfo(
+        `building crawler: config=${JSON.stringify(config, null, 2)}`,
+      );
+      const jobSearchPage = yield* openJobSearchPage();
+      yield* Effect.logInfo("start crawling...");
+      const firstJobListPage = yield* navigateByCriteria(
+        jobSearchPage,
+        config.jobSearchCriteria,
+      );
+      return Stream.paginateEffect(undefined, () =>
+        Effect.gen(function* () {
+          const jobNumbers = yield* fetchJobNumbers(firstJobListPage);
+          if (jobNumbers.length === 0) {
+            return [jobNumbers, Option.none()] as const;
+          }
+          const hasNext = yield* isNextPageEnabled(firstJobListPage);
+          if (hasNext) {
+            yield* goToNextJobListPage(firstJobListPage).pipe(
+              Effect.andThen(Effect.sleep("2 seconds")),
+            );
+          }
+          return [
+            jobNumbers,
+            hasNext ? Option.some<void>(undefined) : Option.none(),
+          ] as const;
+        }),
+      );
+    }),
   );
-  const jobSearchPage = yield* openJobSearchPage();
-  yield* Effect.logInfo("start crawling...");
-  const firstJobListPage = yield* navigateByCriteria(
-    jobSearchPage,
-    config.jobSearchCriteria,
-  );
-  const stream = Stream.paginateChunkEffect(
-    0,
-    // 後で対処する
-    (count) => fetchAndDedupeAndPaginateAndDelay(firstJobListPage, count),
-  );
-  const chunk = yield* Stream.runCollect(stream);
-  const jobLinks = Chunk.toArray(chunk);
-  yield* Effect.logInfo(`crawling finished. total: ${jobLinks.length}`);
-  return jobLinks;
-});
