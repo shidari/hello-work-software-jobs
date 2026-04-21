@@ -1,13 +1,5 @@
 import { JobNumber } from "@sho/models";
-import {
-  Data,
-  Effect,
-  Either,
-  Layer,
-  Option,
-  Schema,
-  Stream,
-} from "effect";
+import { Data, Effect, Either, Layer, Option, Schema, Stream } from "effect";
 import type { Locator } from "../browser";
 import type { DomainError, SystemError } from "../error";
 import {
@@ -193,11 +185,11 @@ export const paginatedJobNumbers = () =>
         jobSearchPage,
         config.jobSearchCriteria,
       );
-      return Stream.paginateEffect(undefined as void, () =>
+      return Stream.paginateEffect(null, () =>
         Effect.gen(function* () {
           const jobNumbers = yield* fetchJobNumbers(firstJobListPage);
           if (jobNumbers.length === 0) {
-            return [jobNumbers, Option.none<void>()] as const;
+            return [jobNumbers, Option.none<null>()] as const;
           }
           const hasNext = yield* isNextPageEnabled(firstJobListPage);
           if (hasNext) {
@@ -207,7 +199,7 @@ export const paginatedJobNumbers = () =>
           }
           return [
             jobNumbers,
-            hasNext ? Option.some<void>(undefined) : Option.none<void>(),
+            hasNext ? Option.some(null) : Option.none<null>(),
           ] as const;
         }),
       );
