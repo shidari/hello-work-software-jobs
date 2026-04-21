@@ -1,13 +1,16 @@
-import { Effect } from "effect";
+import { Effect, Ref, Stream } from "effect";
 import { APIConfig } from "../../../lib/apiClient/config";
+import { filterUnregistered } from "../../../lib/apiClient/query";
 import { ChromiumBrowserConfig } from "../../../lib/browser";
 import {
-  crawlJobLinks,
   JobNumberCrawlerConfig,
+  paginatedJobNumbers,
 } from "../../../lib/job-number-crawler/crawl";
 import { JobDetailQueue } from "../../sqs";
 import { LoggerLayer, logErrorCause } from "../logger";
 import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
+
+const MAX_ENQUEUE_COUNT = 2000;
 
 const program = Effect.gen(function* () {
   yield* disableCoreDump;
@@ -15,16 +18,30 @@ const program = Effect.gen(function* () {
   yield* Effect.promise(() => logTmpUsage("job-number-crawler:start"));
 
   const queue = yield* JobDetailQueue;
-  const jobs = yield* crawlJobLinks();
-  yield* Effect.forEach(jobs, (jobNumber) => queue.send({ jobNumber }));
+  const enqueuedCountRef = yield* Ref.make(0);
 
-  yield* Effect.logInfo("job number crawler success").pipe(
-    Effect.annotateLogs({
-      enqueuedCount: jobs.length,
-    }),
+  yield* paginatedJobNumbers().pipe(
+    Stream.runForEachWhile((jobNumbers) =>
+      Effect.gen(function* () {
+        const unregistered = yield* filterUnregistered(jobNumbers);
+        yield* Effect.forEach(unregistered, (jobNumber) =>
+          queue.send({ jobNumber }),
+        );
+        const total = yield* Ref.updateAndGet(
+          enqueuedCountRef,
+          (n) => n + unregistered.length,
+        );
+        return total <= MAX_ENQUEUE_COUNT;
+      }),
+    ),
   );
 
-  return jobs;
+  const enqueuedCount = yield* Ref.get(enqueuedCountRef);
+  yield* Effect.logInfo("job number crawler success").pipe(
+    Effect.annotateLogs({ enqueuedCount }),
+  );
+
+  return enqueuedCount;
 }).pipe(
   Effect.ensuring(cleanupTmp),
   Effect.tapErrorCause((cause) =>
