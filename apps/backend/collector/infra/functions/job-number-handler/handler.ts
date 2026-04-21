@@ -6,7 +6,7 @@ import {
   JobNumberCrawlerConfig,
   paginatedJobNumbers,
 } from "../../../lib/job-number-crawler/crawl";
-import { JobDetailQueue } from "../../sqs";
+import { JobDetailQueueConfig, sendJobDetail } from "../../sqs";
 import { LoggerLayer, logErrorCause } from "../logger";
 import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
 
@@ -17,7 +17,6 @@ const program = Effect.gen(function* () {
   yield* cleanupTmp;
   yield* Effect.promise(() => logTmpUsage("job-number-crawler:start"));
 
-  const queue = yield* JobDetailQueue;
   const enqueuedCountRef = yield* Ref.make(0);
 
   yield* paginatedJobNumbers().pipe(
@@ -25,7 +24,7 @@ const program = Effect.gen(function* () {
       Effect.gen(function* () {
         const unregistered = yield* filterUnregistered(jobNumbers);
         yield* Effect.forEach(unregistered, (jobNumber) =>
-          queue.send({ jobNumber }),
+          sendJobDetail({ jobNumber }),
         );
         const total = yield* Ref.updateAndGet(
           enqueuedCountRef,
@@ -51,7 +50,7 @@ const program = Effect.gen(function* () {
   Effect.provide(APIConfig.main),
   Effect.provide(JobNumberCrawlerConfig.main),
   Effect.provide(ChromiumBrowserConfig.lambda),
-  Effect.provide(JobDetailQueue.Default),
+  Effect.provide(JobDetailQueueConfig.main),
   Effect.provide(LoggerLayer),
   Effect.orDie,
 );
