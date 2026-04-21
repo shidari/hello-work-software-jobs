@@ -193,11 +193,11 @@ export const paginatedJobNumbers = () =>
         jobSearchPage,
         config.jobSearchCriteria,
       );
-      return Stream.paginateEffect(undefined, () =>
+      return Stream.paginateEffect(undefined as void, () =>
         Effect.gen(function* () {
           const jobNumbers = yield* fetchJobNumbers(firstJobListPage);
           if (jobNumbers.length === 0) {
-            return [jobNumbers, Option.none()] as const;
+            return [jobNumbers, Option.none<void>()] as const;
           }
           const hasNext = yield* isNextPageEnabled(firstJobListPage);
           if (hasNext) {
@@ -207,7 +207,7 @@ export const paginatedJobNumbers = () =>
           }
           return [
             jobNumbers,
-            hasNext ? Option.some<void>(undefined) : Option.none(),
+            hasNext ? Option.some<void>(undefined) : Option.none<void>(),
           ] as const;
         }),
       );
