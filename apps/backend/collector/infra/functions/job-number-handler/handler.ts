@@ -10,6 +10,8 @@ import { JobDetailQueue } from "../../sqs";
 import { LoggerLayer, logErrorCause } from "../logger";
 import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
 
+const MAX_ENQUEUE_COUNT = 2000;
+
 const program = Effect.gen(function* () {
   yield* disableCoreDump;
   yield* cleanupTmp;
@@ -19,13 +21,17 @@ const program = Effect.gen(function* () {
   const enqueuedCountRef = yield* Ref.make(0);
 
   yield* paginatedJobNumbers().pipe(
-    Stream.runForEach((jobNumbers) =>
+    Stream.runForEachWhile((jobNumbers) =>
       Effect.gen(function* () {
         const unregistered = yield* filterUnregistered(jobNumbers);
         yield* Effect.forEach(unregistered, (jobNumber) =>
           queue.send({ jobNumber }),
         );
-        yield* Ref.update(enqueuedCountRef, (n) => n + unregistered.length);
+        const total = yield* Ref.updateAndGet(
+          enqueuedCountRef,
+          (n) => n + unregistered.length,
+        );
+        return total <= MAX_ENQUEUE_COUNT;
       }),
     ),
   );
