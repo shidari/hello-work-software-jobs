@@ -47,6 +47,9 @@ const program = Effect.gen(function* () {
     logErrorCause("job number crawler failed", cause),
   ),
   Effect.scoped,
+);
+
+const runnable = program.pipe(
   Effect.provide(APIConfig.main),
   Effect.provide(CrawlerConfig.main),
   Effect.provide(SearchConfig.detailed),
@@ -57,4 +60,4 @@ const program = Effect.gen(function* () {
   Effect.orDie,
 );
 
-export const handler = async () => Effect.runPromise(program);
+export const handler = async () => Effect.runPromise(runnable);

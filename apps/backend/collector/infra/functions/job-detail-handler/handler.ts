@@ -19,8 +19,8 @@ const SqsJobMessage = Schema.Struct({
 
 // ── processJobDetail ──
 
-const processJobDetail = (jobNumber: string) =>
-  Effect.gen(function* () {
+const processJobDetail = (jobNumber: string) => {
+  const program = Effect.gen(function* () {
     const parsed = yield* Schema.decodeEither(JobNumber)(jobNumber);
     yield* processJob(parsed);
     yield* Effect.logInfo("job detail success");
@@ -42,6 +42,9 @@ const processJobDetail = (jobNumber: string) =>
     }),
     Effect.tapErrorCause((cause) => logErrorCause("job detail failed", cause)),
     Effect.annotateLogs({ jobNumber }),
+  );
+
+  const runnable = program.pipe(
     Effect.provide(JobDetailExtractor.Default),
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
@@ -50,11 +53,13 @@ const processJobDetail = (jobNumber: string) =>
     Effect.provide(LoggerLayer),
     Effect.orDie,
   );
+  return runnable;
+};
 
 // ── Lambda handler ──
 
-const handlerProgram = (event: SQSEvent) =>
-  Effect.gen(function* () {
+const handlerProgram = (event: SQSEvent) => {
+  const program = Effect.gen(function* () {
     // batchSize: 1 なので Records は常に1件
     const record = event.Records[0];
     if (!record) {
@@ -70,7 +75,11 @@ const handlerProgram = (event: SQSEvent) =>
       JSON.parse(record.body),
     );
     yield* processJobDetail(parsed.jobNumber);
-  }).pipe(Effect.provide(LoggerLayer));
+  });
+
+  const runnable = program.pipe(Effect.provide(LoggerLayer));
+  return runnable;
+};
 
 export const handler = async (event: SQSEvent): Promise<void> =>
   Effect.runPromise(handlerProgram(event));
