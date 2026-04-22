@@ -2,9 +2,10 @@
   "name": "collector",
   "version": "0.1.0",
   "scripts": {
-    "dev:verify-job-number-crawler": "tsx lib/scripts/verify-job-number-crawler.ts",
-    "dev:verify-job-detail-crawler": "tsx lib/scripts/verify-job-detail-crawler.ts",
-    "dev:dump-html": "tsx lib/scripts/dump-search-result.ts",
+    "dev:verify-job-number-crawler": "tsx lib/hellowork/scripts/verify-job-number-crawler.ts",
+    "dev:verify-job-detail-crawler": "tsx lib/hellowork/scripts/verify-job-detail-crawler.ts",
+    "dev:verify-detail-search": "tsx lib/hellowork/scripts/verify-detail-search.ts",
+    "dev:dump-html": "tsx lib/hellowork/scripts/dump-search-result.ts",
     "dev:docker-up": "docker compose -f infra/local/docker-compose.yml up --build",
     "dev:docker-down": "docker compose -f infra/local/docker-compose.yml down",
     "dev:docker-build": "docker compose -f infra/local/docker-compose.yml build",

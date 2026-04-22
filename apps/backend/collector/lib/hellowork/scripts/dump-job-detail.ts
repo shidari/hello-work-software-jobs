@@ -8,8 +8,8 @@
 
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
-import { ChromiumBrowserConfig } from "../browser";
-import { navigateByJobNumber, openJobSearchPage } from "../page";
+import { ChromiumBrowserConfig, DebugDumpConfig } from "../browser";
+import { navigateByJobNumber, openJobSearchPage } from "../page/search";
 
 const jobNumber = (process.argv[2] ?? "13010-35021361") as JobNumber;
 
@@ -48,6 +48,7 @@ async function main() {
 
   const runnable = program.pipe(
     Effect.provide(ChromiumBrowserConfig.dev),
+    Effect.provide(DebugDumpConfig.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );

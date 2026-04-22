@@ -1,49 +1,35 @@
 import type { JobNumber } from "@sho/models";
-import { Data, Effect } from "effect";
-import type { Page } from "./browser";
-import { openBrowserPage } from "./browser";
-import type { DomainError, SystemError } from "./error";
-import type { FirstJobListPage } from "./job-number-crawler/type";
+import { Effect } from "effect";
+import { openBrowserPage, type Page } from "../browser";
+import { InvalidJobNumberFormatError, PageActionError } from "../errors";
+import type { FirstJobListPage } from "../job-number-crawler/type";
 
 // ============================================================
-// Page operation types
+// Branded page type — かんたん検索ページ
+// ============================================================
+
+const _simpleJobSearchPage: unique symbol = Symbol("SimpleJobSearchPage");
+export type SimpleJobSearchPage = Page & { [_simpleJobSearchPage]: unknown };
+
+// ============================================================
+// Criteria — かんたん検索で指定可能な条件（最小）
 // ============================================================
 
 export type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
 
-export type JobSearchCriteria = {
+export type SimpleJobSearchCriteria = {
   readonly jobNumber?: typeof JobNumber.Type;
   readonly desiredOccupation?: {
     readonly occupationSelection?: EngineeringLabel;
   };
 };
 
-// ── Errors ──
-
-class PageActionError extends Data.TaggedError(
-  "PageActionError",
-)<SystemError> {}
-
-class InvalidJobNumberFormatError extends Data.TaggedError(
-  "InvalidJobNumberFormatError",
-)<DomainError> {}
-
 // ============================================================
-// Branded page types
-// ============================================================
-
-const _jobSearchPage: unique symbol = Symbol("JobSearchPage");
-export type JobSearchPage = Page & { [_jobSearchPage]: unknown };
-
-const _jobDetailPage: unique symbol = Symbol("JobDetailPage");
-export type JobDetailPage = Page & { [_jobDetailPage]: unknown };
-
-// ============================================================
-// Page operations
+// Internal helpers
 // ============================================================
 
 const fillOccupationField = Effect.fn("fillOccupationField")(function* (
-  page: JobSearchPage,
+  page: SimpleJobSearchPage,
   label: EngineeringLabel,
 ) {
   yield* Effect.logDebug(`will execute fillOccupationField\nlabel=${label}`);
@@ -63,8 +49,8 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
 });
 
 const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(function* (
-  page: JobSearchPage,
-  criteria: JobSearchCriteria,
+  page: SimpleJobSearchPage,
+  criteria: SimpleJobSearchCriteria,
 ) {
   const { desiredOccupation } = criteria;
   if (desiredOccupation?.occupationSelection) {
@@ -73,7 +59,7 @@ const fillJobCriteriaField = Effect.fn("fillJobCriteriaField")(function* (
 });
 
 const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
-  page: JobSearchPage,
+  page: SimpleJobSearchPage,
 ) {
   yield* Effect.tryPromise({
     try: async () => {
@@ -92,7 +78,7 @@ const clickSearchNoBtn = Effect.fn("clickSearchNoBtn")(function* (
 });
 
 const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
-  page: JobSearchPage,
+  page: SimpleJobSearchPage,
 ) {
   yield* Effect.tryPromise({
     try: async () => {
@@ -111,7 +97,7 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
 });
 
 // ============================================================
-// Constructors
+// Public API
 // ============================================================
 
 export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
@@ -128,11 +114,11 @@ export const openJobSearchPage = Effect.fn("openJobSearchPage")(function* () {
       }),
   });
   yield* Effect.logDebug("navigated to job search page.");
-  return page as JobSearchPage;
+  return page as SimpleJobSearchPage;
 });
 
 export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
-  page: JobSearchPage,
+  page: SimpleJobSearchPage,
   jobNumber: string,
 ) {
   const [jo, ge] = jobNumber.split("-");
@@ -161,8 +147,8 @@ export const navigateByJobNumber = Effect.fn("navigateByJobNumber")(function* (
 });
 
 export const navigateByCriteria = Effect.fn("navigateByCriteria")(function* (
-  page: JobSearchPage,
-  criteria: JobSearchCriteria,
+  page: SimpleJobSearchPage,
+  criteria: SimpleJobSearchCriteria,
 ) {
   yield* fillJobCriteriaField(page, criteria);
   yield* clickSearchBtn(page);

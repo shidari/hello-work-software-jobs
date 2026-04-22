@@ -15,7 +15,7 @@ import {
 } from "@sho/models";
 import { Data, Effect, Either, ParseResult, Schema } from "effect";
 import { parseHTML } from "linkedom";
-import { formatParseError } from "../util";
+import { formatParseError } from "../../util";
 import {
   extractRawCompanyFromDocument,
   extractRawFieldsFromDocument,

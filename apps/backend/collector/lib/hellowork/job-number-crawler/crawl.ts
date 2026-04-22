@@ -1,13 +1,27 @@
 import { JobNumber } from "@sho/models";
-import { Data, Effect, Either, Layer, Option, Schema, Stream } from "effect";
-import type { Locator } from "../browser";
-import type { DomainError, SystemError } from "../error";
 import {
-  type JobSearchCriteria,
-  navigateByCriteria,
+  Context,
+  Data,
+  Effect,
+  Either,
+  Layer,
+  Option,
+  Schema,
+  Stream,
+} from "effect";
+import type { DomainError, SystemError } from "../../error";
+import { formatParseError } from "../../util";
+import type { Locator } from "../browser";
+import {
+  type DetailedJobSearchCriteria,
+  navigateByCriteria as detailedNavigateByCriteria,
+  navigateToDetailedJobSearchPage,
+} from "../page/detail-search";
+import {
   openJobSearchPage,
-} from "../page";
-import { formatParseError } from "../util";
+  type SimpleJobSearchCriteria,
+  navigateByCriteria as simpleNavigateByCriteria,
+} from "../page/search";
 import type { JobListPage } from "./type";
 
 // ============================================================
@@ -141,31 +155,59 @@ const fetchJobNumbers = Effect.fn("fetchJobNumbers")(function* (
 });
 
 // ============================================================
-// Config (Effect.Service — 環境切り替え)
+// SearchConfig (Context.Tag — 簡易検索 / 詳細検索の判別可能 union)
 // ============================================================
 
-export class JobNumberCrawlerConfig extends Effect.Tag(
-  "JobNumberCrawlerConfig",
-)<
-  JobNumberCrawlerConfig,
-  {
-    readonly jobSearchCriteria: JobSearchCriteria;
-  }
+type SearchConfigValue =
+  | { readonly _tag: "simple"; readonly criteria: SimpleJobSearchCriteria }
+  | { readonly _tag: "detailed"; readonly criteria: DetailedJobSearchCriteria };
+
+export class SearchConfig extends Context.Tag("SearchConfig")<
+  SearchConfig,
+  SearchConfigValue
 >() {
-  static main = Layer.succeed(JobNumberCrawlerConfig, {
-    jobSearchCriteria: {
+  static simple = Layer.succeed(SearchConfig, {
+    _tag: "simple" as const,
+    criteria: {
       desiredOccupation: {
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
     },
   });
-  static dev = Layer.succeed(JobNumberCrawlerConfig, {
-    jobSearchCriteria: {
+  static detailed = Layer.succeed(SearchConfig, {
+    _tag: "detailed" as const,
+    criteria: {
       desiredOccupation: {
         occupationSelection: "ソフトウェア開発技術者、プログラマー",
       },
+      searchPeriod: "withinTwoDays",
     },
   });
+}
+
+// ============================================================
+// CrawlerConfig (Context.Tag — untilCount + SearchConfig 由来の criteria)
+// ============================================================
+// Layer は SearchConfig に依存する。
+
+export class CrawlerConfig extends Context.Tag("CrawlerConfig")<
+  CrawlerConfig,
+  { readonly untilCount: number } & SearchConfigValue
+>() {
+  static main = Layer.effect(
+    CrawlerConfig,
+    Effect.gen(function* () {
+      const search = yield* SearchConfig;
+      return { untilCount: 2000, ...search };
+    }),
+  );
+  static dev = Layer.effect(
+    CrawlerConfig,
+    Effect.gen(function* () {
+      const search = yield* SearchConfig;
+      return { untilCount: 1, ...search };
+    }),
+  );
 }
 
 // ============================================================
@@ -175,16 +217,19 @@ export class JobNumberCrawlerConfig extends Effect.Tag(
 export const paginatedJobNumbers = () =>
   Stream.unwrap(
     Effect.gen(function* () {
-      const config = yield* JobNumberCrawlerConfig;
+      const config = yield* CrawlerConfig;
       yield* Effect.logInfo(
         `building crawler: config=${JSON.stringify(config, null, 2)}`,
       );
       const jobSearchPage = yield* openJobSearchPage();
       yield* Effect.logInfo("start crawling...");
-      const firstJobListPage = yield* navigateByCriteria(
-        jobSearchPage,
-        config.jobSearchCriteria,
-      );
+      const firstJobListPage = yield* config._tag === "simple"
+        ? simpleNavigateByCriteria(jobSearchPage, config.criteria)
+        : Effect.gen(function* () {
+            const detailed =
+              yield* navigateToDetailedJobSearchPage(jobSearchPage);
+            return yield* detailedNavigateByCriteria(detailed, config.criteria);
+          });
       return Stream.paginateEffect(null, () =>
         Effect.gen(function* () {
           const jobNumbers = yield* fetchJobNumbers(firstJobListPage);
