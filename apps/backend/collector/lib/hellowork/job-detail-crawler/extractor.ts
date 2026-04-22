@@ -1,7 +1,7 @@
 import type { JobNumber } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
-import type { Page } from "../browser";
 import type { DomainError, SystemError } from "../../error";
+import type { Page } from "../browser";
 import type { FirstJobListPage } from "../job-number-crawler/type";
 import type { JobDetailPage } from "../page/detail";
 import { navigateByJobNumber, openJobSearchPage } from "../page/search";

@@ -1,6 +1,6 @@
 import type { JobNumber } from "@sho/models";
 import { Effect } from "effect";
-import { type Page, openBrowserPage } from "../browser";
+import { openBrowserPage, type Page } from "../browser";
 import { InvalidJobNumberFormatError, PageActionError } from "../errors";
 import type { FirstJobListPage } from "../job-number-crawler/type";
 

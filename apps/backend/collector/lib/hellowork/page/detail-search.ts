@@ -50,9 +50,7 @@ const fillOccupationField = Effect.fn("fillOccupationField")(function* (
   yield* Effect.tryPromise({
     try: async () => {
       await page.getByRole("button", { name: "職種を選択" }).first().click();
-      await page
-        .getByText("技術職（建設、開発、ＩＴ）、専門職")
-        .click();
+      await page.getByText("技術職（建設、開発、ＩＴ）、専門職").click();
       await page.getByText(label, { exact: true }).first().click();
       await page.getByRole("button", { name: "決定" }).click();
     },

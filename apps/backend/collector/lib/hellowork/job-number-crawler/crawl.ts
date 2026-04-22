@@ -9,18 +9,18 @@ import {
   Schema,
   Stream,
 } from "effect";
-import type { Locator } from "../browser";
 import type { DomainError, SystemError } from "../../error";
 import { formatParseError } from "../../util";
+import type { Locator } from "../browser";
 import {
   type DetailedJobSearchCriteria,
   navigateByCriteria as detailedNavigateByCriteria,
   navigateToDetailedJobSearchPage,
 } from "../page/detail-search";
 import {
-  navigateByCriteria as simpleNavigateByCriteria,
   openJobSearchPage,
   type SimpleJobSearchCriteria,
+  navigateByCriteria as simpleNavigateByCriteria,
 } from "../page/search";
 import type { JobListPage } from "./type";
 
@@ -223,13 +223,13 @@ export const paginatedJobNumbers = () =>
       );
       const jobSearchPage = yield* openJobSearchPage();
       yield* Effect.logInfo("start crawling...");
-      const firstJobListPage = yield* (config._tag === "simple"
+      const firstJobListPage = yield* config._tag === "simple"
         ? simpleNavigateByCriteria(jobSearchPage, config.criteria)
         : Effect.gen(function* () {
             const detailed =
               yield* navigateToDetailedJobSearchPage(jobSearchPage);
             return yield* detailedNavigateByCriteria(detailed, config.criteria);
-          }));
+          });
       return Stream.paginateEffect(null, () =>
         Effect.gen(function* () {
           const jobNumbers = yield* fetchJobNumbers(firstJobListPage);
@@ -249,4 +249,4 @@ export const paginatedJobNumbers = () =>
         }),
       );
     }),
-);
+  );
