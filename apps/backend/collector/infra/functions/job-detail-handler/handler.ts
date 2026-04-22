@@ -1,7 +1,10 @@
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
-import { ChromiumBrowserConfig, DebugDumpConfig } from "../../../lib/hellowork/browser";
+import {
+  ChromiumBrowserConfig,
+  DebugDumpConfig,
+} from "../../../lib/hellowork/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,

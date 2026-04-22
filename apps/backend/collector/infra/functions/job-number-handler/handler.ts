@@ -1,7 +1,10 @@
 import { Effect, Ref, Stream } from "effect";
 import { APIConfig } from "../../../lib/apiClient/config";
 import { filterUnregistered } from "../../../lib/apiClient/query";
-import { ChromiumBrowserConfig, DebugDumpConfig } from "../../../lib/hellowork/browser";
+import {
+  ChromiumBrowserConfig,
+  DebugDumpConfig,
+} from "../../../lib/hellowork/browser";
 import {
   CrawlerConfig,
   paginatedJobNumbers,
