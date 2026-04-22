@@ -58,8 +58,8 @@ const processJobDetail = (jobNumber: string) => {
 
 // ── Lambda handler ──
 
-const handlerProgram = (event: SQSEvent) => {
-  const program = Effect.gen(function* () {
+const program = (event: SQSEvent) =>
+  Effect.gen(function* () {
     // batchSize: 1 なので Records は常に1件
     const record = event.Records[0];
     if (!record) {
@@ -77,9 +77,7 @@ const handlerProgram = (event: SQSEvent) => {
     yield* processJobDetail(parsed.jobNumber);
   });
 
-  const runnable = program.pipe(Effect.provide(LoggerLayer));
-  return runnable;
+export const handler = async (event: SQSEvent): Promise<void> => {
+  const runnable = program(event).pipe(Effect.provide(LoggerLayer));
+  await Effect.runPromise(runnable);
 };
-
-export const handler = async (event: SQSEvent): Promise<void> =>
-  Effect.runPromise(handlerProgram(event));
