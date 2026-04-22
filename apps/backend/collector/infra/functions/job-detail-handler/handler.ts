@@ -1,13 +1,13 @@
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
-import { ChromiumBrowserConfig } from "../../../lib/browser";
+import { ChromiumBrowserConfig, DebugDumpConfig } from "../../../lib/hellowork/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
   JobDetailTransformer,
   processJob,
-} from "../../../lib/job-detail-crawler";
+} from "../../../lib/hellowork/job-detail-crawler";
 import { LoggerLayer, logErrorCause } from "../logger";
 import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
 
@@ -46,6 +46,7 @@ const processJobDetail = (jobNumber: string) =>
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(ChromiumBrowserConfig.lambda),
+    Effect.provide(DebugDumpConfig.noop),
     Effect.provide(LoggerLayer),
     Effect.orDie,
   );

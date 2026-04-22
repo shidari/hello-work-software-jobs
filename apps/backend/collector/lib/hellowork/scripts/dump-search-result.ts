@@ -6,19 +6,18 @@
  */
 
 import { Effect, Logger, LogLevel } from "effect";
-import { ChromiumBrowserConfig } from "../browser";
-import { JobNumberCrawlerConfig } from "../job-number-crawler/crawl";
-import { navigateByCriteria, openJobSearchPage } from "../page";
+import { ChromiumBrowserConfig, DebugDumpConfig } from "../browser";
+import { navigateByCriteria, openJobSearchPage } from "../page/search";
 
 async function main() {
   const program = Effect.scoped(
     Effect.gen(function* () {
-      const cfg = yield* JobNumberCrawlerConfig;
       const jobSearchPage = yield* openJobSearchPage();
-      const firstJobListPage = yield* navigateByCriteria(
-        jobSearchPage,
-        cfg.jobSearchCriteria,
-      );
+      const firstJobListPage = yield* navigateByCriteria(jobSearchPage, {
+        desiredOccupation: {
+          occupationSelection: "ソフトウェア開発技術者、プログラマー",
+        },
+      });
       const html = yield* Effect.tryPromise({
         try: () => firstJobListPage.content(),
         catch: (e) => new Error(`Failed to get content: ${String(e)}`),
@@ -55,8 +54,8 @@ async function main() {
   );
 
   const runnable = program.pipe(
-    Effect.provide(JobNumberCrawlerConfig.dev),
     Effect.provide(ChromiumBrowserConfig.dev),
+    Effect.provide(DebugDumpConfig.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
   await Effect.runPromise(runnable);

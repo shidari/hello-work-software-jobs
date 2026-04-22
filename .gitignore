@@ -10,3 +10,4 @@ TODO.md
 .pnpm-store
 .vercel
 .env*.local
+.debug/

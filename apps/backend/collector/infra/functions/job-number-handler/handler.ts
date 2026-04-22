@@ -1,22 +1,22 @@
 import { Effect, Ref, Stream } from "effect";
 import { APIConfig } from "../../../lib/apiClient/config";
 import { filterUnregistered } from "../../../lib/apiClient/query";
-import { ChromiumBrowserConfig } from "../../../lib/browser";
+import { ChromiumBrowserConfig, DebugDumpConfig } from "../../../lib/hellowork/browser";
 import {
-  JobNumberCrawlerConfig,
+  CrawlerConfig,
   paginatedJobNumbers,
-} from "../../../lib/job-number-crawler/crawl";
+  SearchConfig,
+} from "../../../lib/hellowork/job-number-crawler/crawl";
 import { JobDetailQueueConfig, sendJobDetail } from "../../sqs";
 import { LoggerLayer, logErrorCause } from "../logger";
 import { cleanupTmp, disableCoreDump, logTmpUsage } from "../tmp-usage";
-
-const MAX_ENQUEUE_COUNT = 2000;
 
 const program = Effect.gen(function* () {
   yield* disableCoreDump;
   yield* cleanupTmp;
   yield* Effect.promise(() => logTmpUsage("job-number-crawler:start"));
 
+  const { untilCount } = yield* CrawlerConfig;
   const enqueuedCountRef = yield* Ref.make(0);
 
   yield* paginatedJobNumbers().pipe(
@@ -30,7 +30,7 @@ const program = Effect.gen(function* () {
           enqueuedCountRef,
           (n) => n + unregistered.length,
         );
-        return total <= MAX_ENQUEUE_COUNT;
+        return total <= untilCount;
       }),
     ),
   );
@@ -48,8 +48,10 @@ const program = Effect.gen(function* () {
   ),
   Effect.scoped,
   Effect.provide(APIConfig.main),
-  Effect.provide(JobNumberCrawlerConfig.main),
+  Effect.provide(CrawlerConfig.main),
+  Effect.provide(SearchConfig.detailed),
   Effect.provide(ChromiumBrowserConfig.lambda),
+  Effect.provide(DebugDumpConfig.noop),
   Effect.provide(JobDetailQueueConfig.main),
   Effect.provide(LoggerLayer),
   Effect.orDie,

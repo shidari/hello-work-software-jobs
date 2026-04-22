@@ -3,7 +3,7 @@ import type { Company } from "@sho/models";
 import { Data, Effect } from "effect";
 import { hc } from "hono/client";
 import type { SystemError } from "../error";
-import type { TransformedJob } from "../job-detail-crawler/transformer";
+import type { TransformedJob } from "../hellowork/job-detail-crawler/transformer";
 import { APIConfig } from "./config";
 
 export class InsertJobError extends Data.TaggedError(
