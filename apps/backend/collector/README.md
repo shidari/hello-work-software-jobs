@@ -2,7 +2,7 @@
 
 ハローワーク求人情報の自動収集クローラー
 
-**設計**: Effect-tsによるETL（Extract-Transform-Load）パイプライン  
+**設計**: Effect-ts による ETL（Extract-Transform-Load）パイプライン
 **ヘッドレス理由**: セッション情報の保持が必要なため
 
 **現状の取得範囲**: ソフトウェア関連求人の一部のみ対応（段階的拡張予定）
@@ -10,28 +10,38 @@
 ## コマンド
 
 ```bash
-# セットアップ
-pnpm install
-pnpm exec playwright install chromium
+# ローカル E2E（docker-compose: Lambda + LocalStack）
+pnpm dev:docker-up
+pnpm dev:docker-down
+pnpm dev:invoke-crawler       # 求人番号クローラー手動実行
+pnpm dev:invoke-detail        # 求人詳細 ETL 手動実行
+pnpm dev:e2e                  # E2E パイプライン検証
 
-# 検証
-pnpm verify:e-t-crawler              # 求人番号抽出
-pnpm verify:job-detail-extractor     # 求人詳細抽出
-pnpm verify:transform-jobDetail      # データ変換
-pnpm type-check                      # 型チェック
+# 実サイトに対する単発スモーク
+pnpm dev:verify-job-number-crawler
+pnpm dev:verify-job-detail-crawler
+pnpm dev:verify-detail-search
+pnpm dev:dump-html            # 検索結果ページ HTML ダンプ
 
-# デプロイ
-pnpm bootstrap  # 初回のみ
-pnpm deploy
+# テスト・型チェック・ビルド
+pnpm test                     # Vitest（PBT + coverage sweep）
+pnpm type-check
+pnpm build                    # tsdown
+
+# デプロイ（CDK、`infra/` で実行）
+cd infra && pnpm exec cdk deploy
 ```
 
-## 環境変数
+## ランタイム環境変数
 
-```bash
-JOB_STORE_ENDPOINT=<job-store-api URL>
+```
+JOB_STORE_ENDPOINT=<job-store API URL>
 API_KEY=<認証キー>
-QUEUE_URL=<SQS URL>
-GITHUB_TOKEN=<GitHub token>
-GITHUB_OWNER=<owner>
-GITHUB_REPO=<repo>
+SQS_QUEUE_URL=<SQS URL>
 ```
+
+AWS 認証情報（`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`）は Lambda の実行ロール経由、ローカルでは docker-compose が注入。
+
+## 診断
+
+CloudWatch Logs の横断検索は `/crawler-diagnose` / `/debug` skill を使用（詳細は [../../../.claude/rules/cli.md](../../../.claude/rules/cli.md)）。

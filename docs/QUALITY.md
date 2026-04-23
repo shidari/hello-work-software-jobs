@@ -19,3 +19,13 @@ PBT は振る舞いを記述するためにも使う。PBT で書かれたテス
 
 - `pr-checks.yml` で Build, Type check, Test, Lint を PR ごとに実行
 - CDK synth (dry-run) でインフラ変更の検証
+
+## Coverage
+
+- 計測用テストは各パッケージの `__coveratge_tests__/` フォルダに隔離する（通常テストと混ぜない）
+- 意図: カバレッジ数値を稼ぐためだけの低品質スイープテスト。振る舞いのドキュメント化には使わない
+- 実行:
+  - collector: `pnpm exec vitest run --coverage`（v8 provider）
+  - api: `pnpm exec vitest run --coverage`（istanbul provider / vitest-pool-workers は `node:inspector` 非対応のため）
+  - frontend: `pnpm exec vitest run --config vitest.coverage.config.ts --coverage`（storybook browser mode とは別 config）
+- 生成物 (`coverage/`) は `.gitignore` 済み
