@@ -16,8 +16,9 @@ apps/
       └── hello-work-job-searcher/  # Next.js フロントエンド
 packages/
   ├── db/                           # Kysely + D1 client factory & types
+  ├── logger/                       # 3 サービス横断の構造化ログライブラリ
   └── models/                       # ドメインモデル定義
-scripts/                            # クローラー診断スクリプト
+scripts/                            # Apple container サンドボックス管理
 ```
 
 ## 技術スタック
@@ -27,24 +28,37 @@ scripts/                            # クローラー診断スクリプト
 - **API**: Cloudflare Workers, Hono, Kysely, D1
 - **クローラー**: AWS Lambda (Docker), SQS, EventBridge, Playwright, Effect, CDK
 - **型管理**: Effect Schema, @sho/models
-- **診断**: シェルスクリプト + AWS CLI + jq
+- **ロギング**: @sho/logger（3 サービス共通の構造化ログ）
+- **診断**: `/crawler-diagnose` / `/debug` skill + AWS CLI / wrangler / vercel + jq
 
 ## セットアップ
 
+開発用 CLI（`pnpm` / `gh` / `aws` / `wrangler` / `vercel` / `claude` 等）は **Apple container サンドボックス** に閉じ込めています。詳細は [.claude/rules/cli.md](.claude/rules/cli.md) 参照。
+
 ```bash
-# 依存関係インストール
-pnpm install
+# サンドボックス（初回）
+./scripts/sandbox-create.sh
+./scripts/sandbox.sh        # 以後はこれでコンテナに入る
 
-# 各パッケージの開発サーバー起動
-cd apps/frontend/hello-work-job-searcher && pnpm dev   # フロントエンド (port 9002)
-cd apps/frontend/hello-work-job-searcher && pnpm storybook  # Storybook (port 6006)
-cd apps/backend/api && pnpm dev                        # API (port 8787)
+# 以下はサンドボックス内で実行
+pnpm install                # 依存関係インストール
 
-# クローラー検証
+# 各パッケージの開発サーバー
+cd apps/frontend/hello-work-job-searcher && pnpm dev            # (port 9002)
+cd apps/frontend/hello-work-job-searcher && pnpm storybook      # (port 6006)
+cd apps/backend/api && pnpm dev                                 # (port 8787)
+
+# クローラー検証（ローカル Docker パイプライン）
 cd apps/backend/collector
-pnpm exec playwright install chromium
-pnpm verify:e-t-crawler
-pnpm verify:job-detail-extractor
+pnpm dev:docker-up                  # docker-compose で Lambda + LocalStack 起動
+pnpm dev:invoke-crawler              # 求人番号クローラー手動実行
+pnpm dev:invoke-detail               # 求人詳細 ETL 手動実行
+pnpm dev:e2e                         # E2E パイプライン検証
+
+# 単発のクローラー動作確認（実サイトに対するスモーク）
+pnpm dev:verify-job-number-crawler
+pnpm dev:verify-job-detail-crawler
+pnpm dev:verify-detail-search
 ```
 
 ## デプロイ
