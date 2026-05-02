@@ -11,7 +11,7 @@ import {
 } from "effect";
 import type { DomainError, SystemError } from "../../error";
 import { formatParseError } from "../../util";
-import type { Locator } from "../browser";
+import { dumpPage, type Locator } from "../browser";
 import {
   type DetailedJobSearchCriteria,
   navigateByCriteria as detailedNavigateByCriteria,
@@ -141,6 +141,7 @@ const goToNextJobListPage = Effect.fn("goToNextJobListPage")(function* (
       }),
   });
   yield* Effect.logDebug("navigated to next job list page.");
+  yield* dumpPage(page, "job-list-next-page");
 });
 
 const fetchJobNumbers = Effect.fn("fetchJobNumbers")(function* (

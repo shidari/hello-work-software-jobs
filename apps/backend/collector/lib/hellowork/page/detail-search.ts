@@ -1,6 +1,6 @@
 import type { JobNumber } from "@sho/models";
 import { Effect } from "effect";
-import type { Page } from "../browser";
+import { dumpPage, type Page } from "../browser";
 import { PageActionError } from "../errors";
 import type { FirstJobListPage } from "../job-number-crawler/type";
 import type { SimpleJobSearchPage } from "./search";
@@ -121,6 +121,7 @@ const clickSearchBtn = Effect.fn("clickSearchBtn")(function* (
   yield* Effect.logDebug(
     "navigated to job list page from detailed job search page.",
   );
+  yield* dumpPage(page, "job-list-by-criteria-detailed");
 });
 
 // ============================================================
@@ -148,6 +149,7 @@ export const navigateToDetailedJobSearchPage = Effect.fn(
       }),
   });
   yield* Effect.logDebug("navigated to detailed job search page.");
+  yield* dumpPage(page, "detailed-job-search-page");
   const _page: Page = page;
   return _page as DetailedJobSearchPage;
 });

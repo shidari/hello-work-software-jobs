@@ -1,7 +1,7 @@
 import type { JobNumber } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
 import type { DomainError, SystemError } from "../../error";
-import type { Page } from "../browser";
+import { dumpPage, type Page } from "../browser";
 import type { FirstJobListPage } from "../job-number-crawler/type";
 import type { JobDetailPage } from "../page/detail";
 import { navigateByJobNumber, openJobSearchPage } from "../page/search";
@@ -233,6 +233,7 @@ function goToSingleJobDetailPage(page: FirstJobListPage) {
         }),
     });
     yield* Effect.logDebug("navigated to job detail page from job list page.");
+    yield* dumpPage(page, "job-detail-page");
     const _page: Page = page;
     return _page as JobDetailPage;
   });
