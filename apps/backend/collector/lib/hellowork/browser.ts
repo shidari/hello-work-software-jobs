@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Console, Context, Data, Effect, Exit, Layer } from "effect";
-import type { Browser, LaunchOptions } from "playwright-core";
+import type { Browser, LaunchOptions, Page } from "playwright-core";
 import { chromium } from "playwright-core";
 import type { SystemError } from "../error";
 
@@ -55,42 +55,77 @@ export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
   } satisfies LaunchOptions);
 }
 
-// ── DebugMode (Context.Tag — true なら openBrowserPage が失敗時に dump する) ──
+// ── DebugMode (Context.Tag — enabled なら dumpPage / dumpBrowserPage が dir に dump する) ──
+// dev では .debug/run-{stamp}/ をその run 用のサブディレクトリとして払い出し、
+// 同じ run のダンプが時系列で 1 箇所にまとまるようにする。
 
-export class DebugMode extends Context.Tag("DebugMode")<DebugMode, boolean>() {
-  static dev = Layer.succeed(DebugMode, true);
-  static main = Layer.succeed(DebugMode, false);
+export type DebugModeValue =
+  | { readonly enabled: false }
+  | { readonly enabled: true; readonly dir: string };
+
+export class DebugMode extends Context.Tag("DebugMode")<
+  DebugMode,
+  DebugModeValue
+>() {
+  static dev = Layer.sync(DebugMode, () => {
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    return {
+      enabled: true,
+      dir: resolve(".debug", `run-${stamp}`),
+    } as const;
+  });
+  static main = Layer.succeed(DebugMode, {
+    enabled: false,
+  } satisfies DebugModeValue);
 }
 
-// ── dumpBrowserPage (browser 内の全 page の HTML + screenshot を dir 配下に dump) ──
+// ── dumpPage (1 枚の Page を dir 配下に HTML + screenshot で dump) ──
+// label にどのページか分かる短い名前を渡す。ファイル名は `{stamp}-{label}.{html,png}`。
 
-export const dumpBrowserPage = (browser: Browser, dir: string) =>
-  Effect.gen(function* () {
-    const pages = browser.contexts().flatMap((ctx) => ctx.pages());
-    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-    yield* Effect.promise(() => mkdir(dir, { recursive: true }));
-    yield* Effect.forEach(pages, (page, i) => {
-      const base = resolve(dir, `on-error-${stamp}-${i}`);
-      return Effect.tryPromise({
+const dumpPageToDir = (page: Page, dir: string, label: string) => {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const safeLabel = label.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const base = resolve(dir, `${stamp}-${safeLabel}`);
+  return Effect.promise(() => mkdir(dir, { recursive: true })).pipe(
+    Effect.andThen(
+      Effect.tryPromise({
         try: async () => {
           await writeFile(`${base}.html`, await page.content());
           await page.screenshot({ path: `${base}.png`, fullPage: true });
         },
         catch: (e) => e,
-      }).pipe(
-        Effect.andThen(Console.log(`dumped ${base}.{html,png}`)),
-        Effect.catchAll((e) =>
-          Console.error(`dump failed for ${base}: ${String(e)}`),
-        ),
-      );
-    });
+      }),
+    ),
+    Effect.andThen(Console.log(`dumped ${base}.{html,png}`)),
+    Effect.catchAll((e) =>
+      Console.error(`dump failed for ${base}: ${String(e)}`),
+    ),
+  );
+};
+
+export const dumpPage = (page: Page, label: string) =>
+  Effect.gen(function* () {
+    const debug = yield* DebugMode;
+    if (!debug.enabled) return;
+    yield* dumpPageToDir(page, debug.dir, label);
+  });
+
+// ── dumpBrowserPage (browser 内の全 page を一斉に dump) ──
+
+export const dumpBrowserPage = (browser: Browser, label: string) =>
+  Effect.gen(function* () {
+    const debug = yield* DebugMode;
+    if (!debug.enabled) return;
+    const pages = browser.contexts().flatMap((ctx) => ctx.pages());
+    yield* Effect.forEach(pages, (page, i) =>
+      dumpPageToDir(page, debug.dir, `${label}-${i}`),
+    );
   });
 
 // ── openBrowserPage (Effect.fn) ──
 
 export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   const config = yield* ChromiumBrowserConfig;
-  const debugMode = yield* DebugMode;
   yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
     Effect.tryPromise({
@@ -108,9 +143,7 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   );
   // 失敗時のみ dump（finalizer は LIFO なので close より前に走る）
   yield* Effect.addFinalizer((exit) =>
-    Exit.isFailure(exit) && debugMode
-      ? dumpBrowserPage(browser, ".debug")
-      : Effect.void,
+    Exit.isFailure(exit) ? dumpBrowserPage(browser, "on-error") : Effect.void,
   );
   yield* Console.log("browser launched, creating context...");
   const context = yield* Effect.tryPromise({
