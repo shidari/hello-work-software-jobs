@@ -55,26 +55,17 @@ export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
   } satisfies LaunchOptions);
 }
 
-// ── DebugDumpConfig (Context.Tag — 失敗時 dump 設定) ──
+// ── DebugMode (Context.Tag — true なら openBrowserPage が失敗時に dump する) ──
 
-export class DebugDumpConfig extends Context.Tag("DebugDumpConfig")<
-  DebugDumpConfig,
-  { readonly dir: string }
->() {
-  /** 未実装マーカ — provide すると die する。環境ごとに dev/本番用 Layer に差し替える。 */
-  static noop = Layer.effect(
-    DebugDumpConfig,
-    Effect.dieMessage("DebugDumpConfig.noop: not implemented"),
-  );
-  /** 開発・検証用。`.debug/` に dump。 */
-  static dev = Layer.succeed(DebugDumpConfig, { dir: ".debug" });
+export class DebugMode extends Context.Tag("DebugMode")<DebugMode, boolean>() {
+  static dev = Layer.succeed(DebugMode, true);
+  static main = Layer.succeed(DebugMode, false);
 }
 
-// ── Debug helper: browser 内の全 page の HTML + screenshot を dump ──
+// ── dumpBrowserPage (browser 内の全 page の HTML + screenshot を dir 配下に dump) ──
 
-const dumpBrowserPages = (browser: Browser) =>
+export const dumpBrowserPage = (browser: Browser, dir: string) =>
   Effect.gen(function* () {
-    const { dir } = yield* DebugDumpConfig;
     const pages = browser.contexts().flatMap((ctx) => ctx.pages());
     const stamp = new Date().toISOString().replace(/[:.]/g, "-");
     yield* Effect.promise(() => mkdir(dir, { recursive: true }));
@@ -99,6 +90,7 @@ const dumpBrowserPages = (browser: Browser) =>
 
 export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   const config = yield* ChromiumBrowserConfig;
+  const debugMode = yield* DebugMode;
   yield* Console.log("launching chromium browser...");
   const browser = yield* Effect.acquireRelease(
     Effect.tryPromise({
@@ -116,7 +108,9 @@ export const openBrowserPage = Effect.fn("openBrowserPage")(function* () {
   );
   // 失敗時のみ dump（finalizer は LIFO なので close より前に走る）
   yield* Effect.addFinalizer((exit) =>
-    Exit.isFailure(exit) ? dumpBrowserPages(browser) : Effect.void,
+    Exit.isFailure(exit) && debugMode
+      ? dumpBrowserPage(browser, ".debug")
+      : Effect.void,
   );
   yield* Console.log("browser launched, creating context...");
   const context = yield* Effect.tryPromise({

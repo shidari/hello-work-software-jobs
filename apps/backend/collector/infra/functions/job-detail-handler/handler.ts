@@ -3,7 +3,7 @@ import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
 import {
   ChromiumBrowserConfig,
-  DebugDumpConfig,
+  DebugMode,
 } from "../../../lib/hellowork/browser";
 import {
   JobDetailExtractor,
@@ -52,7 +52,7 @@ const processJobDetail = (jobNumber: string) => {
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(ChromiumBrowserConfig.lambda),
-    Effect.provide(DebugDumpConfig.noop),
+    Effect.provide(DebugMode.main),
     Effect.provide(LoggerLayer),
     Effect.orDie,
   );

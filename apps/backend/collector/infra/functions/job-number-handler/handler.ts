@@ -3,7 +3,7 @@ import { APIConfig } from "../../../lib/apiClient/config";
 import { filterUnregistered } from "../../../lib/apiClient/query";
 import {
   ChromiumBrowserConfig,
-  DebugDumpConfig,
+  DebugMode,
 } from "../../../lib/hellowork/browser";
 import {
   CrawlerConfig,
@@ -57,7 +57,7 @@ const runnable = program.pipe(
   Effect.provide(CrawlerConfig.main),
   Effect.provide(SearchConfig.detailed),
   Effect.provide(ChromiumBrowserConfig.lambda),
-  Effect.provide(DebugDumpConfig.noop),
+  Effect.provide(DebugMode.main),
   Effect.provide(JobDetailQueueConfig.main),
   Effect.provide(LoggerLayer),
   Effect.orDie,
