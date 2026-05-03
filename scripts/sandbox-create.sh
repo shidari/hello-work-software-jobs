@@ -31,7 +31,8 @@ mkdir -p \
   "$STATE/vercel-data" \
   "$STATE/vercel-config" \
   "$STATE/gh" \
-  "$STATE/claude"
+  "$STATE/claude" \
+  "$STATE/vscode-server"
 
 MOUNTS=(
   -v "$REPO:/work"
@@ -40,6 +41,7 @@ MOUNTS=(
   -v "$STATE/vercel-config:/home/node/.config/com.vercel.cli"
   -v "$STATE/gh:/home/node/.config/gh"
   -v "$STATE/claude:/home/node/.claude"
+  -v "$STATE/vscode-server:/home/node/.vscode-server"
 )
 [[ -e "$HOME/.aws" ]] && MOUNTS+=( -v "$HOME/.aws:/home/node/.aws:ro" )
 
