@@ -31,6 +31,7 @@ RUN apt-get update \
       libcups2 \
       libcairo2 \
       libpango-1.0-0 \
+      fonts-noto-cjk \
  && mkdir -p -m 755 /etc/apt/keyrings \
  && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \
