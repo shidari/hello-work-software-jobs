@@ -1,6 +1,6 @@
 # CLI ツール
 
-このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている（[Dockerfile](../../Dockerfile) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている（[Dockerfile](../../Dockerfile) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
 
 ## 起動
 
@@ -49,6 +49,7 @@ claude /login       # または `claude setup-token`
 |------|------|
 | `nodejs` | ランタイム（Dockerfile の `node:24-bookworm-slim`） |
 | `pnpm` | パッケージマネージャ・monorepo タスクランナー（corepack 経由） |
+| `deno` | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
 | `claude` | Claude Code（`@anthropic-ai/claude-code`） |
 | `gh` | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
 | `jq` | JSON 整形（`aws logs` / `wrangler tail` のパイプ処理） |

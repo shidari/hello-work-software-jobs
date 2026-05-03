@@ -81,6 +81,11 @@ RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o /t
  && /tmp/aws/install \
  && rm -rf /tmp/awscli.zip /tmp/awscli.zip.sig /tmp/aws.gpg /tmp/aws
 
+RUN curl -fsSL "https://github.com/denoland/deno/releases/latest/download/deno-aarch64-unknown-linux-gnu.zip" -o /tmp/deno.zip \
+ && unzip -q /tmp/deno.zip -d /usr/local/bin \
+ && chmod +x /usr/local/bin/deno \
+ && rm /tmp/deno.zip
+
 RUN corepack enable \
  && npm install -g \
       @anthropic-ai/claude-code@latest \
