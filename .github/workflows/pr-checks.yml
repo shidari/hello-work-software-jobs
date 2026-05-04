@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   ci-cd:
@@ -35,11 +36,32 @@ jobs:
       - name: Type check
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
-      
-      - name: Run tests
-        run: pnpm run test
+
+      - name: Run tests with coverage
+        run: pnpm -r test --coverage --coverage.reporter=json --coverage.reporter=json-summary
         continue-on-error: false
-        
+
+      - name: Coverage report - api
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        with:
+          name: api
+          working-directory: apps/backend/api
+
+      - name: Coverage report - collector
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        with:
+          name: collector
+          working-directory: apps/backend/collector
+
+      - name: Coverage report - collector-infra
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        with:
+          name: collector-infra
+          working-directory: apps/backend/collector/infra
+
       - name: CDK synth (dry-run)
         working-directory: ./apps/backend/collector/infra
         env:
