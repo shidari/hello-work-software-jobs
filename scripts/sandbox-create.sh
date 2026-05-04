@@ -10,7 +10,7 @@ if ! command -v container >/dev/null 2>&1; then
   exit 1
 fi
 
-if container list -a --format json | jq -e --arg n "$NAME" '.[] | select(.configuration.id == $n)' >/dev/null 2>&1; then
+if container list -a 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'; then
   echo "ERROR: container '$NAME' already exists. Run ./scripts/sandbox-stop.sh first." >&2
   exit 1
 fi
