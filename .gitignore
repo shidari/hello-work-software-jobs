@@ -11,3 +11,4 @@ TODO.md
 .vercel
 .env*.local
 .debug/
+coverage/

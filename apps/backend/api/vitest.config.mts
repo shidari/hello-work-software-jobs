@@ -19,6 +19,12 @@ export default defineWorkersConfig(async () => {
           },
         },
       },
+      // pool-workers は workerd 上で動くため node:inspector が無く v8 coverage は取れない。
+      // istanbul プロバイダはコード変換時に instrument するため pool-workers でも動作する。
+      coverage: {
+        provider: "istanbul",
+        include: ["src/**"],
+      },
     },
   };
 });
