@@ -53,7 +53,9 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("株式会社テスト")).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("heading", { name: /株式会社テスト/ }),
+    ).toBeInTheDocument();
     await expect(
       canvas.getByText(`事業所番号: ${establishmentNumber}`),
     ).toBeInTheDocument();

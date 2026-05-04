@@ -1,8 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "lockFileMaintenance": {
     "enabled": true,
     "recreateWhen": "auto",
@@ -12,14 +10,46 @@
     "groupName": null,
     "prBodyDefinitions": {
       "Change": "All locks refreshed"
-    }
+    },
+    "automerge": true,
+    "automergeType": "branch"
   },
   "packageRules": [
     {
-      "matchDatasources": [
-        "npm"
-      ],
+      "matchDatasources": ["npm"],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "devDependencies の patch / minor は CI 通過後に自動マージ",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "ランタイム依存の patch は CI 通過後に自動マージ。minor / major は手動レビュー",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "ランタイム挙動を強く支配する依存は major / minor を必ず手動レビュー",
+      "matchPackageNames": [
+        "playwright",
+        "linkedom",
+        "effect",
+        "next",
+        "react",
+        "react-dom",
+        "hono",
+        "aws-cdk-lib",
+        "aws-cdk",
+        "wrangler",
+        "miniflare"
+      ],
+      "matchUpdateTypes": ["major", "minor"],
+      "automerge": false
     }
   ]
 }

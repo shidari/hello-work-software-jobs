@@ -20,7 +20,11 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(mockJobs[0].occupation)).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("heading", {
+        name: `求人番号: ${mockJobs[0].jobNumber}`,
+      }),
+    ).toBeInTheDocument();
     await expect(canvas.getByText(/求人一覧に戻る/)).toBeInTheDocument();
   },
 };

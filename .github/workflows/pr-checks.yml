@@ -41,6 +41,14 @@ jobs:
         run: pnpm -r test --coverage --coverage.reporter=json --coverage.reporter=json-summary
         continue-on-error: false
 
+      - name: Install Playwright chromium (frontend)
+        working-directory: ./apps/frontend/hello-work-job-searcher
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Frontend Storybook tests
+        working-directory: ./apps/frontend/hello-work-job-searcher
+        run: pnpm test:storybook
+
       - name: Coverage report - api
         if: always()
         uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
