@@ -3,7 +3,7 @@ import {
   env,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import { EstablishmentNumber, type Job } from "@sho/models";
+import { type Company, EstablishmentNumber, type Job } from "@sho/models";
 import { Effect, Schema } from "effect";
 import { beforeAll, describe, expect, it } from "vitest";
 import worker from "../src";
@@ -11,9 +11,9 @@ import {
   jobListSuccessResponseSchema,
   jobsExistsSuccessResponseSchema,
 } from "../src/app/jobs";
-import { InsertJobCommand } from "../src/cqrs/commands";
+import { InsertJobCommand, UpsertCompanyCommand } from "../src/cqrs/commands";
 import { JobStoreDB } from "../src/infra/db";
-import { sampleJobs } from "./mock";
+import { sampleCompanies, sampleJobs } from "./mock";
 
 const MOCK_ENV = {
   ...env,
@@ -28,6 +28,19 @@ const insertJob = (job: Job) => {
       return yield* cmd.run(job);
     }).pipe(
       Effect.provide(InsertJobCommand.Default),
+      Effect.provideService(JobStoreDB, db),
+    ),
+  );
+};
+
+const upsertCompany = (company: Company) => {
+  const db = JobStoreDB.main(env.DB);
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const cmd = yield* UpsertCompanyCommand;
+      return yield* cmd.run(company);
+    }).pipe(
+      Effect.provide(UpsertCompanyCommand.Default),
       Effect.provideService(JobStoreDB, db),
     ),
   );
@@ -296,5 +309,149 @@ describe("セキュリティ", () => {
       body: "{broken",
     });
     expect(response.status).toBe(400);
+  });
+});
+
+// --- 事業所 ---
+
+describe("事業所", () => {
+  it("POST /companies で UPSERT できる", async () => {
+    const [company] = sampleCompanies({ num: 1 });
+    const response = await workerFetch("/companies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
+      body: JSON.stringify(company),
+    });
+    expect(response.status).toBe(200);
+    const data = (await response.json()) as { establishmentNumber: string };
+    expect(data.establishmentNumber).toBe(company.establishmentNumber);
+  });
+
+  it("POST /companies は同じキーで二度送ると更新になる（重複エラーにならない）", async () => {
+    const [company] = sampleCompanies({ num: 1 });
+    const post = () =>
+      workerFetch("/companies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "test-api-key",
+        },
+        body: JSON.stringify(company),
+      });
+    const r1 = await post();
+    const r2 = await post();
+    expect(r1.status).toBe(200);
+    expect(r2.status).toBe(200);
+  });
+
+  it("POST /companies は API key なしでは 401", async () => {
+    const [company] = sampleCompanies({ num: 1 });
+    const response = await workerFetch("/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(company),
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it("POST /companies は不正な事業所番号で 400", async () => {
+    const response = await workerFetch("/companies", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
+      body: JSON.stringify({
+        establishmentNumber: "invalid",
+        companyName: null,
+        postalCode: null,
+        address: null,
+        employeeCount: null,
+        foundedYear: null,
+        capital: null,
+        businessDescription: null,
+        corporateNumber: null,
+      }),
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it("GET /companies/:establishmentNumber で取得できる", async () => {
+    const [company] = sampleCompanies({ num: 1 });
+    await upsertCompany(company);
+    const response = await workerFetch(
+      `/companies/${company.establishmentNumber}`,
+    );
+    expect(response.status).toBe(200);
+    const data = (await response.json()) as Company;
+    expect(data.establishmentNumber).toBe(company.establishmentNumber);
+  });
+
+  it("GET /companies/:establishmentNumber は未登録なら 404", async () => {
+    const response = await workerFetch("/companies/9999-999999-9");
+    expect(response.status).toBe(404);
+  });
+});
+
+// --- 日次サマリー ---
+
+describe("日次サマリー", () => {
+  it("GET /stats/daily で日ごとの集計を返す", async () => {
+    const [job] = sampleJobs({ num: 1 });
+    await insertJob(job);
+    const response = await workerFetch("/stats/daily");
+    expect(response.status).toBe(200);
+    const data = (await response.json()) as {
+      stats: { addedDate: string; count: number; jobNumbers: string[] }[];
+    };
+    expect(Array.isArray(data.stats)).toBe(true);
+    expect(data.stats.length).toBeGreaterThanOrEqual(1);
+    for (const day of data.stats) {
+      expect(typeof day.addedDate).toBe("string");
+      expect(typeof day.count).toBe("number");
+      expect(Array.isArray(day.jobNumbers)).toBe(true);
+    }
+  });
+});
+
+// --- 求人検索フィルター ---
+
+describe("求人検索フィルター", () => {
+  it("会社名（部分一致）で絞り込める", async () => {
+    const [job] = sampleJobs({ num: 1 });
+    const fixed: Job = { ...job, companyName: "ユニーク絞込テスト株式会社" };
+    await insertJob(fixed);
+    const response = await workerFetch(
+      `/jobs?companyName=${encodeURIComponent("ユニーク絞込テスト")}`,
+    );
+    expect(response.status).toBe(200);
+    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
+      await response.json(),
+    );
+    expect(data.meta.totalCount).toBeGreaterThanOrEqual(1);
+    expect(
+      data.jobs.every((j) => j.companyName?.includes("ユニーク絞込テスト")),
+    ).toBe(true);
+  });
+
+  it("不正な雇用形態リテラルでは 400 を返す", async () => {
+    const response = await workerFetch("/jobs?employmentType=役員");
+    expect(response.status).toBe(400);
+  });
+
+  it("受信日昇順でソートできる", async () => {
+    const response = await workerFetch("/jobs?orderByReceiveDate=asc");
+    expect(response.status).toBe(200);
+    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
+      await response.json(),
+    );
+    if (data.jobs.length >= 2) {
+      const dates = data.jobs.map((j) => j.receivedDate);
+      const sorted = [...dates].sort();
+      expect(dates).toEqual(sorted);
+    }
   });
 });
