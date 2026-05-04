@@ -1,10 +1,7 @@
 import { Effect, Ref, Stream } from "effect";
 import { APIConfig } from "../../../lib/apiClient/config";
 import { filterUnregistered } from "../../../lib/apiClient/query";
-import {
-  ChromiumBrowserConfig,
-  DebugMode,
-} from "../../../lib/hellowork/browser";
+import { ChromiumBrowserConfig, Mode } from "../../../lib/hellowork/browser";
 import {
   CrawlerConfig,
   paginatedJobNumbers,
@@ -57,7 +54,7 @@ const runnable = program.pipe(
   Effect.provide(CrawlerConfig.main),
   Effect.provide(SearchConfig.detailed),
   Effect.provide(ChromiumBrowserConfig.lambda),
-  Effect.provide(DebugMode.main),
+  Effect.provide(Mode.production),
   Effect.provide(JobDetailQueueConfig.main),
   Effect.provide(LoggerLayer),
   Effect.orDie,

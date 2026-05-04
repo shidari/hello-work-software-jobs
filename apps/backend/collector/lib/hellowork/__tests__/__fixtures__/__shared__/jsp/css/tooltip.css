@@ -1,0 +1,71 @@
+.tooltipBtn_layout {
+  padding: 0;
+  border: none;
+  border-radius: 15px;
+  background: none;
+  cursor: pointer;
+  user-select: none;
+}
+.tooltipImg {
+  display: block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: .5s opacity, .5s transform;
+}
+.tippy-arrow:after {
+  position: absolute;
+  border-style: solid;
+  border-color: transparent;
+  content: "";
+}
+.tippy-box {
+  border: 3px solid #2323f7;
+  border-radius: 10px;
+  background-color: #e8f2fb;
+  color: #000 !important;
+  font-weight: normal !important;
+  text-align: left;
+}
+.tippy-box[data-placement^=bottom] > .tippy-arrow:before,
+.tippy-box[data-placement^=top] > .tippy-arrow:before {
+  z-index: 2;
+}
+.tippy-box[data-placement^=bottom] > .tippy-arrow:after,
+.tippy-box[data-placement^=top] > .tippy-arrow:after {
+  top: -11px;
+  left: -3px;
+  z-index: 1;
+  border-width: 0 11px 11px;
+
+  transform-origin: center bottom;
+}
+.tippy-box[data-placement^=top] > .tippy-arrow:after {
+  top: auto;
+  bottom: -11px;
+  border-width: 11px 11px 0;
+
+  transform-origin: center top;
+}
+.tippy-box[data-placement^=bottom] > .tippy-arrow:before {
+  border-bottom-color: #e8f2fb;
+}
+.tippy-box[data-placement^=bottom] > .tippy-arrow:after {
+  border-bottom-color: #2323f7;
+}
+.tippy-box[data-placement^=top] > .tippy-arrow:before {
+  border-top-color: #e8f2fb;
+}
+.tippy-box[data-placement^=top] > .tippy-arrow:after {
+  border-top-color: #2323f7;
+}
+.tooltipLink_base {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+.tooltipLink_iconBase::before {
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  content: "";
+}

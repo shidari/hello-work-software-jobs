@@ -1,0 +1,370 @@
+/*jamp_button*/
+.jampButton_base {
+  display: flex;
+  cursor: pointer;
+  transition: opacity .3s;
+}
+.jampButton_layout {
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+  gap: 3%;
+  padding-bottom: 10px;
+  border: none;
+  border-radius: 7px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
+}
+@media screen and (max-width:350px) {
+  .jampButton_layout {
+    gap: 6%;
+  }
+}
+.jampButton_font {
+  color: #fff;
+  font-weight: bold;
+  font-size: 15.8px;
+  text-align: center;
+}
+@media screen and (max-width:350px) {
+  .jampButton_font {
+    font-size: 13.9px;
+  }
+}
+.jampButton_icon {
+  width: auto;
+  height: 22px;
+}
+.jampButton_backCollor1 {
+  background-color: #3150b2;
+}
+.jampButton_backCollor1:hover {
+  background-color: #3150b2;
+}
+.jampButton_backCollor2 {
+  background-color: #af612b;
+}
+.jampButton_backCollor2:hover {
+  background-color: #af612b;
+}
+.jampButton_backCollor3 {
+  background-color: #c548aa;
+}
+.jampButton_backCollor3:hover {
+  background-color: #c548aa;
+}
+.jampButton_backCollor4 {
+  background-color: #46bf6a;
+}
+.jampButton_backCollor4:hover {
+  background-color: #46bf6a;
+}
+.jampButton_layout:hover,
+.jampButton_layout:active,
+.jampButton_layout:focus {
+  opacity: .8;
+  box-shadow: none;
+}
+
+
+/*icon_button*/
+.annotateBtn_base:disabled {
+  pointer-events: none !important;
+  opacity: .5 !important;
+}
+.accordion-content {
+  display: block;
+}
+.accordion-icon_open {
+  display: block;
+}
+
+.iconButton_color {
+  border: 1px solid rgba(0, 0, 0, .5);
+  background-color: #fff;
+}
+.iconButton_clickColor {
+  border: 2px solid rgba(0, 0, 0, .8) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+  background-color: #1b8354 !important;
+}
+.iconButton_layout:hover,
+.iconButton_layout:active,
+.iconButton_layout:focus {
+  border: 2px solid rgba(0, 0, 0, .8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+  background-color: #fff;
+}
+.pinIcons_layout {
+  line-height: 0;
+}
+.pinIcon_off {
+  display: block;
+}
+.pinIcon_on {
+  display: none;
+}
+.iconButton_textLayout {
+  padding: 1px 0 0 0;
+  line-height: 0;
+}
+.iconButton_textFont {
+  font-size: 16px;
+}
+.iconButton_textFont-mini {
+  font-size: 80%;
+}
+.iconButton_textColor {
+  color: #555;
+}
+.iconButton_clickColor .pinIcon_off {
+  display: none;
+}
+.iconButton_clickColor .pinIcon_on {
+  display: block;
+}
+.iconButton_clickColor .iconButton_textColor {
+  color: #fff;
+}
+
+/*icon_button*/
+.annotate_base {
+  display: flex;
+  flex-direction: column;
+}
+.annotate_layout {
+  gap: 16px;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+.columnBtn_base {
+  cursor: pointer;
+  transition: .3s;
+}
+.columnBtn_color {
+  border: 1px solid rgba(0, 0, 0, .5);
+  background-color: #fff;
+}
+.columnBtn_font {
+  color: rgba(0, 0, 0, .5);
+  font-weight: bold;
+  font-size: 16px;
+}
+.columnBtn_layout:hover,
+.columnBtn_layout:active,
+.columnBtn_layout:focus {
+  border: 1px solid #1b8354;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+  background-color: #fff;
+  color: #1b8354;
+}
+
+/*annotate_button*/
+.annotateBtn_color {
+  border: 3px solid #1b8354;
+  box-shadow: 0 4px 4px #00000040;
+  background-color: #fffcfc;
+}
+.annotateBtn_layout:hover,
+.annotateBtn_layout:active,
+.annotateBtn_layout:focus {
+  border: 3px solid #006c3c;
+  background-color: #fffcfc;
+}
+.annotateBtn_color.color2 {
+  border: 3px solid #085733;
+  background-color: #1b8354;
+}
+.annotateBtn_color.color2:hover,
+.annotateBtn_layoutcolor2:active,
+.annotateBtn_layoutcolor2:focus {
+  background-color: #085733;
+}
+.annotateBtn_color.color3 {
+  border: 3px solid #803e10;
+  background-color: #af612b;
+}
+.annotateBtn_color.color3:hover,
+.annotateBtn_layoutcolor3:active,
+.annotateBtn_layoutcolor3:focus {
+  background-color: #803e10;
+}
+.annotateBtn_textFont {
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
+.annotateBtn_textColor {
+  color: #1b8354;
+}
+.annotateBtn_layout:hover .annotateBtn_textColor,
+.annotateBtn_layout:active .annotateBtn_textColor,
+.annotateBtn_layout:focus .annotateBtn_textColor {
+  color: #006c3c;
+}
+.annotateBtn_color.color2 .annotateBtn_textColor,
+.annotateBtn_color.color3 .annotateBtn_textColor {
+  color: #fff;
+}
+.annotateBtn_textRight {
+  justify-content: right;
+}
+.annotateBtn_textCenter {
+  justify-content: center;
+}
+.annotateBtn_textLeft {
+  justify-content: left;
+}
+.annotateText_base {
+  display: inline-block;
+}
+.annotateText_color {
+  color: #d80000;
+}
+.annotateBtn_img {
+  width: 20px;
+  height: auto;
+}
+.annotateBtn_color.color2 .annotateBtn_img {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(165deg) brightness(100%) contrast(105%);
+}
+.navButtonSingle_layout {
+  padding: 14px 50px;
+}
+.navButtonSingle_color {
+  border: 1px solid #1b8354;
+  background-color: #fffcfc;
+}
+.navButtonSingle_color:hover {
+  background-color: #1b8354;
+}
+.navButtonSingle_color:hover .annotateBtn_textColor {
+  color: #fffcfc;
+}
+.navButtonSingle_color.color2 {
+  background-color: #1b8354;
+}
+.navButtonSingle_color.color2:hover {
+  background-color: #006c3c;
+}
+.navButtonSingle_color.color2 .annotateBtn_textColor {
+  color: #fffcfc;
+}
+.navButtonSingle_color.login {
+  border: 1px solid #af612b;
+  background-color: #fffcfc;
+}
+.navButtonSingle_color.login .annotateBtn_textColor {
+  color: #af612b;
+}
+.navButtonSingle_color.login:hover {
+  background-color: #af612b;
+}
+.navButtonSingle_color.login:hover .annotateBtn_textColor {
+  color: #fffcfc;
+}
+.navButtonSingle_color.color2.login {
+  background-color: #af612b;
+}
+.navButtonSingle_color.color2.login:hover {
+  background-color: #803e10;
+}
+.navButtonSingle_color.color2.login .annotateBtn_textColor {
+  color: #fffcfc;
+}
+
+.otherButton_base {
+  width: 100%;
+  max-width: 500px;
+  margin: 30px auto 0;
+}
+.otherButton_base > div {
+  margin-bottom: 20px;
+}
+.logoutButton_layout {
+  padding: 2px 6px 0;
+  border-radius: 6px;
+}
+.logoutButton_color {
+  border: 1px solid #006c3c;
+  background-color: #e2f6ed;
+  color: #006c3c;
+}
+.logoutButton_color:hover {
+  background-color: #006c3c;
+  color: #fff;
+}
+.logoutButton_color.color2 {
+  border: 1px solid #803e10;
+  background-color: #ffeff4;
+  color: #803e10;
+}
+.logoutButton_color.color2:hover {
+  border: 1px solid #803e10;
+  background-color: #803e10;
+  color: #fffcfc;
+}
+.offerButton_layout {
+  padding: 4px 10px 3px;
+  border-radius: 5px;
+}
+.offerButton_color {
+  border: 2px solid #939393;
+  background-color: #fffcfc;
+  color: #646464;
+}
+.offerButton_color:hover {
+  border: 2px solid #363636;
+  background-color: #fffcfc;
+  color: #363636;
+}
+.removeButton_layout {
+  padding: 4px 10px 3px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+.removeButton_color {
+  border: 2px solid #ef0000;
+  background-color: #fffcfc;
+  color: #ef0000;
+}
+.removeButton_color:hover {
+  border: 2px solid #d80000;
+  background-color: #d80000;
+  color: #fffcfc;
+}
+.jobOfferButton_layout {
+  padding: 4px 3px 0;
+  border-radius: 8px;
+}
+.jobOfferButton_color {
+  border: 3px solid #af612b;
+  background-color: #fffcfc;
+}
+.jobOfferButton_color:hover {
+  border: 3px solid #803e10;
+  background-color: #fff;
+}
+.jobOfferImg_color {
+  color: #363636;
+}
+.jobOfferImg_size {
+  width: 50px;
+  height: auto;
+  margin: 0 0 -5px 3px;
+  vertical-align: bottom;
+}
+.jobOfferText_layout {
+  font-weight: bold;
+}
+.jobOfferText_color {
+  color: #af612b;
+}
+.jobOfferButton_color:hover .jobOfferText_color {
+  color: #803e10;
+}
+
+/* ECA only CSS */
+.ksno-input-default-open {
+	display: none;
+}

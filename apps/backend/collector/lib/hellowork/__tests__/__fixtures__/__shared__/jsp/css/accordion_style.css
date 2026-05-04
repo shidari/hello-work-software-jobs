@@ -1,0 +1,233 @@
+.arrow_content {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto 20px;
+}
+.arrowBtn_layout {
+  margin: 0;
+  padding: 0 16px;
+  border: none;
+}
+.arrowBtn_font {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 0;
+}
+@media screen and (max-width:576px) {
+  .arrowBtn_font {
+    font-size: 18px;
+  }
+}
+.arrowBtn_size {
+  width: 100%;
+  height: 40px;
+}
+@media screen and (max-width:576px) {
+  .arrowBtn_size {
+    height: 50px;
+  }
+}
+.arrowBtn_color {
+  background-color: #e4f6ed;
+  color: #1b8354;
+}
+.btn_textLeft {
+  text-align: left;
+}
+.btn_textCenter {
+  text-align: center;
+}
+.arrowBtn_arrowLayout {
+  width: 40px;
+  height: 50px;
+}
+.arrowBtn_arrowLocation {
+  top: 50%;
+  right: 0;
+  translate: 0 -50%;
+}
+.accordion-iconColor {
+  background-color: #ccc;
+}
+.accordion-iconRotate {
+  translate: -50% -50%;
+  rotate: 90deg;
+}
+.accordion-size {
+  margin: 0;
+  padding: 0 20px;
+}
+.accordion_item li {
+  padding-bottom: 2px;
+}
+.arrowBtn_wrapLayout {
+  border: 2px solid #1b8354;
+  border-radius: 8px;
+  box-shadow: 0 3px 3px 1px rgba(0, 0, 0, .2);
+  background-color: #fffcfc;
+  transition: .3s;
+}
+.arrowBtn_wrapLayout:hover {
+  border: 2px solid #006c3c;
+}
+.btnLayyout_shadow {
+  box-shadow: 0 3px 6px 1px #ccc;
+}
+.list-parent {
+  border-bottom: 2px solid #bbb;
+}
+.list-parent:last-child {
+  border-bottom: none;
+}
+.arrow_content2 {
+  width: 100%;
+  max-width: 650px;
+  margin: 0;
+}
+.check_square::after {
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  background: #1b8354;
+}
+.checkbox_check:checked {
+  background: #1b8354;
+}
+.prefecture_list input {
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
+  border: 1.6px solid light-dark(#767676, #858585);
+}
+.checkbox_check::after {
+  width: 2.5px;
+  height: 5.5px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+.accordion-checkListLayout {
+  padding: 0 0 0 20px;
+}
+.accordion-checkItemLayout {
+  height: 40px;
+  padding: 0 0 0 35px;
+}
+.accordion-checkItemLayout:first-of-type {
+  height: 41px;
+  padding-top: 1px;
+}
+.accordion-checkItemColor {
+  border-bottom: 2px solid #bbb;
+  color: rgba(100, 100, 100, 1);
+}
+.prefecture .accordion-checkItemColor:has(input:checked) {
+  background-color: rgba(63, 199, 138, .21);
+}
+.annotation_layout {
+  margin-left: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.annotation_font {
+  font-weight: normal;
+  font-size: 95%;
+  vertical-align: middle;
+}
+.annotation_colorRequired {
+  background-color: #e73d3d;
+  color: #fff;
+}
+.annotation_colorAny {
+  background-color: rgba(100, 100, 100, 1);
+  color: #fff;
+}
+.twoColumn_base {
+  width: 100%;
+  max-width: 650px;
+}
+.twoColumn_layout > * {
+  width: calc(100% / 2);
+}
+@media screen and (max-width:576px) {
+  .twoColumn_base > * {
+    width: 100%;
+  }
+}
+
+.accBtn_font {
+  color: rgb(252, 43, 43);
+}
+.accordion-contentWrap {
+  padding: 20px 0 25px;
+}
+
+.modal_content div.modal.top {
+  background-color: #3f3fd3;
+  color: #fff;
+  text-align: center;
+}
+.modal_content div.modal.bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+.modal_content div.modal.bottom button span {
+  /* color: #3f3fd3; */
+}
+.modal_content div.modal.bottom button:nth-of-type(1) {
+  grid-column: 1 / 2;
+}
+.modal_content div.modal.bottom button:nth-of-type(2) {
+  grid-column: 3 / 4;
+}
+.modal_content div.modal.bottom button:nth-of-type(3) {
+  grid-column: 4 / 5;
+  /* background: #3f3fd3; */
+}
+.modal_content div.modal.bottom button:nth-of-type(3) span {
+  color: #fff;
+}
+@media screen and (max-width:450px) {
+  .modal_content div.modal.bottom {
+    display: block;
+  }
+}
+.check_square::after {
+  background: #3f3fd3;
+}
+.checkbox_check:checked {
+  background: #3f3fd3;
+}
+.modal_content {
+  margin: 5% auto;
+}
+@media screen and (max-width: 790px) {
+  .accordion_container .accordion .ac_headerStyle {
+    padding: 4px 30px 4px 8px;
+    line-height: 1.2;
+    height: auto;
+    min-height: 40px;
+  }
+  .accordion_container .accordion .ac_headerStyle.ac_headerTwo {
+    padding: 4px 30px 4px 20px;
+  }
+  .accordion_container .accordion .ac_headerStyle.ac_headerThree {
+    padding: 4px 30px 4px 40px;
+  }
+  .accordion_container .accordion .ac_headerStyle.ac_headerFour{
+    padding: 4px 30px 4px 60px;
+  }
+}
+
+/* Firefox用 */
+@-moz-document url-prefix() {
+	.arrowBtn_arrowLocation {
+		transform: translate(0, -50%);
+		translate: unset !important;
+	}
+	.accordion-iconRotate {
+		transform: translate(-50%, -50%) rotate(90deg);
+		translate: unset !important;
+	}
+}

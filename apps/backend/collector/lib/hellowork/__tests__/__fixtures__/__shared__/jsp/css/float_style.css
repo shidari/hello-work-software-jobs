@@ -1,0 +1,96 @@
+body{
+	height: 1300px;
+}
+.accordion-content{
+	display: block;
+}
+.accordion-icon_open{
+	display: block;
+}
+
+
+.float_layout{
+	padding: 40px 0;
+}
+.float_color{
+	background-color: rgba(27, 131, 84, .5);
+}
+.floatWrap_layout{
+	position: relative;
+	width: 90%;
+	max-width: 400px;
+	margin: auto;
+}
+.floatText_layout{
+	position: absolute;
+	top: -27%;
+	left: 0;
+	margin: 0;
+}
+.floatBtn_layout{
+	display: block;
+	border-radius: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+	transition: .3s;
+}
+.floatText_font{
+	font-weight: bold;
+	font-size: 15px;
+}
+.floatText_color{
+	color: #1f0eff;
+}
+.floatSearch_layout{
+	width: 100%;
+	margin: 0 auto 13px;
+	padding: 11px 0 10px;
+	font-size: 17px;
+}
+.floatSearch_color:hover, .floatSearch_color:focus, .floatSearch_color:active{
+	background: #fff;
+	color: #1b8354;
+}
+.floatSearch_color{
+	background: #1b8354;
+	border: 2px solid #fff;
+	color: #fff;
+}
+.floatBtn_flex{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
+.floatFlex_layout{
+	margin: 0;
+	padding: 9px 0 8px;
+	font-size: 16px;
+}
+.floatSave_size{
+	width: 60%;
+}
+.floatSave_color:hover, .floatSave_color:focus, .floatSave_color:active{
+	background: #1b8354;
+	color: #fff;
+}
+.floatSave_color{
+	background: #fff;
+	border: 2px solid #1b8354;
+	color: #1b8354;
+}
+.floatClear_size{
+	width: 40%;
+}
+.floatClear_color:hover, .floatClear_color:focus, .floatClear_color:active{
+	background: #fff;
+	color: #000;
+}
+.floatClear_color{
+	background: #000;
+	border: 2px solid #000;
+	color: #fff;
+}
+.float_nodisp {
+	display: none;
+}

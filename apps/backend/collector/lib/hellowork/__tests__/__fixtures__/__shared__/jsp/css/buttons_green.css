@@ -1,0 +1,680 @@
+@charset "UTF-8";
+/* ================================================================== */
+/* Base Button */
+/* ================================================================== */
+.button {
+  font-family: "NotoSansJP", Helvetica;
+  font-size: 1em;
+  font-weight: 700;
+
+  position: relative;
+
+  display: inline-block;
+  overflow: visible;
+
+  min-width: 6em;
+  margin: 0;
+  padding: .4em .7em;
+
+  cursor: pointer;
+  text-align: center;
+  white-space: normal;
+  text-decoration: none;
+
+  color: #fffcfc;
+  border: 3px solid #1b8354;
+  border-radius: .5em;
+  outline: none;
+  background-color: #1b8354; }
+
+/* IE hacks */
+.button {
+  zoom: 1;
+  *display: inline; }
+
+/* iOS hacks */
+.button {
+  -webkit-appearance: none; }
+
+.button:hover,
+.button:focus,
+.button:active,
+.button.active {
+  color: #fffcfc;
+  border: 3px solid #085733;
+  background-color: #085733; }
+
+.button.have_span:hover > span,
+.button.have_span:focus > span,
+.button.have_span:active > span,
+.button.have_span.active > span {
+  color: #fffcfc; }
+
+.button.shadowed {
+  /* <offset-x> | <offset-y> | <blur-radius> | <color> */
+  box-shadow: 0 4px 4px #00000040; }
+
+.button.calendar {
+  min-width: 1em;
+  margin-left: .5em;
+  padding-top: .3em;
+
+  color: #1b8354;
+  border: 3px solid #1b8354;
+  background-color: #fffcfc; }
+
+.button.calendar:hover,
+.button.calendar:focus,
+.button.calendar:active,
+.button.calendar.active {
+  color: #fffcfc;
+  border: 3px solid #085733;
+  background-color: #085733; }
+
+.button.main,
+.button.sub {
+  min-width: 8em; }
+
+.button.main.line2,
+.button.sub.line2 {
+  padding-top: .1em;
+  padding-bottom: .1em; }
+
+.button.main {
+  padding: .5em;
+
+  color: #fffcfc;
+  border: 3px solid #085733;
+  border-radius: 8px;
+  background-color: #1b8354; }
+
+.button.main:hover,
+.button.main:focus,
+.button.main:active,
+.button.main.active {
+  color: #fffcfc;
+  border: 3px solid #085733;
+  background-color: #085733; }
+
+.button.main.have_span:hover > span,
+.button.main.have_span:focus > span,
+.button.main.have_span:active > span,
+.button.main.have_span.active > span {
+  color: #fffcfc; }
+
+.button.line2 {
+  padding-top: .1em;
+  padding-bottom: .1em; }
+
+.button.sub {
+  color: #1b8354;
+  border: 3px solid #1b8354;
+  background-color: #fffcfc; }
+
+.button.sub:hover,
+.button.sub:focus,
+.button.sub:active,
+.button.sub.active {
+  color: #fffcfc;
+  border: 3px solid #085733;
+  background-color: #085733; }
+
+.button.sub.have_span:hover > span,
+.button.sub.have_span:focus > span,
+.button.sub.have_span:active > span,
+.button.sub.have_span.active > span {
+  color: #fffcfc; }
+
+.button.sub_black {
+  color: #000000;
+  border: 3px solid #1b8354;
+  background-color: #fffcfc; }
+
+.button.sub_black:hover,
+.button.sub_black:focus,
+.button.sub_black:active,
+.button.sub_black.active {
+  color: #fffcfc;
+  border: 3px solid #085733;
+  background-color: #085733; }
+
+.button.sub_black.have_span:hover > span,
+.button.sub_black.have_span:focus > span,
+.button.sub_black.have_span:active > span,
+.button.sub_black.have_span.active > span {
+  color: #fffcfc; }
+
+.button.light {
+  padding: .1em .3em;
+
+  color: #085733;
+  border: 1px solid #085733;
+  background-color: #e2f6ed; }
+
+.button.light:hover,
+.button.light:focus,
+.button.light:active,
+.button.light.active {
+  color: #fffcfc;
+  border: 1px solid #085733;
+  background-color: #085733; }
+
+.button.light.have_span:hover > span,
+.button.light.have_span:focus > span,
+.button.light.have_span:active > span,
+.button.light.have_span.active > span {
+  color: #fffcfc; }
+
+.button.gray {
+  color: #646464;
+  border: 2px solid #939393;
+  background-color: #fffcfc; }
+
+.button.gray:hover,
+.button.gray:focus,
+.button.gray:active,
+.button.gray.active {
+  color: #000000;
+  border: 2px solid #000000;
+  background-color: #fffcfc; }
+
+.button.gray.have_span:hover > span,
+.button.gray.have_span:focus > span,
+.button.gray.have_span:active > span,
+.button.gray.have_span.active > span {
+  color: #000000; }
+
+.button.danger {
+  color: #D80000;
+  border: 3px solid #D80000;
+  background-color: #fffcfc; }
+
+.button.danger:hover,
+.button.danger:focus,
+.button.danger:active,
+.button.danger.active {
+  color: #fffcfc;
+  border: 3px solid #d80000;
+  background-color: #d80000; }
+
+.button.danger.have_span:hover > span,
+.button.danger.have_span:focus > span,
+.button.danger.have_span:active > span,
+.button.danger.have_span.active > span {
+  color: #fffcfc; }
+
+.button.disable:not(.link_style),
+.button.disable:not(.link_style):hover,
+.button.disable:not(.link_style):focus,
+.button.disable:not(.link_style):active,
+.button.disable:not(.link_style).active {
+  pointer-events: none !important;
+
+  opacity: .5 !important; }
+
+.button.link_style,
+.button.link_style:hover,
+.button.link_style:focus {
+  padding: 0;
+
+  text-decoration: underline;
+
+  color: #0000ee;
+  border: none;
+  background-color: transparent; }
+
+.button.link_style:active,
+.button.link_style.active {
+  color: #ff0000; }
+
+.button.disable.link_style {
+  cursor: default;
+  text-decoration: none;
+
+  color: #000000; }
+
+.button.no_hover {
+  pointer-events: none !important; }
+
+@media screen and (max-width: 768px) {
+  .button.main,
+  .button.sub {
+    width: 80%; } }
+
+/* overrides extra padding on button elements in Firefox */
+.button::-moz-focus-inner {
+  padding: 0;
+
+  border: 0; }
+
+/* ================================================================== */
+/* Button icons */
+/* ================================================================== */
+.button.icon:before {
+  position: relative;
+  top: 1px;
+
+  float: left;
+
+  width: 12px;
+  height: 12px;
+  margin: 0 .75em 0 -.25em;
+
+  content: "";
+
+  background: url(../img/icons.png) 0 99px no-repeat; }
+
+.button.arrowup.icon:before {
+  background-position: 0 0; }
+
+.button.arrowup.icon:hover:before,
+.button.arrowup.icon:focus:before,
+.button.arrowup.icon:active:before {
+  background-position: -12px 0; }
+
+.button.arrowdown.icon:before {
+  background-position: 0 -12px; }
+
+.button.arrowdown.icon:hover:before,
+.button.arrowdown.icon:focus:before,
+.button.arrowdown.icon:active:before {
+  background-position: -12px -12px; }
+
+.button.arrowleft.icon:before {
+  background-position: 0 -24px; }
+
+.button.arrowleft.icon:hover:before,
+.button.arrowleft.icon:focus:before,
+.button.arrowleft.icon:active:before {
+  background-position: -12px -24px; }
+
+.button.arrowright.icon:before {
+  float: right;
+
+  margin: 0 -.25em 0 .5em;
+
+  background-position: 0 -36px; }
+
+.button.arrowright.icon:hover:before,
+.button.arrowright.icon:focus:before,
+.button.arrowright.icon:active:before {
+  background-position: -12px -36px; }
+
+.button.approve.icon:before {
+  background-position: 0 -48px; }
+
+.button.approve.icon:hover:before,
+.button.approve.icon:focus:before,
+.button.approve.icon:active:before {
+  background-position: -12px -48px; }
+
+.button.add.icon:before {
+  background-position: 0 -288px; }
+
+.button.add.icon:hover:before,
+.button.add.icon:focus:before,
+.button.add.icon:active:before {
+  background-position: -12px -288px; }
+
+.button.remove.icon:before {
+  background-position: 0 -60px; }
+
+.button.remove.icon:hover:before,
+.button.remove.icon:focus:before,
+.button.remove.icon:active:before {
+  background-position: -12px -60px; }
+
+.button.log.icon:before {
+  background-position: 0 -72px; }
+
+.button.log.icon:hover:before,
+.button.log.icon:focus:before,
+.button.log.icon:active:before {
+  background-position: -12px -72px; }
+
+.button.calendar.icon:before {
+  background-position: 0 -84px; }
+
+.button.calendar.icon:hover:before,
+.button.calendar.icon:focus:before,
+.button.calendar.icon:active:before {
+  background-position: -12px -84px; }
+
+.button.chat.icon:before {
+  background-position: 0 -96px; }
+
+.button.chat.icon:hover:before,
+.button.chat.icon:focus:before,
+.button.chat.icon:active:before {
+  background-position: -12px -96px; }
+
+.button.clock.icon:before {
+  background-position: 0 -108px; }
+
+.button.clock.icon:hover:before,
+.button.clock.icon:focus:before,
+.button.clock.icon:active:before {
+  background-position: -12px -108px; }
+
+.button.settings.icon:before {
+  background-position: 0 -120px; }
+
+.button.settings.icon:hover:before,
+.button.settings.icon:focus:before,
+.button.settings.icon:active:before {
+  background-position: -12px -120px; }
+
+.button.comment.icon:before {
+  background-position: 0 -132px; }
+
+.button.comment.icon:hover:before,
+.button.comment.icon:focus:before,
+.button.comment.icon:active:before {
+  background-position: -12px -132px; }
+
+.button.fork.icon:before {
+  background-position: 0 -144px; }
+
+.button.fork.icon:hover:before,
+.button.fork.icon:focus:before,
+.button.fork.icon:active:before {
+  background-position: -12px -144px; }
+
+.button.like.icon:before {
+  background-position: 0 -156px; }
+
+.button.like.icon:hover:before,
+.button.like.icon:focus:before,
+.button.like.icon:active:before {
+  background-position: -12px -156px; }
+
+.button.favorite.icon:before {
+  background-position: 0 -348px; }
+
+.button.favorite.icon:hover:before,
+.button.favorite.icon:focus:before,
+.button.favorite.icon:active:before {
+  background-position: -12px -348px; }
+
+.button.home.icon:before {
+  background-position: 0 -168px; }
+
+.button.home.icon:hover:before,
+.button.home.icon:focus:before,
+.button.home.icon:active:before {
+  background-position: -12px -168px; }
+
+.button.key.icon:before {
+  background-position: 0 -180px; }
+
+.button.key.icon:hover:before,
+.button.key.icon:focus:before,
+.button.key.icon:active:before {
+  background-position: -12px -180px; }
+
+.button.lock.icon:before {
+  background-position: 0 -192px; }
+
+.button.lock.icon:hover:before,
+.button.lock.icon:focus:before,
+.button.lock.icon:active:before {
+  background-position: -12px -192px; }
+
+.button.unlock.icon:before {
+  background-position: 0 -204px; }
+
+.button.unlock.icon:hover:before,
+.button.unlock.icon:focus:before,
+.button.unlock.icon:active:before {
+  background-position: -12px -204px; }
+
+.button.loop.icon:before {
+  background-position: 0 -216px; }
+
+.button.loop.icon:hover:before,
+.button.loop.icon:focus:before,
+.button.loop.icon:active:before {
+  background-position: -12px -216px; }
+
+.button.search.icon:before {
+  background-position: 0 -228px; }
+
+.button.search.icon:hover:before,
+.button.search.icon:focus:before,
+.button.search.icon:active:before {
+  background-position: -12px -228px; }
+
+.button.mail.icon:before {
+  background-position: 0 -240px; }
+
+.button.mail.icon:hover:before,
+.button.mail.icon:focus:before,
+.button.mail.icon:active:before {
+  background-position: -12px -240px; }
+
+.button.move.icon:before {
+  background-position: 0 -252px; }
+
+.button.move.icon:hover:before,
+.button.move.icon:focus:before,
+.button.move.icon:active:before {
+  background-position: -12px -252px; }
+
+.button.edit.icon:before {
+  background-position: 0 -264px; }
+
+.button.edit.icon:hover:before,
+.button.edit.icon:focus:before,
+.button.edit.icon:active:before {
+  background-position: -12px -264px; }
+
+.button.pin.icon:before {
+  background-position: 0 -276px; }
+
+.button.pin.icon:hover:before,
+.button.pin.icon:focus:before,
+.button.pin.icon:active:before {
+  background-position: -12px -276px; }
+
+.button.reload.icon:before {
+  background-position: 0 -300px; }
+
+.button.reload.icon:hover:before,
+.button.reload.icon:focus:before,
+.button.reload.icon:active:before {
+  background-position: -12px -300px; }
+
+.button.rss.icon:before {
+  background-position: 0 -312px; }
+
+.button.rss.icon:hover:before,
+.button.rss.icon:focus:before,
+.button.rss.icon:active:before {
+  background-position: -12px -312px; }
+
+.button.tag.icon:before {
+  background-position: 0 -324px; }
+
+.button.tag.icon:hover:before,
+.button.tag.icon:focus:before,
+.button.tag.icon:active:before {
+  background-position: -12px -324px; }
+
+.button.trash.icon:before {
+  background-position: 0 -336px; }
+
+.button.trash.icon:hover:before,
+.button.trash.icon:focus:before,
+.button.trash.icon:active:before {
+  background-position: -12px -336px; }
+
+.button.user.icon:before {
+  background-position: 0 -360px; }
+
+.button.user.icon:hover:before,
+.button.user.icon:focus:before,
+.button.user.icon:active:before {
+  background-position: -12px -360px; }
+
+/* ================================================================== */
+/* Button extensions */
+/* ================================================================== */
+/* Primary button */
+/* ================================================================== */
+.button.primary {
+  font-weight: bold; }
+
+/* Pill button */
+/* ================================================================== */
+.button.pill {
+  border-radius: 50em; }
+
+/* Big button */
+/* ================================================================== */
+.button.big {
+  font-size: 1.2em; }
+
+.button.big.icon:before {
+  top: 0; }
+
+/* ================================================================== */
+/* Button groups */
+/* ================================================================== */
+/* Standard group */
+/* ================================================================== */
+.button_group {
+  display: inline-block;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none; }
+
+/* IE hacks */
+.button_group {
+  zoom: 1;
+  *display: inline; }
+
+.button + .button,
+.button + script + .button,
+.button + .button_group,
+.button_group + .button,
+.button_group + .button_group {
+  margin-left: 15px; }
+
+/* スマートデバイス用 */
+@media screen and (max-width: 768px) {
+  .button + .button,
+  .button + script + .button {
+    margin-left: 0; } }
+
+.button_group .button.main,
+.button_group .button.sub {
+  padding: .5em 1em; }
+
+.button_group li {
+  float: left;
+
+  margin: 0;
+  padding: 0; }
+
+.button_group .button {
+  float: left;
+
+  margin-left: -1px; }
+
+.button_group > .button:not(:first-child):not(:last-child),
+.button_group li:not(:first-child):not(:last-child) .button {
+  border-radius: 0; }
+
+.button_group > .button:first-child,
+.button_group li:first-child .button {
+  margin-left: 0;
+
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0; }
+
+.button_group > .button:last-child,
+.button_group li:last-child > .button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0; }
+
+/* Minor group */
+/* ================================================================== */
+.button_group.minor-group .button {
+  border: 1px solid #d4d4d4;
+  background-color: #ffffff;
+  background-image: none;
+  text-shadow: none; }
+
+.button_group.minor-group .button:hover,
+.button_group.minor-group .button:focus {
+  background-color: #599bdc; }
+
+.button_group.minor-group .button:active,
+.button_group.minor-group .button.active {
+  background-color: #3072b3; }
+
+.button_group.minor-group .button.icon:before {
+  opacity: .8; }
+
+/* ================================================================== */
+/* Button container (mixing buttons and groups, e.g., nav bar) */
+/* ================================================================== */
+.button_container .button,
+.button_container .button_group {
+  vertical-align: top; }
+
+/* ================================================================== */
+/* Button Style Check Boxes and Radio Buttons */
+/* ================================================================== */
+div.checkbox > label > input[type="checkbox"].button_style,
+div.radio > label > input[type="radio"].button_style {
+  position: absolute !important;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+
+  width: 1px;
+  height: 1px;
+
+  border: 0; }
+div.checkbox > label:has(input[type="checkbox"].button_style),
+div.radio > label:has(input[type="radio"].button_style) {
+  font-family: "NotoSansJP", Helvetica;
+  font-size: 1em;
+
+  position: relative;
+
+  display: inline-block;
+  overflow: visible;
+
+  min-width: 6em;
+  margin: 0;
+  padding: .2em 1em;
+
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+
+  color: #939393;
+  border: 2px solid #939393;
+  border-radius: .5em;
+  outline: none;
+  background-color: #fffcfc; }
+div.checkbox > label:has(input[type="checkbox"].button_style:checked),
+div.radio > label:has(input[type="radio"].button_style:checked) {
+  color: #000000;
+  border: 2px solid #000000;
+  background-color: #fffcfc; }
+div.checkbox > label:has(input[type="checkbox"].button_style:disabled),
+div.radio > label:has(input[type="radio"].button_style:disabled) {
+  color: #fffcfc !important;
+  border-color: #757575 !important;
+  background-color: #757575 !important; }
+
+label.firefox-has-disabled {
+  color: #fffcfc !important;
+  border-color: #757575 !important;
+  background-color: #757575 !important; }

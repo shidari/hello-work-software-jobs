@@ -1,6 +1,6 @@
 import type { JobNumber } from "@sho/models";
 import { Effect, Logger, LogLevel } from "effect";
-import { ChromiumBrowserConfig, DebugMode } from "../browser";
+import { ChromiumBrowserConfig, Mode } from "../browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -20,7 +20,7 @@ async function main() {
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.noop),
     Effect.provide(ChromiumBrowserConfig.dev),
-    Effect.provide(DebugMode.dev),
+    Effect.provide(Mode.dev),
     Effect.scoped,
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );

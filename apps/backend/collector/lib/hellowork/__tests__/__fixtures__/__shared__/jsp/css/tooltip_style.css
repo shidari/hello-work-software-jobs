@@ -1,0 +1,63 @@
+.tooltipBtn_layout {
+  top: 50%;
+  left: 50%;
+}
+.tippy-content {
+  padding: 5px 9px;
+  font-size: 14px;
+}
+.tooltipLink_layout {
+  gap: 8px;
+  padding: 5px 0 0 0;
+}
+.tooltipLink_iconSize::before {
+  width: 1em;
+  height: 1em;
+}
+.tooltipLink_iconImage::before {
+  background-image: url(../img/square_arrow.svg);
+}
+.tooltipImg {
+  width: 23px;
+  height: 23px;
+  background-image: url(../img/help.svg);
+}
+.tooltipBtn_layout:hover .tooltipImg,
+.tooltipBtn_layout:focus .tooltipImg,
+.tooltipBtn_layout:active .tooltipImg {
+  background-image: url(../img/help_hover.svg);
+}
+
+.tooltipContainer {
+  position: relative;
+  width: 80%;
+  height: 300px;
+  margin: auto;
+  border: 1px solid #ccc;
+}
+.tooltip_wrap{
+	height: 23px;
+}
+
+/* アイコン */
+i.tooltip_icon {
+  font-size: 1.25em;
+
+  width: 1em;
+  height: 1em;
+  margin: 0 auto;
+
+  color: #939393; }
+
+i.tooltip_icon:hover,
+i.tooltip_icon:focus,
+i.tooltip_icon:active,
+i.tooltip_icon.active {
+  color: #052aa0; }
+
+table.normal tr th.r08ThAccordion div span div.tooltip_wrap {
+  margin-right: 16px; }
+
+.tippy-content, .tippy-content > span, .tippy-content > div {
+  color: #000000 !important;
+}

@@ -1,0 +1,265 @@
+@charset "UTF-8";
+/* ================================================================== */
+/* プログレスバー （使用されていない） */
+/* ================================================================== */
+.progress:not(.triangle) {
+  width: 90%;
+  margin: 1em auto;
+  padding: .5em 1em;
+
+  border-radius: .25em;
+  background-color: #e0e9f5; }
+.progress:not(.triangle):after {
+  display: table;
+  clear: both;
+
+  content: ""; }
+.progress:not(.triangle) li {
+  display: inline-block;
+  float: left;
+
+  margin: .5em 0; }
+.progress:not(.triangle) li::after {
+  /* this is the separator between items */
+  display: inline-block;
+
+  margin: 0 .6em;
+
+  content: "\00bb";
+
+  color: #959fa5; }
+.progress:not(.triangle) li:last-of-type::after {
+  /* hide separator after the last item */
+  display: none; }
+.progress:not(.triangle) li a,
+.progress:not(.triangle) li > span {
+  font-size: 1em; }
+.progress:not(.triangle) li a {
+  text-decoration: none; }
+.progress:not(.triangle) li > * {
+  font-size: 1.4rem;
+  /* single step */
+
+  display: inline-block;
+
+  color: #2c3f4c; }
+.progress:not(.triangle) li.current > * {
+  /* selected step */
+  color: #173773; }
+.progress:not(.triangle) a:hover {
+  /* steps already visited */
+  color: #173773;
+  outline: none; }
+.progress:not(.triangle) a {
+  text-decoration: none;
+
+  color: #173773; }
+/* PC表示用 */
+@media only screen and (min-width: 769px) {
+  .progress:not(.triangle) {
+    padding: 0 1.2em; }
+  .progress:not(.triangle) li {
+    margin: 1.2em 0; }
+  .progress:not(.triangle) li::after {
+    margin: 0 1em; }
+  .progress:not(.triangle) li > * {
+    font-size: 1.6rem; }
+  .progress:not(.triangle) li a {
+    display: block;
+
+    height: 48px; } }
+/* ==================================================================*/
+/* 三角形プログレスバー */
+/* ==================================================================*/
+/* 本体 */
+nav ol.progress.triangle {
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  max-width: 1280px; }
+
+nav ol.progress.triangle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+
+  width: fit-content;
+  width: -moz-fit-content;
+  max-width: 1088px;
+  margin: 1em auto 1.25em;
+  padding: 0;
+
+  background-color: transparent; }
+
+/* 各進捗 */
+nav ol.progress.triangle li {
+  position: relative;
+
+  display: inline-block;
+  float: none;
+
+  width: fit-content;
+  width: -moz-fit-content;
+  padding: 0; }
+nav ol.progress.triangle li::after {
+  position: absolute;
+  top: calc(50% - 8px);
+  left: 100%;
+
+  display: inline-block;
+
+  margin: 0 0 0 1em;
+
+  content: "";
+  -webkit-transform: translateX(4px);
+     -moz-transform: translateX(4px);
+      -ms-transform: translateX(4px);
+       -o-transform: translateX(4px);
+          transform: translateX(4px);
+  vertical-align: super;
+
+  border-top: 8px solid transparent;
+  border-right: none;
+  border-bottom: 8px solid transparent;
+  border-left: 12px solid #c2e3d4; }
+nav ol.progress.triangle li:last-of-type {
+  margin: 0; }
+nav ol.progress.triangle li:last-of-type::after {
+  display: none; }
+
+/* 未通過進捗（liの直下にspanタグ） */
+nav ol.progress.triangle li > span {
+  position: relative;
+
+  display: inline-block;
+
+  height: auto;
+  margin: 0;
+  padding: .5em;
+
+  text-align: center;
+
+  background-color: transparent; }
+
+/* 現在の進捗（liの直下にspanタグ） */
+nav ol.progress.triangle li.current > span {
+  font-weight: bold;
+
+  color: #085733;
+  background-color: #c4f6e0; }
+nav ol.progress.triangle li.current > span > span {
+  font-weight: inherit;
+
+  color: inherit; }
+
+/* 通過済み進捗（liの直下にaタグ） */
+nav ol.progress.triangle li > a {
+  position: relative;
+
+  display: inline-block;
+
+  height: auto;
+  margin: 0;
+  padding: .5em;
+
+  text-align: center;
+  text-decoration: none;
+
+  background-color: transparent; }
+nav ol.progress.triangle li > a:hover {
+  outline: none; }
+nav ol.progress.triangle li > a > span {
+  color: inherit; }
+
+/* PC表示用 */
+@media only screen and (min-width: 769px) {
+  /* 各進捗 */
+  nav ol.progress.triangle li {
+    margin: 0 3em 0 0; }
+  nav ol.progress.triangle li::after {
+    margin: 0 0 0 1em; }
+  nav ol.progress.triangle li > span > span.cd_pc,
+  nav ol.progress.triangle li > a > span.cd_pc {
+    display: block; } }
+
+/* 微妙な大きさのPC表示用 */
+@media screen and (min-width: 769px) and (max-width: 1188px) {
+  /* 本体 */
+  nav ol.progress.triangle {
+    width: 90%;
+    margin-right: 5%;
+    margin-left: 5%; } }
+
+/* スマートデバイス用 */
+@media only screen and (max-width: 768px) {
+  /* 各進捗 */
+  nav ol.progress.triangle li {
+    margin: 0 1.25em 0 0; }
+  nav ol.progress.triangle li::after {
+    margin: 0; }
+  nav ol.progress.triangle li > span,
+  nav ol.progress.triangle li > a {
+    font-size: 1.25em; }
+  nav ol.progress.triangle li > span > span.cd_pc,
+  nav ol.progress.triangle li > a > span.cd_pc {
+    display: none; }
+  /* 通過済み進捗（liの直下にaタグ） */
+  nav ol.progress.triangle li > a {
+    text-decoration: underline; } }
+/* ================================================================== */
+/* multi_steps （使用されていない） */
+/* ================================================================== */
+.multi_steps {
+  width: 90%;
+  margin: 1em auto;
+  padding: .5em 1em;
+
+  border-radius: .25em;
+  background-color: #e0e9f5; }
+.multi_steps:after {
+  display: table;
+  clear: both;
+
+  content: ""; }
+.multi_steps li {
+  display: inline-block;
+  float: left;
+
+  margin: .5em 0; }
+/* this is the separator between items */
+.multi_steps li::after {
+  display: inline-block;
+
+  margin: 0 .6em;
+
+  content: "\00bb";
+
+  color: #959fa5; }
+/* hide separator after the last item */
+.multi_steps li:last-of-type::after {
+  display: none; }
+/* single step */
+.multi_steps li > * {
+  font-size: 1.4rem;
+
+  display: inline-block;
+
+  color: #2c3f4c; }
+/* selected step */
+.multi_steps li.current > * {
+  color: #173773; }
+/* steps already visited */
+.multi_steps a:hover {
+  color: #173773;
+  outline: none; }
+/* PC表示用 */
+@media only screen and (min-width: 769px) {
+  .multi_steps {
+    padding: 0 1.2em; }
+  .multi_steps li {
+    margin: 1.2em 0; }
+  .multi_steps li::after {
+    margin: 0 1em; }
+  .multi_steps li > * {
+    font-size: 1.6rem; } }

@@ -6,7 +6,7 @@
  */
 
 import { Effect, Logger, LogLevel } from "effect";
-import { ChromiumBrowserConfig, DebugMode } from "../browser";
+import { ChromiumBrowserConfig, Mode } from "../browser";
 import { navigateByCriteria, openJobSearchPage } from "../page/search";
 
 async function main() {
@@ -55,7 +55,7 @@ async function main() {
 
   const runnable = program.pipe(
     Effect.provide(ChromiumBrowserConfig.dev),
-    Effect.provide(DebugMode.dev),
+    Effect.provide(Mode.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
   await Effect.runPromise(runnable);

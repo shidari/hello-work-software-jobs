@@ -1,0 +1,1027 @@
+@charset "UTF-8";
+
+/* webkit */
+.lock_mom::-webkit-scrollbar {
+	display: none;
+}
+/* firefox */
+.lock_mom {
+	scrollbar-width: none;
+}
+
+.sub_model{
+     border: solid 1px #1b8354;
+     border-spacing: 0;
+     vertical-align: top;
+}
+table.sub_model tr td{
+	border-bottom: solid 1px #1b8354;
+    padding: 1.5em;
+    text-align: left;
+}
+
+@media screen and (max-width: 768px) {
+    .sub_model {
+        width: 100%;
+        height: 0px;
+        border: none;
+        border-spacing: 0;
+    }
+    table.sub_model tr td {
+        display: block;
+        width: 100%;
+        border: none;
+        padding: 1.5em;
+        text-align: left;
+    }
+}
+/*----------全体調整----------*/
+
+/*求人区分の影削除/代表画面*/
+  .box_shadow_none{
+	box-shadow: none !important;
+  }
+
+/*スマホ画面*/
+@media screen and (max-width: 768px) {
+	.color_black_sd_im{
+		color: #000000 !important;
+	}
+	}
+@media screen and (max-width: 768px) {
+hr{
+	margin: .5em 0 !important;
+}
+}
+/*求人票を表示ボタンサイズ変更用 共通化*/
+.in_width_19em{
+	width: 19em;
+}
+
+/*サマリ幅調整*/
+/*PC*/
+@media screen and (min-width: 769px) {
+	.samari_tyousei,
+	.hozonyomikomi_tyousei {
+		max-width:1088px !important;
+		width: calc(100% - 32px);
+		margin-right: auto;
+		margin-left: auto;
+	}
+}
+@media screen and (max-width: 768px) {
+	.samari_tyousei,
+	.hozonyomikomi_tyousei {
+		max-width:1088px !important;
+		width: calc(100% - 16px);
+		margin-right: auto;
+		margin-left: auto;
+	}
+}
+.p_t_0_1 {
+	padding-top: .1em;
+	}
+/*チェックボックス形式ボタンの影（全体につけている）*/
+.boxShadow {
+	box-shadow: 0 4px 4px #00000040;
+}
+/*チェックボックス形式ボタンの影（全体につけない）*/
+.boxShadowNone {
+	box-shadow: none !important ;
+}
+
+/*インプット横ハイフンの幅調整 */
+.hyphen{
+    margin-left: -.2em !important;
+    margin-right: 1.5em !important;
+}
+/*テーブルの調整_上（共有）*/
+.mt8px{
+    margin-top: 8px !important;
+}
+/*テーブルの調整_下（共有）*/
+.pb8px{
+    padding-bottom: 8px !important;
+}
+/*テーブルの調整_右下（共有）*/
+table.normal tr td div.m05 {
+	margin: 0px 0px 8px 0px;
+}
+
+.mb03{
+	margin: 0em !important;
+}
+/*テキストボックスの左打消し(一個目のみ)*/
+div.flex.input input[type="text"]:first-child, div.flex.input input[type="password"]:first-child, div.flex.input textarea:first-child, div.flex.input select:first-child {
+    margin-top: 8px ;
+    margin-right: 8px !important;
+    margin-left: 0 !important;
+    margin-bottom: 8px ;
+}
+/*テーブルの調整（PC版）*/
+@media screen and (min-width: 769px){
+
+table.normal tr td,
+table.normal tr td.iew,
+table.normal tr td.iew_modal,
+table.normal tr td.iew_intab {
+	padding-top: 16px;
+	padding-right: 24px;
+	padding-left: 24px;
+	padding-bottom: 16px; }
+table.normal tr td.nes2 {
+	padding-top: 24px;
+	padding-right: 24px;
+	padding-left: 24px;
+	padding-bottom: 24px; }
+/*110030画面_基盤部品のモーダル画面調整（PC版）*/
+#ID_form_1002 table.normal tr td,
+#ID_form_1004 table.normal tr td {
+	padding: 24px; }
+}
+/*テーブルの調整（スマホ版）*/
+@media screen and (max-width: 768px) {
+table.normal tr td,
+table.normal tr td.iew,
+table.normal tr td.iew_modal,
+table.normal tr td.iew_intab {
+padding-left: 8px;
+padding-right:8px;
+padding-top: 8px;
+padding-bottom: 8px; }
+/*110030画面_基盤部品のモーダル画面調整（スマホ版）*/
+#ID_form_1002 table.normal tr td,
+#ID_form_1004 table.normal tr td {
+	padding: 16px 8px; }
+}
+
+/*サマリ付近の罫線の表示調整 */
+.samari_tyousei > hr:first-of-type{
+    display: none;
+}
+
+/*----------フロート----------*/
+
+/*フロート使用時に全体の調整*/
+.body-in {
+	position: relative;
+}
+
+/*フロートボタンエリア1つ目が停止時に収まるための余白*/
+.heightZ {
+	height: 110px;
+}
+
+/*----------求人情報検索のしかた----------*/
+/*求人情報検索のしかた（PC画面時の文字の調整）*/
+@media screen and (min-width: 769px) {
+	table.normal tr th.kensakusikata > div > span:nth-child(1) {
+			width: 20em !important;
+		}
+	}
+
+/*求人情報検索のしかた（幅の調整）*/
+@media screen and (min-width: 769px) {
+	th.r08Th>div {
+		width: 100%;
+	}
+}
+/*求人情報検索のしかた（記載位置調整）*/
+@media screen and (max-width: 768px) {
+	.max_width24px {
+		max-width: 24px;
+	}
+}
+/* PC表示用 */
+/* 求人情報検索のしかた（簡単な検索方法）tableの調整 */
+@media screen and (min-width: 769px) {
+	table.normal tr th.kensakusikata, table.normal tr td.kensakusikata {
+		display: block;
+		width: 100% !important;
+	}
+	table.normal tr th.kensakusikata {
+		border-top: none;
+		border-right: none;
+		border-left: none;
+		padding: 12.5px 24px !important;
+	}
+	table.normal tr td.kensakusikata {
+		border-top: none;
+		border-right: none;
+		border-bottom: none;
+		border-left: none;
+	}
+	table.normal tr th.kensakusikata>div {
+		width: 100% !important;
+	}
+}
+
+/*----------ボタン関連の調整----------*/
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン非選択時*/
+label.buttonStyle{
+    font-family: "Noto Sans JP", Helvetica!important;
+    font-size: 1em!important;
+    position: relative!important;
+    display: inline-block!important;
+    overflow: visible!important;
+    min-width: 6em!important;
+    margin: 0!important;
+    padding: .2em 1em!important;
+    cursor: pointer!important;
+    text-align: center!important;
+    white-space: nowrap!important;
+    text-decoration: none!important;
+    color: #646464!important;
+    border: 1px solid #939393!important;
+    border-radius: .5em!important;
+    outline: none!important;
+    background-color: #fffcfc!important;
+}
+
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン非選択時ホバー時*/
+label.buttonStyleHover{
+    color: #000000 !important;
+    border: 1px solid #000000!important;
+}
+
+/*条件を選ぶ・特集求人の影を外す用*/
+#ID_LJyoukenBox12,#ID_LJyoukenBox13,#ID_LJyoukenBox14,#ID_LJyoukenBox15,#ID_LJyoukenBox16,#ID_LJyoukenBox17
+,#ID_LTokusyuBtn4,#ID_LTokusyuBtn5{
+	box-shadow: none;
+}
+
+label.buttonStyleDisabled {
+  color: #fffcfc !important;
+  border-color: #757575 !important;
+  background-color: #757575 !important; 
+  cursor: default !important;
+}
+
+/*プラスボタンボーダーテキスト文字色ホバー時等*/
+.annotateBtn_layout:hover .annotateBtn_textColor, .annotateBtn_layout:active .annotateBtn_textColor,
+.annotateBtn_layout:focus .annotateBtn_textColor, .annotateBtn_layout.selected .annotateBtn_textColor {
+    color: #fffcfc !important;
+}
+.annotateBtn_layout{
+	height:46px !important;
+}
+.height46px{
+	height:46px !important;
+}
+/*PC画面*/
+@media screen and (min-width: 769px) {
+	/*就業場所欄のプラスボタン*/
+	.syugyou_button{
+		width: 15em !important;
+		min-width: 15em !important;
+		margin-bottom: .5em !important;
+		margin-left: 0px !important;
+		margin-right: 1em !important;
+	}
+	/*PRロゴマーク欄のプラスボタン*/
+	.prRogo_button {
+		display: inline-flex !important;
+		width: 20em !important;
+		margin-left: 0 !important;
+		min-width: 20em;
+	}
+	/*番号検索*/
+	#ID_searchNoBtn {
+		width: 30%;
+		height:46px;
+		margin-left: 1em;
+	}
+	/*条件をクリア*/
+	#ID_searchClearBtn {
+		margin: 0;
+		margin-top: .5em;
+		height: 46px;
+		width:11em;
+	}
+	/*検索条件を保存*/
+	#ID_saveCondBtn {
+		margin: 0;
+		margin-top: .5em;
+		height: 46px;
+		width:11em;
+	}
+	/*チェックした求人の求人票を表示*/
+	#ID_checkedKyujinhyoDsBtn,
+	#ID_checkedKyujinhyoIppanBtn {
+		height: 46px;
+		line-height: 105%;
+		padding-top: 2%;
+		width:11em;
+		white-space: nowrap;
+	}
+	/*チェックした求人をお気に入りに保存*/
+	#ID_saveCheckedFavoriteBtn {
+		height: 46px;
+		line-height: 105%;
+		margin: 0;
+		margin-bottom: .5em;
+		padding-top: 2%;
+		width:11em;
+	}
+	/*チェックした求人を表示*/
+	#ID_checkedKyujinViewBtn {
+		height: 46px;
+		line-height: 105%;
+		padding-top: 2%;
+		width:11em;
+	}
+	/* firefox対応*/
+	@-moz-document url-prefix(){
+		/*チェックした求人の求人票を表示*/
+		#ID_checkedKyujinhyoDsBtn,
+		#ID_checkedKyujinhyoIppanBtn {
+			height: 49px;
+			line-height: 105%;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			width:11em;
+			white-space: nowrap;
+		}
+		/*チェックした求人をお気に入りに保存*/
+		#ID_saveCheckedFavoriteBtn {
+			height: 49px;
+			line-height: 105%;
+			margin: 0;
+			margin-bottom: .5em;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			width:11em;
+		}
+		/*チェックした求人を表示*/
+		#ID_checkedKyujinViewBtn {
+			height: 49px;
+			line-height: 105%;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			width:11em;
+		}
+	}
+}
+/*スマホ画面*/
+@media screen and (max-width: 768px) {
+	/*検索する*/
+	#ID_searchBtn {
+		width: 96%;
+		margin-right: 2%;
+		margin-left: 2%;
+		height: 46px;
+	}
+	/*チェックした求人の求人票を表示*/
+	#ID_checkedKyujinhyoDsBtn,
+	#ID_checkedKyujinhyoIppanBtn {
+		width: 96%;
+		height: 46px;
+		margin-right: 2%;
+		margin-left: 2%;
+		line-height: 105%;
+		padding-top: .8%;
+		white-space: nowrap;
+	}
+	.float_search_button_area .button {
+		width: auto;
+	}
+	.syugyou_button{
+		width: 100% !important;
+		margin-bottom: .5em !important;
+		margin-left: 0px !important;
+	}
+	.prRogo_button{
+		width: 100% !important;
+        margin-left: 0 !important;
+	}
+	/*番号検索*/
+	#ID_searchNoBtn {
+		width: 60%;
+		height:46px;
+		margin-left: 1em;
+	}
+	/*詳細を表示ボタン*/
+	#ID_dispDetailBtn {
+		height: 46px;
+	}
+	/*条件をクリア*/
+	#ID_searchNoClearBtn_mobile {
+		min-width: 5em;
+		width: 20%;
+		height: 46px;
+		line-height: 115%;
+		padding-top: 0.4%;
+	}
+	.kyujin_foot .button.sub {
+		width: 97%;
+	}
+	.button.main {
+		min-width: 12em;
+	}
+
+	/*もっと詳しい条件を入力する*/
+	#ID_searchShosaiBtn {
+		width: 80%;
+		height: 46px;
+	}
+	/*かんたん検索を利用する 110030*/
+	#ID_searchKantanBtn {
+		width: 80%;
+	}
+	/*求人票を表示ボタン*/
+	.width97p_sd {
+		width: 97% !important;
+	}
+
+	/*条件をクリア*/
+	#ID_searchClearBtn {
+		margin-left: 2%;
+		width: 47%;
+		height: 46px;
+		padding: .2em 0em .2em 0em;
+	}
+	/*検索条件を保存*/
+	#ID_saveCondBtn {
+		margin-right: 2%;
+		margin-left: 2%;
+		width: 47%;
+		height: 46px;
+		padding: .2em 0em .2em 0em;
+	}
+	/*チェックした求人をお気に入りに保存*/
+	#ID_saveCheckedFavoriteBtn {
+		width: 47%;
+		height: 46px;
+		margin-left: 2%;
+		line-height: 105%;
+		padding-top: .8%;
+		white-space: nowrap;
+	}
+	/*チェックした求人を表示*/
+	#ID_checkedKyujinViewBtn {
+		width: 47%;
+		height: 46px;
+		margin-right: 2%;
+		margin-left: 2%;
+		line-height: 105%;
+		padding-top: .8%;
+	}
+	/* firefox対応*/
+	@-moz-document url-prefix(){
+		/*チェックした求人の求人票を表示*/
+		#ID_checkedKyujinhyoDsBtn,
+		#ID_checkedKyujinhyoIppanBtn {
+			width: 96%;
+			height: 49px;
+			margin-right: 2%;
+			margin-left: 2%;
+			line-height: 105%;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			white-space: nowrap;
+		}
+		/*チェックした求人をお気に入りに保存*/
+		#ID_saveCheckedFavoriteBtn {
+			width: 47%;
+			height: 49px;
+			margin-left: 2%;
+			line-height: 105%;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			white-space: nowrap;
+		}
+		/*チェックした求人を表示*/
+		#ID_checkedKyujinViewBtn {
+			width: 47%;
+			height: 49px;
+			margin-right: 2%;
+			margin-left: 2%;
+			line-height: 105%;
+			padding-top: 0px;
+			padding-bottom: 0px;
+		}
+		/*条件をクリア*/
+		#ID_searchNoClearBtn_mobile {
+			min-width: 5em;
+			width: 20%;
+			height: 49px;
+			line-height: 115%;
+			padding-top: 0px;
+		}	
+		/*番号検索*/
+		#ID_searchNoBtn {
+			width: 60%;
+			height:49px;
+			margin-left: 1em;
+		}
+	}
+	
+	/*ページ上部へ調整用*/
+	.pagebottom a:hover, .pagetop a:hover {
+		margin-bottom: 8em !important;
+	}
+	.pagebottom a, .pagetop a {
+		margin-bottom: 8em !important;
+	}
+  /*職業場所_通常時の表示調整（スマホの場合）*/
+	#ID_todohukenHiddenAccoBtn, #ID_ensenHiddenAccoBtn, #ID_roudousijyoHiddenAccoBtn {
+		width: 100%;
+	}
+}
+
+  /*職業場所_画像ホバー時の表示調整*/
+#ID_todohukenHiddenAccoBtn:hover::after, #ID_todohukenHiddenAccoBtn:active::after, #ID_todohukenHiddenAccoBtn:focus::after,#ID_todohukenHiddenAccoBtn.selected:after,#ID_todohukenHiddenAccoBtn.grayout:after,
+#ID_ensenHiddenAccoBtn:hover::after, #ID_ensenHiddenAccoBtn:active::after, #ID_ensenHiddenAccoBtn:focus::after,#ID_ensenHiddenAccoBtn.selected:after,#ID_ensenHiddenAccoBtn.grayout:after,
+#ID_roudousijyoHiddenAccoBtn:hover::after, #ID_roudousijyoHiddenAccoBtn:active::after, #ID_roudousijyoHiddenAccoBtn:focus::after, #ID_roudousijyoHiddenAccoBtn.selected:after,#ID_roudousijyoHiddenAccoBtn.grayout:after {
+ 	filter: brightness(0) saturate(100%) invert(95%) sepia(3%) saturate(388%) hue-rotate(314deg) brightness(97%) contrast(117%) !important;
+}
+
+  /*職業場所_画像の表示調整*/
+#ID_todohukenHiddenAccoBtn:after, #ID_ensenHiddenAccoBtn:after, #ID_roudousijyoHiddenAccoBtn:after {
+	content: "\e901";
+    font-family: "designsystem-assets" !important;
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    speak: never;
+    font-size: 1.5em;
+    filter: brightness(0) saturate(100%) invert(36%) sepia(7%) saturate(19%) hue-rotate(42deg) brightness(99%) contrast(80%);
+    position: absolute;
+	top: 50%;
+	right: 15px;
+	transform: translateY(-50%);
+}
+
+  /*職業場所_基盤部品ボタン以外を非表示へ*/
+.assistButtonDiv > div {
+	display:none;
+}
+
+   /*職業場所_クリアボタン*/
+ #ID_clear {
+	width: 8em !important;
+	height: 46px !important;
+}
+
+/*----------検索結果----------*/
+
+#ID_changeSearchCond {
+	height: 35px !important;
+}
+
+/*全て選択ボタン*/
+#ID_checkBoxAllSelect {
+	height: 35px !important;
+}
+
+/*----------モーダル画面----------*/
+/*都道府県から選択モーダル画面用*/
+.mr5p_im {
+	margin-right: 5% !important;
+}
+/**/
+.max_width_n {
+	max-width: none;
+}
+/**/
+.width97p_im {
+	width: 97% !important;
+}
+/**/
+.flex>.button.main_modal {
+	margin-bottom: .5em !important;
+}
+@media screen and (min-width: 769px) {
+	.modalA_bottom_ok_pc{
+		width: 8em !important;
+		min-width: 8em;
+		margin-top: .5em !important;
+		margin-bottom: .5em !important;
+		margin-left: 1em !important;
+		margin-right: 1em !important;
+	}
+	.modalA_bottom_Clear_pc{
+		margin-bottom: .5em !important;
+		width:8em;
+		min-width: 8em;
+		height:46px;
+		margin-right: 1em !important;
+	}
+	.modalA_bottom_close_pc{
+		margin-right: 1em !important;
+		width:8em;
+		min-width: 8em;
+		margin-bottom: .5em !important;
+		height:46px;
+		margin-left: 1em !important;
+	}
+	}
+@media screen and (min-width: 769px) {
+.modalB_bottom_ok_pc{
+	width: 100% !important;
+	margin: .5em 0em .5em 0em !important;
+}
+.modalB_bottom_Clear_pc{
+	width:35%;
+	height:46px;
+	margin: 0em 0em .5em 0em !important;
+}
+.modalB_bottom_close_pc{
+	width:59%;
+	height:46px;
+	margin: 0em 0em .5em 6% !important;
+}
+/*PC版_職種選択モーダル画面用*/
+ .modal.bottom > #ID_ok3{
+	width: 8em !important;
+	min-width: 8em;
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+	margin-left: 1em !important;
+	margin-right: 1em !important;
+}
+ .modal.bottom > #ID_iaClearButton3{
+	margin-bottom: .5em !important;
+	width:8em;
+	min-width: 8em;
+	height:46px;
+	margin-right: 1em !important;
+}
+ .modal.bottom > #ID_close3{
+	margin-right: 1em !important;
+	width:8em;
+	min-width: 8em;
+	margin-bottom: .5em !important;
+	height:46px;
+	margin-left: 1em !important;
+}
+/*PC版_就業場所モーダル画面用*/
+.modal.bottom >  #ID_ok4{
+	width: 8em !important;
+	min-width: 8em;
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+	margin-left: 1em !important;
+	margin-right: 1em !important;
+}
+.modal.bottom >  #ID_iaClearButton{
+	margin-bottom: .5em !important;
+	width:8em;
+	min-width: 8em;
+	height:46px;
+	margin-right: 1em !important;
+}
+.modal.bottom >  #ID_close4{
+	margin-right: 1em !important;
+	width:8em;
+	min-width: 8em;
+	margin-bottom: .5em !important;
+	height:46px;
+	margin-left: 1em !important;
+}
+}
+@media screen and (max-width: 768px) {
+.modalB_bottom > #ID_saveBtn{
+	width: 100% !important;
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+}
+.modalB_bottom > #ID_clearBtn{
+	margin-bottom: .5em !important;
+	width:35%;
+	height:46px;
+	min-width: 5em !important;
+}
+.modalB_bottom > #ID_cancelBtn{
+	margin-bottom: .5em !important;
+	margin-left: 6% !important;
+	width:59%;
+	height:46px;
+	min-width: 5em !important;
+}
+#ID_form_1005 div.modal.bottom,
+#ID_form_1004 div.modal.bottom {
+	padding: .5em 10% !important;
+}
+/*スマホ版_職種選択モーダル画面用*/
+ .modal.bottom > #ID_ok3{
+	width: 100% !important;
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+}
+ .modal.bottom > #ID_iaClearButton3{
+	margin-bottom: .5em !important;
+	width:35%;
+	height:46px;
+	min-width: 5em !important;
+}
+ .modal.bottom > #ID_close3{
+	margin-bottom: .5em !important;
+	margin-left: 6% !important;
+	width:59%;
+	height:46px;
+	min-width: 5em !important;
+}
+/*スマホ版_就業場所モーダル画面用*/
+.modal.bottom > #ID_ok4{
+	width: 100% !important;
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+}
+.modal.bottom > #ID_iaClearButton{
+	margin-bottom: .5em !important;
+	width:35%;
+	height:46px;
+	min-width: 5em !important;
+}
+.modal.bottom > #ID_close4{
+	margin-bottom: .5em !important;
+	margin-left: 6% !important;
+	width:59%;
+	height:46px;
+	min-width: 5em !important;
+}
+}
+
+/*モーダルボトム内でinputのマージンを0にする*/
+/**/
+.modal_wrap .modal_content div.modal.top {
+	font-size: 20px;
+	font-weight: bold;
+}
+.modal_wrap .modal_content div.modalB_bottom {
+	padding: .5em 10% !important;
+}
+@media screen and (min-width: 769px) {
+.modal_wrap .modal_content div.modal.bottom.modal_A_bottom_pc {
+	padding: .5em 0 !important;
+	gap: calc(0% / 30);
+	}
+}
+@media screen and (min-width: 769px) {
+	.modal_wrap .modal_content_A{
+		max-width:none;
+	}
+}
+.modal_wrap .modal_content div.modal.middle {
+	border-right: none;
+    border-left: none;
+}
+.modal_wrap .modal_content div.modal.bottom {
+    display: flex;
+	border-left: none;
+	border-right: none;
+	border-bottom:none ;
+}
+
+/*PRロゴモーダル画面用*/
+/*PC画面用*/
+@media screen and (min-width: 769px) {
+#ID_PRrogoclose{
+	margin-top: 1em !important;
+	margin-right: 1em !important;
+	margin-bottom: 1em !important;
+}
+#ID_PRrogokettei{
+	margin-top: 1em !important;
+	margin-right: 1em !important;
+	margin-bottom: 1em !important;
+}}
+/*スマホ画面用*/
+@media screen and (max-width: 768px) {
+#ID_PRrogoclose{
+	width: 100% !important;
+	margin-left: 10% !important;
+	margin-right: 10% !important;
+	margin-bottom: .5em !important;
+	height: 46px;
+}
+#ID_PRrogokettei{
+	width: 100% !important;
+	margin-top: .5em !important;
+	margin-left: 10% !important;
+	margin-right: 10% !important;
+	margin-bottom: .5em !important;
+	}
+}
+
+/*PRロゴマークの大きさ*/
+.prIconSize{
+	width: 50px !important;
+    height: 50px !important;
+    padding: 0px !important;
+}
+.modal.middlesub{
+	padding-top:0em !important;
+  }
+.border_none{
+	border:none;
+}
+.min_width_20p{
+	min-width: 20%;
+}
+@media screen and (max-width: 768px) {
+.width100p_sd{
+	min-width: 100%;
+}
+}
+.font_weight_none{
+	font-weight: none;
+}
+
+@media screen and (max-width: 768px) {
+.modal_td_style{
+	height: 50px;
+	max-width: 47%;
+	min-width: 47%;
+}}
+@media screen and (max-width: 768px) {
+	.modal_td_style{
+		height: 50px;
+		max-width: 47%;
+		min-width: 47%;
+	}}
+.modal_haba{
+	max-width: 50% !important;
+}
+.margin_check_a{
+	margin-top: .5em !important;
+    margin-right: 1.2em !important;
+    margin-bottom: .5em !important;
+    margin-left: 0 !important;
+}
+
+.white_space_normal_A{
+	width: calc(100% - 110px);
+}
+/*スマホ*/
+@media screen and (max-width: 768px) {
+	.width_50p_1{
+	width: calc(100% - 1em);
+	}
+}
+/*PC*/
+@media screen and (min-width: 769px) {
+	.width_50p_1{
+	width: calc(50% - 2px);
+	}
+	.mh1{
+		margin-left: 1em;
+		margin-right: 1em;
+	}
+	.m1_pc {
+		margin: 1em;
+	}
+}
+.padding0{
+	padding: 0 !important;
+}
+/*----------共通cssの暫定対応----------*/
+
+/*基盤cssの暫定対応（button.css_106行目）*/
+/*ボタンの丸みの指定で基盤の6pxに打ち勝つ */
+.annotateBtn_layout {
+  border-radius: 8px !important;
+}
+/*buttons_style.css 225行目が#fffcfcとカラーコードが一致しないため）.filter_whiteの内容で.annotateBtn_color.color2 .annotateBtn_imgを上書き*/
+.annotateBtn_color.color2 .annotateBtn_img{
+  filter: brightness(0) saturate(100%) invert(95%) sepia(3%) saturate(388%) hue-rotate(314deg) brightness(97%) contrast(117%) !important;
+}
+
+/* #646464 modal遷移するプラスボタンのアイコン通常時に画像色が変わる */
+.filter_gray_purasu {
+	width: 24px !important;
+	filter: brightness(0) saturate(100%) invert(36%) sepia(7%) saturate(19%) hue-rotate(42deg) brightness(99%) contrast(80%);
+}
+/* #fffcfc modal遷移するプラスボタンのアイコンホバー時色 (ホバー時に画像色が変わる) */
+.annotateBtn_base:hover .filter_gray_purasu, .annotateBtn_base:active .filter_gray_purasu,
+.annotateBtn_base:focus .filter_gray_purasu, .annotateBtn_base.selected .filter_gray_purasu{
+	width: 24px !important;
+	filter: brightness(0) saturate(100%) invert(95%) sepia(3%) saturate(388%) hue-rotate(314deg) brightness(97%) contrast(117%) !important;
+}
+/*tooltipの高さを固定することで、スマホ画面時のアコーディオンthの縦幅をtooltipの有無に関係なくそろえる (高さを23pxに固定できる) */
+.tooltip_wrap{
+	height: 23px;
+}
+
+/*検索結果_並び順コンボボックスの幅調整35vw→40vw */
+.selectSort_layout {
+  width: 40vw !important;
+  min-width: 100px;
+  max-width: 170px;
+}
+/*検索結果_並び順コンボボックスの文字サイズ調整　17px→16px */
+.selectSort_font,
+.selectNumber_font {
+  font-size: 16px !important;
+  text-align: center;
+  text-align-last: center;
+}
+/*検索結果_ページ数の幅調整　gapを削除（仮で0pxとしている）*/
+.pageNumber_layout {
+  justify-content: center;
+  align-items: center;
+  gap: max(0px) !important;
+}
+
+/*検索画面_開閉ボタンアイコン関連１　PC画面での非表示*/
+@media screen and (min-width: 769px) {
+ table.normal tr th.r08ThAccordion > div > span.accordion_icon {
+   display: none; }
+}
+
+/*検索画面_開閉ボタンアイコン関連２　表示アイコン制御*/
+  table.normal tr th.r08ThAccordion[data-open="true"] > div > span.accordion_icon > img.close_icon {
+    display: none; }
+  table.normal tr th.r08ThAccordion[data-open="false"] > div > span.accordion_icon > img.open_icon {
+    display: none; }
+
+/*検索画面_ツールチップ記載位置の調整（PC画面）*/
+@media screen and (min-width: 769px) {
+	table.normal tr th.r08ThAccordion div span div.tooltip_wrap {
+	  margin-right: 0px !important;
+}
+/*検索画面_ツールチップ記載位置の調整（スマホ画面）*/
+@media screen and (max-width: 768px) {
+	table.normal tr th.r08ThAccordion div span div.tooltip_wrap {
+	  margin-right: 16px !important;
+}
+
+/*以下110020で使用するものーーーーーーーーーーーーーーーーーーーーーーーーーーーー*/
+
+div.kodawari span.bg_label {
+	border-width: 2px; }
+/*110020で使用*/
+@media screen and (min-width: 769px) {
+	.width19em_pc {
+		width: 19em ;
+	}}
+
+  /* ボタンスマホ表示用 (求人票を表示)*/
+  @media screen and (max-width: 768px) {
+  .button_in_width_8em {
+	  width: 8em !important;
+	  height: 46px;
+	  margin-left: 0 !important; } }
+
+  /* ボタンPC表示用 (求人票を表示)*/
+  @media screen and (min-width: 769px) {
+	.button_in_width_15em {
+	  width: 15em !important;
+	  height: 46px;
+	  margin-left: 0 !important;} }
+
+  /* ボタンPC表示用 (登録済みの地図を表示)*/
+	.button_in_width_12em {
+		width: 12em !important;
+		height: 46px;
+		margin-left: 0 !important; }
+
+  @media screen and (max-width: 768px) {
+  .padding_ml_mr_8px_sd {
+	  padding-right: 8px;
+	  padding-left: 8px; } }
+
+  /* しょくばらぼPC表示用 */
+  @media screen and (min-width: 769px) {
+  .shokuba_lab_mr1 {
+	margin-right: 1em; } }
+
+  /* サブタイトル周辺の空白調整 */
+ .fs1_25 ~ div.padding_ml_mr_8px_sd  :first-child{
+	margin-top: 0 !important;
+}
+
+  /* ================================================================== */
+  /* アラート */
+  /* ================================================================== */
+.alert_eca110020 {
+	font-size: 1em;
+	line-height: 1.5em;
+	border: 2px solid #000000;
+	border-radius: .25em; }
+
+  .alert_eca110020.danger {
+	color: #ad650d;
+	border-color: #ad650d; }
+
+	/* システム共通 */
+  .color_danger {
+	color: #ad650d; }
+
+
+  @media screen and (max-width: 768px) {
+	.flex.direction_column_sd {
+	  flex-direction: column;
+	}
+  }
+
+.div_blank_line {
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}

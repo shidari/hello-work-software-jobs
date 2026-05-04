@@ -1,5 +1,5 @@
 import { Console, Effect, Logger, LogLevel, Ref, Stream } from "effect";
-import { ChromiumBrowserConfig, DebugMode } from "../browser";
+import { ChromiumBrowserConfig, Mode } from "../browser";
 import {
   CrawlerConfig,
   paginatedJobNumbers,
@@ -29,7 +29,7 @@ async function main() {
     Effect.provide(CrawlerConfig.dev),
     Effect.provide(SearchConfig.simple),
     Effect.provide(ChromiumBrowserConfig.dev),
-    Effect.provide(DebugMode.dev),
+    Effect.provide(Mode.dev),
     Logger.withMinimumLogLevel(LogLevel.Debug),
   );
   await Effect.runPromise(runnable);

@@ -1,0 +1,115 @@
+.searchList_head {
+  position: relative;
+}
+.searchSelect_base {
+  display: flex;
+  justify-content: flex-end;
+}
+.searchSelectList_base {
+  display: flex;
+}
+.numberJob_position {
+  top: 0;
+  left: 0;
+}
+.numberJobText_layout {
+  margin: 0;
+  font-size: 18px;
+}
+.numberJobText_font span {
+  font-weight: bold;
+}
+.sortOrder_base,
+.numberDisplays_base {
+  position: relative;
+}
+.sortOrder_base::before,
+.sortOrder_base::after,
+.numberDisplays_base::before,
+.numberDisplays_base::after {
+  position: absolute;
+  content: "";
+}
+.selectSort_base,
+.selectNumber_base {
+          appearance: none;
+  cursor: pointer;
+
+  -webkit-appearance: none;
+     -moz-appearance: none;
+}
+.searchBtn_base {
+  display: flex;
+  position: relative;
+}
+.pageNumber_base {
+  display: flex;
+  flex-wrap: wrap;
+}
+.searchItem_layout {
+  display: flex;
+  align-items: baseline;
+  gap: 13px;
+}
+.searchItemText_layout {
+  margin: 0;
+}
+.searchItemText_font {
+  font-size: 15px;
+  text-align: right;
+}
+.sortOrder_layout::after,
+.numberDisplays_layout::after {
+  right: 4px;
+  bottom: 45%;
+  translate: -50% 0;
+  rotate: 45deg;
+  width: 5px;
+  height: 5px;
+}
+.sortOrder_color::after,
+.numberDisplays_color::after {
+  border-right: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+.pageNumber_layout {
+  justify-content: center;
+  align-items: center;
+  gap: max(10px, 1%);
+}
+.flex.align_end.first_left.mt05 div:has(.flex.page_navi.pageNumber_base.pageNumber_layout) {
+  width: 100%;
+}
+@media screen and (max-width:450px) {
+  .numberJob_base {
+    position: relative;
+  }
+}
+/* firefox専用 */
+@-moz-document url-prefix() {
+	.searchBtn_layout,
+	.searchItem_layout,
+	.searchSelectList_layout {
+		gap:unset !important;
+	}
+	.searchBtn_base > ul > li ,
+	#ID_checkBoxAllSelect,
+	#ID_changeSearchCond {
+  		margin-right: 15px;
+	}
+	.searchBtn_base > ul > li > p {
+  		margin-right: 13px;
+	}
+	@media screen and (max-width:675px) {
+		#ID_checkBoxAllSelect,
+		#ID_changeSearchCond {
+  			margin-top: 15px;
+		}
+	}
+	.sortOrder_layout::after,
+	.numberDisplays_layout::after {
+  		transform: translate(-50%, 0) rotate(45deg);
+		translate: unset !important;
+		rotate: unset !important;
+	}
+}
