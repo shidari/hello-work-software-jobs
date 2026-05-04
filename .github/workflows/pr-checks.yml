@@ -37,13 +37,12 @@ jobs:
         run: pnpm -r exec tsc --noEmit
         continue-on-error: false
 
+      - name: Install Playwright chromium (collector fixture tests + frontend Storybook)
+        run: pnpm dlx playwright@1.59.1 install --with-deps chromium
+
       - name: Run tests with coverage
         run: pnpm -r test --coverage --coverage.reporter=json --coverage.reporter=json-summary
         continue-on-error: false
-
-      - name: Install Playwright chromium (frontend)
-        working-directory: ./apps/frontend/hello-work-job-searcher
-        run: pnpm exec playwright install --with-deps chromium
 
       - name: Frontend Storybook tests
         working-directory: ./apps/frontend/hello-work-job-searcher
