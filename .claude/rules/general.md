@@ -16,6 +16,8 @@ Apple container サンドボックスで管理している CLI（`gh` / `aws` / 
 
 実装: 着手前に `EnterWorktree` を使い、終わったら `ExitWorktree` で戻る。worktree の中では通常通り編集・コミット・PR 作成を行う。
 
+強制: `.claude/hooks/enforce-worktree.sh`（PreToolUse hook）が main worktree 上での `Edit` / `Write` / `NotebookEdit` を block する。例外（trivial 修正）に該当する場合は、ユーザーに確認を取った上で `touch /tmp/.claude-allow-main-edit` を実行してから編集を再試行する。センチネルは 1 回限りで次の編集時に自動消費される。
+
 ## コミット粒度
 
 **1 Claude セッション = 1 コミット**。ユーザーから「コミットして」と言われたら、そのセッション中に Claude が触った差分だけを stage する。セッション開始前から存在する未コミット差分（`git status` に出ている他の M / ?? ファイル）には触らない。
