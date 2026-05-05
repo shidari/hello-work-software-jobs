@@ -1,0 +1,18 @@
+[
+  {
+    "url": "https://www.hellowork.mhlw.go.jp/kensaku/GECA110010.do?action=initDisp&screenId=GECA110010",
+    "file": "01-search.html"
+  },
+  {
+    "url": "https://www.hellowork.mhlw.go.jp/kensaku/GECA130010.do",
+    "file": "02-list-1.html"
+  },
+  {
+    "url": "https://www.hellowork.mhlw.go.jp/kensaku/GECA130010.do?p=2",
+    "file": "03-list-2.html"
+  },
+  {
+    "url": "https://www.hellowork.mhlw.go.jp/kensaku/GECA130010.do?p=3",
+    "file": "04-list-3.html"
+  }
+]

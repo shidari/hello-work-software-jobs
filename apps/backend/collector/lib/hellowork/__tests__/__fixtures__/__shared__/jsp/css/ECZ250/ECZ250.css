@@ -1,0 +1,149 @@
+@charset "UTF-8";
+/* ==================================================================*/
+/* 求人共通 */
+/* ==================================================================*/
+
+/* ==================================================================*/
+/* width */
+/* ==================================================================*/
+.msg_eca {
+ color: #D80000
+}
+
+.width3em {
+ width:3em;
+}
+
+.width4em {
+ width:4em;
+}
+
+.width15em {
+ width:15em;
+}
+
+.in_width_9em {
+ width: 9em;
+}
+
+.in_width_10em {
+ width: 10em;
+}
+
+.nowrap {
+ white-space: nowrap;
+}
+
+span.nes_label.info {
+ font-size: .875em;
+}
+
+div.flex.kodawari > span {
+	display: block;
+	margin: .1em;
+}
+
+@media screen and (max-width: 768px) {
+ .width15em {
+  width:7em; }
+ }
+
+ @media screen and (max-width: 768px) {
+
+ .pc_mr1.mr1 {
+  margin-right: initial; }
+}
+
+@media screen and (max-width: 375px) {
+
+  tr.border_new td{
+  padding-left: 0px;}
+
+  div.left-side td{
+   padding-left: 0px;}
+
+  div.right-side td{
+   padding-left: 0px;}
+
+  div.left-side td:nth-child(2){
+   padding-right: 0px;}
+
+  div.right-side td:nth-child(2){
+   padding-right: 0px;}
+
+  .width16em {
+   width:15.45em;}
+
+  .fs13 {
+  font-size: 12px; }
+
+  table.noborder td.in_width_11em{
+   width: 6em;}
+
+  table.noborder span.mt04{
+   margin-top: 0.5em;}
+
+  table.kyujin td.left-right{
+   padding-left:.5em;
+   padding-right:0em;
+   padding-top:.5em;
+   padding-bottom:.5em;
+   }
+  tr.border_new td.in_width_9em{
+   	width: 6em;}
+
+ .in_width_9em{
+    width:6em;
+ }
+
+  div.flex.kodawari > span {
+   display: block;
+   margin-top: .5em;
+   }
+
+  div.left-side td.in_width_9em {
+   width: 5.5em;}
+
+  div.right-side td.in_width_9em {
+   width: 5.5em;}
+
+}
+.modal_nodisp {
+  display: none;
+}
+
+width3em {
+ width:3em;
+}
+
+.flex.jyouken_box > div{
+	margin-left: none;
+	margin-right:none;
+}
+.tokusyu_none{
+	display: none;
+}
+
+.grayout{
+	pointer-events: none;
+	border: 1px solid #757575 !important;
+    color: #fffcfc !important;
+	background-color: #757575 !important;
+	box-shadow: none !important;
+}
+
+table.noborder,
+table.noborder tbody,
+table.noborder tr,
+table.noborder td{
+	border: none !important;
+}
+
+@media screen and (max-width: 768px) {
+	.Interval_syousai td:first-of-type{
+		margin-top:16px !important;
+	}
+	.Interval_syousai td:last-of-type{
+	margin-bottom:16px !important;
+	}
+}

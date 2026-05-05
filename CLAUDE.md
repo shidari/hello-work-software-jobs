@@ -67,8 +67,10 @@ pnpm dev:docker-down   # docker-compose down
 pnpm dev:invoke-crawler  # 求人番号クローラー手動実行
 pnpm dev:invoke-detail   # 求人詳細 ETL 手動実行
 pnpm dev:e2e             # E2E パイプライン検証 (crawler → SQS → ETL → API)
-pnpm test              # Vitest tests (PBT)
+pnpm test              # Vitest tests (PBT + fixture 駆動 crawler テスト)
 pnpm build             # tsdown ビルド
+pnpm tsx lib/hellowork/scripts/build-fixtures.ts    # fixture HTML 再生成
+pnpm tsx lib/hellowork/scripts/render-fixtures.ts   # fixture を .debug/fixtures/ に PNG 出力
 
 # 診断は /crawler-diagnose skill を使用
 # 横断ログ検索は /debug skill を使用

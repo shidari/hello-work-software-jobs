@@ -1,0 +1,720 @@
+@charset "UTF-8";
+/* ================================================================== */
+/* 全般 */
+/* ================================================================== */
+table {
+  width: 100%;
+
+  border-collapse: collapse; }
+
+/* ================================================================== */
+/* 通常テーブル（入力画面や参照画面等のth1に対してtdが1の場合） */
+/* ================================================================== */
+table.normal {
+  border-spacing: 0; }
+
+table.normal tr th,
+table.normal tr th span:not(.nes_label),
+table.normal tr th div {
+  color: #085733; }
+
+table.normal tr th {
+  background-color: #e2f6ed; }
+
+table.normal tr td {
+  text-align: left; }
+
+table.normal tr td.iew,
+table.normal tr td.iew_modal,
+table.normal tr td.iew_intab {
+  padding-top: .4em;
+  padding-bottom: .5em;
+  padding-left: 1.5em; }
+
+/* R08Th用 */
+table.normal tr:has(td) th.r08Th > div {
+  display: flex;
+  flex-wrap: nowrap; }
+/* R08Th用 firefoxのhas対応 */
+.firefox-div-has-td {
+  display: flex;
+  flex-wrap: nowrap; }
+
+/* 不要なパディングの削除 */
+table.normal .leftAlignRestrict > span.restrict {
+  padding-left: 0; }
+
+/* PC表示用 */
+@media screen and (min-width: 769px) {
+  table.normal {
+    border: solid 1px #939393; }
+
+  table.normal tr th {
+    text-align: left;
+    vertical-align: top;
+
+    border: solid 1px #939393; }
+  /* tdが０個の場合 - そのまま表示する */
+  table.normal tr:not(:has(td)) th {
+    width: 100%;
+    padding: 1.5em; }
+  /* tdが０個の場合 - そのまま表示する firefoxの対応 */
+  .firefox-not-has-td-th {
+    width: 100%;
+    padding: 1.5em; }
+  /* tdが１個の場合 - そのまま表示する */
+  table.normal tr:has(td):not(:has(td.media_nodisp, td.nes2)) th {
+    /* ボーダー分の計算がemだと面倒なので足しておく */
+    width: calc(16em + 2px);
+    padding: 1.5em; }
+  /* tdが１個の場合 - そのまま表示する firefoxのhas対応 */
+  table.normal tr.firefox-th-no-excluded th {
+    width: calc(16em + 2px);
+    padding: 1.5em; }
+  /* tdが２個の場合 - 左側のtdと結合したように見せる */
+  table.normal tr:has(td):has(td.media_nodisp, td.nes2) th {
+    /* ボーダー分の計算がemだと面倒なので足しておく */
+    width: calc(11.5em + 1px);
+    padding: 1.5em 0 1.5em 1.5em;
+
+    border-right: none; }
+  /* tdが２個の場合 - 左側のtdと結合したように見せる firefoxのhas対応 */
+  table.normal tr.firefox-th-has-excluded th {
+    width: calc(11.5em + 1px);
+    padding: 1.5em 0 1.5em 1.5em;
+    border-right: none; }
+
+  table.normal tr th > span.nes_label {
+    display: none; }
+
+  table.normal tr td {
+    padding: 1.5em;
+
+    vertical-align: top; }
+  table.normal tr td.pad_adjuster {
+    padding: 1em 1.5em; }
+  table.normal tr td:not(:last-child) {
+    border-top: solid 1px #939393;
+    border-right: none;
+    border-bottom: solid 1px #939393;
+    border-left: none; }
+  table.normal tr td:last-child {
+    border-top: solid 1px #939393;
+    border-right: solid 1px #939393;
+    border-bottom: solid 1px #939393;
+    border-left: none; }
+
+  table.normal tr td.media_nodisp,
+  table.normal tr td.nes2 {
+    /* ボーダー分の計算がemだと面倒なので足しておく */
+    width: calc(4.5em + 1px);
+    padding-left: .5em;
+
+    border-right: solid 1px #939393;
+    background-color: #e2f6ed; }
+
+  /* R08Th用 */
+  table.normal tr:not(:has(td)) th.r08Th {
+    width: 100%;
+    padding: 1.5em; }
+  table.normal tr:has(td) th.r08Th {
+    /* ボーダー分の計算がemだと面倒なので足しておく */
+    width: calc(16em + 2px);
+    padding: 1.5em; }
+  table.normal tr:has(td) th.r08Th > div {
+    width: 13em; }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(1) {
+    width: 10em; }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(2) {
+    width: 3em;
+    padding-left: .5em;
+
+    text-align: right; }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(2) > :nth-child(n + 2) {
+    margin-top: .5em; }
+
+  /* R08Th用 firefoxのhas対応 */
+  .firefox-div-has-td.r08Th {
+    width: 100%;
+    padding: 1.5em; }
+  .firefox-has-td {
+    width: calc(16em + 2px);
+    padding: 1.5em; }
+  .firefox-div-has-td {
+    width: 13em; }
+  .firefox-div-has-td > span:nth-child(1) {
+    width: 10em; }
+  .firefox-div-has-td > span:nth-child(2) {
+    width: 3em;
+    padding-left: .5em;
+    text-align: right; }
+  .firefox-div-has-td > span:nth-child(2) > :nth-child(n + 2) {
+    margin-top: .5em; }
+
+  table.normal tr th.r08ThAccordion > div > span.accordion_icon {
+    display: none; }
+
+  /* 不要なマージンの削除 */
+  table.normal tr td > div.m03:has(input[type="text"]),
+  table.normal tr td > div.m03:has(input[type="password"]),
+  table.normal tr td > div.m03:has(textarea),
+  table.normal tr td > div.m03:has(select) {
+    margin: 0; }
+  table.normal tr td > div.flex.input:nth-child(1) > div.m03:nth-child(1):has(input[type="text"]),
+  table.normal tr td > div.flex.input:nth-child(1) > div.m03:nth-child(1):has(input[type="password"]),
+  table.normal tr td > div.flex.input:nth-child(1) > div.m03:nth-child(1):has(textarea),
+  table.normal tr td > div.flex.input:nth-child(1) > div.m03:nth-child(1):has(select) {
+    margin-top: 0; }
+
+  /* 不要なマージンの削除 firefoxのhas対応 */
+  table.normal tr > td > div.m03.firefox-has-div-m03,
+  table.normal tr > td > div.flex.input:nth-child(1) > div.m03.firefox-has-div-m03 {
+    margin-top: 0; }
+
+  table.normal tr td > div.flex.input:nth-child(1) > div.checkbox:nth-child(1){
+    margin-top: 0; } }
+
+/* スマートデバイス用 */
+@media screen and (max-width: 768px) {
+  table.normal {
+    width: 100%;
+    height: 0px;
+
+    border: none; }
+  table.normal tr {
+    border: none; }
+  table.normal tr th {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    padding: .5em;
+
+    text-align: left;
+
+    border: none; }
+
+  table.normal tr th span:not(.nes_label) {
+    text-align: left; }
+  table.normal tr th > span.nes_label {
+    line-height: calc(1.5em - 2px);
+
+    margin-left: 1em; }
+  table.normal tr th.right_nes_label > span.nes_label {
+    margin-left: auto; }
+
+  table.normal tr td {
+    display: block;
+
+    width: 100%;
+    padding: 1em .5em;
+
+    border: none; }
+  table.normal tr td.pad_adjuster {
+    padding: .5em .5em; }
+  table.normal tr td.media_nodisp,
+  table.normal tr td.nes2 {
+    display: none; }
+
+  table.normal tr td.iew,
+  table.normal tr td.iew_modal,
+  table.normal tr td.iew_intab {
+    width: 100%; }
+
+  /* R08Th用 */
+  table.normal tr:has(td) th.r08Th > div {
+    width: 100%; }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(2) {
+    flex-grow: 1;
+
+    margin-left: 1em; }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(2) > span.nes_label {
+    line-height: calc(1.5em - 2px); }
+  table.normal tr:has(td) th.r08Th > div > span:nth-child(2) > :not(:last-child) {
+    margin-right: .5em; }
+
+  /* R08Th用 firefoxのhas対応 */
+  .firefox-div-has-td {
+    width: 100%; }
+  .firefox-div-has-td > span:nth-child(2) {
+    flex-grow: 1;
+    margin-left: 1em; }
+  .firefox-div-has-td > span:nth-child(2) > span.nes_label {
+    line-height: calc(1.5em - 2px); }
+  .firefox-div-has-td > span:nth-child(2) > :not(:last-child) {
+    margin-right: .5em; }
+
+  table.normal tr th.r08ThAccordion > div > button.accordion_button {
+    width: 24px;
+    height: 24px;
+    margin: auto 0 auto .5em;
+    padding: 0;
+
+    border: none;
+    background-color: transparent; }
+  table.normal tr th.r08ThAccordion > div > button.accordion_button > span.accordion_icon {
+    font-size: 24px; }
+  table.normal tr th.r08ThAccordion > div > button.accordion_button > span.accordion_icon i {
+    display: block; }
+  table.normal tr th.r08ThAccordion[data-open="true"] > div > span.accordion_icon > img.close_icon {
+    display: none; }
+  table.normal tr th.r08ThAccordion[data-open="false"] > div > span.accordion_icon > img.open_icon {
+    display: none; }
+  table.normal tr th.r08ThAccordion ~ td {
+    display: grid;
+
+    transition-duration: .5s;
+    transition-property: grid-template-rows visibility; }
+  table.normal tr th.r08ThAccordion ~ td > div.r08ThAcWrapper {
+    overflow: hidden; }
+  table.normal tr th.r08ThAccordion[data-open="true"] ~ td {
+    visibility: visible;
+
+    grid-template-rows: 1fr; }
+  table.normal tr th.r08ThAccordion[data-open="false"] ~ td {
+    visibility: hidden;
+
+    grid-template-rows: 0fr; } }
+
+/* ================================================================== */
+/* レスポンシブテーブル */
+/* ================================================================== */
+table.responsive {
+  border-collapse: collapse;
+
+  vertical-align: middle; }
+
+table.responsive th,
+table.responsive td {
+  padding: .5em;
+
+  border: 1px solid #085733; }
+
+table.responsive th {
+  vertical-align: middle;
+
+  background-color: #e2f6ed; }
+
+@media only screen and (max-width: 768px) {
+  table.responsive {
+    width: 98%;
+    margin-right: auto;
+    margin-left: auto; }
+  table.responsive thead {
+    display: none; }
+  table.responsive tr,
+  table.responsive td {
+    display: block;
+
+    width: auto; }
+  table.responsive tr {
+    margin-bottom: .5em;
+    padding: .5em .5em 0 .5em;
+
+    border: 1px solid #085733;
+    border-radius: .5em; }
+  table.responsive td {
+    display: flex;
+    justify-content: space-between;
+
+    text-align: right;
+
+    border: none;
+    border-bottom: 1px solid #085733; }
+  table.responsive td:last-child {
+    border-bottom: none; }
+  table.responsive td::before {
+    font-weight: bold;
+
+    display: inline-block;
+    float: left;
+
+    padding-right: 1.5em;
+    padding-left: 1em;
+
+    content: attr(aria-label);
+    text-align: left;
+    white-space: nowrap; }
+  table.responsive.header_check tr {
+    position: relative;
+
+    padding-left: 2em; }
+  table.responsive.header_check td:first-child {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.5em;
+    padding: 0;
+
+    text-align: center;
+
+    border-right: 1px solid #085733;
+    border-bottom: none;
+    border-top-left-radius: .5em;
+    border-bottom-left-radius: .5em;
+    background: #ffffff; }
+  table.responsive.header_check td:first-child::before {
+    display: none; } }
+
+/* ================================================================== */
+/* リストテーブル(色付き) */
+/* ================================================================== */
+table.list_table_colored {
+  border-spacing: 0; }
+
+/* ヘッダ */
+table.list_table_colored > thead > tr > th,
+table.list_table_colored > tbody > tr > th {
+  padding: .5em;
+
+  vertical-align: middle;
+
+  background-color: #e2f6ed; }
+table.list_table_colored.bordered > thead > tr > th,
+table.list_table_colored.bordered > tbody > tr > th {
+  border-top: #d0d0d0 solid 1px;
+  border-bottom: #d0d0d0 solid 1px; }
+
+/* ボディ */
+table.list_table_mono > tbody > tr:nth-child(odd) {
+  background-color: #efefef; }
+table.list_table_mono > tbody > tr:nth-child(even) {
+  background-color: #fffcfc; }
+table.list_table_colored > tbody > tr > td {
+  padding: .5em;
+
+  vertical-align: middle; }
+table.list_table_colored.bordered > tbody > tr > td {
+  border-bottom: 1px solid #d0d0d0; }
+
+/* ================================================================== */
+/* リストテーブル（グレースケール） */
+/* ================================================================== */
+table.list_table_mono {
+  border-spacing: 0; }
+
+/* ヘッダ */
+table.list_table_mono > thead > tr > th,
+table.list_table_mono > tbody > tr > th {
+  padding: .5em;
+
+  vertical-align: middle;
+
+  background-color: #e2f6ed; }
+table.list_table_mono.bordered > thead > tr > th,
+table.list_table_mono.bordered > tbody > tr > th {
+  border-top: #d0d0d0 solid 1px;
+  border-bottom: #d0d0d0 solid 1px; }
+
+/* ボディ */
+table.list_table_mono > tbody > tr:nth-child(odd) {
+  background-color: #efefef; }
+table.list_table_mono > tbody > tr > td {
+  padding: .5em;
+
+  vertical-align: middle; }
+table.list_table_mono.bordered > tbody > tr > td {
+  border-bottom: 1px solid #d0d0d0; }
+
+/* ================================================================== */
+/* 求人情報（サマリ）テーブル */
+/* ================================================================== */
+table.kyujin {
+  table-layout: fixed;
+
+  word-wrap: anywhere; }
+
+table.kyujin {
+  border: 1px solid #646464; }
+
+table.kyujin span.bg_label {
+  font-weight: 500; }
+
+/* 背景色（デフォルト） */
+table.kyujin > tbody > tr:not(.kyujin_head) {
+  background-color: #ffffff; }
+/* 背景色（閲覧済み） */
+table.kyujin:has(tbody tr.kyujin_head td .kyujin_head_date span[style="display: block;"]) > tbody > tr:not(.kyujin_head) {
+  background-color: #eefaed; }
+/* 背景色（チェック時）閲覧済みより優先 */
+table.kyujin:has(tbody tr.kyujin_head td div .kyujin_head_check input[type="checkbox"]:checked) {
+  outline: 4px solid #70e1ae; }
+table.kyujin:has(tbody tr.kyujin_head td div .kyujin_head_check input[type="checkbox"]:checked) > tbody > tr:not(.kyujin_head) {
+  background-color: #f8fcfa; }
+
+/* 背景色（閲覧済み） firefoxのhas対応 */
+table.kyujin.firefox-has-display-block-span > tbody > tr:not(.kyujin_head) {
+  background-color: #eefaed; }
+/* 背景色（チェック時）閲覧済みより優先 firefoxのhas対応 */
+table.kyujin.firefox-has-checkbox-checked {
+  outline: 4px solid #70e1ae; }
+table.kyujin.firefox-has-checkbox-checked > tbody > tr:not(.kyujin_head) {
+  background-color: #f8fcfa; }
+
+table.kyujin > tbody > tr:not(.kyujin_head) > td > div {
+  margin: 0 1em;
+  padding: 1em 0; }
+table.kyujin > tbody > tr:not(.kyujin_head):not(.kyujin_body) > td > div {
+  border-top: 1px solid #d0d0d0; }
+
+table.kyujin tbody tr.kyujin_head {
+  border-bottom: 1px solid #646464; }
+table.kyujin tbody tr.kyujin_head td div .kyujin_head_check {
+  display: flex;
+  align-items: center;
+
+  border-right: 1px solid #646464; }
+table.kyujin tbody tr.kyujin_head td div .kyujin_head_check:has(input[type="checkbox"]:checked) {
+  background-color: #c4f6e0; }
+/* firefoxのhas対応 */
+.kyujin_head_check.firefox-has-checked {
+  background-color: #c4f6e0; }
+
+table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div {
+  text-align: center; }
+table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"] {
+  width: 32px;
+  height: 32px;
+
+  accent-color: #1b8354; }
+
+/* firefox用サマリチェックボックス */
+@-moz-document url-prefix() {
+
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"]:hover {
+    border: 1px inset #000;
+  }
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"] {
+    -moz-appearance: none;
+    transform: scale(1.2);
+    border: 1px inset #767676;
+    border-radius: 3px;
+    position: relative;
+  }
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"]:checked {
+    background-color: #1b8354 ;
+    border: 0px solid white;
+  }
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 1.5px;
+    left: 11px;
+    width: 6px;
+    height: 17px;
+    transform: rotate(42deg);
+    border: solid white;
+    border-width: 0 5.5px 5.5px 0;
+  }
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"]:checked:focus,
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check div input[type="checkbox"]:checked:hover {
+    background-color: #085733 ;
+  }
+
+}
+
+table.kyujin tbody tr.kyujin_head td .kyujin_head_date {
+  width: 100%;
+
+  background-color: #757575; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_date div {
+  color: #fffcfc; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label {
+  line-height: 32px;
+
+  min-width: 72px;
+
+  border: 4px solid #757575; }
+
+table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn {
+  width: 100%;
+  margin: 0;
+
+  background-color: #efefef; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn > div {
+  height: 34px; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn > div:nth-child(1) {
+  padding: .15em 0; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn > div:nth-child(1) span:not(:first-child) {
+  margin-left: .5em; }
+table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn > div:nth-child(2) i.fa-map-marker::before {
+  font-size: 19px;
+
+  vertical-align: middle; }
+
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder {
+  table-layout: fixed;
+
+  word-wrap: break-all;
+  word-break: break-all; }
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody {
+  border: none; }
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.label_col,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.label_col {
+  width: 7em;
+  padding-bottom: 1em; }
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td span.bg_label,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td span.bg_label {
+  width: 100%;
+  padding: .1em .5em; }
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col {
+  padding-top: .1em;
+  padding-bottom: 1em;
+
+  vertical-align: top; }
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col,
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col div,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col,
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col div {
+  line-height: 1.5em; }
+
+table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col a {
+  white-space: nowrap; }
+
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col button.qr_btn {
+  font-weight: normal;
+  line-height: 14px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  width: 54px;
+  min-width: auto;
+  height: 54px;
+  margin: 0;
+  padding: 0; }
+table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col button.qr_btn * {
+  display: block; }
+
+table.kyujin tbody tr td div.kodawari span.bg_label {
+  border-width: 2px; }
+
+table.kyujin tbody tr.kyujin_head td div.kyujin_head_date span.bg_label.red_back > div,
+table.kyujin tbody tr.kyujin_head td div.kyujin_head_date span.bg_label.dark_gray_back > div,
+table.kyujin tbody tr.kyujin_head td div.kyujin_head_date span.bg_label.blue_back > div {
+  color : #FFFFFF; }
+
+/* ================= */
+/* PC表示用 */
+/* ================= */
+@media screen and (min-width: 769px) {
+  table.kyujin > tbody > tr:not(.kyujin_head) > td > div {
+    margin: 0 1em; }
+
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check {
+    padding: 5px 12px; }
+  table.kyujin tbody tr.kyujin_head td > div > :not(.kyujin_head_check) {
+    width: calc(100% - 89px); }
+
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date {
+    padding-left: 1em; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div div.mr1 {
+    padding: 7px 0; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label {
+    padding: 6px 0; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label.wide_label {
+    width: 125px; }
+
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn {
+    padding-right: 1em;
+    padding-left: 1em; }
+
+  table.kyujin tbody tr.kyujin_body td div .left-side,
+  table.kyujin tbody tr.kyujin_body td div .right-side {
+    width: 50%; }
+  table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col,
+  table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col {
+    padding-left: 1em; }
+
+  table.kyujin tbody tr.kyujin_body td div .left-side {
+    padding-right: calc(2em - 1px); }
+
+  table.kyujin tbody tr.kyujin_body td div .right-side {
+    padding-left: .5em;
+
+    border-left: 1px solid #efefef; } }
+
+/* ================= */
+/* 微妙な大きさのPC表示用 */
+/* ================= */
+@media screen and (min-width: 769px) and (max-width: 954px) {
+  /* システム処理中ラベル用個別指定 */
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div:has(span.bg_label.wide_label) {
+    width: 120px;
+    min-width: 120px; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div:has(span.bg_label.wide_label) span.bg_label {
+    flex-grow: 1;
+
+    margin-left: 0; } }
+
+/* ================= */
+/* スマートデバイス用 */
+/* ================= */
+@media screen and (max-width: 768px) {
+  table.kyujin > tbody > tr:not(.kyujin_head) > td > div {
+    margin: 0 .5em; }
+
+  table.kyujin tbody tr.kyujin_head td div .kyujin_head_check {
+    padding: 0 6px; }
+  table.kyujin tbody tr.kyujin_head td > div > :not(.kyujin_head_check) {
+    width: calc(100% - 77px); }
+
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date {
+    padding-left: .5em; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label.wide_label {
+    width: 72px; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label.wide_label div {
+    width: 100%;
+
+    word-wrap: break-word; }
+
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn {
+    padding-right: .5em;
+    padding-left: .5em; }
+
+  table.kyujin tbody tr.kyujin_body td div .left-side,
+  table.kyujin tbody tr.kyujin_body td div .right-side {
+    width: 100%; }
+  table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td.data_col,
+  table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td.data_col {
+    padding-left: .25em; } }
+
+/* ================= */
+/* さらに画面の小さいデバイス用 */
+/* ================= */
+@media screen and (min-width: 454px) and (max-width: 772px) {
+  /* システム処理中ラベル用個別指定 */
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div:has(span.bg_label.wide_label) {
+    width: 120px;
+    min-width: 120px; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div:has(span.bg_label.wide_label) span.bg_label.wide_label br {
+    display: none; } }
+@media screen and (max-width: 453px) {
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date {
+    padding-left: .125em; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn {
+    padding-right: .125em;
+    padding-left: .125em; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date div div.mr1 {
+    margin-right: 0; }
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn div span.bg_label {
+    padding: .1em; } }
+@media screen and (max-width: 391px) {
+  table.kyujin tbody tr.kyujin_head td .kyujin_head_date > div > div.flex.nowrap {
+    flex-wrap: wrap; } }

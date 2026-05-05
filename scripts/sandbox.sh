@@ -8,12 +8,13 @@ if ! command -v container >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! container list -a --format json | jq -e --arg n "$NAME" '.[] | select(.configuration.id == $n)' >/dev/null 2>&1; then
-  echo "ERROR: container '$NAME' not found. Run ./scripts/sandbox-create.sh first." >&2
-  exit 1
-fi
+has_container() {
+  container list ${1:-} 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
 
-if ! container list --format json | jq -e --arg n "$NAME" '.[] | select(.configuration.id == $n)' >/dev/null 2>&1; then
+if ! has_container -a; then
+  "$(dirname "${BASH_SOURCE[0]}")/sandbox-create.sh"
+elif ! has_container; then
   container start "$NAME"
 fi
 

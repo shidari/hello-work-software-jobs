@@ -13,7 +13,8 @@
       "!packages/**/*/worker-configuration.d.ts",
       "!packages/types/dist/**/*.d.ts",
       "!apps/hello-work-job-searcher/src/routeTree.gen.ts",
-      "!apps/hello-work-job-searcher/.output"
+      "!apps/hello-work-job-searcher/.output",
+      "!apps/backend/collector/lib/hellowork/__tests__/__fixtures__/**"
     ]
   },
   "formatter": {

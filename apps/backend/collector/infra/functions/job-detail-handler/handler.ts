@@ -1,10 +1,7 @@
 import { JobNumber } from "@sho/models";
 import type { SQSEvent } from "aws-lambda";
 import { Effect, Schema } from "effect";
-import {
-  ChromiumBrowserConfig,
-  DebugMode,
-} from "../../../lib/hellowork/browser";
+import { ChromiumBrowserConfig, Mode } from "../../../lib/hellowork/browser";
 import {
   JobDetailExtractor,
   JobDetailLoader,
@@ -52,7 +49,7 @@ const processJobDetail = (jobNumber: string) => {
     Effect.provide(JobDetailTransformer.Default),
     Effect.provide(JobDetailLoader.main),
     Effect.provide(ChromiumBrowserConfig.lambda),
-    Effect.provide(DebugMode.main),
+    Effect.provide(Mode.production),
     Effect.provide(LoggerLayer),
     Effect.orDie,
   );

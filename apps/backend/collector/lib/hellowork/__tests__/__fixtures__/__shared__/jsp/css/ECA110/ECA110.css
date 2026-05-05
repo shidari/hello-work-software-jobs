@@ -1,0 +1,482 @@
+@charset "UTF-8";
+
+/*----------全体調整----------*/
+
+/*求職番号入力*/
+.accordion-contentWrap {
+    padding: .5em 0 1em;
+}/*求職番号入力セレクトリスト文字色*/
+#ID_kSNoJo,#ID_kSNoGe{
+	color: #000000 !important;
+}
+/*求職番号入力*/
+.arrowBtn_arrowLocationKyushoku {
+	top: 50%;
+    right: 0;
+    translate: 0 -50%;
+	left: calc(50% - 65px) ;
+}
+@media screen and (max-width: 576px) {
+.arrowBtn_arrowLocationKyushoku {
+	left: calc(50% - 67px) ;
+  }
+}
+/*求職番号入力セレクトリスト文字色*/
+#ID_kSNoJo,#ID_kSNoGe{
+	color: #000000 !important;
+}
+/*サマリ幅調整 ECAのみ*/
+/*PC*/
+@media screen and (min-width: 769px) {
+	.max_width_1088px_im{
+		max-width:1088px !important;
+		width: calc(100% - 32px) !important;
+	}}
+
+/*ECAのみ、情報提供利用団体IDを設定_位置調整（1.1em,スマホのみ）*/
+@media screen and (max-width: 768px) {
+	.m_l_11_sd {
+		margin-left: 1.1em;}
+	}
+/*ECAのみ、アイコンの大きさ調整　求職番号入力（16px）*/
+.fs16px{
+    font-size: 16px;
+}
+/*EACのみ、背景色_透明 求職番号入力*/
+.bg_color_none{
+    background-color: transparent !important;
+}
+/*セレクトリストテキスト文字色 */
+input, select, textarea {
+	color: #1B8354;
+}
+/*テーブル内セレクトリストテキスト文字色*/
+table.normal tr td input, table.normal tr td select, table.normal tr td textarea {
+	color: #000000;
+}
+/*リンク文字色を青にする（通常時）「保存した条件を読込」で使用*/
+.button.link_style {
+    padding: 0;
+    text-decoration: underline;
+    color: #0000ee !important;
+    border: none;
+    background-color: transparent;
+	font-weight: 400 !important;
+}
+/*リンク文字色を青にする（ホバー時）「保存した条件を読込」で使用*/
+.button.link_style:hover, .button.link_style:focus, .button.link_style:active, .button.link_style.active {
+    padding: 0;
+    text-decoration: underline;
+    color: #0000ee !important;
+    border: none;
+    background-color: transparent;
+	font-weight: 400 !important;
+}
+  /*110030画面で110020用のラベル設定の削除*/
+.label_clear{
+    max-width: none !important;
+    width: auto !important;
+    margin-top: 0 !important;
+	min-width: none !important;
+}
+/* ECAのみ使用_求職番号入力 */
+@media screen and (max-width: 768px) {
+	/* スマホの場合表示 */
+	.dispnone_sd {
+		display: none !important;
+	}
+}
+/* 110020画面で使用 */
+@media screen and (max-width: 768px) {
+	/* スマホの場合表示 */
+	.dispnone_sd {
+		display: none !important;
+	}
+}
+@media screen and (max-width: 768px) {
+		/* スマホの場合表示 */
+	.checkedKyujinhyoBtnIppan_2 {
+		width: 47% !important;
+		height: 46px !important;
+		line-height: 105%;
+		padding-top: .4%;
+		margin-right: 0% !important;
+        margin-left: 2% !important;
+        min-width: 8em !important;
+	}
+	.checkedKyujinhyoBtnDs_2{
+		width: 47% !important;
+		height: 46px !important;
+		line-height: 105%;
+		padding-top: .4%;
+		margin-right: 2% !important;
+        margin-left: 2% !important;
+        min-width: 8em !important;
+	}
+}
+/*----------フロート----------*/
+/*チェックした求人の求人票を表示ボタン*/
+#ID_checkedKyujinhyoBtn {
+	border: 3px solid #085733;
+}
+
+/*PC画面*/
+@media screen and (min-width: 769px) {
+	/*フロートボタンエリア*/
+	.float_search_button_area {
+		position: fixed;
+		z-index: 30000;
+		top: 50%;
+		right: 0;
+		display: block;
+		width: 196px;
+		padding: 10px;
+		background-color: #70e1ae33;
+	}
+	/*フロートボタンエリア2つ目用*/
+	.area2 {
+		width: 196px;
+	}
+}
+/*スマホ画面*/
+@media screen and (max-width: 768px) {
+	/*フロートボタンエリア*/
+	.float_search_button_area {
+		padding: 2px 0px;
+		width: 100%;
+		position: fixed;
+		z-index: 30000;
+		bottom: 0;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		background-color: #70e1ae33;
+	}
+	/*フロートボタンエリア2つ目用*/
+	.area2 {
+		height: 115px;
+	}
+}
+
+/*----------ボタン関連の調整----------*/
+
+/*職種を選ぶ、条件を選ぶ、特集求人_チェックボックスの位置調整*/
+div.flex > div.flex > .checkbox {
+	margin-left: 0;
+}
+/*ECAのみ_情報提供利用団体IDを設定_タブ遷移時*/
+#ID_infTkRiyoDantaiBtn:focus {
+	outline: #101010 auto 1px;
+	outline-offset: 1px;
+	border-radius: .0em;
+}
+/*ボタン内の白字化と影の付与*/
+#ID_Btn {
+	color: #fffcfc;
+	box-shadow: 0 4px 4px #00000040;
+	border: 3px solid #085733;
+}
+/*ECAのみ*/
+@media screen and (max-width: 768px) {
+.m_r_1_5p_sd{
+	margin-right: 1.5% !important;
+}}
+
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン選択時*/
+label.buttonStyle.buttonStyleChecked{
+    color: #fffcfc !important;
+    border: 1px solid #085733!important;
+    background-color: #1b8354!important;
+}
+
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン選択時ホバー時*/
+label.buttonStyle.buttonStyleCheckedHover{
+    color: #fffcfc !important;
+    border: 1px solid #085733!important;
+    background-color: #085733!important;
+}
+
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン非選択時フォーカス時*/
+label.buttonStyle.buttonStyleFocus{
+    color: #000000!important;
+    border: 1px solid #000000!important;
+}
+
+/*ボタン形式チェックボックス・ボタン形式ラジオボタン非選択時フォーカス時*/
+label.buttonStyle.buttonStyleCheckedFocus{
+    border: 1px solid #000000!important;
+}
+/*プラスボタンボーダー太さ*/
+.annotateBtn_layout {
+    border: 3px solid #1b8354 !important;
+}
+/*プラスボタンボーダー太さ選択時等*/
+.annotateBtn_layout.selected {
+    border: 3px solid #085733 !important;
+    background-color: #1b8354 !important;
+}
+/*プラスボタンボーダー太さホバー時等*/
+.annotateBtn_layout:hover, .annotateBtn_layout:active, .annotateBtn_layout:focus {
+    border: 3px solid #085733 !important;
+    background-color: #085733 !important;
+}
+/*PC画面*/
+@media screen and (min-width: 769px) {
+	/*検索する*/
+	#ID_searchBtn {
+		margin: 0;
+		border: 3px solid #085733;
+		height: 46px;
+		width:11em;
+	}
+}
+
+  /*職業場所_通常時の表示調整*/
+#ID_todohukenHiddenAccoBtn, #ID_ensenHiddenAccoBtn, #ID_roudousijyoHiddenAccoBtn {
+	position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    cursor: pointer;
+    transition: .3s;
+    max-width: 500px;
+    height: 48px;
+    margin: auto;
+    box-shadow: 0px 4px 4px #00000040;
+    border-radius: 8px;
+    gap: 3%;
+	border: 3px solid #1b8354;
+    background-color: #fffcfc;
+	min-width: 14em !important;
+	margin-bottom: .5em !important;
+	margin-left: 0px !important;
+	margin-right: 1em !important;
+	color: #1b8354;
+}
+
+  /*職業場所_ボタンホバー時の表示調整*/
+#ID_todohukenHiddenAccoBtn:hover, #ID_todohukenHiddenAccoBtn:active, #ID_todohukenHiddenAccoBtn:focus,
+#ID_ensenHiddenAccoBtn:hover, #ID_ensenHiddenAccoBtn:active, #ID_ensenHiddenAccoBtn:focus,
+#ID_roudousijyoHiddenAccoBtn:hover, #ID_roudousijyoHiddenAccoBtn:active, #ID_roudousijyoHiddenAccoBtn:focus {
+	border: 3px solid #085733;
+	background-color: #085733;
+	color: #fffcfc;
+}
+
+  /*職業場所_選択時の表示調整*/
+#ID_todohukenHiddenAccoBtn.selected, #ID_ensenHiddenAccoBtn.selected, #ID_roudousijyoHiddenAccoBtn.selected {
+  	color: #fffcfc !important;
+ 	border: 3px solid #085733;
+	background-color: #1b8354;
+}
+
+#ID_todohukenHiddenAccoBtn.selected:hover, #ID_ensenHiddenAccoBtn.selected:hover, #ID_roudousijyoHiddenAccoBtn.selected:hover,
+#ID_todohukenHiddenAccoBtn.selected:active, #ID_ensenHiddenAccoBtn.selected:active, #ID_roudousijyoHiddenAccoBtn.selected:active,
+#ID_todohukenHiddenAccoBtn.selected:focus, #ID_ensenHiddenAccoBtn.selected:focus, #ID_roudousijyoHiddenAccoBtn.selected:focus {
+	border: 3px solid #085733;
+	background-color: #085733 !important;
+}
+  /*職業場所_選択中ラベル*/
+.thin_mypage_back {
+	color: #fffcfc;
+    border: 1px solid #1b8354;
+    background-color: #1b8354;
+    padding: 2px;
+    min-width: 55px;
+}
+/*----------モーダル画面----------*/
+@media screen and (min-width: 769px) {
+    .modal_wrap .modal_content.modalB_width{
+		max-width:640px;
+		border: 1px solid #1b8354;
+		border-radius: 25px 25px 20px 20px;
+	}
+}
+
+/**/
+.button.sub_modal {
+	color: #1b8354 !important;
+	border: 3px solid #1b8354 !important;
+	background-color: #fffcfc !important;
+}
+/**/
+.button.sub_modal:hover, .button.sub_modal:focus, .button.sub_modal:active,
+	.button.sub_modal.active {
+	color: #fffcfc !important;
+	border: 3px solid #085733 !important;
+	background-color: #085733 !important;
+}
+/**/
+
+.color_green_white:hover{
+	color:#fffcfc;
+}
+.color_green_white{
+	color:#1b8354;
+}
+
+.modal_wrap .modal_content {
+	border: 1px solid #1b8354;
+}
+
+/*PRロゴモーダル画面用*/
+
+.modal_wrap .modal_content div.modal.topsub {
+	padding: .5em .8em;
+	font-size: 1.25em;
+	font-weight: bold;
+	color: #1b8354;
+	border-radius: .5em .5em 0 0;
+	padding-bottom:0em !important;
+}
+
+/*----------検索結果----------*/
+#ID_changeSearchCond:focus {
+	outline: #1b8354 1px;
+}
+/*全て選択ボタン*/
+#ID_checkBoxAllSelect:focus {
+	outline: #1b8354 1px;
+}
+
+/*----------共通cssの暫定対応----------*/
+/*検索するボタンホバー時の背景色 基盤部品#006c3cに打ち勝つ */
+.annotateBtn_color.color2:hover, .annotateBtn_layoutcolor2:active, .annotateBtn_layoutcolor2:focus {
+    border: none;
+    background-color: #085733 !important;
+}
+
+.page_title ~ div.fs1_25,
+.page_title ~ form > div.fs1_25 {
+	font-size: 1.25em;
+	display: flex;
+	padding: .5em .8em;
+	color: #fffcfc;
+	background-color: #1b8354;
+}
+
+@media screen and (max-width: 768px) {
+	/* PCの場合表示 */
+	.display_pc {
+		display: none;
+	}
+	/* スマホの場合表示 */
+	.display_sd {
+		display: block;
+	}
+}
+@media screen and (min-width: 769px) {
+	/* PCの場合表示 */
+	.display_pc {
+		display: block;
+	}
+	/* スマホの場合表示 */
+	.display_sd {
+		display: none;
+	}
+}
+
+/*就業場所のモーダルボタン*/
+.annotateBtn_color.sub {
+    color: #1b8354 !important;
+    border: 3px solid #1b8354 !important;
+    background-color: #fffcfc !important;
+}
+.annotateBtn_color.sub > span {
+  color: #1b8354 !important;
+}
+.annotateBtn_color.main {
+  color: #fffcfc !important;
+  border: 3px solid #085733 !important;
+  background-color: #1b8354 !important;
+}
+.annotateBtn_color.main > span {
+  color: #fffcfc !important;
+}
+.annotateBtn_color.main:hover, .annotateBtn_color.main:focus, .annotateBtn_color.main:active,
+.annotateBtn_color.sub:hover, .annotateBtn_color.sub:focus, .annotateBtn_color.sub:active {
+    color: #fffcfc !important;
+    border: 3px solid #085733 !important;
+    background-color: #085733 !important;
+}
+
+/*110020で使用*/
+.fs_14px {
+	font-size: 14px; }
+
+/* サブタイトル周辺の空白調整 */
+.fs1_25 ~ div.padding_ml_mr_8px_sd  :first-child{
+	margin-top: 0 !important;
+}
+
+@media screen and (min-width: 769px) {
+	span.bg_label:not(.kodawari > span.bg_label ):not(table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td span.bg_label):not(table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td span.bg_label):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn div span.bg_label):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label){
+	  max-width: 1088px;
+	  width: 100%;
+	  text-align: left;
+	  margin-top: 1em;
+	}
+}
+@media screen and (max-width: 768px) {
+	span.bg_label:not(.kodawari > span.bg_label):not(table.kyujin tbody tr.kyujin_body td div .right-side table.noborder tbody tr td span.bg_label):not(table.kyujin tbody tr.kyujin_body td div .left-side table.noborder tbody tr td span.bg_label):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn div span.bg_label):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_kbn):not(table.kyujin tbody tr.kyujin_head td .kyujin_head_date div span.bg_label){
+	  display: inline-block;
+	  min-width: 140px;
+	  text-align: center;
+	  margin-top: 1em;
+	}
+}
+div.modal.middle table.normal tbody tr td div.m03{
+	margin-bottom: 8px;
+	margin-left: 0;
+}
+div.validate_msg {
+    font-size: 1em;
+    margin-bottom: .5em;
+    margin-top: .5em;
+    color: #D80000;
+}
+
+/* 事業所画像（ドット） */
+@media screen and (min-width: 769px) {
+	.flickity-page-dots .dot{
+		transform: scale(2);
+	}
+}
+@media screen and (max-width: 768px) {
+	.flickity-page-dots .dot{
+		transform: scale(1.4);
+	}
+}
+/* 事業所画像（ポインタ） */
+.flickity-enabled.is-draggable .flickity-viewport{
+	cursor:pointer !important;
+}
+.flickity-enabled.is-draggable .flickity-viewport.is-pointer-down{
+	cursor:pointer !important;
+}
+
+/* 地図表示ボタン */
+#ID_map1regbutton, #ID_map2regbutton {
+    color: #1b8354;
+    border: 3px solid #1b8354;
+    background-color: #fffcfc;
+}
+#ID_map1regbutton:hover, #ID_map1regbutton:focus, #ID_map1regbutton:active, #ID_map1regbutton.active,
+#ID_map2regbutton:hover, #ID_map2regbutton:focus, #ID_map2regbutton:active, #ID_map2regbutton.active {
+    color: #fffcfc;
+    border: 3px solid #085733;
+    background-color: #085733;
+}
+.accordion-icon_img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Firefox用 */
+@-moz-document url-prefix() {
+	/*求職番号入力*/
+	.arrowBtn_arrowLocationKyushoku {
+		transform: translate(0, -50%);
+		translate: unset !important;
+	}

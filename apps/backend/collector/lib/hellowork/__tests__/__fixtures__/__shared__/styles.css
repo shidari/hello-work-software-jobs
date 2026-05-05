@@ -1,0 +1,34 @@
+/*
+ * Bundled HelloWork stylesheets for fixture preview.
+ * Captured via `pnpm dev:dump-html` (browser.ts dumpPage).
+ * Order matches the real search page <link> sequence so cascading is preserved.
+ *
+ * Tests do NOT load this file (Mode.test aborts non-snapshot URLs).
+ * Used only when opening fixture HTMLs in a browser via file:// for visual verification.
+ */
+@import url("./jsp/css/reset.css");
+@import url("./jsp/css/buttons_green.css");
+@import url("./jsp/css/table_green.css");
+@import url("./jsp/css/navbar_green.css");
+@import url("./jsp/css/page.css");
+@import url("./jsp/css/progress_green.css");
+@import url("./jsp/css/common_green.css");
+@import url("./jsp/css/jquery-ui.css");
+@import url("./jsp/font-awesome-4.7.0/css/font-awesome.min.css");
+@import url("./jsp/css/accordion.css");
+@import url("./jsp/css/accordion_style.css");
+@import url("./jsp/css/navigation.css");
+@import url("./jsp/css/navigation_style.css");
+@import url("./jsp/css/ECZ250/ECZ250.css");
+@import url("./jsp/css/ECA110/ECA110.css");
+@import url("./jsp/css/ECZ110/ECZ110.css");
+@import url("./jsp/css/tooltip.css");
+@import url("./jsp/css/tooltip_style.css");
+@import url("./jsp/css/tippy.css");
+@import url("./jsp/css/float.css");
+@import url("./jsp/css/float_style.css");
+@import url("./jsp/css/buttons.css");
+@import url("./jsp/css/button_style.css");
+@import url("./jsp/css/searchList.css");
+@import url("./jsp/css/searchList_style.css");
+@import url("./jsp/css/checkbox_style.css");

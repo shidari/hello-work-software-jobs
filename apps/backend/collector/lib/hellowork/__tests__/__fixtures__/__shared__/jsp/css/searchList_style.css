@@ -1,0 +1,127 @@
+ul {
+  list-style: none;
+  padding: 0;
+}
+.searchSelect_layout {
+  align-items: center;
+  gap: 30px;
+}
+.searchSelectList_layout {
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  margin: 0 25px 0 0;
+}
+.selectSort_layout,
+.selectNumber_layout {
+  width: 155px;
+  height: 29px;
+  padding: 1px 8px 5px 5px;
+  border: none;
+  border-radius: 4px;
+  outline: 1px solid #999;
+  -moz-outline-radius: 4px;
+}
+.selectSort_color,
+.selectNumber_color {
+  color: #000;
+}
+.selectSort_font,
+.selectNumber_font {
+  font-size: 16px;
+  text-align: center;
+  text-align-last: center;
+}
+.selectSort_layout {
+  width: 38vw;
+  min-width: 100px;
+  max-width: 170px;
+  padding: 1px 16px 5px 5px;
+}
+.selectNumber_layout {
+  width: 20vw;
+  min-width: 80px;
+  max-width: 130px;
+}
+.searchBtn_layout {
+  flex-wrap: wrap;
+  justify-content: end;
+  align-items: center;
+  gap: 15px;
+  margin: 20px 0;
+  padding: 0;
+}
+.searchBtn_layout .annotateBtn_layout {
+  width: -webkit-fit-content;
+  width:    -moz-fit-content;
+  width:         fit-content;
+  height: auto;
+  min-height: 20px;
+  margin: 0;
+  padding: 7px 3% 6px;
+  border-radius: 7px;
+}
+.searchBtn_layout .tooltipBtn_layout {
+  top: 50%;
+  right: 0;
+  left: inherit;
+  translate: 0 -50%;
+}
+.searchBtn_layout .annotateBtn_textFont {
+  text-wrap: nowrap;
+}
+.pageNumberItem {
+  color: #595959;
+  cursor: pointer;
+}
+.pageNumberItem.add {
+  font-weight: bold;
+}
+.pageNumberItem.rem {
+  color: #ccc;
+}
+@media screen and (max-width:850px) {
+  .searchBtn_layout {
+    align-items: end;
+  }
+  .searchSelectList_layout {
+    margin: 0;
+  }
+  .searchItem_layout {
+    display: block;
+  }
+  .searchItemText_layout {
+    margin: 0 0 5px;
+    text-align: center;
+  }
+}
+
+
+
+.checkbox {
+  margin: 0 5%;
+}
+#container .flex.align_end.first_left.mt05 {
+  margin: 0;
+}
+.flex.align_end.first_left.mt05 {
+  margin: 0 5%;
+}
+.flex.align_end.first_left.mt05 .searchBtn_layout {
+  display: none;
+}
+@media screen and (max-width:768px) {
+  .checkbox {
+    margin: 0;
+  }
+  .flex.align_end.first_left.mt05 {
+    margin: 0;
+  }
+}
+.searchBtn_layout .tooltipBtn_layout {
+  position: relative;
+  top: 3px;
+  right: inherit;
+  translate: 0;
+  margin: 0;
+}

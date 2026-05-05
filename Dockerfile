@@ -87,6 +87,14 @@ RUN curl -fsSL "https://github.com/denoland/deno/releases/latest/download/deno-a
  && chmod +x /usr/local/bin/deno \
  && rm /tmp/deno.zip
 
+# Playwright chromium. Pin must track the resolved playwright(-core) version in
+# the workspace; on mismatch, playwright-core re-downloads into ~/.cache at runtime.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npm install -g playwright@1.59.1 \
+ && playwright install chromium \
+ && npm uninstall -g playwright \
+ && chmod -R a+rX /ms-playwright
+
 RUN corepack enable \
  && npm install -g \
       @anthropic-ai/claude-code@latest \

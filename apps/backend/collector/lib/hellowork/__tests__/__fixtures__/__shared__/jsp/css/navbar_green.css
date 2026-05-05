@@ -1,0 +1,531 @@
+@charset "UTF-8";
+/* -------------------------------------------------------------------------- */
+/* スタイル指定（カラーはファイル後部で別指定） */
+/* -------------------------------------------------------------------------- */
+
+/* ナビゲーションバー - ルート */
+
+/* ナビゲーションバー - ハンバーガーメニュー */
+#hamburger_check {
+  display: none; }
+
+/* ナビゲーションバー - 本体 */
+#navbar {
+  overflow: hidden;
+
+  width: 100%;
+  max-width: 1128px;
+  min-height: 58px;
+  margin: auto; }
+#navbar ul {
+  display: flex;
+
+  max-width: 1120px;
+  margin: auto;
+  padding-left: 0em;
+
+  list-style: none; }
+
+/* ナビゲーションバー - 項目 */
+#navbar ul li.navbar_item a {
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+  text-decoration: none; }
+#navbar ul li.navbar_item.active {
+  transition-duration: 200ms;
+  transition-property: background-color, color, box-shadow;
+
+  outline: none; }
+#navbar ul li.navbar_item:not(.disable):hover,
+#navbar ul li.navbar_item:not(.disable) a:hover {
+  transition-duration: 200ms;
+  transition-property: background-color, color, box-shadow;
+
+  outline: none; }
+
+/* ナビゲーションバー - 項目 - 無効状態 */
+#navbar ul li.navbar_item.disable {
+  opacity: .5; }
+#navbar ul li.navbar_item.disable a {
+  cursor: default; }
+
+/* ナビゲーションバー - 項目(ドロップダウン付き) */
+#navbar ul li.navbar_item:has(> button.pulldown_base) {
+  position: relative; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+  font-weight: bold;
+
+  width: 100%;
+  height: 100%;
+
+  border: none; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow {
+  font-family: "designsystem-assets" !important;
+  font-size: 1.25em;
+  font-weight: normal;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+
+  width: 20px;
+  height: 20px;
+
+  text-transform: none;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  speak: never; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow::after {
+  content: ""; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow.addClick:before,
+#navbar ul li.navbar_item:has(> button.pulldown_base:hover) > button.pulldown_base:hover > span.pulldown_arrow:before,
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base:has(+ .pulldown_containerBase:hover) > span.pulldown_arrow:before {
+  content: "\e90c"; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow:not(.addClick):before {
+  content: "\e906"; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul {
+  display: none; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li {
+  font-size: inherit;
+
+  min-width: 100%;
+  height: 2.5em;
+  margin: 0; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li a {
+  width: 100%;
+  height: 100%; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul.addClick,
+#navbar ul li.navbar_item:has(> button.pulldown_base:hover) > ul,
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul.pulldown_containerBase:hover {
+  display: block;
+
+  min-width: 100%;
+  padding: 0;
+
+  list-style: none; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li:hover {
+  box-shadow: none; }
+
+/* ナビゲーションバー - 項目(ドロップダウン付き) - 全体が無効状態 */
+#navbar ul li.navbar_item.disable:has(> button.pulldown_base) > button.pulldown_base {
+  cursor: default; }
+#navbar ul li.navbar_item.disable:has(> button.pulldown_base) > button.pulldown_base span {
+  display: none; }
+#navbar ul li.navbar_item.disable:has(> button.pulldown_base) > ul {
+  display: none; }
+
+/* ナビゲーションバー - 項目(ドロップダウン付き) - ドロップダウンが無効状態 */
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li a:not([href]) {
+  cursor: default; }
+
+/* -------------------------------------------------------------------------- */
+/* PC用メディアブレークポイント */
+/* -------------------------------------------------------------------------- */
+@media print, screen and (min-width: 769px) {
+  /* ナビゲーションバー - ルート */
+  #top_header > .navigation_menu {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー */
+  #top_header > .navigation_menu label[for="hamburger_check"] {
+    display: none; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー(非展開時) */
+  #hamburger_check:not(:checked) ~ #mainNav #navbar {
+    overflow: visible;
+
+    height: 58px; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー(展開時) */
+  #hamburger_check:checked ~ #mainNav #navbar {
+    overflow: visible; }
+
+  /* ナビゲーションバー 本体 */
+  #navbar ul {
+    flex-flow: row;
+    justify-content: space-between; }
+
+  /* ナビゲーションバー - 項目 */
+  #navbar ul li.navbar_item {
+    flex: 1;
+
+    height: 58px;
+    margin-left: 4px; }
+  #navbar ul li.navbar_item:nth-child(2) {
+    margin-left: 0; }
+  #navbar ul li.navbar_item a {
+    font-size: inherit;
+
+    justify-content: center;
+
+    height: 56px;
+    padding: 0 4%;
+
+    text-align: center;
+
+    border: none; }
+
+  /* ナビゲーションバー - 項目(ヘッダー) */
+  #navbar ul li.navbar_item.navbar_header {
+    display: none; }
+
+  /* ナビゲーションバー - 項目(ドロップダウン付き) */
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+    font-size: inherit;
+
+    position: relative;
+
+    padding: 0 2em; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow {
+    position: absolute;
+    top: calc(50% - 9px);
+    right: .5em;
+
+    margin-left: 0; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.addClick,
+  #navbar ul li.navbar_item:has(> button.pulldown_base:hover) > ul,
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.pulldown_containerBase:hover {
+    position: absolute;
+    z-index: 20001;
+
+    margin: 0;
+    padding: 0; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.addClick li,
+  #navbar ul li.navbar_item:has(> button.pulldown_base:hover) > ul li,
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.pulldown_containerBase:hover li {
+    margin-top: 1px; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.addClick li a,
+  #navbar ul li.navbar_item:has(> button.pulldown_base:hover) > ul li a,
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.pulldown_containerBase:hover li a {
+    line-height: 1em;
+
+    padding: 5px 10px;
+
+    border-left: none; }
+
+  /* ナビゲーションバー - 項目(ログアウトボタン) */
+  #navbar ul li.navbar_item.login_status {
+    display: none; } }
+
+/* -------------------------------------------------------------------------- */
+/* スマートデバイス用メディアブレークポイント */
+/* -------------------------------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  /* ナビゲーションバー - ルート */
+  #top_header > .navigation_menu {
+    position: static;
+
+    display: inline-flex;
+
+    margin: 0;
+
+    vertical-align: top;
+    text-wrap: nowrap;
+
+    inset: auto; }
+  #top_header > .navigation_menu::after {
+    font-size: .5em !important;
+
+    display: inline-block;
+
+    content: "メニュー";
+            text-wrap: nowrap;
+
+    -webkit-text-wrap: nowrap;
+       -moz-text-wrap: nowrap; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー */
+  #top_header > .navigation_menu label[for="hamburger_check"] {
+    position: relative;
+
+    display: block;
+
+    width: 40px;
+    height: 24px;
+    padding: 0 8px;
+
+    cursor: pointer;
+    -webkit-user-select:      none;
+       -moz-user-select: -moz-none;
+            user-select:      none;
+
+     -khtml-user-select:      none; }
+  #top_header > .navigation_menu label[for="hamburger_check"]::before,
+  #top_header > .navigation_menu label[for="hamburger_check"]::after,
+  #top_header > .navigation_menu label[for="hamburger_check"] span {
+    display: block;
+
+    width: 24px;
+    height: 3px;
+
+    transition: .6s ease; }
+  #top_header > .navigation_menu label[for="hamburger_check"]::before,
+  #top_header > .navigation_menu label[for="hamburger_check"]::after {
+    position: absolute;
+
+    content: ""; }
+  #top_header > .navigation_menu label[for="hamburger_check"]::before {
+    top: 5px; }
+  #top_header > .navigation_menu label[for="hamburger_check"]::after {
+    bottom: 2px; }
+  #top_header > .navigation_menu label[for="hamburger_check"] span {
+    margin-top: 12px; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー(非展開時) */
+  #hamburger_check:not(:checked) ~ #mainNav #navbar {
+    overflow: hidden;
+
+    height: 42px; }
+  #hamburger_check:not(:checked) ~ #mainNav #navbar ul li.navbar_item {
+    display: none; }
+  #hamburger_check:not(:checked) ~ #mainNav #navbar ul li.navbar_item.navbar_header {
+    flex-wrap: wrap;
+    justify-content: center; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー(展開時) */
+  #hamburger_check:checked ~ label[for="hamburger_check"]::before {
+    top: 10px; }
+  #hamburger_check:checked ~ label[for="hamburger_check"]::after {
+    bottom: 11px; }
+  /* ページ最下部へリンクが被るので消す */
+  body:has(#hamburger_check:checked) .pagebottom {
+    display: none; }
+
+  /* ナビゲーションバー - ハンバーガーメニュー(展開時) */
+  #hamburger_check:checked ~ #mainNav #navbar {
+    z-index: 35000;
+
+    overflow: auto;
+
+    width: 100%;
+
+    transition: height .6s ease; }
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item {
+    display: block; }
+
+  /* ナビゲーションバー - 本体 */
+  #mainNav {
+    position: absolute;
+    top: -6px;
+    right: 0; }
+  #navbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width: 40px;
+    min-height: 40px; }
+  #navbar ul {
+    flex-direction: column;
+    justify-content: center; }
+
+  /* ナビゲーションバー - 項目 */
+  #navbar ul li.navbar_item {
+    font-size: 1em;
+
+    height: 40px; }
+  #navbar ul li.navbar_item a {
+    height: 40px;
+    padding: 11px 0 11px 10%;
+
+    text-align: left; }
+
+  /* ナビゲーションバー - 項目(ヘッダー) */
+  #navbar ul li.navbar_item.navbar_header {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    height: 40px;
+
+    cursor: pointer; }
+  #navbar ul li.navbar_item.navbar_header p {
+    padding: 8px 0px 8px 10%;
+
+    cursor: pointer;
+    text-align: left; }
+  #navbar ul li.navbar_item.navbar_header:not(.disable):hover,
+  #navbar ul li.navbar_item.navbar_header:not(.disable):focus {
+    transition-duration: 200ms;
+    transition-property: background-color, color, box-shadow;
+
+    outline: none; }
+
+  /* ナビゲーションバー - 項目(ドロップダウン付き) */
+  #navbar ul li.navbar_item:has(> button.pulldown_base) {
+    height: auto;
+    min-height: 40px; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+
+    height: 40px;
+    padding: 0 0 0 10%; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base > span.pulldown_arrow {
+    margin-left: 1em; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > ul.addClick li a,
+  #navbar ul li.navbar_item:has(> button.pulldown_base):hover > ul li a {
+    font-size: 1em;
+    line-height: inherit;
+
+    width: 100%;
+    min-height: inherit;
+    padding: 11px 0 11px 20%; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base):hover > ul {
+    position: relative; } }
+
+/* -------------------------------------------------------------------------- */
+/* カラー指定 */
+/* -------------------------------------------------------------------------- */
+
+/* ナビゲーションバー - ルート */
+#top_header > .navigation_menu::after {
+  color: #363636 !important; }
+
+/* ナビゲーションバー - 本体 */
+#mainNav {
+  background-color: #1b8354; }
+#navbar {
+  color: #fffcfc;
+  background-color: #fffcfc; }
+#navbar ul {
+  background-color: transparent; }
+
+/* ナビゲーションバー - 項目 */
+#navbar ul li.navbar_item {
+  border: 1px solid #1b8354;
+  background-color: #1b8354; }
+#navbar ul li.navbar_item a {
+  color: #fffcfc; }
+#navbar ul li.navbar_item:not(.disable):hover,
+#navbar ul li.navbar_item:not(.disable) a:hover {
+  color: #fffcfc;
+  border-color: #085733;
+  background-color: #085733; }
+#navbar ul li.navbar_item:not(.disable):hover a {
+  color: #fffcfc; }
+
+/* ナビゲーションバー - 項目 - 現在地 */
+#navbar ul li.navbar_item.active {
+  color: #1b8354;
+  background-color: #fffcfc; }
+#navbar ul li.navbar_item.active > a {
+  color: #1b8354; }
+
+/* ナビゲーションバー - 項目(ヘッダー) */
+#navbar ul li.navbar_item.navbar_header p {
+  color: #1b8354; }
+#navbar ul li.navbar_item.navbar_header:not(.disable):hover,
+#navbar ul li.navbar_item.navbar_header:not(.disable):focus {
+  color: #1b8354;
+  background-color: #085733; }
+
+/* ナビゲーションバー - 項目(ドロップダウン付き) */
+#navbar ul li.navbar_item:has(> button.pulldown_base) {
+  border: none; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+  color: #fffcfc;
+  background-color: #1b8354; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base:hover {
+  color: #fffcfc;
+  background-color: #085733; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base span.pulldown_arrow {
+  color: #fffcfc; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul {
+  background-color: #fffcfc; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li {
+  background-color: #1b8354; }
+#navbar ul li.navbar_item:has(> button.pulldown_base) > ul li:hover {
+  background-color: #085733; }
+
+  /* ナビゲーションバー - 項目(ドロップダウン付き) - 現在地 */
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > button.pulldown_base {
+  color: #1b8354;
+  background-color: #fffcfc; }
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > button.pulldown_base span.pulldown_arrow {
+  color: #1b8354; }
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > button.pulldown_base:hover {
+  color: #fffcfc;
+  background-color: #085733; }
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > button.pulldown_base:hover span.pulldown_arrow {
+  color: #fffcfc; }
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > ul li.active {
+  color: #fffcfc;
+  background-color: #1b8354; }
+#navbar ul li.navbar_item.active:has(> button.pulldown_base) > ul li.active:hover {
+  color: #fffcfc;
+  background-color: #085733; }
+
+/* -------------------------------------------------------------------------- */
+/* PC用メディアブレークポイント */
+/* -------------------------------------------------------------------------- */
+@media print, screen and (min-width: 769px) {
+  /* ナビゲーションバー - 項目(ドロップダウン付き) */
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+    border: 1px solid #1b8354; }
+  #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base:hover {
+    border: 1px solid #085733; }
+
+    /* ナビゲーションバー - 項目(ドロップダウン付き) - 現在地 */
+  #navbar ul li.navbar_item.active:has(> button.pulldown_base) > button.pulldown_base:hover {
+    border: 1px solid #085733; }
+  #navbar ul li.navbar_item.active:has(> button.pulldown_base) > ul li.active {
+    border: 1px solid #1b8354; }
+  #navbar ul li.navbar_item.active:has(> button.pulldown_base) > ul li.active:hover {
+    border: 1px solid #085733; } }
+
+/* -------------------------------------------------------------------------- */
+/* スマートデバイス用メディアブレークポイント */
+/* -------------------------------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  /* ナビゲーションバー - ハンバーガーメニュー */
+  #top_header > .navigation_menu label[for="hamburger_check"]::before,
+  #top_header > .navigation_menu label[for="hamburger_check"]::after,
+  #top_header > .navigation_menu label[for="hamburger_check"] span {
+    background-color: #1b8354; }
+  /* ナビゲーションバー - ハンバーガーメニュー(展開時) */
+  #hamburger_check:checked ~ label[for="hamburger_check"] span {
+    background-color: transparent; }
+  #hamburger_check:checked ~ label[for="hamburger_check"]::before,
+  #hamburger_check:checked ~ label[for="hamburger_check"]::after,
+  #hamburger_check:checked ~ label[for="hamburger_check"] span {
+    background-color: #1b8354; }
+
+  /* ナビゲーションバー - 項目 */
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item {
+    border: none;
+    border-top: 1px solid #fffcfc; }
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item:not(.disable):hover,
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item a:not(.disable):hover {
+    border-top-color: #fffcfc; }
+
+  /* ナビゲーションバー - 項目 - 現在地 */
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item.active {
+    border: none;
+    border-top: 1px solid #1b8354;
+    border-left: 1px solid #1b8354;
+    background-color: #fffcfc; }
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item.active:hover {
+    background-color: #085733; }
+
+  /* ナビゲーションバー - 項目(ヘッダー) */
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item.navbar_header {
+    border: none;
+    border-left: 1px solid #1b8354;
+    background-color: #fffcfc; }
+
+  /* ナビゲーションバー - 項目(ドロップダウン付き) */
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item:has(> button.pulldown_base) {
+    border-left: none; }
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base {
+    border-left: 1px solid #1b8354; }
+  #hamburger_check:checked ~ #mainNav #navbar ul li.navbar_item:has(> button.pulldown_base) > button.pulldown_base:hover {
+    border-left: #085733; } }
