@@ -24,9 +24,6 @@
     "@sho/models": "workspace:*",
     "aws-cdk-lib": "2.243.0",
     "constructs": "^10.0.0",
-    "date-fns": "^4.1.0",
-    "effect": "^3.16.5",
-    "linkedom": "0.18.12",
-    "playwright": "^1.58.2"
+    "effect": "^3.16.5"
   }
 }

@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import styles from "./badge.module.css";
 
-export type BadgeProps = ComponentProps<"span"> & {
+type BadgeProps = ComponentProps<"span"> & {
   variant?: "default" | "secondary" | "outline";
 };
 

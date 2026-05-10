@@ -34,5 +34,3 @@ export const JobOverviewSchema = JobSchema.pick(
 export type JobOverview = Unbrand<typeof JobOverviewSchema.Type>;
 
 export type JobDetail = Unbrand<Job>;
-
-export type JobList = JobDetail[];

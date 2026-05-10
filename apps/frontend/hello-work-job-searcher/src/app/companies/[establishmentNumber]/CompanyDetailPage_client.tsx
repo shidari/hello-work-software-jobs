@@ -7,14 +7,11 @@ import type { AppType } from "@/lib/backend-client";
 import styles from "./CompanyDetailPage.module.css";
 
 type Client = ReturnType<typeof hc<AppType>>;
-export type CompanyResponse = InferResponseType<
+type CompanyResponse = InferResponseType<
   Client["companies"][":establishmentNumber"]["$get"],
   200
 >;
-export type CompanyJobsResponse = InferResponseType<
-  Client["jobs"]["$get"],
-  200
->;
+type CompanyJobsResponse = InferResponseType<Client["jobs"]["$get"], 200>;
 
 export function CompanyDetailPage({
   company,

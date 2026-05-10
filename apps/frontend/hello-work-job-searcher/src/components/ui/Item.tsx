@@ -5,7 +5,7 @@ function cn(base: string, className?: string) {
   return `${base}${className ? ` ${className}` : ""}`;
 }
 
-export type ItemProps = ComponentProps<"div"> & {
+type ItemProps = ComponentProps<"div"> & {
   variant?: "default" | "outline" | "muted";
   size?: "default" | "sm" | "xs";
 };
@@ -27,19 +27,7 @@ export function Item({
   );
 }
 
-export type ItemMediaProps = ComponentProps<"div">;
-
-export function ItemMedia({ className, ...props }: ItemMediaProps) {
-  return (
-    <div
-      data-slot="item-media"
-      className={cn(styles.media, className)}
-      {...props}
-    />
-  );
-}
-
-export type ItemContentProps = ComponentProps<"div">;
+type ItemContentProps = ComponentProps<"div">;
 
 export function ItemContent({ className, ...props }: ItemContentProps) {
   return (
@@ -51,7 +39,7 @@ export function ItemContent({ className, ...props }: ItemContentProps) {
   );
 }
 
-export type ItemTitleProps = ComponentProps<"span">;
+type ItemTitleProps = ComponentProps<"span">;
 
 export function ItemTitle({ className, ...props }: ItemTitleProps) {
   return (
@@ -63,7 +51,7 @@ export function ItemTitle({ className, ...props }: ItemTitleProps) {
   );
 }
 
-export type ItemDescriptionProps = ComponentProps<"p">;
+type ItemDescriptionProps = ComponentProps<"p">;
 
 export function ItemDescription({ className, ...props }: ItemDescriptionProps) {
   return (
@@ -75,31 +63,7 @@ export function ItemDescription({ className, ...props }: ItemDescriptionProps) {
   );
 }
 
-export type ItemActionsProps = ComponentProps<"div">;
-
-export function ItemActions({ className, ...props }: ItemActionsProps) {
-  return (
-    <div
-      data-slot="item-actions"
-      className={cn(styles.actions, className)}
-      {...props}
-    />
-  );
-}
-
-export type ItemHeaderProps = ComponentProps<"div">;
-
-export function ItemHeader({ className, ...props }: ItemHeaderProps) {
-  return (
-    <div
-      data-slot="item-header"
-      className={cn(styles.header, className)}
-      {...props}
-    />
-  );
-}
-
-export type ItemFooterProps = ComponentProps<"div">;
+type ItemFooterProps = ComponentProps<"div">;
 
 export function ItemFooter({ className, ...props }: ItemFooterProps) {
   return (
@@ -111,7 +75,7 @@ export function ItemFooter({ className, ...props }: ItemFooterProps) {
   );
 }
 
-export type ItemGroupProps = ComponentProps<"div">;
+type ItemGroupProps = ComponentProps<"div">;
 
 export function ItemGroup({ className, ...props }: ItemGroupProps) {
   return (
@@ -123,7 +87,7 @@ export function ItemGroup({ className, ...props }: ItemGroupProps) {
   );
 }
 
-export type ItemSeparatorProps = ComponentProps<"hr">;
+type ItemSeparatorProps = ComponentProps<"hr">;
 
 export function ItemSeparator({ className, ...props }: ItemSeparatorProps) {
   return (

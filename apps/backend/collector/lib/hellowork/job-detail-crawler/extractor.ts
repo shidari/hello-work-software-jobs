@@ -8,7 +8,7 @@ import { navigateByJobNumber, openJobSearchPage } from "../page/search";
 
 // ── RawJob スキーマ: DOM から抽出した生テキスト ──
 
-export const RawJob = Schema.Struct({
+const RawJob = Schema.Struct({
   jobNumber: Schema.NullOr(Schema.String),
   companyName: Schema.NullOr(Schema.String),
   receivedDate: Schema.NullOr(Schema.String),
@@ -41,11 +41,11 @@ export const RawJob = Schema.Struct({
   insurance: Schema.NullOr(Schema.String),
   retirementBenefit: Schema.NullOr(Schema.String),
 });
-export type RawJob = typeof RawJob.Type;
+type RawJob = typeof RawJob.Type;
 
 // ── RawCompany スキーマ: DOM から抽出した会社情報生テキスト ──
 
-export const RawCompany = Schema.Struct({
+const RawCompany = Schema.Struct({
   establishmentNumber: Schema.NullOr(Schema.String),
   companyName: Schema.NullOr(Schema.String),
   postalCode: Schema.NullOr(Schema.String),
@@ -56,11 +56,11 @@ export const RawCompany = Schema.Struct({
   businessDescription: Schema.NullOr(Schema.String),
   corporateNumber: Schema.NullOr(Schema.String),
 });
-export type RawCompany = typeof RawCompany.Type;
+type RawCompany = typeof RawCompany.Type;
 
 // ── エラー ──
 
-export class ExtractJobDetailRawHtmlError extends Data.TaggedError(
+class ExtractJobDetailRawHtmlError extends Data.TaggedError(
   "ExtractJobDetailRawHtmlError",
 )<SystemError & { readonly jobNumber: string; readonly currentUrl: string }> {}
 

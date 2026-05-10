@@ -17,10 +17,7 @@ import { PageLink } from "./PageLink";
  * pageNumbers(1, 50)  // [1, 2, 3, "...", 50]
  * pageNumbers(50, 50) // [1, "...", 49, 50]
  */
-export function pageNumbers(
-  current: number,
-  total: number,
-): (number | "...")[] {
+function pageNumbers(current: number, total: number): (number | "...")[] {
   if (total <= 7) {
     return Iterator.from(naturals()).drop(1).take(total).toArray();
   }

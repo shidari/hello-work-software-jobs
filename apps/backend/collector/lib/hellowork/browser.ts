@@ -9,19 +9,19 @@ export type { Locator, Page } from "playwright-core";
 
 // ── Errors ──
 
-export class BrowserLaunchError extends Data.TaggedError(
+class BrowserLaunchError extends Data.TaggedError(
   "BrowserLaunchError",
 )<SystemError> {}
 
-export class BrowserContextError extends Data.TaggedError(
+class BrowserContextError extends Data.TaggedError(
   "BrowserContextError",
 )<SystemError> {}
 
-export class BrowserNewPageError extends Data.TaggedError(
+class BrowserNewPageError extends Data.TaggedError(
   "BrowserNewPageError",
 )<SystemError> {}
 
-export class PageRouterError extends Data.TaggedError(
+class PageRouterError extends Data.TaggedError(
   "PageRouterError",
 )<SystemError> {}
 
@@ -71,7 +71,7 @@ export class ChromiumBrowserConfig extends Context.Tag("ChromiumBrowserConfig")<
 // dev: ローカル / verify スクリプト。失敗時に dumpDir 配下に HTML+screenshot を吐く。
 // test: テスト。snapshots を URL マッチで page.route に流す（実ネットワーク到達なし）。
 
-export type ModeValue =
+type ModeValue =
   | { readonly kind: "production" }
   | { readonly kind: "dev"; readonly dumpDir: string }
   | { readonly kind: "test"; readonly snapshots: readonly PageSnapshot[] };
@@ -167,7 +167,7 @@ export const dumpPage = (page: Page, label: string) =>
 
 // ── dumpBrowserPage (browser 内の全 page を一斉に dump) ──
 
-export const dumpBrowserPage = (browser: Browser, label: string) =>
+const dumpBrowserPage = (browser: Browser, label: string) =>
   Effect.gen(function* () {
     const mode = yield* Mode;
     if (mode.kind !== "dev") return;

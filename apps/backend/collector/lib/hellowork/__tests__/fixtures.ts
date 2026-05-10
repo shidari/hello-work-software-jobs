@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { Data, Effect } from "effect";
 import type { PageSnapshot } from "../browser";
 
-export class FixtureLoadError extends Data.TaggedError("FixtureLoadError")<{
+class FixtureLoadError extends Data.TaggedError("FixtureLoadError")<{
   readonly reason: string;
   readonly error?: Error;
 }> {}

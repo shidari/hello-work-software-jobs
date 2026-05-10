@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import styles from "./Label.module.css";
 
-export type LabelProps = ComponentProps<"dl"> & {
+type LabelProps = ComponentProps<"dl"> & {
   term: string;
 };
 

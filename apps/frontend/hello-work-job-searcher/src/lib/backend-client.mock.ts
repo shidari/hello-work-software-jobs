@@ -3,7 +3,7 @@ import type { AppType } from "./backend-client";
 
 type Client = ReturnType<typeof hc<AppType>>;
 type JobListResponse = InferResponseType<Client["jobs"]["$get"], 200>;
-export type JobDetailResponse = InferResponseType<
+type JobDetailResponse = InferResponseType<
   Client["jobs"][":jobNumber"]["$get"],
   200
 >;

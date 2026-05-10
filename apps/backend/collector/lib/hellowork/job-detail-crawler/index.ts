@@ -5,18 +5,9 @@ import { JobDetailLoader } from "./loader";
 import { JobDetailTransformer } from "./transformer";
 
 // re-export
-export {
-  ExtractJobDetailRawHtmlError,
-  JobDetailExtractor,
-} from "./extractor";
+export { JobDetailExtractor } from "./extractor";
 export { JobDetailLoader } from "./loader";
-export {
-  CompanyTransformError,
-  JobDetailTransformError,
-  JobDetailTransformer,
-  type TransformedCompany,
-  type TransformedJob,
-} from "./transformer";
+export { JobDetailTransformer } from "./transformer";
 
 // ── processJob (Effect.fn — 手続き的オーケストレーション) ──
 
