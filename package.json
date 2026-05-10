@@ -16,8 +16,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@anthropic-ai/claude-code": "latest",
     "@biomejs/biome": "^2.0.6",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vercel": "^48",
+    "wrangler": "^4"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.6.0"
