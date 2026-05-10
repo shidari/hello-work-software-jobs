@@ -1,16 +1,36 @@
 # CLI ツール
 
-このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている（[Dockerfile](../../Dockerfile) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+
+## 構成
+
+| 層 | 何をするか |
+|------|-----------|
+| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / gh / awscli2 / deno / jq / openssh / cacert 等を contents に列挙 |
+| `package.json` (root devDependencies) | `@anthropic-ai/claude-code` / `wrangler` / `vercel` は npm 配布物なので nix を経由せず pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin` に展開され、image の PATH に組み込まれる |
+| `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` のラッパ |
+| `scripts/sandbox.sh` | container を作成・起動して `/bin/bash` を投げる。`--ensure-up` で起動だけして抜ける（direnv 用） |
+| `scripts/sandbox-stop.sh` | 停止 + 破棄 |
+| `.envrc` | direnv が repo `cd` 時に `sandbox.sh --ensure-up` を呼ぶ |
+
+## 前提（ホスト macOS）
+
+- **`nix-darwin` + `nix.linux-builder.enable = true`**
+  aarch64-darwin から aarch64-linux derivation を build するため。VM が `/Library/LaunchDaemons/org.nixos.linux-builder.plist` で常駐
+- **Apple `container` CLI**（https://github.com/apple/container）
+- **direnv**（任意、`brew install direnv` + `direnv allow` で repo 入室時に自動 up）
 
 ## 起動
 
 ```bash
-./scripts/sandbox-create.sh  # image build + コンテナ作成（初回 or 破棄後）
-./scripts/sandbox.sh         # 既存コンテナに bash で入る
+./scripts/sandbox-image.sh   # 初回 or flake.nix 更新時のみ。VM 経由で nix build → load（10〜30 分）
+./scripts/sandbox.sh         # コンテナ作成（初回）+ 起動 + bash 投入
 ./scripts/sandbox-stop.sh    # 停止・破棄
 ```
 
-初回は `sandbox-create.sh` でセットアップ後、`sandbox.sh` で中に入って `gh auth login` / `wrangler login` / `vercel login` / `claude /login` を手動で実行する。
+direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-image.sh` は依然手動）。
+
+初回は `sandbox.sh` で中に入った後 `pnpm install` を 1 度叩く（root devDeps の wrangler / vercel / claude-code を `/work/node_modules/.bin` に展開）。その後で `gh auth login` / `wrangler login` / `vercel login` / `claude /login` をブラウザ OAuth で。
 
 ## 認証情報の扱い
 
@@ -21,41 +41,41 @@
 | `~/.sho-sandbox/` 以下を read-write bind mount | `gh` / `claude` / `wrangler` / `vercel` | コンテナ内で各 CLI の `login` を実行し、結果をホストから隔離して永続化。OAuth トークンリフレッシュのため書き込み可 |
 | `~/.aws` を read-only マウント | `aws` | AWS CLI のプロファイル設定ファイルを参照するため。SSO ログインはホスト側で行う |
 
-### 初回セットアップ
-
-サンドボックス内でブラウザ OAuth を一度ずつ実行すれば、`~/.sho-sandbox/` に保存されて次回以降も有効:
-
-```bash
-./scripts/sandbox-create.sh   # 初回のみ: コンテナ作成
-./scripts/sandbox.sh          # bash で中に入る
-gh auth login       # ブラウザで GitHub 承認
-wrangler login      # ブラウザで Cloudflare 承認
-vercel login        # ブラウザで Vercel 承認
-claude /login       # または `claude setup-token`
-```
-
-永続化パス:
+永続化パス（image は root で動くため `HOME=/root`）:
 
 | ツール | ホスト側 | コンテナ内 |
 |--------|---------|-----------|
-| `gh` | `~/.sho-sandbox/gh/` | `~/.config/gh/` |
-| `claude` | `~/.sho-sandbox/claude/` | `~/.claude/` |
-| `wrangler` | `~/.sho-sandbox/wrangler/` | `~/.config/.wrangler/` |
-| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `~/.local/share/com.vercel.cli/`, `~/.config/com.vercel.cli/` |
+| `gh` | `~/.sho-sandbox/gh/` | `/root/.config/gh/` |
+| `claude` | `~/.sho-sandbox/claude/` | `/root/.claude/` |
+| `wrangler` | `~/.sho-sandbox/wrangler/` | `/root/.config/.wrangler/` |
+| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/root/.local/share/com.vercel.cli/`, `/root/.config/com.vercel.cli/` |
+| `aws` | `~/.aws/`（ro） | `/root/.aws/`（ro） |
+
+## image を更新したい時
+
+```bash
+# flake.nix を編集（package を追加 / 削る等）
+./scripts/sandbox-image.sh   # rebuild + reload
+./scripts/sandbox-stop.sh    # 旧 container を破棄
+./scripts/sandbox.sh         # 新 image で container 再作成
+```
+
+`buildLayeredImage` は path 単位の content-addressed layer なので、変わってない layer は cache から再利用される（差分 layer のみ作り直し）。
 
 ## 用途
 
-| ツール | 用途 |
-|------|------|
-| `nodejs` | ランタイム（Dockerfile の `node:24-bookworm-slim`） |
-| `pnpm` | パッケージマネージャ・monorepo タスクランナー（corepack 経由） |
-| `deno` | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
-| `claude` | Claude Code（`@anthropic-ai/claude-code`） |
-| `gh` | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
-| `jq` | JSON 整形（`aws logs` / `wrangler tail` のパイプ処理） |
-| `aws` | Collector ログ・Lambda 診断 |
-| `wrangler` | Cloudflare Workers（API デプロイ・D1・tail） |
-| `vercel` | Vercel（Frontend ログ・デプロイ確認） |
+| ツール | 由来 | 用途 |
+|------|------|------|
+| `nodejs` | nix (`nodejs_24`) | ランタイム |
+| `pnpm` | nix | パッケージマネージャ・monorepo タスクランナー |
+| `deno` | nix | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
+| `gh` | nix | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
+| `jq` | nix | JSON 整形（`aws logs` / `wrangler tail` のパイプ処理） |
+| `aws` | nix (`awscli2`) | Collector ログ・Lambda 診断 |
+| `claude` | pnpm (`@anthropic-ai/claude-code`) | Claude Code |
+| `wrangler` | pnpm | Cloudflare Workers（API デプロイ・D1・tail） |
+| `vercel` | pnpm | Vercel（Frontend ログ・デプロイ確認） |
+| chromium | nix (`playwright-driver.browsers-chromium`) | Crawler の Playwright が呼び出す。`PLAYWRIGHT_BROWSERS_PATH` で image 内 path に固定済み |
 
 ## ログ取得 CLI 認証
 
