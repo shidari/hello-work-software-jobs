@@ -38,9 +38,10 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 
 ```bash
 # Sandbox (Apple container) — Claude Code / CLI ツールはすべてこの中で実行
-./scripts/sandbox-create.sh   # 作成（初回 or 破棄後）
-./scripts/sandbox.sh          # 既存コンテナに bash で入る
+./scripts/sandbox-image.sh    # OCI image を nix で build & load（初回 or image 更新時）
+./scripts/sandbox.sh          # コンテナ起動 + bash で入る（direnv で自動 up も可）
 ./scripts/sandbox-stop.sh     # 停止・破棄
+# direnv 入れていれば repo に cd するだけで container は自動 up される
 
 # Root
 pnpm test              # Run all tests
