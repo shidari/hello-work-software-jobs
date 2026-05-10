@@ -56,6 +56,11 @@ container run --rm --name "${NAME}-smoketest" "${TAG}" /bin/bash -c '
   /usr/bin/env bash --version >/dev/null       # exec via /usr/bin/env works
   command -v getconf >/dev/null                # glibc bin (VSCode check-requirements)
   getconf GNU_LIBC_VERSION >/dev/null          # glibc version probe actually returns
+  test -f /etc/ld.so.cache                     # ldconfig cache pre-populated
+  /sbin/ldconfig -p | grep -q "libc\.so"       # ldconfig wrapper resolves cache
+  test -e /lib/ld-linux-aarch64.so.1           # FHS interpreter symlink for prebuilt binaries
+  [[ -n "${LD_LIBRARY_PATH:-}" ]]              # LD_LIBRARY_PATH baked for non-nix prebuilt binaries
+  ls $(echo "$LD_LIBRARY_PATH" | cut -d: -f2)/libstdc++.so.6 >/dev/null  # libstdc++ reachable via LD_LIBRARY_PATH
 ' || { echo "[sandbox-image] smoke test FAILED" >&2; exit 1; }
 echo "[sandbox-image] smoke test passed"
 
