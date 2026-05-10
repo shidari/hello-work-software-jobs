@@ -41,16 +41,16 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 | `~/.sho-sandbox/` 以下を read-write bind mount | `gh` / `claude` / `wrangler` / `vercel` | コンテナ内で各 CLI の `login` を実行し、結果をホストから隔離して永続化。OAuth トークンリフレッシュのため書き込み可 |
 | `~/.aws/{config,credentials}` を `~/.sho-sandbox/aws/` にスナップショット → rw マウント | `aws` | ホストを source of truth にしつつ、cache 書き込みはコンテナに閉じる。snapshot は `sandbox.sh` 起動時に毎回再 sync するので、ホスト config の変更は次回 `cd`（direnv `--ensure-up`）で反映される。`aws sso login` もコンテナ内で実行 |
 
-永続化パス（image は `HOME=/root` 指定だが Apple container により runtime user `node` (UID 1000) の `/home/node` に上書きされる。コンテナ側 path は明示的に `/home/node/...` でマウント）:
+永続化パス（image は `HOME=/root` 指定で Apple container も runtime をそのまま root で起動するので `/root/...` にマウント）:
 
 | ツール | ホスト側 | コンテナ内 |
 |--------|---------|-----------|
-| `gh` | `~/.sho-sandbox/gh/` | `/home/node/.config/gh/` |
-| `claude` | `~/.sho-sandbox/claude/` | `/home/node/.claude/` |
-| `wrangler` | `~/.sho-sandbox/wrangler/` | `/home/node/.config/.wrangler/` |
-| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/home/node/.local/share/com.vercel.cli/`, `/home/node/.config/com.vercel.cli/` |
-| `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/home/node/.vscode-server/` |
-| `aws` | `~/.sho-sandbox/aws/`（host config を毎回 snapshot + cache が rw で書かれる） | `/home/node/.aws/` |
+| `gh` | `~/.sho-sandbox/gh/` | `/root/.config/gh/` |
+| `claude` | `~/.sho-sandbox/claude/` | `/root/.claude/` |
+| `wrangler` | `~/.sho-sandbox/wrangler/` | `/root/.config/.wrangler/` |
+| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/root/.local/share/com.vercel.cli/`, `/root/.config/com.vercel.cli/` |
+| `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/root/.vscode-server/` |
+| `aws` | `~/.sho-sandbox/aws/`（host config を毎回 snapshot + cache が rw で書かれる） | `/root/.aws/` |
 
 ## image を更新したい時
 
