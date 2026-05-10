@@ -12,3 +12,6 @@ TODO.md
 .env*.local
 .debug/
 coverage/
+result
+result-*
+*.oci
