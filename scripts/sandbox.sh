@@ -6,7 +6,17 @@
 
 set -euo pipefail
 
-REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# Resolve the *main* repo's host path even when this script is invoked from
+# a git worktree. We mount that path into the container at the *same* host
+# path, so worktree `.git` files (which contain absolute host paths like
+# `gitdir: /Users/.../<repo>/.git/worktrees/<name>`) resolve correctly inside.
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+if MAIN_GIT_DIR=$(git -C "$SCRIPT_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+  REPO=$(dirname "$MAIN_GIT_DIR")
+else
+  REPO=$(cd "$SCRIPT_DIR/.." && pwd)
+fi
+
 NAME=sho-sandbox
 IMAGE=sho-sandbox:latest
 ENSURE_UP_ONLY=0
@@ -62,7 +72,7 @@ if ! has_container -a; then
   GIT_EMAIL=$(git -C "$REPO" config --get user.email || echo "sandbox@localhost")
 
   MOUNTS=(
-    -v "$REPO:/work"
+    -v "$REPO:$REPO"
     -v "$STATE/wrangler:/root/.config/.wrangler"
     -v "$STATE/vercel-data:/root/.local/share/com.vercel.cli"
     -v "$STATE/vercel-config:/root/.config/com.vercel.cli"
@@ -79,13 +89,19 @@ if ! has_container -a; then
     -e GIT_AUTHOR_EMAIL="$GIT_EMAIL" \
     -e GIT_COMMITTER_NAME="$GIT_NAME" \
     -e GIT_COMMITTER_EMAIL="$GIT_EMAIL" \
-    -w /work \
+    -w "$REPO" \
     "$IMAGE" \
     sleep infinity >/dev/null
 elif ! has_container; then
   container start "$NAME" >/dev/null
 fi
 
+# /work は image の PATH (=/work/node_modules/.bin) と既存 docs に baked
+# されているので、$REPO への symlink として常に提供する。container 起動
+# 直後に張り直すので、bind mount の先（worktree path 等）が変わっても追従
+# する。
+container exec "$NAME" /bin/bash -c "rm -rf /work && ln -sfT '$REPO' /work" >/dev/null
+
 (( ENSURE_UP_ONLY )) && exit 0
 
-exec container exec -it -w /work "$NAME" /bin/bash
+exec container exec -it -w "$REPO" "$NAME" /bin/bash
