@@ -33,8 +33,11 @@ fi
 
 # Sandbox state lives under ~/.sho-sandbox/ on the host. Each subdir is bind-mounted
 # into the container so credential/IDE state survives container recreation.
-# Mount targets use /home/node/... explicitly — Apple container runs the image as
-# user `node` (UID 1000) regardless of the image's HOME=/root setting in flake.nix.
+# Mount targets follow image HOME=/root (flake.nix). Earlier we expected Apple
+# container to remap the runtime user to `node` (UID 1000), but recent versions
+# run the image as its declared user (root) — so /home/node/... mounts went
+# unused and `gh login` etc. lost persistence. Sticking to /root keeps mounts
+# aligned with the actual runtime HOME.
 STATE="$HOME/.sho-sandbox"
 mkdir -p \
   "$STATE/wrangler" \
@@ -60,13 +63,13 @@ if ! has_container -a; then
 
   MOUNTS=(
     -v "$REPO:/work"
-    -v "$STATE/wrangler:/home/node/.config/.wrangler"
-    -v "$STATE/vercel-data:/home/node/.local/share/com.vercel.cli"
-    -v "$STATE/vercel-config:/home/node/.config/com.vercel.cli"
-    -v "$STATE/gh:/home/node/.config/gh"
-    -v "$STATE/claude:/home/node/.claude"
-    -v "$STATE/vscode-server:/home/node/.vscode-server"
-    -v "$STATE/aws:/home/node/.aws"
+    -v "$STATE/wrangler:/root/.config/.wrangler"
+    -v "$STATE/vercel-data:/root/.local/share/com.vercel.cli"
+    -v "$STATE/vercel-config:/root/.config/com.vercel.cli"
+    -v "$STATE/gh:/root/.config/gh"
+    -v "$STATE/claude:/root/.claude"
+    -v "$STATE/vscode-server:/root/.vscode-server"
+    -v "$STATE/aws:/root/.aws"
   )
 
   container run -d --name "$NAME" \

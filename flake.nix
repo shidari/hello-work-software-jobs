@@ -49,10 +49,14 @@
         # /work is the bind-mount target; /tmp is conventional. Both must exist
         # in the rootfs even before the host mount lands. nsswitch lets glibc
         # resolve DNS via /etc/resolv.conf (populated by Apple container).
+        # passwd/group give uid 0 a name so `id -un` and friends (notably
+        # VSCode Dev Containers' attach probe) succeed.
         extraCommands = ''
           mkdir -p work tmp etc
           chmod 1777 tmp
           echo "hosts: files dns" > etc/nsswitch.conf
+          echo "root:x:0:0:root:/root:/bin/bash" > etc/passwd
+          echo "root:x:0:" > etc/group
         '';
 
         config = {
