@@ -10,7 +10,7 @@ import type { SimpleJobSearchPage } from "./search";
 // ============================================================
 
 const _detailedJobSearchPage: unique symbol = Symbol("DetailedJobSearchPage");
-export type DetailedJobSearchPage = Page & {
+type DetailedJobSearchPage = Page & {
   [_detailedJobSearchPage]: unknown;
 };
 

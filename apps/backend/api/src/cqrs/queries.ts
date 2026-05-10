@@ -22,12 +22,12 @@ export class FetchJobError extends Data.TaggedError("FetchJobError")<{
   readonly errorType: "client" | "server";
 }> {}
 
-export class FetchJobListError extends Data.TaggedError("FetchJobListError")<{
+class FetchJobListError extends Data.TaggedError("FetchJobListError")<{
   readonly message: string;
   readonly errorType: "client" | "server";
 }> {}
 
-export class FetchStatsError extends Data.TaggedError("FetchStatsError")<{
+class FetchStatsError extends Data.TaggedError("FetchStatsError")<{
   readonly message: string;
 }> {}
 
@@ -266,7 +266,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
   },
 ) {}
 
-export type DailyStat = {
+type DailyStat = {
   addedDate: string;
   count: number;
   jobNumbers: string[];

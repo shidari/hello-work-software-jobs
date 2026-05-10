@@ -12,7 +12,7 @@ import {
   SearchFilterSchema,
 } from "./JobSearchFilter.schema";
 
-export { type SearchFilter, SearchFilterSchema };
+export type { SearchFilter };
 
 type JobsQuery = InferRequestType<
   ReturnType<typeof hc<AppType>>["jobs"]["$get"]

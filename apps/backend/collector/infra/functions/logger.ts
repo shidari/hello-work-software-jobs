@@ -1,5 +1,5 @@
 import { logErrorCause, makeLogger } from "@sho/logger";
 
 // @sho/logger の薄いラッパ。service=collector を束縛する。
-export const { LoggerLayer, runLog } = makeLogger("collector");
+export const { LoggerLayer } = makeLogger("collector");
 export { logErrorCause };

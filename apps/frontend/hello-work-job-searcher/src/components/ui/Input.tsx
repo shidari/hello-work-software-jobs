@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import styles from "./Input.module.css";
 
-export type InputProps = ComponentProps<"input"> & {
+type InputProps = ComponentProps<"input"> & {
   invalid?: boolean;
 };
 

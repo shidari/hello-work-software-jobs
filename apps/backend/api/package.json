@@ -19,10 +19,8 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "~0.12.21",
-		"@dotenvx/dotenvx": "^1.54.1",
 		"@types/node": "^24.0.15",
 		"tsdown": "^0.21.0",
-		"tsx": "^4.20.3",
 		"typescript": "catalog:",
 		"vitest": "~3.2.4",
 		"@vitest/coverage-istanbul": "~3.2.4",
@@ -34,7 +32,6 @@
 		"@sho/db": "workspace:*",
 		"@sho/logger": "workspace:*",
 		"@sho/models": "workspace:*",
-		"dotenv": "^17.0.0",
 		"effect": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "^1.0.8",

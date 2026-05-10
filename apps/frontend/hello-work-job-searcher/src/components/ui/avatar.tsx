@@ -5,7 +5,7 @@ import styles from "./avatar.module.css";
 
 const SIZE_PX = { sm: 24, default: 40, lg: 56 } as const;
 
-export type AvatarProps = ComponentProps<"span"> & {
+type AvatarProps = ComponentProps<"span"> & {
   src: string;
   alt: string;
   fallback: string;

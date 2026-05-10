@@ -17,7 +17,6 @@
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.149",
     "@types/node": "22.19.15",
     "tsdown": "^0.21.0",
     "tsx": "^4.20.3",
@@ -26,9 +25,7 @@
     "@vitest/coverage-v8": "~3.2.4"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.800.0",
     "@sho/api": "workspace:*",
-    "@sho/logger": "workspace:*",
     "@sho/models": "workspace:*",
     "@sparticuz/chromium": "^143.0.4",
     "effect": "catalog:",

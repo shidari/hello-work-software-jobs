@@ -9,12 +9,6 @@ export const favoriteJobsAtom = atom<JobOverview[]>([]);
 
 export const favoriteJobsSelector = atom((get) => get(favoriteJobsAtom));
 
-export const isFavoriteSelector = atom((get) => {
-  const favorites = get(favoriteJobsAtom);
-  return (jobNumber: string) =>
-    favorites.some((job) => job.jobNumber === jobNumber);
-});
-
 // ── Writers (side effects) ──
 
 export const favoriteAppendWriter = atom(

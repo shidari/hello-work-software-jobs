@@ -23,16 +23,8 @@ import {
 
 // ── エラー ──
 
-export class JobDetailTransformError extends Data.TaggedError(
+class JobDetailTransformError extends Data.TaggedError(
   "JobDetailTransformError",
-)<{
-  readonly reason: string;
-  readonly error?: unknown;
-  readonly rawFields: string;
-}> {}
-
-export class CompanyTransformError extends Data.TaggedError(
-  "CompanyTransformError",
 )<{
   readonly reason: string;
   readonly error?: unknown;
@@ -198,7 +190,7 @@ export type TransformedJob = typeof RawJobToDomainJob.Type;
 
 // ── 集約: RawCompany → Domain Company ──
 
-export const RawCompanyToDomainCompany = Schema.Struct({
+const RawCompanyToDomainCompany = Schema.Struct({
   establishmentNumber: EstablishmentNumber,
   companyName: Schema.NullOr(Schema.String),
   postalCode: Schema.NullOr(Schema.String),
@@ -209,8 +201,6 @@ export const RawCompanyToDomainCompany = Schema.Struct({
   businessDescription: Schema.NullOr(Schema.String),
   corporateNumber: Schema.NullOr(CorporateNumber),
 });
-
-export type TransformedCompany = typeof RawCompanyToDomainCompany.Type;
 
 // ── Transformer サービス ──
 

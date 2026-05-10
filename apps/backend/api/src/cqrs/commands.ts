@@ -4,7 +4,7 @@ import { CompanyToCompanyTable, JobStoreDB, JobToJobTable } from "../infra/db";
 
 // --- エラー ---
 
-export class InsertJobError extends Data.TaggedError("InsertJobError")<{
+class InsertJobError extends Data.TaggedError("InsertJobError")<{
   readonly message: string;
   readonly errorType: "client" | "server";
 }> {}
@@ -16,7 +16,7 @@ export class InsertJobDuplicationError extends Data.TaggedError(
   readonly errorType: "client" | "server";
 }> {}
 
-export class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
+class UpsertCompanyError extends Data.TaggedError("UpsertCompanyError")<{
   readonly message: string;
   readonly errorType: "client" | "server";
 }> {}
