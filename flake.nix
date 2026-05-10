@@ -28,6 +28,10 @@
           jq
           cacert
           tzdata
+          # glibc bin output: getconf / ldd / getent / locale / iconv 等。
+          # VSCode Dev Containers の check-requirements.sh が getconf で
+          # GNU_LIBC_VERSION を引くのを通すために必要。
+          glibc.bin
 
           # langs / runtimes
           nodejs_24

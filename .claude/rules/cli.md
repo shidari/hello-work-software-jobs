@@ -8,9 +8,9 @@
 |------|-----------|
 | `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / gh / awscli2 / deno / jq / openssh / cacert 等を contents に列挙 |
 | `package.json` (root devDependencies) | `@anthropic-ai/claude-code` / `wrangler` / `vercel` は npm 配布物なので nix を経由せず pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin` に展開され、image の PATH に組み込まれる |
-| `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` のラッパ |
+| `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` → smoke test → 旧 container 破棄 → 新 image で container 再作成までを 1 本で実行 |
 | `scripts/sandbox.sh` | container を作成・起動して `/bin/bash` を投げる。`--ensure-up` で起動だけして抜ける（direnv 用） |
-| `scripts/sandbox-stop.sh` | 停止 + 破棄 |
+| `scripts/sandbox-stop.sh` | 停止 + 破棄（image rebuild なしで一旦 sandbox を消したい時の ad-hoc cleanup 用） |
 | `.envrc` | direnv が repo `cd` 時に `sandbox.sh --ensure-up` を呼ぶ |
 
 ## 前提（ホスト macOS）
@@ -23,9 +23,9 @@
 ## 起動
 
 ```bash
-./scripts/sandbox-image.sh   # 初回 or flake.nix 更新時のみ。VM 経由で nix build → load（10〜30 分）
-./scripts/sandbox.sh         # コンテナ作成（初回）+ 起動 + bash 投入
-./scripts/sandbox-stop.sh    # 停止・破棄
+./scripts/sandbox-image.sh   # 初回 or flake.nix 更新時。nix build → smoke test → container 再作成まで 1 本で実行（5〜30 分、cache が効けば 5 分前後）
+./scripts/sandbox.sh         # 既存 container に bash で入る（image はそのまま、中身だけ触りたい時）
+./scripts/sandbox-stop.sh    # 停止・破棄（ad-hoc cleanup）
 ```
 
 direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-image.sh` は依然手動）。
@@ -56,9 +56,7 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 
 ```bash
 # flake.nix を編集（package を追加 / 削る等）
-./scripts/sandbox-image.sh   # rebuild + reload
-./scripts/sandbox-stop.sh    # 旧 container を破棄
-./scripts/sandbox.sh         # 新 image で container 再作成
+./scripts/sandbox-image.sh   # build → smoke test → 旧 container 破棄 → 新 image で再作成 を 1 本で
 ```
 
 `buildLayeredImage` は path 単位の content-addressed layer なので、変わってない layer は cache から再利用される（差分 layer のみ作り直し）。
