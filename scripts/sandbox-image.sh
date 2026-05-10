@@ -40,5 +40,19 @@ container image load -i "${OCI_ARCHIVE}"
 
 rm -f "${OCI_ARCHIVE}"
 
+echo "[sandbox-image] smoke test"
+# Catches the "build succeeds but image is missing unix conventions" class of
+# regression (e.g. /etc/passwd absent, /usr/bin/env shebang trampoline absent)
+# that nix build itself wouldn't notice. Runs in a throw-away container.
+container run --rm --name sho-sandbox-smoketest "${TAG}" /bin/bash -c '
+  set -euo pipefail
+  test -f /etc/passwd                          # uid 0 name lookup
+  test -e /usr/bin/env                         # shebang trampoline
+  [[ "$(id -un)" == "root" ]]                  # passwd entry resolves
+  [[ "$(id -gn)" == "root" ]]                  # group entry resolves
+  /usr/bin/env bash --version >/dev/null       # exec via /usr/bin/env works
+' || { echo "[sandbox-image] smoke test FAILED" >&2; exit 1; }
+echo "[sandbox-image] smoke test passed"
+
 echo "[sandbox-image] done. Loaded:"
 container image ls | awk 'NR==1 || $1=="sho-sandbox"'
