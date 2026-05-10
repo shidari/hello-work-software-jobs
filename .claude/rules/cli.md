@@ -39,17 +39,18 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 | 方式 | 対象 | 理由 |
 |------|------|------|
 | `~/.sho-sandbox/` 以下を read-write bind mount | `gh` / `claude` / `wrangler` / `vercel` | コンテナ内で各 CLI の `login` を実行し、結果をホストから隔離して永続化。OAuth トークンリフレッシュのため書き込み可 |
-| `~/.aws` を read-only マウント | `aws` | AWS CLI のプロファイル設定ファイルを参照するため。SSO ログインはホスト側で行う |
+| `~/.aws/{config,credentials}` を `~/.sho-sandbox/aws/` にスナップショット → rw マウント | `aws` | ホストを source of truth にしつつ、cache 書き込みはコンテナに閉じる。snapshot は `sandbox.sh` 起動時に毎回再 sync するので、ホスト config の変更は次回 `cd`（direnv `--ensure-up`）で反映される。`aws sso login` もコンテナ内で実行 |
 
-永続化パス（image は root で動くため `HOME=/root`）:
+永続化パス（image は `HOME=/root` 指定だが Apple container により runtime user `node` (UID 1000) の `/home/node` に上書きされる。コンテナ側 path は明示的に `/home/node/...` でマウント）:
 
 | ツール | ホスト側 | コンテナ内 |
 |--------|---------|-----------|
-| `gh` | `~/.sho-sandbox/gh/` | `/root/.config/gh/` |
-| `claude` | `~/.sho-sandbox/claude/` | `/root/.claude/` |
-| `wrangler` | `~/.sho-sandbox/wrangler/` | `/root/.config/.wrangler/` |
-| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/root/.local/share/com.vercel.cli/`, `/root/.config/com.vercel.cli/` |
-| `aws` | `~/.aws/`（ro） | `/root/.aws/`（ro） |
+| `gh` | `~/.sho-sandbox/gh/` | `/home/node/.config/gh/` |
+| `claude` | `~/.sho-sandbox/claude/` | `/home/node/.claude/` |
+| `wrangler` | `~/.sho-sandbox/wrangler/` | `/home/node/.config/.wrangler/` |
+| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/home/node/.local/share/com.vercel.cli/`, `/home/node/.config/com.vercel.cli/` |
+| `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/home/node/.vscode-server/` |
+| `aws` | `~/.sho-sandbox/aws/`（host config を毎回 snapshot + cache が rw で書かれる） | `/home/node/.aws/` |
 
 ## image を更新したい時
 
@@ -83,7 +84,7 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 
 | 基盤 | CLI | 認証 |
 |------|-----|------|
-| Collector | `aws logs` | `AWS_PROFILE=crawler-debug`（`~/.aws` はホスト側で整備） |
+| Collector | `aws logs` | `AWS_PROFILE=crawler-debug`（profile 定義はホストの `~/.aws/{config,credentials}` を `~/.sho-sandbox/aws/` にスナップショット。AssumeRole / SSO の cache はコンテナ内 `~/.sho-sandbox/aws/` に閉じる） |
 | API (Workers) | `wrangler tail job-store` | サンドボックス内で `wrangler login`（`~/.sho-sandbox/wrangler/` に永続化） |
 | Frontend (Vercel) | `vercel logs` | サンドボックス内で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
 
