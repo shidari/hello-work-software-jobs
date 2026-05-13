@@ -9,11 +9,21 @@ description: コミットから PR 作成までを一貫して実行する。pre
 
 ## 手順
 
+### 0. codex review loop
+
+未コミット差分にコード変更（`.ts` / `.tsx` / `.js` / `.jsx` / `.css` / `.sh` / `.py` 等）が含まれる場合、`/codex-review-loop` を実行して別 LLM のセカンドオピニオンを浴びる。
+
+- ドキュメント (`.md`) / 設定 (`.json` / `.toml` / `.yml`) のみの変更ならスキップ
+- 1 行未満の trivial 修正もスキップ可
+- ユーザーが明示的に「codex 飛ばして」と言えばスキップ
+- ループ完了後、修正内容を確認してから次の step に進む
+- **重要**: ループ中の修正は working tree にしか入らない。事前に staging 済みのファイルがループで書き換わると、後続 step (biome / commit) は古い staged 版を見てしまう。`git status --short` で確認して、ループが触ったファイルを `git add <path>` で個別に再 staging する（`git add -A` は禁止）
+
 ### 1. Pre-commit チェック
 
 以下を順番に実行し、問題があれば修正する:
 
-1. `pnpm exec biome check --write <staged files>` (staged ファイルのみ lint + format。プロジェクト全体への実行は禁止)
+1. `pnpm exec biome check --write <staged files>` で staged ファイルのみ lint + format（プロジェクト全体への実行は禁止）。**対象は biome が扱える拡張子のみ**: `.ts` / `.tsx` / `.js` / `.jsx` / `.mjs` / `.cjs` / `.css`（`.json` は biome.json で除外済み）。`.md` / `.sh` / `.yml` 等は biome 対象外なのでスキップ。staged にこれらの対象拡張子が 1 つもなければ biome 自体をスキップしてよい
 2. 変更があったパッケージのみ `pnpm exec tsc --noEmit` で型チェック
 3. ドキュメント更新（必須・スキップ禁止） — コミット前に必ず以下を実行する:
    1. `CLAUDE.md` を Read し、staged 変更と照合して **Common Commands** を更新する
