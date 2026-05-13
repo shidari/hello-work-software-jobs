@@ -19,6 +19,11 @@ fi
 
 NAME=sho-sandbox
 IMAGE=sho-sandbox:latest
+# Shared private network with the ops container (sho-mcp-ops). Dev sandbox
+# joins it so Claude inside this container can reach MCP endpoints exposed
+# by ops at sho-mcp-ops:7001 / :7002. Network is idempotently created here
+# and again in scripts/ops-sandbox.sh — whoever boots first wins.
+NETWORK=sho-mcp-net
 ENSURE_UP_ONLY=0
 
 [[ "${1-}" == "--ensure-up" ]] && ENSURE_UP_ONLY=1
@@ -33,6 +38,16 @@ has_image() {
 }
 has_container() {
   container list ${1:-} 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
+has_network() {
+  container network ls 2>/dev/null | awk -v n="$NETWORK" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
+# Best-effort check: existing container's stored config mentions NETWORK.
+# Grepping inspect output without parsing JSON is brittle but conservative —
+# a false negative just produces a warning (not an error), and the real fix
+# is "recreate the container".
+container_on_network() {
+  container inspect "$NAME" 2>/dev/null | grep -q "$NETWORK"
 }
 
 if ! has_image; then
@@ -67,6 +82,21 @@ if [[ -d "$HOME/.aws" ]]; then
   [[ -f "$HOME/.aws/credentials" ]] && cp -p "$HOME/.aws/credentials" "$STATE/aws/credentials"
 fi
 
+if ! has_network; then
+  echo "[sandbox] creating network ${NETWORK}"
+  container network create "$NETWORK" >/dev/null
+fi
+
+# Migration warning: if the container was created before sho-mcp-net was
+# introduced, --network was never applied. Apple container doesn't expose a
+# safe "attach existing container to network" path here, so the only fix is
+# to recreate. Warn explicitly instead of silently leaving MCP unreachable.
+if has_container -a && ! container_on_network; then
+  echo "[sandbox] WARN: ${NAME} is not on ${NETWORK}." >&2
+  echo "             MCP servers in sho-mcp-ops will be unreachable from this container." >&2
+  echo "             Recreate to attach: ./scripts/sandbox-stop.sh && ./scripts/sandbox.sh" >&2
+fi
+
 if ! has_container -a; then
   GIT_NAME=$(git -C "$REPO" config --get user.name || echo "Sandbox")
   GIT_EMAIL=$(git -C "$REPO" config --get user.email || echo "sandbox@localhost")
@@ -83,6 +113,7 @@ if ! has_container -a; then
   )
 
   container run -d --name "$NAME" \
+    --network "$NETWORK" \
     -m 6g \
     "${MOUNTS[@]}" \
     -e GIT_AUTHOR_NAME="$GIT_NAME" \
