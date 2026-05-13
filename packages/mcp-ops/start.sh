@@ -3,14 +3,19 @@
 # with mcp-proxy so Claude (in the separate dev sandbox container) can reach
 # them over SSE on the shared private network.
 #
-#   :$MCP_OPS_GH_PORT   github-mcp-server (Go binary from GitHub releases)
-#                       wrapped by mcp-proxy, toolset hardcoded to read-only
-#                       core sets so the client can't widen scope at runtime.
-#   :$MCP_OPS_AWS_PORT  awslabs.cloudwatch-mcp-server (Python via uvx)
-#                       wrapped by mcp-proxy.
+#   :$MCP_OPS_GH_PORT       github-mcp-server (Go binary from GitHub releases)
+#                           wrapped by mcp-proxy, toolset hardcoded to read-only
+#                           core sets so the client can't widen scope at runtime.
+#   :$MCP_OPS_AWS_PORT      awslabs.cloudwatch-mcp-server (Python via uvx)
+#                           wrapped by mcp-proxy. CloudWatch logs/metrics 専用。
+#   :$MCP_OPS_AWS_API_PORT  awslabs.aws-api-mcp-server (Python via uvx) wrapped
+#                           by mcp-proxy. READ_OPERATIONS_ONLY=true で固定し、
+#                           SQS / Lambda / EventBridge 等の生 AWS API を read
+#                           専用で expose する（CloudWatch 以外の診断用途）。
+#                           dev sandbox から awscli を撤去した代わり。
 #
-# Runs as PID 2 under tini (flake.nix Entrypoint). Both children run in the
-# background; we `wait -n` and tear the other down on first exit so tini sees
+# Runs as PID 2 under tini (flake.nix Entrypoint). All children run in the
+# background; we `wait -n` and tear the others down on first exit so tini sees
 # a clean shutdown.
 #
 # Tokens live ONLY in this process tree (GITHUB_PERSONAL_ACCESS_TOKEN from
@@ -21,6 +26,7 @@ set -euo pipefail
 
 GH_PORT="${MCP_OPS_GH_PORT:-7001}"
 AWS_PORT="${MCP_OPS_AWS_PORT:-7002}"
+AWS_API_PORT="${MCP_OPS_AWS_API_PORT:-7003}"
 
 # === github-mcp-server: download release binary on first run ============
 
@@ -86,11 +92,26 @@ uvx mcp-proxy --port "$AWS_PORT" --host 0.0.0.0 \
   uvx awslabs.cloudwatch-mcp-server@latest &
 AWS_PID=$!
 
-echo "[start] up: github=${GH_PID} aws=${AWS_PID}"
+echo "[start] aws-api-mcp-server → mcp-proxy :${AWS_API_PORT} (read-only)"
+# READ_OPERATIONS_ONLY=true で書き込み系 AWS API を server 側で拒否する。
+# AWS_PROFILE / config file path 等は cloudwatch-mcp-server と同じ理由で
+# 明示的に渡す（mcp-proxy が env を strip するため）。
+uvx mcp-proxy --port "$AWS_API_PORT" --host 0.0.0.0 \
+  -e LD_LIBRARY_PATH "$LD_LIBRARY_PATH" \
+  -e AWS_PROFILE "$AWS_PROFILE" \
+  -e AWS_REGION "$AWS_REGION" \
+  -e AWS_CONFIG_FILE /root/.aws/config \
+  -e AWS_SHARED_CREDENTIALS_FILE /root/.aws/credentials \
+  -e READ_OPERATIONS_ONLY true \
+  -- \
+  uvx awslabs.aws-api-mcp-server@latest &
+AWS_API_PID=$!
 
-# Wait for either child to die; bring the other down too so tini reaps cleanly.
+echo "[start] up: github=${GH_PID} aws=${AWS_PID} aws-api=${AWS_API_PID}"
+
+# Wait for any child to die; bring the others down too so tini reaps cleanly.
 wait -n
 echo "[start] one child exited — tearing down siblings" >&2
-kill -TERM "$GH_PID" "$AWS_PID" 2>/dev/null || true
+kill -TERM "$GH_PID" "$AWS_PID" "$AWS_API_PID" 2>/dev/null || true
 wait
 exit 1

@@ -22,8 +22,20 @@ echo "# Trace for jobNumber=$job_number (last ${minutes}m)"
 echo "############################################################"
 echo ""
 
-echo "##### [1/3] Crawler (CloudWatch) #####"
-bash "$dir/debug-crawler.sh" "$job_number" "$minutes" || echo "(crawler check failed; see error above)"
+echo "##### [1/3] Crawler (CloudWatch via MCP) #####"
+cat <<EOF
+NOTE: crawler ログは ops MCP 経由で取得する（dev sandbox に awscli は無い）。
+SKILL.md の「Crawler (CloudWatch via MCP)」節に従い、
+ops-aws-cloudwatch の execute_log_insights_query を以下クエリで呼ぶ:
+
+  log-group:  /aws/lambda/job-detail-etl
+  range:      ${minutes} minutes
+  query:
+    fields @timestamp, @message
+    | filter @message like /${job_number}/
+    | sort @timestamp desc
+    | limit 200
+EOF
 echo ""
 
 echo "##### [2/3] API (Workers) #####"

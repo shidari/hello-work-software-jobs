@@ -40,7 +40,11 @@
 
           # cli tools
           gh
-          awscli2
+          # AWS CLI は dev sandbox からは撤去。実 AWS への診断は ops container
+          # (packages/mcp-ops) の awslabs.aws-api-mcp-server / cloudwatch-mcp-server
+          # 経由で MCP で行う（読み取り専用）。LocalStack は docker compose の
+          # localstack 公式 image に同梱されている `awslocal` を `docker compose
+          # exec` 経由で呼ぶ。
           # claude-code / wrangler / vercel など npm 配布物は pnpm 管理に逃がす
           # （nixpkgs 経由だと pnpm install が VM disk を食い潰す or 重い）。
           # container 内で pnpm 側から PATH を通す前提。

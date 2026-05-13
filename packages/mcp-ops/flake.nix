@@ -70,6 +70,7 @@
             "LD_LIBRARY_PATH=${pkgs.lib.getLib pkgs.stdenv.cc.cc}/lib"
             "MCP_OPS_GH_PORT=7001"
             "MCP_OPS_AWS_PORT=7002"
+            "MCP_OPS_AWS_API_PORT=7003"
           ];
         };
       };

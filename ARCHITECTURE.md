@@ -134,7 +134,7 @@ AWS Lambda (Docker) + SQS + EventBridge + Playwright + Effect サービスパタ
 
 1. **求人番号抽出** — EventBridge (平日 01:00 JST) → Lambda `job-number-crawler` → Playwright で検索ページ走査 → SQS 送信
 2. **求人詳細 ETL** — SQS (batchSize: 1) → Lambda `job-detail-etl` → Playwright で HTML 取得 → linkedom でパース → API に POST
-3. **手動トリガー** — AWS CLI で Lambda invoke
+3. **手動トリガー** — ops MCP (`ops-aws-api`, read-only) では Lambda invoke は不可。一時的に書き込みが必要な場合は host で `aws lambda invoke` を叩く
 
 ### 設計
 

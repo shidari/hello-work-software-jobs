@@ -7,18 +7,29 @@
 # 前提:
 #   - docker compose up 済み（LocalStack + Lambda コンテナ）
 #   - API サーバー起動済み（localhost:8787）
+#
+# SQS 操作は host / dev sandbox の awscli ではなく、docker compose の
+# localstack service に同梱されている awslocal を `docker compose exec` で
+# 呼ぶ。これで実行環境側に awscli を要求しない（dev sandbox から awscli
+# を撤去した後の前提）。
 set -euo pipefail
 
 MAX_COUNT="${1:-3}"
 CRAWLER_URL="http://localhost:9000/2015-03-31/functions/function/invocations"
 LAMBDA_URL="${LAMBDA_ENDPOINT:-http://localhost:9001}/2015-03-31/functions/function/invocations"
 API_URL="${JOB_STORE_ENDPOINT:-http://localhost:8787}"
-SQS_ENDPOINT="${SQS_ENDPOINT_URL:-http://localhost:4566}"
-QUEUE_URL="${SQS_ENDPOINT}/000000000000/job-detail-queue"
+# localstack container 内部からは自身を localhost:4566 で見られるので
+# QUEUE_URL は固定値で良い（host 側の SQS_ENDPOINT_URL を持ち出す必要はない）。
+QUEUE_URL="http://localhost:4566/000000000000/job-detail-queue"
 
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-test}"
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-test}"
-export AWS_REGION="${AWS_REGION:-ap-northeast-1}"
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+
+# localstack 内で実行する awslocal の wrapper。-T で stdin TTY を切る
+# （非対話、CI でも動く）。
+awslocal_in_localstack() {
+  docker compose -f "$COMPOSE_FILE" exec -T localstack awslocal "$@"
+}
 
 echo "=== E2E Pipeline Test ==="
 echo "  max_count: $MAX_COUNT"
@@ -41,7 +52,7 @@ processed=0
 failures=0
 
 while true; do
-  result=$(aws --endpoint-url="$SQS_ENDPOINT" sqs receive-message \
+  result=$(awslocal_in_localstack sqs receive-message \
     --queue-url "$QUEUE_URL" \
     --max-number-of-messages 1 \
     --wait-time-seconds 1 \
@@ -79,7 +90,7 @@ while true; do
 
   if [ "$response" = "null" ]; then
     echo "ok"
-    aws --endpoint-url="$SQS_ENDPOINT" sqs delete-message \
+    awslocal_in_localstack sqs delete-message \
       --queue-url "$QUEUE_URL" \
       --receipt-handle "$receipt" 2>/dev/null || true
   else
