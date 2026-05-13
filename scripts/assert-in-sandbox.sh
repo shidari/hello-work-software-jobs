@@ -11,11 +11,12 @@ if [[ "${SHO_SANDBOX:-}" == "1" ]]; then
   exit 0
 fi
 
-# CI bypass: GitHub Actions / generic CI runners set CI=true. Letting installs
-# run there is required for PR checks and deploy workflows that do
-# `pnpm install --frozen-lockfile` on `ubuntu-latest` without our sandbox env.
-# The sandbox guard is a developer-host gate, not a CI gate.
-if [[ "${CI:-}" == "true" ]]; then
+# CI bypass: GitHub Actions sets CI=true, Vercel sets CI=1, Cloudflare Workers
+# Builds also sets CI. The convention is that CI being set to any truthy value
+# means "we're in CI". Letting installs run there is required for PR checks and
+# deploy workflows that do `pnpm install --frozen-lockfile` without our sandbox
+# env. The sandbox guard is a developer-host gate, not a CI gate.
+if [[ -n "${CI:-}" ]]; then
   exit 0
 fi
 
