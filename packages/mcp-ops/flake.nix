@@ -29,6 +29,12 @@
           # Python + uv: uvx で awslabs.cloudwatch-mcp-server と mcp-proxy を実行
           python3
           uv
+          # libstdc++: awslabs.cloudwatch-mcp-server が内部で numpy を import し、
+          # numpy の C-extension が libstdc++.so.6 を dlopen する。nix の minimal
+          # image だと libstdc++ は coreutils/python と別 package で入らないので、
+          # ここで stdenv.cc.cc.lib を明示的に追加し、Env の LD_LIBRARY_PATH で
+          # dlopen が見つけられるようにする。
+          (lib.getLib stdenv.cc.cc)
           # tini: PID 1 として子プロセス (mcp-proxy × 2) の signal を取り回す
           tini
         ];
@@ -59,6 +65,9 @@
             "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             "TZ=Asia/Tokyo"
             "UV_CACHE_DIR=/root/.cache/uv"
+            # numpy / scipy など C-extension が libstdc++.so.6 を dlopen するため。
+            # contents に追加した stdenv.cc.cc.lib (= libstdc++) の path を渡す。
+            "LD_LIBRARY_PATH=${pkgs.lib.getLib pkgs.stdenv.cc.cc}/lib"
             "MCP_OPS_GH_PORT=7001"
             "MCP_OPS_AWS_PORT=7002"
           ];

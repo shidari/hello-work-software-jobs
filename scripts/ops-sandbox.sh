@@ -45,6 +45,7 @@ has_network() {
 if [[ "$ACTION" == "stop" ]]; then
   container stop "$NAME" 2>/dev/null || true
   container delete "$NAME" 2>/dev/null || true
+  rm -f "$HOME/.sho-mcp-ops/github-pat"
   echo "[ops-sandbox] stopped."
   exit 0
 fi
@@ -64,15 +65,29 @@ fi
 
 # Token / credential state. ops container is the ONLY surface that touches
 # these — claude container's mount set must not include them.
-#   github-pat: fine-grained PAT file (one-line, no trailing newline)
+#   github-pat: macOS Keychain が source of truth。起動毎に Keychain から取り出して
+#               $STATE/github-pat に書き出し、bind mount で /run/secrets に渡す。
+#               container 稼働中だけ host に file が存在。--stop で破棄する。
 #   aws/      : ~/.aws snapshot, same convention as sho-sandbox uses today
 STATE="$HOME/.sho-mcp-ops"
+KEYCHAIN_SERVICE=sho-mcp-ops
+KEYCHAIN_ACCOUNT=github-pat
 mkdir -p "$STATE/aws" "$STATE/cache"
-if [[ ! -f "$STATE/github-pat" ]]; then
-  echo "[ops-sandbox] WARN: ${STATE}/github-pat not present." >&2
-  echo "             Create a fine-grained PAT at https://github.com/settings/personal-access-tokens" >&2
-  echo "             with Contents:Read, Pull requests:RW, Issues:R, Actions:R" >&2
-  echo "             and write the token (single line, no newline) to that path." >&2
+
+if [[ "$ACTION" != "logs" ]]; then
+  if security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_ACCOUNT" -w >/dev/null 2>&1; then
+    (
+      umask 077
+      security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_ACCOUNT" -w \
+        | tr -d '\n' > "$STATE/github-pat"
+    )
+  else
+    echo "ERROR: github-pat が Keychain に見つかりません (service=${KEYCHAIN_SERVICE}, account=${KEYCHAIN_ACCOUNT})." >&2
+    echo "       fine-grained PAT を https://github.com/settings/personal-access-tokens で発行し、" >&2
+    echo "       次のコマンドで Keychain に保存してください (token はプロンプトに貼り付け; argv にも履歴にも残らない):" >&2
+    echo "         security add-generic-password -s ${KEYCHAIN_SERVICE} -a ${KEYCHAIN_ACCOUNT} -T /usr/bin/security -w" >&2
+    exit 1
+  fi
 fi
 if [[ -d "$HOME/.aws" ]]; then
   [[ -f "$HOME/.aws/config"      ]] && cp -p "$HOME/.aws/config"      "$STATE/aws/config"

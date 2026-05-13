@@ -55,14 +55,23 @@ export GITHUB_PERSONAL_ACCESS_TOKEN
 # === spawn both servers under mcp-proxy =================================
 
 echo "[start] github-mcp-server → mcp-proxy :${GH_PORT}"
-uvx mcp-proxy --port "$GH_PORT" --host 0.0.0.0 -- \
+# mcp-proxy はデフォルト --no-pass-environment で子プロセスに env を継承しない。
+# token 1 つだけ -e で明示的に渡す（--pass-environment は他 env も漏れるので避ける）。
+uvx mcp-proxy --port "$GH_PORT" --host 0.0.0.0 \
+  -e GITHUB_PERSONAL_ACCESS_TOKEN "$GITHUB_PERSONAL_ACCESS_TOKEN" \
+  -- \
   "$GH_BIN" stdio \
     --read-only \
     --toolsets=pull_requests,issues,actions,repos &
 GH_PID=$!
 
 echo "[start] cloudwatch-mcp-server → mcp-proxy :${AWS_PORT}"
-uvx mcp-proxy --port "$AWS_PORT" --host 0.0.0.0 -- \
+# cloudwatch-mcp-server 内の numpy は libstdc++.so.6 を dlopen する。flake.nix で
+# image に libstdc++ を入れ、Env の LD_LIBRARY_PATH に path を載せたが、
+# mcp-proxy は子プロセスに env を継承しないので明示的に渡す必要がある。
+uvx mcp-proxy --port "$AWS_PORT" --host 0.0.0.0 \
+  -e LD_LIBRARY_PATH "$LD_LIBRARY_PATH" \
+  -- \
   uvx awslabs.cloudwatch-mcp-server@latest &
 AWS_PID=$!
 

@@ -66,6 +66,8 @@ container run --rm --name "${NAME}-smoketest" --entrypoint /bin/bash "${TAG}" -c
   command -v python3 >/dev/null  # uvx runtime
   command -v uv      >/dev/null  # awslabs.cloudwatch-mcp-server / mcp-proxy 起動経路
   command -v tini    >/dev/null  # PID 1 で子プロセスの signal を取り回す
+  # numpy / scipy が dlopen で要求するため LD_LIBRARY_PATH 越しに見える必要あり
+  python3 -c "import ctypes; ctypes.CDLL(\"libstdc++.so.6\")"
 ' || { echo "[ops-sandbox-image] smoke test FAILED" >&2; exit 1; }
 echo "[ops-sandbox-image] smoke test passed"
 
