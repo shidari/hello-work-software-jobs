@@ -8,11 +8,26 @@
 #   MAX_ROUNDS=5 ./loop.sh # 環境変数でも上書き可
 #
 # 前提:
+#   - **sandbox 内での実行必須** (SHO_SANDBOX=1 で判別)。子 claude が
+#     --dangerously-skip-permissions で動くため host 直接実行は危険
 #   - codex / claude / git が実行環境で利用可能（codex / claude が無い場合は graceful skip）
 #   - 未コミット差分 (staged + unstaged + untracked) が存在する
 #   - codex / claude ともに login 済み
 
 set -euo pipefail
+
+# サンドボックス必須。子 claude が `--dangerously-skip-permissions` で動くため、
+# host で誤起動するとファイルシステム / ネットワークに無制限アクセスを与えてしまう。
+# flake.nix の image Env に焼き込んだ SHO_SANDBOX=1 で host vs sandbox を判別する
+# (scripts/assert-in-sandbox.sh と同じ規約)。
+if [[ "${SHO_SANDBOX:-}" != "1" ]]; then
+  cat >&2 <<'EOF'
+ERROR: codex-review-loop は --dangerously-skip-permissions を使うため sandbox 内でのみ実行可。
+
+  ./scripts/sandbox.sh で sandbox に入り直してから再実行してください。
+EOF
+  exit 1
+fi
 
 MAX_ROUNDS="${1:-${MAX_ROUNDS:-3}}"
 
@@ -21,15 +36,12 @@ if ! [[ "$MAX_ROUNDS" =~ ^[0-9]+$ ]] || [[ "$MAX_ROUNDS" -lt 1 ]]; then
   exit 1
 fi
 
-# checksum: Linux サンドボックス (coreutils) は sha256sum、macOS host は shasum を持つ。
-if command -v sha256sum >/dev/null 2>&1; then
-  CHECKSUM=sha256sum
-elif command -v shasum >/dev/null 2>&1; then
-  CHECKSUM=shasum
-else
-  echo "ERROR: sha256sum / shasum のいずれも見つかりません" >&2
+# sandbox は Linux + coreutils なので sha256sum 固定でよい。
+if ! command -v sha256sum >/dev/null 2>&1; then
+  echo "ERROR: sha256sum が見つかりません (sandbox image が壊れている可能性)" >&2
   exit 1
 fi
+CHECKSUM=sha256sum
 
 # codex / claude が無ければ graceful skip。/commit-and-pr の Step 0 として呼ばれた時、
 # 環境に codex/claude が無くても commit フローを止めない。
