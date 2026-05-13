@@ -1,4 +1,22 @@
 {
+  "permissions": {
+    "deny": [
+      "Read(~/.aws/config)",
+      "Read(//Users/zuoxiangtailang/.aws/config)",
+      "Bash(cat ~/.aws/config)",
+      "Bash(cat /Users/zuoxiangtailang/.aws/config)",
+      "Bash(less ~/.aws/config)",
+      "Bash(less /Users/zuoxiangtailang/.aws/config)",
+      "Bash(more ~/.aws/config)",
+      "Bash(more /Users/zuoxiangtailang/.aws/config)",
+      "Bash(head ~/.aws/config)",
+      "Bash(head /Users/zuoxiangtailang/.aws/config)",
+      "Bash(tail ~/.aws/config)",
+      "Bash(tail /Users/zuoxiangtailang/.aws/config)",
+      "Bash(bat ~/.aws/config)",
+      "Bash(bat /Users/zuoxiangtailang/.aws/config)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
