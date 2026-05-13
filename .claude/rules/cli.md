@@ -87,3 +87,36 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 | Frontend (Vercel) | `vercel logs` | サンドボックス内で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
 
 認証が切れている場合は `/debug` skill が検知して再ログインを促す。
+
+## MCP ops コンテナ (sho-mcp-ops)
+
+dev sandbox とは別に、GitHub / AWS の MCP server を expose するための **ops コンテナ**を `sho-mcp-net` という private network 上で動かす。Claude (dev sandbox = `sho-sandbox`) は同 network から SSE でアクセスする。token は ops コンテナだけが持ち、dev sandbox からは直接見えない。
+
+| 層 | 何をするか |
+|------|-----------|
+| `packages/mcp-ops/flake.nix` | aarch64-linux 用の OCI image 定義。bash / curl / python3 / uv / tini / libstdc++ 等 minimal セット |
+| `packages/mcp-ops/start.sh` | image の Cmd。`github-mcp-server` (Go) と `awslabs.cloudwatch-mcp-server` (Python via uvx) を `mcp-proxy` で stdio→SSE 化して 7001 / 7002 で listen |
+| `scripts/ops-sandbox-image.sh` | nix build → OCI archive → `container image load` → smoke test → ops container 再作成 まで 1 本 |
+| `scripts/ops-sandbox.sh` | ops コンテナの起動 / 停止 / ログ。起動時に macOS Keychain から PAT を取り出し、bind mount 用の一時 file に書き出す |
+| `.mcp.json` | project レベル MCP 設定。`sho-mcp-net` 上の hostname `sho-mcp-ops` の SSE endpoint を `ops-github` / `ops-aws-cloudwatch` として登録 |
+
+### GitHub PAT の保存（macOS Keychain）
+
+fine-grained PAT (`Contents:Read` / `Pull requests:RW` / `Issues:R` / `Actions:R`) を発行して Keychain に保存する:
+
+```bash
+security add-generic-password -s sho-mcp-ops -a github-pat -T /usr/bin/security -w
+# プロンプトに PAT を貼り付け（履歴にも argv にも残らない）
+```
+
+`-T /usr/bin/security` を付けることで `security find-generic-password` 経由の取り出しが GUI prompt なしで通る。`ops-sandbox.sh` がこの経路で起動毎に取り出して `~/.sho-mcp-ops/github-pat` に書き、container 内 `/run/secrets/github-pat` として bind mount する。`--stop` で破棄。
+
+### 起動
+
+```bash
+./scripts/ops-sandbox-image.sh   # 初回 or flake.nix 更新時。nix build → smoke → ops container 再作成
+./scripts/ops-sandbox.sh         # 既に image があれば ops container を ensure-up（毎回 Keychain から PAT を取り直す）
+./scripts/ops-sandbox.sh --stop  # 停止 + 削除 + 一時 PAT file 破棄
+```
+
+`./scripts/sandbox.sh` は ops が同 `sho-mcp-net` 上に居れば、起動時に ops の IP を dev sandbox の `/etc/hosts` に書き込んで `sho-mcp-ops` を resolve 可能にする（Apple container CLI 0.11.0 時点で builtin DNS が同 network 上の hostname を解決しないため）。

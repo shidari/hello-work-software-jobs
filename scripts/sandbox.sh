@@ -133,6 +133,33 @@ fi
 # する。
 container exec "$NAME" /bin/bash -c "rm -rf /work && ln -sfT '$REPO' /work" >/dev/null
 
+# Apple container builtin DNS は sho-mcp-net 上の hostname を resolve しない
+# (CLI 0.11.0 時点)。同 network 上の sho-mcp-ops は IP は固定だが container を
+# 作り直すと変わるので、起動時に毎回引き直して /etc/hosts に書き込む (idempotent)。
+# ops が存在しない / 別 network の場合は skip — MCP は使わない開発でも壊さない。
+if container list -a 2>/dev/null | awk 'NR>1 && $1=="sho-mcp-ops"' | grep -q .; then
+  OPS_IP=$(container inspect sho-mcp-ops 2>/dev/null | python3 -c "
+import sys, json
+try:
+  d = json.load(sys.stdin)[0]
+  for n in d.get('networks', []):
+    if n.get('network') == '$NETWORK':
+      print(n['ipv4Address'].split('/')[0])
+      break
+except Exception:
+  pass
+" 2>/dev/null)
+  if [[ -n "$OPS_IP" ]]; then
+    container exec "$NAME" /bin/bash -c "
+      grep -v '[[:space:]]sho-mcp-ops\$' /etc/hosts > /tmp/.hosts.new 2>/dev/null || true
+      echo '$OPS_IP sho-mcp-ops' >> /tmp/.hosts.new
+      cat /tmp/.hosts.new > /etc/hosts
+      rm -f /tmp/.hosts.new
+    " >/dev/null
+    echo "[sandbox] /etc/hosts: sho-mcp-ops -> $OPS_IP"
+  fi
+fi
+
 (( ENSURE_UP_ONLY )) && exit 0
 
 exec container exec -it -w "$REPO" "$NAME" /bin/bash
