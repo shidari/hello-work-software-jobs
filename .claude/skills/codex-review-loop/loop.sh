@@ -4,8 +4,11 @@
 #
 # Usage:
 #   ./loop.sh              # デフォルト 3 周
-#   ./loop.sh 5            # 5 周に上書き（位置引数）
-#   MAX_ROUNDS=5 ./loop.sh # 環境変数でも上書き可
+#   ./loop.sh 2            # 1〜3 の範囲で指定可（位置引数）
+#   MAX_ROUNDS=2 ./loop.sh # 環境変数でも指定可
+#
+# MAX_ROUNDS は 3 周を hard cap とする。暴走防止のためそれを超える値は exit 1 で弾く。
+# 緩めたい場合は本ファイルの MAX_ROUNDS_HARD_CAP を直接書き換える。
 #
 # 前提:
 #   - **sandbox 内での実行必須** (SHO_SANDBOX=1 で判別)。子 claude が
@@ -29,10 +32,21 @@ EOF
   exit 1
 fi
 
+# 3 周を hard cap にする。codex / claude を多数回走らせて API 課金・実行時間・
+# 想定外の編集量が暴走するのを防ぐため、ここを超える値は受け付けない。
+# 緩めたい時はこのファイル自体を編集する（位置引数 / env では超えられない）。
+readonly MAX_ROUNDS_HARD_CAP=3
+
 MAX_ROUNDS="${1:-${MAX_ROUNDS:-3}}"
 
 if ! [[ "$MAX_ROUNDS" =~ ^[0-9]+$ ]] || [[ "$MAX_ROUNDS" -lt 1 ]]; then
   echo "ERROR: MAX_ROUNDS は 1 以上の整数を指定してください (got: $MAX_ROUNDS)" >&2
+  exit 1
+fi
+
+if [[ "$MAX_ROUNDS" -gt "$MAX_ROUNDS_HARD_CAP" ]]; then
+  echo "ERROR: MAX_ROUNDS=$MAX_ROUNDS は上限 $MAX_ROUNDS_HARD_CAP を超えています。" >&2
+  echo "       暴走防止のため位置引数 / env では $MAX_ROUNDS_HARD_CAP 周までしか指定できません。" >&2
   exit 1
 fi
 
