@@ -30,7 +30,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 ## Skills
 
 - `/commit-and-pr` — コミット → PR 作成の自動化
-- `/codex-review-loop` — commit 前に codex review を 3 周ループ（codex 指摘 → claude が修正 → 再レビュー）
+- `/codex-review-loop` — commit 前に codex review を最大 3 周ループ（hard cap、codex 指摘 → claude が修正 → 再レビュー）
 - `/pentest` — 攻撃者視点のペネトレーションテスト
 - `/crawler-diagnose` — クローラーパイプライン診断
 - `/debug` — 3 基盤横断ログ検索（CloudWatch / Workers / Vercel）
