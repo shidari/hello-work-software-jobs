@@ -69,8 +69,19 @@ echo "[start] cloudwatch-mcp-server → mcp-proxy :${AWS_PORT}"
 # cloudwatch-mcp-server 内の numpy は libstdc++.so.6 を dlopen する。flake.nix で
 # image に libstdc++ を入れ、Env の LD_LIBRARY_PATH に path を載せたが、
 # mcp-proxy は子プロセスに env を継承しないので明示的に渡す必要がある。
+#
+# AWS 系も同様。mcp-proxy が env を strip するので、AWS_PROFILE / AWS_REGION /
+# 設定ファイル path を明示的に渡さないと、cloudwatch-mcp-server 側の boto3 が
+# crawler-debug → debug-all-role の assume チェーンに乗らず、別 identity で AWS
+# を叩いて AccessDenied になる。
+AWS_PROFILE="${AWS_PROFILE:-crawler-debug}"
+AWS_REGION="${AWS_REGION:-ap-northeast-1}"
 uvx mcp-proxy --port "$AWS_PORT" --host 0.0.0.0 \
   -e LD_LIBRARY_PATH "$LD_LIBRARY_PATH" \
+  -e AWS_PROFILE "$AWS_PROFILE" \
+  -e AWS_REGION "$AWS_REGION" \
+  -e AWS_CONFIG_FILE /root/.aws/config \
+  -e AWS_SHARED_CREDENTIALS_FILE /root/.aws/credentials \
   -- \
   uvx awslabs.cloudwatch-mcp-server@latest &
 AWS_PID=$!
