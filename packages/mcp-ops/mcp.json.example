@@ -1,0 +1,13 @@
+{
+  "_comment": "Claude .mcp.json snippet for the ops sandbox. Place these entries under your project-level or user-level mcpServers config. Hostname `sho-mcp-ops` resolves on the sho-mcp-net Apple container network; if DNS doesn't resolve in your environment, replace with the container's IP from `container list`. SSE endpoint shape is `/sse` per mcp-proxy default — adjust if your mcp-proxy version differs.",
+  "mcpServers": {
+    "ops-github": {
+      "type": "sse",
+      "url": "http://sho-mcp-ops:7001/sse"
+    },
+    "ops-aws-cloudwatch": {
+      "type": "sse",
+      "url": "http://sho-mcp-ops:7002/sse"
+    }
+  }
+}

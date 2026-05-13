@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Start the sho-mcp-ops container on a private Apple container network shared
+# with sho-sandbox (Claude). The ops container holds GitHub PAT + AWS profile
+# and runs MCP servers (github-mcp-server, awslabs.cloudwatch-mcp-server) wrapped
+# by mcp-proxy for stdio→SSE adaptation. Claude side connects via the private
+# network — no host port is exposed.
+#
+# Usage:
+#   ops-sandbox.sh                 # ensure container is up, attach a shell
+#   ops-sandbox.sh --ensure-up     # ensure up and exit (used by sandbox-image.sh)
+#   ops-sandbox.sh --logs          # tail container stdout
+#   ops-sandbox.sh --stop          # stop and remove
+
+set -euo pipefail
+
+REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+NAME=sho-mcp-ops
+IMAGE=sho-mcp-ops:latest
+NETWORK=sho-mcp-net
+
+ACTION=shell
+for arg in "$@"; do
+  case "$arg" in
+    --ensure-up) ACTION=ensure_up ;;
+    --logs)      ACTION=logs      ;;
+    --stop)      ACTION=stop      ;;
+  esac
+done
+
+if ! command -v container >/dev/null 2>&1; then
+  echo "ERROR: Apple container CLI not found (https://github.com/apple/container)" >&2
+  exit 1
+fi
+
+has_image() {
+  container image ls 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
+has_container() {
+  container list ${1:-} 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
+has_network() {
+  container network ls 2>/dev/null | awk -v n="$NETWORK" 'NR>1 && $1==n {f=1} END{exit !f}'
+}
+
+if [[ "$ACTION" == "stop" ]]; then
+  container stop "$NAME" 2>/dev/null || true
+  container delete "$NAME" 2>/dev/null || true
+  echo "[ops-sandbox] stopped."
+  exit 0
+fi
+
+if ! has_image; then
+  echo "ERROR: ${IMAGE} not loaded." >&2
+  echo "       Build & load with: ./scripts/ops-sandbox-image.sh" >&2
+  exit 1
+fi
+
+# Private network shared between claude sandbox and ops container.
+# scripts/sandbox.sh is expected to attach sho-sandbox to the same network.
+if ! has_network; then
+  echo "[ops-sandbox] creating network ${NETWORK}"
+  container network create "$NETWORK" >/dev/null
+fi
+
+# Token / credential state. ops container is the ONLY surface that touches
+# these — claude container's mount set must not include them.
+#   github-pat: fine-grained PAT file (one-line, no trailing newline)
+#   aws/      : ~/.aws snapshot, same convention as sho-sandbox uses today
+STATE="$HOME/.sho-mcp-ops"
+mkdir -p "$STATE/aws" "$STATE/cache"
+if [[ ! -f "$STATE/github-pat" ]]; then
+  echo "[ops-sandbox] WARN: ${STATE}/github-pat not present." >&2
+  echo "             Create a fine-grained PAT at https://github.com/settings/personal-access-tokens" >&2
+  echo "             with Contents:Read, Pull requests:RW, Issues:R, Actions:R" >&2
+  echo "             and write the token (single line, no newline) to that path." >&2
+fi
+if [[ -d "$HOME/.aws" ]]; then
+  [[ -f "$HOME/.aws/config"      ]] && cp -p "$HOME/.aws/config"      "$STATE/aws/config"
+  [[ -f "$HOME/.aws/credentials" ]] && cp -p "$HOME/.aws/credentials" "$STATE/aws/credentials"
+fi
+
+if ! has_container -a; then
+  MOUNTS=(
+    -v "$REPO:/work"
+    -v "$STATE/aws:/root/.aws"
+    -v "$STATE/cache:/root/.cache"
+    -v "$STATE/github-pat:/run/secrets/github-pat:ro"
+  )
+
+  echo "[ops-sandbox] creating ${NAME} on network ${NETWORK}"
+  container run -d --name "$NAME" \
+    --network "$NETWORK" \
+    -m 1g \
+    "${MOUNTS[@]}" \
+    "$IMAGE"
+fi
+
+if ! container list 2>/dev/null | awk -v n="$NAME" 'NR>1 && $1==n {f=1} END{exit !f}'; then
+  container start "$NAME" >/dev/null
+fi
+
+case "$ACTION" in
+  ensure_up) echo "[ops-sandbox] up (${NAME} on ${NETWORK})";;
+  logs)      container logs -f "$NAME";;
+  shell)
+    echo "[ops-sandbox] attaching shell (Ctrl-D to detach)"
+    container exec -it "$NAME" /bin/bash
+    ;;
+esac

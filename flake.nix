@@ -116,6 +116,10 @@
             # の lib path を baked in する。nix-built binary は RPATH が効くので
             # この LD_LIBRARY_PATH の影響を受けない。
             "LD_LIBRARY_PATH=${pkgs.glibc}/lib:${pkgs.stdenv.cc.cc.lib}/lib"
+            # Sandbox marker: scripts/assert-in-sandbox.sh と
+            # .claude/hooks/deny-host.sh はこの env の有無で host vs sandbox を
+            # 判別する。host 側には絶対に export されない値を維持すること。
+            "SHO_SANDBOX=1"
           ];
         };
       };
@@ -127,6 +131,8 @@
       # Build target: linux/arm64 image.
       # Evaluating from a darwin host requires nix-darwin's linux-builder
       # (or any other aarch64-linux remote builder).
+      # ops image は packages/mcp-ops/flake.nix に分離されている（dev とは
+      # 独立 lock / 独立 bump cycle で運用するため）。
       packages.aarch64-darwin.sandboxImage = mkImage pkgsLinux;
       packages.aarch64-linux.sandboxImage  = mkImage pkgsLinux;
     };
