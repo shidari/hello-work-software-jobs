@@ -1,12 +1,14 @@
 # CLI ツール
 
-このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `aws` (awscli2) / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースのサンドボックス**に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースの dev サンドボックス** (`sho-sandbox`) に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+
+実 AWS への到達経路は dev サンドボックスからは外している。`aws` CLI は flake から削除済みで、`~/.aws` の mount も無い。CloudWatch / SQS / Lambda / EventBridge 等は **ops サンドボックス** (`sho-mcp-ops`) 側に閉じた MCP server（`ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only）経由で読む。詳細は後段の「MCP ops コンテナ」節を参照。
 
 ## 構成
 
 | 層 | 何をするか |
 |------|-----------|
-| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / gh / awscli2 / deno / jq / openssh / cacert 等を contents に列挙 |
+| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / gh / deno / jq / openssh / cacert 等を contents に列挙（awscli は意図的に除外） |
 | `package.json` (root devDependencies) | `@anthropic-ai/claude-code` / `wrangler` / `vercel` は npm 配布物なので nix を経由せず pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin` に展開され、image の PATH に組み込まれる |
 | `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` → smoke test → 旧 container 破棄 → 新 image で container 再作成までを 1 本で実行 |
 | `scripts/sandbox.sh` | container を作成・起動して `/bin/bash` を投げる。`--ensure-up` で起動だけして抜ける（direnv 用）。**main repo の host 絶対 path で self-mount** するので worktree から呼んでも main を mount し、worktree の `.git` ファイル参照（host 絶対 path）が container 内でも resolve する。`/work` は `$REPO` への symlink として提供（image の PATH=/work/node_modules/.bin 互換用） |
@@ -34,12 +36,9 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 
 ## 認証情報の扱い
 
-ブラスト半径を最小化するため、ホストの認証情報は直接触らせない。方式は 2 つ:
+ブラスト半径を最小化するため、ホストの認証情報は直接触らせない。dev サンドボックスは `~/.sho-sandbox/` 以下を read-write bind mount し、コンテナ内で各 CLI の `login` を実行する。OAuth トークンリフレッシュのため書き込み可。
 
-| 方式 | 対象 | 理由 |
-|------|------|------|
-| `~/.sho-sandbox/` 以下を read-write bind mount | `gh` / `claude` / `wrangler` / `vercel` | コンテナ内で各 CLI の `login` を実行し、結果をホストから隔離して永続化。OAuth トークンリフレッシュのため書き込み可 |
-| `~/.aws/{config,credentials}` を `~/.sho-sandbox/aws/` にスナップショット → rw マウント | `aws` | ホストを source of truth にしつつ、cache 書き込みはコンテナに閉じる。snapshot は `sandbox.sh` 起動時に毎回再 sync するので、ホスト config の変更は次回 `cd`（direnv `--ensure-up`）で反映される。`aws sso login` もコンテナ内で実行 |
+AWS credentials は dev サンドボックスには mount しない（aws CLI 自体を撤去済み）。実 AWS への到達は ops サンドボックス側の MCP server に閉じる（後段「MCP ops コンテナ」節）。
 
 永続化パス（image は `HOME=/root` 指定で Apple container も runtime をそのまま root で起動するので `/root/...` にマウント）:
 
@@ -50,7 +49,6 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 | `wrangler` | `~/.sho-sandbox/wrangler/` | `/root/.config/.wrangler/` |
 | `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/root/.local/share/com.vercel.cli/`, `/root/.config/com.vercel.cli/` |
 | `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/root/.vscode-server/` |
-| `aws` | `~/.sho-sandbox/aws/`（host config を毎回 snapshot + cache が rw で書かれる） | `/root/.aws/` |
 
 ## image を更新したい時
 
@@ -69,36 +67,45 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 | `pnpm` | nix | パッケージマネージャ・monorepo タスクランナー |
 | `deno` | nix | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
 | `gh` | nix | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
-| `jq` | nix | JSON 整形（`aws logs` / `wrangler tail` のパイプ処理） |
-| `aws` | nix (`awscli2`) | Collector ログ・Lambda 診断 |
+| `jq` | nix | JSON 整形（`wrangler tail` 等のパイプ処理） |
 | `claude` | pnpm (`@anthropic-ai/claude-code`) | Claude Code |
 | `wrangler` | pnpm | Cloudflare Workers（API デプロイ・D1・tail） |
 | `vercel` | pnpm | Vercel（Frontend ログ・デプロイ確認） |
 | chromium | nix (`playwright-driver.browsers-chromium`) | Crawler の Playwright が呼び出す。`PLAYWRIGHT_BROWSERS_PATH` で image 内 path に固定済み |
 
+実 AWS API への直接アクセスは dev サンドボックスからは出来ない（awscli 撤去）。代わりに ops サンドボックス側の MCP server を使う（後段「MCP ops コンテナ」節）。LocalStack は docker compose の localstack service に同梱されている `awslocal` を `docker compose exec` 経由で叩く（[apps/backend/collector/infra/local/e2e.sh](../../apps/backend/collector/infra/local/e2e.sh) 参照）。
+
 ## ログ取得 CLI 認証
 
-3 基盤のログを CLI から取得するための認証前提（すべてサンドボックス内で実行）:
+3 基盤のログ取得の前提:
 
-| 基盤 | CLI | 認証 |
+| 基盤 | 経路 | 認証 |
 |------|-----|------|
-| Collector | `aws logs` | `AWS_PROFILE=crawler-debug`（profile 定義はホストの `~/.aws/{config,credentials}` を `~/.sho-sandbox/aws/` にスナップショット。AssumeRole / SSO の cache はコンテナ内 `~/.sho-sandbox/aws/` に閉じる） |
+| Collector | `ops-aws-cloudwatch` MCP（`execute_log_insights_query` 等） | host の `~/.aws/{config,credentials,sso/cache}` を ops コンテナが起動時に `~/.sho-mcp-ops/aws/` にスナップショットして mount。`AWS_PROFILE=crawler-debug` は ops 側 env で固定。SSO profile を使う場合は `aws sso login` 後に ops を再起動して cache を取り直す |
 | API (Workers) | `wrangler tail job-store` | サンドボックス内で `wrangler login`（`~/.sho-sandbox/wrangler/` に永続化） |
 | Frontend (Vercel) | `vercel logs` | サンドボックス内で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
 
-認証が切れている場合は `/debug` skill が検知して再ログインを促す。
+認証が切れている場合は `/debug` skill が検知して再ログインを促す。Collector 系で MCP が認証エラーを返すなら、host で `aws sso login --profile crawler-debug` を打ってから `./scripts/ops-sandbox.sh --stop && ./scripts/ops-sandbox.sh` で snapshot を取り直す。
 
 ## MCP ops コンテナ (sho-mcp-ops)
 
-dev sandbox とは別に、GitHub / AWS の MCP server を expose するための **ops コンテナ**を `sho-mcp-net` という private network 上で動かす。Claude (dev sandbox = `sho-sandbox`) は同 network から SSE でアクセスする。token は ops コンテナだけが持ち、dev sandbox からは直接見えない。
+dev sandbox とは別に、GitHub / AWS の MCP server を expose するための **ops コンテナ**を `sho-mcp-net` という private network 上で動かす。Claude (dev sandbox = `sho-sandbox`) は同 network から SSE でアクセスする。token / AWS credentials は ops コンテナだけが持ち、dev sandbox からは直接見えない。
 
 | 層 | 何をするか |
 |------|-----------|
 | `packages/mcp-ops/flake.nix` | aarch64-linux 用の OCI image 定義。bash / curl / python3 / uv / tini / libstdc++ 等 minimal セット |
-| `packages/mcp-ops/start.sh` | image の Cmd。`github-mcp-server` (Go) と `awslabs.cloudwatch-mcp-server` (Python via uvx) を `mcp-proxy` で stdio→SSE 化して 7001 / 7002 で listen |
+| `packages/mcp-ops/start.sh` | image の Cmd。`github-mcp-server` (Go, `--read-only`) と `awslabs.cloudwatch-mcp-server` / `awslabs.aws-api-mcp-server` (Python via uvx、いずれも read-only) を `mcp-proxy` で stdio→SSE 化して 7001 / 7002 / 7003 で listen |
 | `scripts/ops-sandbox-image.sh` | nix build → OCI archive → `container image load` → smoke test → ops container 再作成 まで 1 本 |
-| `scripts/ops-sandbox.sh` | ops コンテナの起動 / 停止 / ログ。起動時に macOS Keychain から PAT を取り出し、bind mount 用の一時 file に書き出す |
-| `.mcp.json` | project レベル MCP 設定。`sho-mcp-net` 上の hostname `sho-mcp-ops` の SSE endpoint を `ops-github` / `ops-aws-cloudwatch` として登録 |
+| `scripts/ops-sandbox.sh` | ops コンテナの起動 / 停止 / ログ。起動時に macOS Keychain から PAT を取り出し、bind mount 用の一時 file に書き出す。`~/.aws/{config,credentials,sso/cache}` も `~/.sho-mcp-ops/aws/` に snapshot して mount する（SSO 利用時は token cache が必須） |
+| `.mcp.json` | project レベル MCP 設定。`sho-mcp-net` 上の hostname `sho-mcp-ops` の SSE endpoint を `ops-github` / `ops-aws-cloudwatch` / `ops-aws-api` として登録 |
+
+ops コンテナが expose する MCP server:
+
+| port | server | 役割 | 認可 |
+|------|--------|------|------|
+| 7001 | `github-mcp-server` | GitHub の issue / PR / actions / repos を read-only で参照 | PAT、`--read-only` で write tool 無効化 |
+| 7002 | `awslabs.cloudwatch-mcp-server` | CloudWatch Logs / Metrics の問い合わせ | `AWS_PROFILE=crawler-debug` |
+| 7003 | `awslabs.aws-api-mcp-server` | 汎用 AWS API（SQS / Lambda / EventBridge 等）。dev sandbox から awscli を撤去した代わり | `AWS_PROFILE=crawler-debug` + `READ_OPERATIONS_ONLY=true` で書き込み拒否 |
 
 ### GitHub PAT の保存（macOS Keychain）
 
