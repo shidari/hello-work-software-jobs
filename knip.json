@@ -1,18 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["**/dist/**", "**/.next/**", "**/generated/**"],
-  "ignoreBinaries": [
-    "tsdown",
-    "tsx",
-    "vitest",
-    "cdk",
-    "next",
-    "storybook",
-    "sqlite3",
-    "kysely-codegen",
-    "build",
-    "infra/local/e2e.sh"
-  ],
+  "ignoreBinaries": ["build"],
   "workspaces": {
     ".": {
       "entry": [".github/workflows/*.{yml,yaml}"],
@@ -20,30 +8,24 @@
     },
     "apps/backend/api": {
       "entry": [
-        "src/index.ts",
         "test/**/*.{spec,test}.ts",
         "test/d1/apply-migrations.ts",
         "test/mock.ts",
         "vitest.config.mts"
       ],
       "vitest": false,
-      "ignoreDependencies": [
-        "cloudflare",
-        "@vitest/coverage-istanbul",
-        "@cloudflare/vitest-pool-workers"
-      ]
+      "ignoreDependencies": ["cloudflare", "@vitest/coverage-istanbul"]
     },
     "apps/backend/collector": {
       "entry": [
-        "src/**/handler.ts",
-        "src/index.ts",
         "lib/hellowork/scripts/*.ts",
         "lib/hellowork/**/__tests__/**/*.test.ts",
         "lib/hellowork/__tests__/fixtures.ts",
         "vitest.config.ts"
       ],
       "vitest": false,
-      "ignoreDependencies": ["@vitest/coverage-v8", "tsx"]
+      "ignoreBinaries": ["infra/local/e2e.sh"],
+      "ignoreDependencies": ["@vitest/coverage-v8"]
     },
     "apps/backend/collector/infra": {
       "entry": [
@@ -53,7 +35,7 @@
         "vitest.config.ts"
       ],
       "vitest": false,
-      "ignoreDependencies": ["aws-cdk", "tsx", "@vitest/coverage-v8"]
+      "ignoreDependencies": ["@vitest/coverage-v8", "tsx"]
     },
     "apps/frontend/hello-work-job-searcher": {
       "entry": [
@@ -61,35 +43,22 @@
         "src/app/**/layout.tsx",
         "src/app/**/loading.tsx",
         "src/app/**/error.tsx",
-        "src/app/**/not-found.tsx",
-        "src/app/**/route.ts",
         "src/**/*.stories.{ts,tsx}",
-        "src/**/*.test.{ts,tsx}",
         "src/lib/*.mock.ts",
         "next.config.{js,mjs,ts}",
-        "vitest.config.ts",
-        "instrumentation.ts"
+        "vitest.config.ts"
       ],
-      "vitest": false,
-      "ignoreDependencies": [
-        "react-dom",
-        "@types/react-dom",
-        "@vitest/browser",
-        "playwright",
-        "vitest"
-      ]
+      "vitest": false
     },
     "packages/db": {
-      "entry": ["src/index.ts", "src/**/*.test.ts"],
-      "ignoreDependencies": ["better-sqlite3", "kysely-codegen"]
+      "ignore": ["src/generated/**"],
+      "ignoreBinaries": ["sqlite3"]
     },
     "packages/models": {
-      "entry": ["src/index.ts", "src/**/*.test.ts", "vitest.config.ts"],
+      "entry": ["src/**/*.test.ts", "vitest.config.ts"],
       "vitest": false,
       "ignoreDependencies": ["@vitest/coverage-v8"]
     },
-    "packages/logger": {
-      "entry": ["src/index.ts", "src/**/*.test.ts"]
-    }
+    "packages/logger": {}
   }
 }
