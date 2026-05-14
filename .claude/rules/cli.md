@@ -1,6 +1,8 @@
 # CLI ツール
 
-このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースの dev サンドボックス** (`sho-sandbox`) に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。**Claude Code もこのコンテナ内で実行する**。ホスト側のグローバル版は使わない。
+このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースの dev サンドボックス** (`sho-sandbox`) に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。Claude Code はこのコンテナ内で実行するのが基本。コンテナ内で立ち上がっている場合はホスト側のグローバル版は使わない。
+
+**例外: Claude Code が host (macOS) 側で直接動いている場合**は、わざわざ `./scripts/sandbox.sh` 経由で叩き直さず、host の `gh` / `wrangler` / `vercel` / `jq` 等を直接呼んで良い。判定は実行環境を見れば足りる（`uname` が `Darwin` ならホスト、`Linux` かつ `/work` symlink があればコンテナ内）。host 実行時はコンテナの `~/.sho-sandbox/` ではなく、ホスト本来の `~/.config/gh/` や `~/.config/.wrangler/` 等の認証が使われる点だけ注意。
 
 実 AWS への到達経路は dev サンドボックスからは外している。`aws` CLI は flake から削除済みで、`~/.aws` の mount も無い。CloudWatch / SQS / Lambda / EventBridge 等は **ops サンドボックス** (`sho-mcp-ops`) 側に閉じた MCP server（`ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only）経由で読む。詳細は後段の「MCP ops コンテナ」節を参照。
 
