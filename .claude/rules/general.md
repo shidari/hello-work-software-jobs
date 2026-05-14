@@ -11,14 +11,14 @@ Claude が今 host (macOS) で動いてるか sandbox コンテナ (sho-sandbox,
 | 出力 | 環境 |
 |------|------|
 | `Darwin` | host (macOS) — Apple container CLI で sandbox/ops を管理 |
-| `Linux` + `/work` あり | sandbox (sho-sandbox) — gh / wrangler / vercel が PATH 上 |
+| `Linux` + `/work` あり | sandbox (sho-sandbox) — Claude Code 本体と汎用 dev tools のみ。gh / wrangler / vercel は **PATH に無い**（host 専用） |
 | `Linux` + `/work` なし | sandbox 以外の Linux (普段は来ない) |
 
 判定は **kernel と bind mount で行う**。`SHO_SANDBOX` 等の env 変数は spoof / 取り違えが起こる (image rebuild 忘れで unset のまま、shell から手動 export で誤認 etc.) ので self-detect には使わない。
 
 ## CLI ツール
 
-Apple container サンドボックスで管理している CLI（`gh` / `aws` / `wrangler` / `vercel` 等）の一覧と実行方法は [.claude/rules/cli.md](./cli.md) を参照。
+CLI の住み分け（sandbox 内 / host 専用）と実行方法は [.claude/rules/cli.md](./cli.md) を参照。`gh` / `wrangler` / `vercel` / `awscli` 等の認証付き CLI は host 専用。
 
 ## 作業単位 = worktree
 

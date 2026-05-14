@@ -1,17 +1,30 @@
 # CLI ツール
 
-このプロジェクトでは開発用 CLI（`nodejs` / `pnpm` / `deno` / `gh` / `jq` / `wrangler` / `vercel` / `@anthropic-ai/claude-code`）が **Apple container ベースの dev サンドボックス** (`sho-sandbox`) に閉じ込められている。OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。Claude Code はこのコンテナ内で実行するのが基本。コンテナ内で立ち上がっている場合はホスト側のグローバル版は使わない。
+開発用 CLI のうち **認証 token を抱える**もの (`gh` / `wrangler` / `vercel` / `awscli`) は dev サンドボックスには入れない。ブラスト半径を最小化するため、これらはすべて **ホスト (macOS) 側で直接実行する**。sandbox は Claude Code 本体と汎用 dev tools (`nodejs` / `pnpm` / `deno` / `jq` / chromium) だけを抱える Apple container ベースの最小実行環境 (`sho-sandbox`) で、OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。
 
-**例外: Claude Code が host (macOS) 側で直接動いている場合**は、わざわざ `./scripts/sandbox.sh` 経由で叩き直さず、host の `gh` / `wrangler` / `vercel` / `jq` 等を直接呼んで良い。判定は実行環境を見れば足りる（`uname` が `Darwin` ならホスト、`Linux` かつ `/work` symlink があればコンテナ内）。host 実行時はコンテナの `~/.sho-sandbox/` ではなく、ホスト本来の `~/.config/gh/` や `~/.config/.wrangler/` 等の認証が使われる点だけ注意。
+| CLI | どこで動かすか | 認証の置き場所 |
+|-----|---------------|-----------|
+| `gh` | **host のみ** | `~/.config/gh/` (host) |
+| `wrangler` | **host のみ** (workspace devDep として `apps/backend/api` には残る) | `~/.config/.wrangler/` (host) |
+| `vercel` | **host のみ** | `~/.config/com.vercel.cli/`, `~/.local/share/com.vercel.cli/` (host) |
+| `awscli` | **入れない**。ops container 経由の MCP のみ | — |
+| `claude` | sandbox / host どちらでも | sandbox: `~/.sho-sandbox/claude/` / host: `~/.claude/` |
+| `nodejs` / `pnpm` / `deno` / `jq` / chromium | sandbox / host どちらでも | 認証なし |
 
-実 AWS への到達経路は dev サンドボックスからは外している。`aws` CLI は flake から削除済みで、`~/.aws` の mount も無い。CloudWatch / SQS / Lambda / EventBridge 等は **ops サンドボックス** (`sho-mcp-ops`) 側に閉じた MCP server（`ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only）経由で読む。詳細は後段の「MCP ops コンテナ」節を参照。
+Claude Code 自体が sandbox 内で動いている場合、`gh` / `wrangler` / `vercel` は **PATH に無い**。これらが必要な操作 (PR の作成・マージ、Workers / Pages デプロイ等) は:
+1. ホスト側で叩いてもらうようユーザーに依頼する、または
+2. Claude Code がホストで動き直してから実行する
+
+の二択。read-only な GitHub / AWS の参照は ops サンドボックス (`sho-mcp-ops`) 側に閉じた MCP server (`ops-github` / `ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only) 経由で行う。詳細は後段の「MCP ops コンテナ」節を参照。
+
+Claude Code がホスト (macOS) 側で動いている場合は、ホストの `gh` / `wrangler` / `vercel` / `jq` を `./scripts/sandbox.sh` を経由せずに直接呼ぶ。判定は `uname` が `Darwin` ならホスト、`Linux` かつ `/work` symlink があればコンテナ内。
 
 ## 構成
 
 | 層 | 何をするか |
 |------|-----------|
-| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / gh / deno / jq / openssh / cacert 等を contents に列挙（awscli は意図的に除外） |
-| `package.json` (root devDependencies) | `@anthropic-ai/claude-code` / `wrangler` / `vercel` は npm 配布物なので nix を経由せず pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin` に展開され、image の PATH に組み込まれる |
+| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / deno / jq / openssh / cacert 等を contents に列挙（gh / wrangler / vercel / awscli は意図的に除外） |
+| `package.json` (root devDependencies) | `@anthropic-ai/claude-code` のみ npm 配布物として pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin/claude` に展開され、image の PATH に組み込まれる |
 | `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` → smoke test → 旧 container 破棄 → 新 image で container 再作成までを 1 本で実行 |
 | `scripts/sandbox.sh` | container を作成・起動して `/bin/bash` を投げる。`--ensure-up` で起動だけして抜ける（direnv 用）。**main repo の host 絶対 path で self-mount** するので worktree から呼んでも main を mount し、worktree の `.git` ファイル参照（host 絶対 path）が container 内でも resolve する。`/work` は `$REPO` への symlink として提供（image の PATH=/work/node_modules/.bin 互換用） |
 | `scripts/sandbox-stop.sh` | 停止 + 破棄（image rebuild なしで一旦 sandbox を消したい時の ad-hoc cleanup 用） |
@@ -34,23 +47,20 @@
 
 direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-image.sh` は依然手動）。
 
-初回は `sandbox.sh` で中に入った後 `pnpm install` を 1 度叩く（root devDeps の wrangler / vercel / claude-code を `/work/node_modules/.bin` に展開）。その後で `gh auth login` / `wrangler login` / `vercel login` / `claude /login` をブラウザ OAuth で。
+初回は `sandbox.sh` で中に入った後 `pnpm install` を 1 度叩く（root devDeps の `@anthropic-ai/claude-code` を `/work/node_modules/.bin/claude` に展開）。その後 sandbox 内では `claude /login` だけ実行する。`gh` / `wrangler` / `vercel` は host 側で `brew install` 等して `gh auth login` / `wrangler login` / `vercel login` をブラウザ OAuth で済ませる。
 
 ## 認証情報の扱い
 
-ブラスト半径を最小化するため、ホストの認証情報は直接触らせない。dev サンドボックスは `~/.sho-sandbox/` 以下を read-write bind mount し、コンテナ内で各 CLI の `login` を実行する。OAuth トークンリフレッシュのため書き込み可。
+**dev サンドボックスは認証 token を一切持たない**。`gh` / `wrangler` / `vercel` / `awscli` は image にも入っていないし、host から bind-mount もしない (`~/.sho-sandbox/{gh,wrangler,vercel*}` は廃止済み)。これらが必要な操作は host 側で実行する。
 
-AWS credentials は dev サンドボックスには mount しない（aws CLI 自体を撤去済み）。実 AWS への到達は ops サンドボックス側の MCP server に閉じる（後段「MCP ops コンテナ」節）。
-
-永続化パス（image は `HOME=/root` 指定で Apple container も runtime をそのまま root で起動するので `/root/...` にマウント）:
+sandbox がまだ保持するのは Claude Code 自身と VSCode-server の状態のみ:
 
 | ツール | ホスト側 | コンテナ内 |
 |--------|---------|-----------|
-| `gh` | `~/.sho-sandbox/gh/` | `/root/.config/gh/` |
 | `claude` | `~/.sho-sandbox/claude/` | `/root/.claude/` |
-| `wrangler` | `~/.sho-sandbox/wrangler/` | `/root/.config/.wrangler/` |
-| `vercel` | `~/.sho-sandbox/vercel-data/`, `~/.sho-sandbox/vercel-config/` | `/root/.local/share/com.vercel.cli/`, `/root/.config/com.vercel.cli/` |
 | `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/root/.vscode-server/` |
+
+実 AWS への到達経路は dev サンドボックスからは外している。`awscli` は flake から削除済みで、`~/.aws` の mount も無い。CloudWatch / SQS / Lambda / EventBridge 等は **ops サンドボックス** (`sho-mcp-ops`) 側に閉じた MCP server（`ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only）経由で読む（後段「MCP ops コンテナ」節）。
 
 ## Claude project-level permissions の分離 (host vs container)
 
@@ -115,17 +125,24 @@ worktree 固有の状態は持たない。main を経由するのは sandbox.sh 
 
 ## 用途
 
+### sandbox 内 (sho-sandbox)
+
 | ツール | 由来 | 用途 |
 |------|------|------|
 | `nodejs` | nix (`nodejs_24`) | ランタイム |
 | `pnpm` | nix | パッケージマネージャ・monorepo タスクランナー |
 | `deno` | nix | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
-| `gh` | nix | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
-| `jq` | nix | JSON 整形（`wrangler tail` 等のパイプ処理） |
+| `jq` | nix | JSON 整形 |
 | `claude` | pnpm (`@anthropic-ai/claude-code`) | Claude Code |
-| `wrangler` | pnpm | Cloudflare Workers（API デプロイ・D1・tail） |
-| `vercel` | pnpm | Vercel（Frontend ログ・デプロイ確認） |
 | chromium | nix (`playwright-driver.browsers-chromium`) | Crawler の Playwright が呼び出す。`PLAYWRIGHT_BROWSERS_PATH` で image 内 path に固定済み |
+
+### host のみ
+
+| ツール | 配布物 | 用途 |
+|------|------|------|
+| `gh` | host (`brew install gh`) | GitHub CLI（PR・issue、`/commit-and-pr` skill が利用） |
+| `wrangler` | host (`brew install cloudflare-wrangler2` or workspace pnpm) | Cloudflare Workers（API デプロイ・D1・tail） |
+| `vercel` | host (`brew install vercel-cli`) | Vercel（Frontend ログ・デプロイ確認） |
 
 実 AWS API への直接アクセスは dev サンドボックスからは出来ない（awscli 撤去）。代わりに ops サンドボックス側の MCP server を使う（後段「MCP ops コンテナ」節）。LocalStack は docker compose の localstack service に同梱されている `awslocal` を `docker compose exec` 経由で叩く（[apps/backend/collector/infra/local/e2e.sh](../../apps/backend/collector/infra/local/e2e.sh) 参照）。
 
@@ -136,8 +153,8 @@ worktree 固有の状態は持たない。main を経由するのは sandbox.sh 
 | 基盤 | 経路 | 認証 |
 |------|-----|------|
 | Collector | `ops-aws-cloudwatch` MCP（`execute_log_insights_query` 等） | host の `~/.aws/{config,credentials,sso/cache}` を ops コンテナが起動時に `~/.sho-mcp-ops/aws/` にスナップショットして mount。`AWS_PROFILE=crawler-debug` は ops 側 env で固定。SSO profile を使う場合は `aws sso login` 後に ops を再起動して cache を取り直す |
-| API (Workers) | `wrangler tail job-store` | サンドボックス内で `wrangler login`（`~/.sho-sandbox/wrangler/` に永続化） |
-| Frontend (Vercel) | `vercel logs` | サンドボックス内で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
+| API (Workers) | host の `wrangler tail job-store` | host で `wrangler login`（`~/.config/.wrangler/` に永続化） |
+| Frontend (Vercel) | host の `vercel logs` | host で `vercel login` + `vercel link`（`apps/frontend/hello-work-job-searcher` で実行、`.vercel/` はリポジトリ内に書かれる） |
 
 認証が切れている場合は `/debug` skill が検知して再ログインを促す。Collector 系で MCP が認証エラーを返すなら、host で `aws sso login --profile crawler-debug` を打ってから `./scripts/ops-sandbox.sh --stop && ./scripts/ops-sandbox.sh` で snapshot を取り直す。
 
