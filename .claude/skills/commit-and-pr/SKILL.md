@@ -1,11 +1,11 @@
 ---
 name: commit-and-pr
-description: コミットから PR 作成までを一貫して実行する。pre-commit チェック、セキュリティレビュー、Conventional Commits、ブランチ作成、PR 作成を自動化。
+description: コミットから PR 作成、CI/CD 監視、マージまでを一貫して実行する。pre-commit チェック、セキュリティレビュー、Conventional Commits、ブランチ作成、PR 作成、CI green 待ち、squash merge を自動化。
 ---
 
 # Commit and PR
 
-コミットからPR作成までを一貫して実行する。
+コミット → PR 作成 → CI/CD 監視 → squash merge までを一貫して実行する。
 
 ## 手順
 
@@ -71,10 +71,38 @@ staging されたファイルに対して、security-review コマンドの Chec
   - body にバッククォート等の特殊文字を含む場合は `--body-file` を使う
 - 既に PR があるなら push のみ（PR は自動更新される）
 
-### 6. 結果報告
+### 6. CI/CD 監視
 
-- PR の URL を表示する
-- PR が既存の場合はその旨を伝える
+push 後、PR の全 check が green になるまで監視する。
+
+- `gh pr checks <pr> --watch --fail-fast` を **`run_in_background: true`** で投げて完了通知を待つ（[.claude/rules/general.md](../../rules/general.md) の方針に従う）。`sleep` ループでの polling は禁止
+- PR 番号は `gh pr view --json number -q .number` で取得
+- 通知が来たら exit code で判定:
+  - **success (exit 0)** → Step 7 へ
+  - **failure (non-zero)** → 失敗 job のログを取りに行く:
+    1. `gh pr checks <pr> --json name,conclusion,link --jq '.[] | select(.conclusion=="FAILURE")'` で失敗 check を特定
+    2. `gh run view <run-id> --log-failed` で失敗ジョブのログを取得（`gh pr checks` の link から run-id を抽出）
+    3. 原因に応じて修正:
+       - 型エラー / lint / format → 該当ファイルを直接修正
+       - 単体テスト失敗 → 該当テストとプロダクションコードを読んで修正
+       - 依存・環境起因（chromium のセットアップ失敗、network flake 等） → 一度だけ `gh run rerun <run-id> --failed` で再実行を試みる
+    4. 修正したら **Step 1 (Pre-commit チェック)** に戻ってやり直す。コミットは新規作成（`--amend` 禁止）、push 後また Step 6 に来る
+- 同じ check が 3 周以上連続で落ちたら hard stop。**自動修正ループを止めて、ユーザーに状況を報告し判断を仰ぐ**（誤修正リスクを避けるため）
+
+### 7. マージ
+
+全 check が green になったら squash merge する。
+
+- `gh pr merge <pr> --squash --delete-branch` を実行
+- マージ後にローカルの状態を整える:
+  - `git checkout main && git pull` でローカル main を最新化
+  - 削除済みのリモートブランチをローカルでも掃除（worktree 内なら `ExitWorktree` で抜けてから）
+
+### 8. 結果報告
+
+- PR の URL とマージ済み commit hash を表示する
+- 監視 → マージまで自動でやった旨を伝える
+- CI が失敗してリトライした場合はその回数と修正内容も併せて報告する
 
 ## 引数
 
