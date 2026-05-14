@@ -92,6 +92,17 @@ fi
 if [[ -d "$HOME/.aws" ]]; then
   [[ -f "$HOME/.aws/config"      ]] && cp -p "$HOME/.aws/config"      "$STATE/aws/config"
   [[ -f "$HOME/.aws/credentials" ]] && cp -p "$HOME/.aws/credentials" "$STATE/aws/credentials"
+  # SSO profile を使う場合、boto3 は ~/.aws/sso/cache/<hash>.json から token を読む。
+  # ドキュメントは「aws sso login --profile ... → ops 再起動」を回復手順として
+  # 案内しているため、その手順を実際に成立させるには cache ディレクトリも
+  # 都度 snapshot しておく必要がある。長期 IAM key + AssumeRole のみの場合は
+  # 不要だが、副作用は無いので無条件にコピーする。
+  if [[ -d "$HOME/.aws/sso/cache" ]]; then
+    mkdir -p "$STATE/aws/sso/cache"
+    # 既存 snapshot は revoke 済みかもしれないので、毎回まるごと差し替える。
+    rm -f "$STATE/aws/sso/cache/"*.json 2>/dev/null || true
+    cp -p "$HOME/.aws/sso/cache/"*.json "$STATE/aws/sso/cache/" 2>/dev/null || true
+  fi
 fi
 
 if ! has_container -a; then

@@ -8,6 +8,10 @@
     "ops-aws-cloudwatch": {
       "type": "sse",
       "url": "http://sho-mcp-ops:7002/sse"
+    },
+    "ops-aws-api": {
+      "type": "sse",
+      "url": "http://sho-mcp-ops:7003/sse"
     }
   }
 }

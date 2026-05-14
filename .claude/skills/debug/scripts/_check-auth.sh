@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
 # Shared auth check helpers. Source this file.
+#
+# AWS auth は ops container 側で完結するため dev sandbox からはチェックしない。
+# crawler 系の CloudWatch クエリは ops-aws-cloudwatch MCP server 経由で行い、
+# 認証エラーは MCP のレスポンスでハンドルする。
 set -euo pipefail
-
-check_aws_auth() {
-  if [ -z "${AWS_PROFILE:-}" ]; then
-    echo "ERROR: AWS_PROFILE is not set. Expected: AWS_PROFILE=crawler-debug" >&2
-    return 1
-  fi
-  if ! aws sts get-caller-identity --output json >/dev/null 2>&1; then
-    echo "ERROR: AWS auth failed for profile '$AWS_PROFILE'." >&2
-    echo "Hint: aws sso login --profile $AWS_PROFILE" >&2
-    return 1
-  fi
-}
 
 check_wrangler_auth() {
   if ! command -v wrangler >/dev/null 2>&1; then

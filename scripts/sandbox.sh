@@ -70,17 +70,13 @@ mkdir -p \
   "$STATE/vercel-config" \
   "$STATE/gh" \
   "$STATE/claude" \
-  "$STATE/vscode-server" \
-  "$STATE/aws"
+  "$STATE/vscode-server"
 
-# Snapshot host AWS profile defs into the sandbox (host = source of truth).
-# Runs on every invocation so direnv picks up host config edits automatically.
-# Container's AssumeRole / SSO cache ends up in $STATE/aws/{cli,sso}/cache/
-# without ever writing back to host ~/.aws/.
-if [[ -d "$HOME/.aws" ]]; then
-  [[ -f "$HOME/.aws/config"      ]] && cp -p "$HOME/.aws/config"      "$STATE/aws/config"
-  [[ -f "$HOME/.aws/credentials" ]] && cp -p "$HOME/.aws/credentials" "$STATE/aws/credentials"
-fi
+# 実 AWS への到達経路は dev sandbox からは外した。awscli は flake.nix に
+# 入れず、~/.aws の snapshot/mount も行わない。実 AWS の診断は ops container
+# (sho-mcp-ops) 側に閉じた awslabs.aws-api-mcp-server / cloudwatch-mcp-server
+# 経由で行う。LocalStack は docker compose の `localstack` service に同梱
+# されている awslocal を `docker compose exec` 経由で叩く。
 
 if ! has_network; then
   echo "[sandbox] creating network ${NETWORK}"
@@ -109,7 +105,6 @@ if ! has_container -a; then
     -v "$STATE/gh:/root/.config/gh"
     -v "$STATE/claude:/root/.claude"
     -v "$STATE/vscode-server:/root/.vscode-server"
-    -v "$STATE/aws:/root/.aws"
   )
 
   container run -d --name "$NAME" \
