@@ -35,8 +35,12 @@
           # ここで stdenv.cc.cc.lib を明示的に追加し、Env の LD_LIBRARY_PATH で
           # dlopen が見つけられるようにする。
           (lib.getLib stdenv.cc.cc)
-          # tini: PID 1 として子プロセス (mcp-proxy × 2) の signal を取り回す
+          # tini: PID 1 として子プロセス (nginx + mcp-proxy × 3) の signal を取り回す
           tini
+          # nginx: mcp-proxy の手前で薄い reverse proxy として動かし、limit_req
+          # で簡易レート制限を掛ける。limit_req は core モジュールなので追加 build
+          # フラグは不要。conf は /work/packages/mcp-ops/nginx.conf を -c で指定する。
+          nginx
         ];
 
         extraCommands = ''
@@ -68,9 +72,6 @@
             # numpy / scipy など C-extension が libstdc++.so.6 を dlopen するため。
             # contents に追加した stdenv.cc.cc.lib (= libstdc++) の path を渡す。
             "LD_LIBRARY_PATH=${pkgs.lib.getLib pkgs.stdenv.cc.cc}/lib"
-            "MCP_OPS_GH_PORT=7001"
-            "MCP_OPS_AWS_PORT=7002"
-            "MCP_OPS_AWS_API_PORT=7003"
           ];
         };
       };
