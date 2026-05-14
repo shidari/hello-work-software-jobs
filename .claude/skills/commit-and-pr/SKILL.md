@@ -65,7 +65,7 @@ staging されたファイルに対して、security-review コマンドの Chec
 
 ### 5. PR 作成
 
-- そのブランチの PR が未作成なら `gh pr create` で作成（サンドボックスコンテナ内で実行）
+- そのブランチの PR が未作成なら `gh pr create` で作成（host で動いている場合は host の `gh` を直接、sandbox の場合は `ops-github` MCP 経由）
   - タイトル: コミットメッセージの1行目
   - body: `docs/references/conventions.md` の PR テンプレートに従って作成する（Summary, Background & Motivation, Design Decisions, Changes, Test Plan）
   - body にバッククォート等の特殊文字を含む場合は `--body-file` を使う
@@ -112,4 +112,4 @@ push 後、PR の全 check が green になるまで監視する。
 
 - 変更がない場合は何もしない
 - secrets を含むファイル (.env, credentials.json 等) はコミットしない
-- `gh` はサンドボックスコンテナ（`./scripts/sandbox.sh`）内で実行する。ホストのグローバル版の直接実行は不可
+- `gh` はホスト (macOS) 側で直接実行する。sandbox には `gh` は入っていないので、sandbox-Claude は `ops-github` MCP 経由で同等の操作を行う（書き込み系は ops-github の `--read-only` を外す必要あり。今回のスコープ外）

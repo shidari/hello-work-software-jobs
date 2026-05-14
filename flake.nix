@@ -38,16 +38,19 @@
           pnpm
           deno
 
-          # cli tools
-          gh
-          # AWS CLI は dev sandbox からは撤去。実 AWS への診断は ops container
-          # (packages/mcp-ops) の awslabs.aws-api-mcp-server / cloudwatch-mcp-server
-          # 経由で MCP で行う（読み取り専用）。LocalStack は docker compose の
-          # localstack 公式 image に同梱されている `awslocal` を `docker compose
-          # exec` 経由で呼ぶ。
-          # claude-code / wrangler / vercel など npm 配布物は pnpm 管理に逃がす
-          # （nixpkgs 経由だと pnpm install が VM disk を食い潰す or 重い）。
-          # container 内で pnpm 側から PATH を通す前提。
+          # 認証情報を抱える CLI（gh / wrangler / vercel / awscli 等）は dev
+          # sandbox には入れない方針。ブラスト半径を最小化するため、認証 token を
+          # コンテナ内部に持たせないように切る。
+          # - GitHub: PR / Actions / repos の read は ops container の
+          #   github-mcp-server (read-only) で。書き込み (`gh pr create` / `merge`
+          #   等) はホスト側で `gh` を直接実行する。
+          # - AWS: 実 AWS への診断は ops container の cloudwatch-mcp-server /
+          #   aws-api-mcp-server (read-only) 経由で MCP。LocalStack は docker
+          #   compose 同梱の `awslocal` を `docker compose exec` で呼ぶ。
+          # - Cloudflare / Vercel: deploy・login 系はホストで `wrangler` /
+          #   `vercel` を直接実行する。`apps/backend/api` の wrangler は workspace
+          #   devDep として残るが、sandbox 内では auth がないため実質ホスト前提。
+          # - Claude Code 自体は引き続き sandbox 管理（root devDep）。
 
           # browser (chromium のみ。playwright-driver.browsers は firefox/webkit
           # も同梱するので避ける)
