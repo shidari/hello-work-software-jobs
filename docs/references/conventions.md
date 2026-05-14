@@ -33,7 +33,7 @@
 
 ## CI/CD
 
-- `pr-checks.yml` - Build, type check, test, lint on PRs
+- `pr-checks.yml` - Build, type check, knip（未使用検出）, test, lint on PRs
 - `deploy-collector.yml` - main push 時に OIDC 認証 → CDK deploy（collector / models 変更時のみ）
 
 ---

@@ -15,7 +15,7 @@ export type SimpleJobSearchPage = Page & { [_simpleJobSearchPage]: unknown };
 // Criteria — かんたん検索で指定可能な条件（最小）
 // ============================================================
 
-export type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
+type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
 
 export type SimpleJobSearchCriteria = {
   readonly jobNumber?: typeof JobNumber.Type;

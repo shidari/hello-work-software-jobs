@@ -19,6 +19,7 @@
   "devDependencies": {
     "@anthropic-ai/claude-code": "latest",
     "@biomejs/biome": "^2.0.6",
+    "knip": "^6.13.1",
     "typescript": "catalog:",
     "vercel": "^48",
     "wrangler": "^4"
