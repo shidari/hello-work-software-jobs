@@ -2,6 +2,20 @@
 
 プロジェクト全体に適用されるルール。
 
+## 実行環境の判定 (host vs sandbox)
+
+Claude が今 host (macOS) で動いてるか sandbox コンテナ (sho-sandbox, Linux) の中で動いてるかは、利用可能な CLI / ファイルシステム / network 経路が大きく違う。session 冒頭で `.claude/hooks/announce-env.sh` (SessionStart hook) が宣言するので、まずそれを見る。
+
+宣言が無い or 疑念が湧いた時は手動で `uname -s` を叩く:
+
+| 出力 | 環境 |
+|------|------|
+| `Darwin` | host (macOS) — Apple container CLI で sandbox/ops を管理 |
+| `Linux` + `/work` あり | sandbox (sho-sandbox) — gh / wrangler / vercel が PATH 上 |
+| `Linux` + `/work` なし | sandbox 以外の Linux (普段は来ない) |
+
+判定は **kernel と bind mount で行う**。`SHO_SANDBOX` 等の env 変数は spoof / 取り違えが起こる (image rebuild 忘れで unset のまま、shell から手動 export で誤認 etc.) ので self-detect には使わない。
+
 ## CLI ツール
 
 Apple container サンドボックスで管理している CLI（`gh` / `aws` / `wrangler` / `vercel` 等）の一覧と実行方法は [.claude/rules/cli.md](./cli.md) を参照。
