@@ -7,6 +7,7 @@ TODO.md
 .env.sandbox
 *.tsbuildinfo
 .claude/settings.local.json
+.claude/permissions/
 .claude/worktrees/
 .pnpm-store
 .vercel
