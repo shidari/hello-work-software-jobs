@@ -123,9 +123,9 @@
             # の lib path を baked in する。nix-built binary は RPATH が効くので
             # この LD_LIBRARY_PATH の影響を受けない。
             "LD_LIBRARY_PATH=${pkgs.glibc}/lib:${pkgs.stdenv.cc.cc.lib}/lib"
-            # Sandbox marker: scripts/assert-in-sandbox.sh と
-            # .claude/hooks/deny-host.sh はこの env の有無で host vs sandbox を
-            # 判別する。host 側には絶対に export されない値を維持すること。
+            # Sandbox marker: .claude/hooks/deny-host.sh が manual bypass として
+            # この env を見る (primary 判定は kernel + bind-mount)。host 側には
+            # 絶対に export されない値を維持すること。
             "SHO_SANDBOX=1"
           ];
         };

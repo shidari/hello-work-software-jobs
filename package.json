@@ -6,7 +6,6 @@
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "preinstall": "bash ./scripts/assert-in-sandbox.sh",
     "test": "pnpm -r test",
     "type-check": "pnpm -r exec tsc --noEmit ",
     "lint": "pnpm exec biome lint",
