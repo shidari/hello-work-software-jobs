@@ -49,6 +49,7 @@ pnpm test              # Run all tests
 pnpm type-check        # Type check
 pnpm lint              # Lint
 pnpm format            # Format
+pnpm exec knip         # 未使用ファイル / export / 依存検出（CI 必須）
 
 # Frontend (apps/frontend/hello-work-job-searcher)
 pnpm dev               # Dev server (port 9002)

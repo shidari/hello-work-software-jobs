@@ -9,7 +9,7 @@ export type FirstJobListPage = Page & {
 };
 
 declare const _nextJobListPage: unique symbol;
-export type NextJobListPage = Page & {
+type NextJobListPage = Page & {
   readonly _tag: "NextJobListPage";
   readonly [_nextJobListPage]: unknown;
 };

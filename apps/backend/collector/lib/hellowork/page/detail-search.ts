@@ -18,12 +18,12 @@ type DetailedJobSearchPage = Page & {
 // Criteria — 詳しい条件で検索ページで指定可能な条件
 // ============================================================
 
-export type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
+type EngineeringLabel = "ソフトウェア開発技術者、プログラマー";
 
 // 詳細検索ページ `newArrivedCKBox` と対応:
 //   "withinTwoDays" → value=1（新着：当日・前日）
 //   "withinWeek"    → value=2（新着：1週間以内）
-export type SearchPeriod = "withinTwoDays" | "withinWeek";
+type SearchPeriod = "withinTwoDays" | "withinWeek";
 
 export type DetailedJobSearchCriteria = {
   readonly jobNumber?: typeof JobNumber.Type;

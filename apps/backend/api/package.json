@@ -27,7 +27,6 @@
 		"wrangler": "4.69.0"
 	},
 	"dependencies": {
-		"@hono/standard-validator": "^0.2.0",
 		"@hono/swagger-ui": "^0.6.0",
 		"@sho/db": "workspace:*",
 		"@sho/logger": "workspace:*",
@@ -35,7 +34,6 @@
 		"effect": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "^1.0.8",
-		"kysely": "^0.28.0",
 		"kysely-d1": "^0.4.0"
 	}
 }

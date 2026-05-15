@@ -1,0 +1,68 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreBinaries": ["build"],
+  "workspaces": {
+    ".": {
+      "entry": [".github/workflows/*.{yml,yaml}"],
+      "ignoreDependencies": ["@anthropic-ai/claude-code"]
+    },
+    "apps/backend/api": {
+      "entry": [
+        "test/**/*.{spec,test}.ts",
+        "test/d1/apply-migrations.ts",
+        "test/mock.ts",
+        "vitest.config.mts"
+      ],
+      "vitest": false,
+      "ignoreDependencies": ["cloudflare", "@vitest/coverage-istanbul"]
+    },
+    "apps/backend/collector": {
+      "entry": [
+        "lib/hellowork/scripts/*.ts",
+        "lib/hellowork/**/__tests__/**/*.test.ts",
+        "lib/hellowork/__tests__/fixtures.ts",
+        "vitest.config.ts"
+      ],
+      "vitest": false,
+      "ignoreBinaries": ["infra/local/e2e.sh"],
+      "ignoreDependencies": [
+        "@vitest/coverage-v8",
+        "@aws-sdk/client-sqs",
+        "@sho/logger"
+      ]
+    },
+    "apps/backend/collector/infra": {
+      "entry": [
+        "bin/collector.ts",
+        "lib/collector-stack.ts",
+        "test/**/*.test.ts",
+        "vitest.config.ts"
+      ],
+      "vitest": false,
+      "ignoreDependencies": ["@vitest/coverage-v8", "tsx"]
+    },
+    "apps/frontend/hello-work-job-searcher": {
+      "entry": [
+        "src/app/**/page.tsx",
+        "src/app/**/layout.tsx",
+        "src/app/**/loading.tsx",
+        "src/app/**/error.tsx",
+        "src/**/*.stories.{ts,tsx}",
+        "src/lib/*.mock.ts",
+        "next.config.{js,mjs,ts}",
+        "vitest.config.ts"
+      ],
+      "vitest": false
+    },
+    "packages/db": {
+      "ignore": ["src/generated/**"],
+      "ignoreBinaries": ["sqlite3"]
+    },
+    "packages/models": {
+      "entry": ["src/**/*.test.ts", "vitest.config.ts"],
+      "vitest": false,
+      "ignoreDependencies": ["@vitest/coverage-v8"]
+    },
+    "packages/logger": {}
+  }
+}
