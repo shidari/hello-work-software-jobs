@@ -29,6 +29,8 @@ import { verifyApiKey } from "../middleware/api-key";
 
 // --- スキーマ ---
 
+const MAX_PAGE = 1000;
+
 const jobFetchParamSchema = Schema.Struct({
   jobNumber: JobNumber,
 });
@@ -76,6 +78,9 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
       const WageFromString = Schema.compose(Schema.NumberFromString, RawWage);
 
       const parsedPage = raw.page ? Number(raw.page) : 1;
+      const page = Number.isNaN(parsedPage)
+        ? 1
+        : Math.min(MAX_PAGE, Math.max(1, Math.floor(parsedPage)));
       return ParseResult.succeed({
         filter: Schema.decodeUnknownSync(SearchFilterSchema)({
           companyName: raw.companyName,
@@ -111,9 +116,7 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
           industryClassification: raw.industryClassification,
           establishmentNumber: raw.establishmentNumber,
         }),
-        page: Number.isNaN(parsedPage)
-          ? 1
-          : Math.max(1, Math.floor(parsedPage)),
+        page,
       });
     },
     encode: (val, _, ast) =>
