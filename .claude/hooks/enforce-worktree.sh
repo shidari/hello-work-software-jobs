@@ -2,7 +2,18 @@
 # Block Edit/Write/NotebookEdit on the main worktree to enforce "1 feature = 1 worktree".
 # See .claude/rules/general.md for rationale.
 # Bypass for trivial fixes: `touch /tmp/.claude-allow-main-edit` (one-shot, auto-consumed).
+#
+# Skipped on Claude Code on the web: each session already runs in an ephemeral
+# cloud container on its own branch (a fresh clone, not a worktree setup), so
+# the worktree-isolation goal is met by the session boundary itself. There is
+# no shared parent checkout to protect, and `.git` is a directory by default
+# which would otherwise trigger the main-worktree block on every edit.
 set -euo pipefail
+
+# Short-circuit on Claude Code on the web (Linux + /home/user, no /work symlink).
+if [[ "$(uname -s)" == "Linux" && ! -L /work && -d /home/user ]]; then
+  exit 0
+fi
 
 input=$(cat)
 file_path=$(jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' <<<"$input")
