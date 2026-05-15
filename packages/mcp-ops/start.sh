@@ -10,8 +10,9 @@
 #   内側 7011/7012/7013    mcp-proxy が 127.0.0.1 で bind (nginx 経由でしか到達不可)
 #
 #   :7001 / :7011  github-mcp-server (Go binary from GitHub releases)。
-#                  --read-only と toolset ハードコードで起動し、
-#                  クライアント側から scope を広げられないようにする。
+#                  toolset ハードコードで起動し、クライアント側から scope を
+#                  広げられないようにする。write 系 tool は Keychain に保存した
+#                  PAT の scope (Pull requests:RW / Issues:RW 等) で制限する。
 #   :7002 / :7012  awslabs.cloudwatch-mcp-server (Python via uvx)。
 #                  CloudWatch logs / metrics 専用。
 #   :7003 / :7013  awslabs.aws-api-mcp-server (Python via uvx)。
@@ -73,7 +74,6 @@ uvx mcp-proxy --port 7011 --host 127.0.0.1 \
   -e GITHUB_PERSONAL_ACCESS_TOKEN "$GITHUB_PERSONAL_ACCESS_TOKEN" \
   -- \
   "$GH_BIN" stdio \
-    --read-only \
     --toolsets=pull_requests,issues,actions,repos &
 GH_PID=$!
 
