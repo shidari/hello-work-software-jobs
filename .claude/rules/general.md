@@ -62,17 +62,38 @@ CLI の住み分け（sandbox 内 / host 専用）と実行方法は [.claude/ru
 
 ## ワンショットスクリプト実行
 
-調査・検証用の使い捨てワンライナー / 短いスクリプトは `node -e` ではなく **`deno eval`** を使う。Deno はデフォルトで権限ゼロなので、コンテナ内でもう一段の最小権限境界が引ける。
+調査・検証用の使い捨てワンライナー / 短いスクリプトは `node -e` ではなく **deno** を使う。
 
-**まず `--allow-*` を一切付けずに書く**。実行して `PermissionDenied` が出たら、出たエラーが指す権限だけを `--allow-X=<最小スコープ>` で足す。最初から「たぶん要る」で許可を盛らない。
+| サブコマンド | 権限 | 用途 |
+|------|------|------|
+| `deno eval '<code>'` | **暗黙の all permissions** (flag 不可) | inline 1 発書き捨て。JSON 整形・ファイル走査・集計など |
+| `deno run --allow-X=<scope> <file>` | flag で明示的に最小権限 | 何度か走らせるスクリプト / 信用境界を引きたい時 |
 
-| 用途 | コマンド例 |
-|------|-----------|
-| 純粋計算・文字列処理 | `deno eval "..."`（権限なし、デフォルト） |
-| ファイル読むだけ | `deno eval --allow-read=. "..."` |
-| 外部 API 叩く | `deno eval --allow-net=api.example.com "..."` |
-| 環境変数を読む | `deno eval --allow-env=FOO "..."` |
+`deno eval` は v2 以降 `--allow-*` flag を **受け付けない** (`unexpected argument '--allow-read' found` で落ちる)。eval は trusted な書き捨て専用と割り切る。最小権限を引きたい時は `deno run` を一時 file 経由で叩く:
+
+```bash
+cat > /tmp/foo.ts <<'TS'
+const txt = Deno.readTextFileSync("/tmp/data.json");
+console.log(JSON.parse(txt));
+TS
+deno run --allow-read=/tmp /tmp/foo.ts
+```
 
 **Read / Edit / Write tool で済む場合は deno を呼ばない**。単一ファイルの読み書きや JSON の中身を見るだけなら専用 tool の方が安全で速い。deno は「ロジック付きの処理（複数ファイル走査・集計・変換）」が必要になったときだけ。
 
 **棲み分け**: Deno はあくまで「リポジトリのコードに繋がらない単発スクリプト」専用。リポジトリ内パッケージ（`@sho/*`）を import する検証や `apps/`・`packages/` 配下に永続的に置くスクリプトは、pnpm workspace 解決のため `tsx scripts/foo.ts` を使う。
+
+## codex CLI (セカンドオピニオン)
+
+別 LLM のコードレビューを得るために `codex` CLI を使う。host / sandbox どちらでも利用可。詳細な周回・auto-apply は `/codex-review-loop` skill が wrap している。
+
+| 目的 | コマンド |
+|------|---------|
+| 未コミット差分 (staged + unstaged + untracked) をレビュー | `codex review --uncommitted` |
+| 既存 commit をレビュー | `codex review --commit <SHA>` |
+| base ブランチとの diff をレビュー | `codex review --base main` |
+| 補助 prompt 付き | `codex review --uncommitted "X 周りの抜けを重点的に"` |
+
+`codex review` は非対話で完走して finding を stdout に出す。`[P0]` / `[P1]` / `[P2]` 等の severity tag が付くので、accept / reject を判断する。出力末尾の thread エラー (`failed to record rollout items`) は session telemetry の都合で無視してよい。
+
+`/codex-review-loop` skill は上記を `claude -p --dangerously-skip-permissions` と組み合わせて最大 3 周 auto-apply する。**個別 finding を読みつつ自分で修正したい時は素の `codex review --uncommitted` を直接叩く**。loop と違い `SHO_SANDBOX=1` チェックは無いので host からでも回せる。

@@ -53,14 +53,33 @@ direnv 経由なら `cd ~/path/to/repo` で container が自動 up（`sandbox-im
 
 **dev サンドボックスは認証 token を一切持たない**。`gh` / `wrangler` / `vercel` / `awscli` は image にも入っていないし、host から bind-mount もしない (`~/.sho-sandbox/{gh,wrangler,vercel*}` は廃止済み)。これらが必要な操作は host 側で実行する。
 
-sandbox がまだ保持するのは Claude Code 自身と VSCode-server の状態のみ:
+sandbox がまだ保持するのは Claude Code 自身と VSCode-server の状態、そして git 署名用の SSH 公開鍵のみ:
 
 | ツール | ホスト側 | コンテナ内 |
 |--------|---------|-----------|
 | `claude` | `~/.sho-sandbox/claude/` | `/root/.claude/` |
 | `vscode-server` | `~/.sho-sandbox/vscode-server/` | `/root/.vscode-server/` |
+| ssh (pub key / known_hosts) | `~/.sho-sandbox/ssh/` (host の `~/.ssh/github_ed25519.pub` / `known_hosts` を staging copy) | `/root/.ssh/` (read-only) |
 
 実 AWS への到達経路は dev サンドボックスからは外している。`awscli` は flake から削除済みで、`~/.aws` の mount も無い。CloudWatch / SQS / Lambda / EventBridge 等は **ops サンドボックス** (`sho-mcp-ops`) 側に閉じた MCP server（`ops-aws-cloudwatch` / `ops-aws-api`、いずれも read-only）経由で読む（後段「MCP ops コンテナ」節）。
+
+## SSH-agent forwarding (git commit signing)
+
+container 内で `git commit -S` が動くようにするため、host の launchd ssh-agent (`SSH_AUTH_SOCK` で渡される socket) を container に bind mount し、SSH_AUTH_SOCK env を container 内 path (`/run/ssh-agent.sock`) に張り替える。
+
+| 対象 | host | container |
+|------|------|-----------|
+| 署名鍵の秘密鍵本体 | `~/.ssh/github_ed25519` (passphrase 保護) — host の Keychain で unlock 済み、ssh-agent に load 済み | **置かない** |
+| 署名鍵の公開鍵 | `~/.ssh/github_ed25519.pub` | `/root/.ssh/github_ed25519.pub` (staging copy 経由 read-only mount) |
+| ssh-agent socket | `$SSH_AUTH_SOCK` (例: `/var/run/com.apple.launchd.XXX/Listeners`) | `/run/ssh-agent.sock` (bind mount + `SSH_AUTH_SOCK` env) |
+
+container 内の `ssh-keygen -Y sign -f /root/.ssh/github_ed25519.pub` は agent 越しに host で unlocked な秘密鍵で署名するので、container は秘密鍵そのものを抱えない。
+
+### 制約
+
+- **host SSH_AUTH_SOCK path は session 毎に変わる**。launchd が host re-login で新しい socket path を払い出すので、container 作成時に焼き付けた `source` が dangling になる。`sandbox.sh` は起動時に現在の `SSH_AUTH_SOCK` と既存 container の mount source を比較して、ずれていれば warning を出す。`./scripts/sandbox-stop.sh && ./scripts/sandbox.sh` で recreate して直す。
+- **agent forwarding は host agent に load された全鍵を container 側コードから利用可能にする**。`ssh-add -L` に並ぶ鍵は container からも使える。dev sandbox の信頼境界に含まれる前提で許容している。
+- **CI / 非対話セッション等で host SSH_AUTH_SOCK が無い場合**は forwarding を skip して warning を出す。container 内で signing は動かない (commit 時に host で代わりに sign するか、host で `ssh-add` してから sandbox を recreate する)。
 
 ## Claude project-level permissions の分離 (host vs container)
 
