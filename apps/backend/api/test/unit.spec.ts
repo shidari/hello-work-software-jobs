@@ -278,17 +278,38 @@ describe("セキュリティ", () => {
   });
 
   it("レート制限を超えると 429 を返す", async () => {
-    // まず1回リクエストしてテーブルを確実に作成
+    // まず1回リクエストしてテーブルと bucket を確実に作成
     await workerFetch("/jobs");
-    // トークンを枯渇させて refill されないよう last_refill を現在時刻に
+    // CF-Connecting-IP が無い request の bucket id は 'ip:unknown'
     const db = MOCK_ENV.DB;
     await db
       .prepare(
-        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'global'",
+        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'ip:unknown'",
       )
       .run();
     const response = await workerFetch("/jobs");
     expect(response.status).toBe(429);
+  });
+
+  it("レート制限の bucket は CF-Connecting-IP ごとに分離される", async () => {
+    // ip:1.1.1.1 の bucket を枯渇させる
+    await workerFetch("/jobs", { headers: { "CF-Connecting-IP": "1.1.1.1" } });
+    const db = MOCK_ENV.DB;
+    await db
+      .prepare(
+        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'ip:1.1.1.1'",
+      )
+      .run();
+    // ip:1.1.1.1 は 429
+    const blocked = await workerFetch("/jobs", {
+      headers: { "CF-Connecting-IP": "1.1.1.1" },
+    });
+    expect(blocked.status).toBe(429);
+    // ip:2.2.2.2 は影響を受けない
+    const ok = await workerFetch("/jobs", {
+      headers: { "CF-Connecting-IP": "2.2.2.2" },
+    });
+    expect(ok.status).toBe(200);
   });
 
   it("LIKE ワイルドカードがエスケープされる", async () => {
