@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# PreToolUse hook: deny tool use on the user's macOS host. Wired in
-# .claude/settings.json on Read / Glob / Grep / Bash / Edit / Write /
-# NotebookEdit.
+# PreToolUse hook: deny tool use on the user's macOS host.
+#
+# Wired in .claude/settings.json with matcher ".*" so it fires on every tool
+# (file, shell, network, agent spawn, MCP). The earlier narrow matcher
+# (Read|Glob|Grep|Bash|Edit|Write|NotebookEdit) left a hole where host-side
+# Claude could still hit MCP write tools (mcp__github__*) and outbound HTTP
+# (WebFetch) — defeating the "host sandbox-only" intent.
 #
 # Allowed environments:
 #   - sandbox (sho-sandbox): Linux + /work bind-mount symlink set by
@@ -15,6 +19,8 @@
 #
 # Soft guard, not a security boundary (the user can unset the hook by editing
 # settings.json). Goal is "host で Claude が誤って動かない" にする運用境界。
+
+set -uo pipefail
 
 kernel=$(uname -s)
 
@@ -45,6 +51,7 @@ cat >&2 <<'EOF'
     ./scripts/sandbox.sh         # enter the container
     claude                       # start Claude inside the sandbox
 
-  Read, Glob, Grep, Bash, Edit, Write, and NotebookEdit are blocked on host.
+  All tools (file, shell, network, agent, MCP) are blocked on host. If you
+  genuinely need to bypass for an unusual environment, set SHO_SANDBOX=1.
 EOF
 exit 2
