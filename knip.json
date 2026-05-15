@@ -4,7 +4,7 @@
   "workspaces": {
     ".": {
       "entry": [".github/workflows/*.{yml,yaml}"],
-      "ignoreDependencies": ["@anthropic-ai/claude-code", "vercel", "wrangler"]
+      "ignoreDependencies": ["@anthropic-ai/claude-code"]
     },
     "apps/backend/api": {
       "entry": [
@@ -25,7 +25,11 @@
       ],
       "vitest": false,
       "ignoreBinaries": ["infra/local/e2e.sh"],
-      "ignoreDependencies": ["@vitest/coverage-v8"]
+      "ignoreDependencies": [
+        "@vitest/coverage-v8",
+        "@aws-sdk/client-sqs",
+        "@sho/logger"
+      ]
     },
     "apps/backend/collector/infra": {
       "entry": [

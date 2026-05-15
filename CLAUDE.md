@@ -29,7 +29,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 
 ## Skills
 
-- `/commit-and-pr` — コミット → PR 作成の自動化
+- `/commit-and-pr` — コミット → PR 作成 → CI 監視 → squash merge の自動化
 - `/codex-review-loop` — commit 前に codex review を最大 3 周ループ（hard cap、codex 指摘 → claude が修正 → 再レビュー）
 - `/pentest` — 攻撃者視点のペネトレーションテスト
 - `/crawler-diagnose` — クローラーパイプライン診断
@@ -38,7 +38,7 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 ## Common Commands
 
 ```bash
-# Sandbox (Apple container) — Claude Code / CLI ツールはすべてこの中で実行
+# Sandbox (Apple container) — Claude Code と汎用 dev tools のみ。gh / wrangler / vercel / awscli は host 専用
 ./scripts/sandbox-image.sh    # image build + smoke test + container 再作成を 1 本で（初回 or flake.nix 更新時）
 ./scripts/sandbox.sh          # コンテナ起動 + bash で入る（direnv で自動 up も可）
 ./scripts/sandbox-stop.sh     # 停止・破棄（ad-hoc cleanup 用）
