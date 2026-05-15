@@ -2,23 +2,26 @@
 
 プロジェクト全体に適用されるルール。
 
-## 実行環境の判定 (host vs sandbox)
+## 実行環境の判定 (host / sandbox / web)
 
-Claude が今 host (macOS) で動いてるか sandbox コンテナ (sho-sandbox, Linux) の中で動いてるかは、利用可能な CLI / ファイルシステム / network 経路が大きく違う。session 冒頭で `.claude/hooks/announce-env.sh` (SessionStart hook) が宣言するので、まずそれを見る。
+Claude が今 host (macOS) / sandbox コンテナ (sho-sandbox, Linux) / Claude Code on the web (Anthropic-managed cloud container, Linux) のどこで動いてるかは、利用可能な CLI / ファイルシステム / network 経路が大きく違う。session 冒頭で `.claude/hooks/announce-env.sh` (SessionStart hook) が宣言するので、まずそれを見る。
 
 宣言が無い or 疑念が湧いた時は手動で `uname -s` を叩く:
 
 | 出力 | 環境 |
 |------|------|
 | `Darwin` | host (macOS) — Apple container CLI で sandbox/ops を管理 |
-| `Linux` + `/work` あり | sandbox (sho-sandbox) — Claude Code 本体と汎用 dev tools のみ。gh / wrangler / vercel は **PATH に無い**（host 専用） |
-| `Linux` + `/work` なし | sandbox 以外の Linux (普段は来ない) |
+| `Linux` + `/work` symlink あり | sandbox (sho-sandbox) — Claude Code 本体と汎用 dev tools のみ。gh / wrangler / vercel は **PATH に無い**（host 専用） |
+| `Linux` + `/home/user` あり | web (Claude Code on the web) — Anthropic-managed ephemeral cloud container。gh / wrangler / vercel / awscli は **不在**。GitHub 操作は `mcp__github__*` MCP tools 経由 |
+| `Linux` + 上記いずれもなし | sandbox 以外の Linux (普段は来ない) |
 
-判定は **kernel と bind mount で行う**。`SHO_SANDBOX` 等の env 変数は spoof / 取り違えが起こる (image rebuild 忘れで unset のまま、shell から手動 export で誤認 etc.) ので self-detect には使わない。
+判定は **kernel と filesystem signals で行う**。`SHO_SANDBOX` 等の env 変数は spoof / 取り違えが起こる (image rebuild 忘れで unset のまま、shell から手動 export で誤認 etc.) ので self-detect には使わない。
 
 ## CLI ツール
 
 CLI の住み分け（sandbox 内 / host 専用）と実行方法は [.claude/rules/cli.md](./cli.md) を参照。`gh` / `wrangler` / `vercel` / `awscli` 等の認証付き CLI は host 専用。
+
+Claude Code on the web ではこれらの CLI も入っていない。GitHub 操作 (PR・issue・コメント・file 読み書き等) は `mcp__github__*` MCP tools 経由で行い、wrangler / vercel が必要なオペレーション (deploy・tail) は host 側のユーザーに依頼する。
 
 ## 作業単位 = worktree
 
@@ -31,6 +34,8 @@ CLI の住み分け（sandbox 内 / host 専用）と実行方法は [.claude/ru
 実装: 着手前に `EnterWorktree` を使い、終わったら `ExitWorktree` で戻る。worktree の中では通常通り編集・コミット・PR 作成を行う。
 
 強制: `.claude/hooks/enforce-worktree.sh`（PreToolUse hook）が main worktree 上での `Edit` / `Write` / `NotebookEdit` を block する。例外（trivial 修正）に該当する場合は、ユーザーに確認を取った上で `touch /tmp/.claude-allow-main-edit` を実行してから編集を再試行する。センチネルは 1 回限りで次の編集時に自動消費される。
+
+Claude Code on the web では各 session が独立した cloud container で動いており、session = branch の isolation が container 境界で担保されているため、`enforce-worktree.sh` は web では skip される（fresh clone なので `.git` が directory のまま → main worktree 扱いになるのを避けるため）。web 側では普通に branch を切って編集してよい。
 
 ## コミット粒度
 
