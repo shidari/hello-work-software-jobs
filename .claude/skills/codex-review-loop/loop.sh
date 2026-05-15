@@ -22,7 +22,8 @@ set -euo pipefail
 # サンドボックス必須。子 claude が `--dangerously-skip-permissions` で動くため、
 # host で誤起動するとファイルシステム / ネットワークに無制限アクセスを与えてしまう。
 # flake.nix の image Env に焼き込んだ SHO_SANDBOX=1 で host vs sandbox を判別する
-# (scripts/assert-in-sandbox.sh と同じ規約)。
+# (.claude/hooks/deny-host.sh と同じ env を見る。deny-host は primary に
+# kernel + bind-mount で判定)。
 if [[ "${SHO_SANDBOX:-}" != "1" ]]; then
   cat >&2 <<'EOF'
 ERROR: codex-review-loop は --dangerously-skip-permissions を使うため sandbox 内でのみ実行可。

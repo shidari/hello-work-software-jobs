@@ -7,7 +7,6 @@
   "packageManager": "pnpm@10.30.3",
   "main": "index.js",
   "scripts": {
-    "preinstall": "bash ./scripts/assert-in-sandbox.sh",
     "test": "pnpm -r test",
     "type-check": "pnpm -r exec tsc --noEmit ",
     "lint": "pnpm exec biome lint",
