@@ -55,6 +55,20 @@ container_on_network() {
 container_has_permissions_overlay() {
   container inspect "$NAME" 2>/dev/null | grep -q "claude-permissions"
 }
+# Same pattern: ssh-agent forwarding mount (for git commit signing). MOUNTS
+# only apply on container creation, so existing containers without this mount
+# must be recreated to pick it up.
+container_has_ssh_agent_mount() {
+  container inspect "$NAME" 2>/dev/null | grep -q "/run/ssh-agent.sock"
+}
+# host の SSH_AUTH_SOCK path は launchd 管理で session 毎に変わる
+# (例: /var/run/com.apple.launchd.XXX/Listeners)。container 作成時の path が
+# host 現在の SSH_AUTH_SOCK と一致しているか確認する。ずれていたら
+# bind mount 先の socket は既に消滅していて signing が動かないので recreate を促す。
+container_ssh_agent_source_matches() {
+  [[ -z "${SSH_AUTH_SOCK:-}" ]] && return 0
+  container inspect "$NAME" 2>/dev/null | grep -q "\"source\" *: *\"${SSH_AUTH_SOCK}\""
+}
 
 if ! has_image; then
   echo "ERROR: ${IMAGE} not loaded." >&2
@@ -126,6 +140,96 @@ fi
 # 新規 worktree は EnterWorktree hook (.claude/hooks/link-worktree-settings.sh) が
 # main の permissions/settings.local.json への絶対 symlink を張る。
 
+# SSH-agent forwarding + 公開鍵 expose の準備。
+#
+# 目的: container 内で git commit -S が動くようにする。host の launchd が管理する
+# ssh-agent socket (SSH_AUTH_SOCK) を container に bind mount し、host の Keychain
+# 経由で既に unlocked になっている署名鍵 (~/.ssh/github_ed25519) を agent 越しに
+# 使わせる。秘密鍵そのものは container には決して置かない。
+#
+# 公開鍵は gitconfig の `user.signingkey = ~/.ssh/github_ed25519.pub` が path で
+# 参照しているので、host の .pub を $STATE/ssh/ に staging copy して /root/.ssh/
+# に read-only mount する。known_hosts も併せて staging copy する (ssh-keygen -Y
+# sign 自体は known_hosts を読まないが、container 内で他の SSH を打つ場合の最低限
+# として持たせておく)。
+#
+# セキュリティトレードオフ: agent forwarding は host agent に load された **全鍵**
+# を container 側コードから利用可能にする。host で `ssh-add -L` に並ぶ鍵がそのまま
+# container にも見える点に注意。dev sandbox の信頼境界に含まれる前提で許容している。
+SSH_STAGING_DIR="$STATE/ssh"
+mkdir -p "$SSH_STAGING_DIR"
+chmod 700 "$SSH_STAGING_DIR"
+SSH_PUB_SRC="$HOME/.ssh/github_ed25519.pub"
+SSH_KNOWN_HOSTS_SRC="$HOME/.ssh/known_hosts"
+# 同期: host source が消えたら staging copy も消す (consume されないと、SIGNING_ENABLED
+# の判定で staged copy だけが残って "signing 可" と誤判定する)。
+if [[ -f "$SSH_PUB_SRC" ]]; then
+  cp -f "$SSH_PUB_SRC" "$SSH_STAGING_DIR/github_ed25519.pub"
+  chmod 644 "$SSH_STAGING_DIR/github_ed25519.pub"
+else
+  rm -f "$SSH_STAGING_DIR/github_ed25519.pub"
+fi
+if [[ -f "$SSH_KNOWN_HOSTS_SRC" ]]; then
+  cp -f "$SSH_KNOWN_HOSTS_SRC" "$SSH_STAGING_DIR/known_hosts"
+  chmod 644 "$SSH_STAGING_DIR/known_hosts"
+else
+  rm -f "$SSH_STAGING_DIR/known_hosts"
+fi
+
+# allowed_signers (git の SSH 署名検証用 — verify 時のみ参照、sign 時は不要だが
+# `git log --show-signature` 等のために container にも置いておく) を staging copy。
+# host の ~/.config/git/allowed_signers を staging dir 経由で /root/.config/git/
+# に read-only mount する (file-level mount は doc 上 unreliable なので dir mount)。
+GIT_CONFIG_STAGING_DIR="$STATE/git-config"
+mkdir -p "$GIT_CONFIG_STAGING_DIR"
+GIT_ALLOWED_SIGNERS_SRC="$HOME/.config/git/allowed_signers"
+if [[ -f "$GIT_ALLOWED_SIGNERS_SRC" ]]; then
+  cp -f "$GIT_ALLOWED_SIGNERS_SRC" "$GIT_CONFIG_STAGING_DIR/allowed_signers"
+  chmod 644 "$GIT_CONFIG_STAGING_DIR/allowed_signers"
+else
+  rm -f "$GIT_CONFIG_STAGING_DIR/allowed_signers"
+fi
+
+# host SSH_AUTH_SOCK が無い (CI / 非対話セッション等) 場合は agent forwarding を
+# skip。container 内で signing が必要になったら user に再 login を促す。
+# SIGNING_ENABLED は後段の git config 書き込みで commit.gpgsign を有効化するか
+# 判別する。forwarding が無いまま commit.gpgsign=true にすると通常の `git commit`
+# まで失敗するので、**実際に running container が agent forwarding を使える時のみ**
+# signing を強制し、それ以外では明示的に unset する。
+# - 新規 container を作る場合: 現在の SSH_AUTH_SOCK / 公開鍵が揃えば OK
+# - 既存 container がいる場合: その container の mount が現行 SSH_AUTH_SOCK に
+#   一致している必要がある (mount は作成時固定、host re-login で source が ずれた
+#   ものは使えない)
+# pub key が host agent に load 済みかも確認する。socket だけあって鍵が load
+# されていない状態 (host reboot 直後で keychain 未起動 / 違う鍵だけ load 済み
+# 等) で commit.gpgsign=true にすると、普通の `git commit` が "no usable private
+# key" で fail する。鍵 type + base64 (公開鍵ファイルの 2 列目まで) で identity
+# 一致を見る。
+key_in_agent() {
+  [[ -f "$SSH_PUB_SRC" ]] || return 1
+  command -v ssh-add >/dev/null 2>&1 || return 1
+  local want
+  want=$(awk '{print $1, $2}' "$SSH_PUB_SRC" 2>/dev/null)
+  [[ -n "$want" ]] || return 1
+  ssh-add -L 2>/dev/null | awk '{print $1, $2}' | grep -qxF "$want"
+}
+
+SSH_AGENT_MOUNT=()
+SSH_AGENT_ENV=()
+SIGNING_ENABLED=0
+if [[ -n "${SSH_AUTH_SOCK:-}" && -S "${SSH_AUTH_SOCK:-}" && -f "$SSH_STAGING_DIR/github_ed25519.pub" ]] && key_in_agent; then
+  SSH_AGENT_MOUNT=(-v "$SSH_AUTH_SOCK:/run/ssh-agent.sock")
+  SSH_AGENT_ENV=(-e "SSH_AUTH_SOCK=/run/ssh-agent.sock")
+  if ! has_container -a; then
+    SIGNING_ENABLED=1
+  elif container_has_ssh_agent_mount && container_ssh_agent_source_matches; then
+    SIGNING_ENABLED=1
+  fi
+fi
+if (( ! SIGNING_ENABLED )); then
+  echo "[sandbox] WARN: container 内で git commit -S は無効化する (forwarding 不可 / 鍵 unload / mount 不一致)。" >&2
+fi
+
 # 実 AWS への到達経路は dev sandbox からは外した。awscli は flake.nix に
 # 入れず、~/.aws の snapshot/mount も行わない。実 AWS の診断は ops container
 # (sho-mcp-ops) 側に閉じた awslabs.aws-api-mcp-server / cloudwatch-mcp-server
@@ -162,18 +266,39 @@ if has_container -a && ! container_has_permissions_overlay; then
   exit 1
 fi
 
-if ! has_container -a; then
-  GIT_NAME=$(git -C "$REPO" config --get user.name || echo "Sandbox")
-  GIT_EMAIL=$(git -C "$REPO" config --get user.email || echo "sandbox@localhost")
+# Migration warning: ssh-agent forwarding は MOUNTS の一部なので container 作成時
+# しか効かない。既存 container にこの mount が無ければ git commit -S が動かない。
+# また host SSH_AUTH_SOCK は session ごとに path が変わるので、host 側 reboot 後
+# は container 作成時の source path が dangling になる。両方をここで検知する。
+if has_container -a && ! container_has_ssh_agent_mount; then
+  echo "[sandbox] WARN: ${NAME} は ssh-agent forwarding mount を持っていない。" >&2
+  echo "             container 内で git commit -S は動かない。" >&2
+  echo "             有効化するには: ./scripts/sandbox-stop.sh && ./scripts/sandbox.sh" >&2
+elif has_container -a && ! container_ssh_agent_source_matches; then
+  echo "[sandbox] WARN: ${NAME} の ssh-agent socket mount source が host の SSH_AUTH_SOCK" >&2
+  echo "             (${SSH_AUTH_SOCK:-unset}) と一致していない。" >&2
+  echo "             host reboot / re-login で socket path が変わった可能性。" >&2
+  echo "             修正するには: ./scripts/sandbox-stop.sh && ./scripts/sandbox.sh" >&2
+fi
 
+# GIT_NAME / GIT_EMAIL は container 起動時の env と recreate 後の gitconfig
+# 書き戻しの両方で使うので、ここで一度だけ resolve する。
+GIT_NAME=$(git -C "$REPO" config --get user.name || echo "Sandbox")
+GIT_EMAIL=$(git -C "$REPO" config --get user.email || echo "sandbox@localhost")
+
+if ! has_container -a; then
   # claude-permissions overlay は --mount の長形式で readonly を明示する。
   # Apple container 0.11.0 では `-v src:dst:ro` の `:ro` が silently 落とされる
   # ため、長形式の `readonly` flag に乗せる必要がある。
+  # /root/.ssh も同じく readonly で expose (公開鍵 + known_hosts のみ)。
   MOUNTS=(
     -v "$REPO:$REPO"
     --mount "type=bind,source=$PERMISSIONS_OVERLAY_DIR,target=$PERMISSIONS_HOST_DIR,readonly"
     -v "$STATE/claude:/root/.claude"
     -v "$STATE/vscode-server:/root/.vscode-server"
+    --mount "type=bind,source=$SSH_STAGING_DIR,target=/root/.ssh,readonly"
+    --mount "type=bind,source=$GIT_CONFIG_STAGING_DIR,target=/root/.config/git,readonly"
+    "${SSH_AGENT_MOUNT[@]}"
   )
 
   container run -d --name "$NAME" \
@@ -184,6 +309,7 @@ if ! has_container -a; then
     -e GIT_AUTHOR_EMAIL="$GIT_EMAIL" \
     -e GIT_COMMITTER_NAME="$GIT_NAME" \
     -e GIT_COMMITTER_EMAIL="$GIT_EMAIL" \
+    "${SSH_AGENT_ENV[@]}" \
     -w "$REPO" \
     "$IMAGE" \
     sleep infinity >/dev/null
@@ -196,6 +322,27 @@ fi
 # 直後に張り直すので、bind mount の先（worktree path 等）が変わっても追従
 # する。
 container exec "$NAME" /bin/bash -c "rm -rf /work && ln -sfT '$REPO' /work" >/dev/null
+
+# /root/.gitconfig は container 作成時に layer に焼かれないので recreate 毎に
+# 消える。git identity と signing 関連の config を毎回 idempotent に書き戻す。
+# 秘密鍵本体は container には無く、agent forwarding 経由で host 側 unlocked key
+# を使う。値は container exec の引数として直接渡す (bash -c の文字列補間に値を
+# 混ぜると identity に apostrophe 等が含まれた時に shell 構文が壊れるため)。
+container exec "$NAME" git config --global user.name  "$GIT_NAME"  >/dev/null
+container exec "$NAME" git config --global user.email "$GIT_EMAIL" >/dev/null
+if (( SIGNING_ENABLED )); then
+  container exec "$NAME" git config --global user.signingkey            /root/.ssh/github_ed25519.pub >/dev/null
+  container exec "$NAME" git config --global gpg.format                 ssh                            >/dev/null
+  container exec "$NAME" git config --global gpg.ssh.allowedSignersFile /root/.config/git/allowed_signers >/dev/null
+  container exec "$NAME" git config --global commit.gpgsign             true                           >/dev/null
+  container exec "$NAME" git config --global tag.gpgsign                true                           >/dev/null
+else
+  # forwarding 無効時は signing を強制すると通常の git commit すら通らなくなる。
+  # 明示的に unset して fallback path を保証する。--unset は未設定だと exit 5 を
+  # 返すので || true で抑える。
+  container exec "$NAME" git config --global --unset commit.gpgsign 2>/dev/null || true
+  container exec "$NAME" git config --global --unset tag.gpgsign    2>/dev/null || true
+fi
 
 # Apple container builtin DNS は sho-mcp-net 上の hostname を resolve しない
 # (CLI 0.11.0 時点)。同 network 上の sho-mcp-ops は IP は固定だが container を
