@@ -1,0 +1,65 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/backend/collector/**"
+      - "packages/models/**"
+      - ".github/workflows/bench.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/collector/**"
+      - "packages/models/**"
+      - ".github/workflows/bench.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+  deployments: write
+
+jobs:
+  collector-bench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build models package (collector ETL dependency)
+        run: pnpm --filter @sho/models build
+
+      - name: Run collector benchmarks
+        working-directory: apps/backend/collector
+        run: pnpm bench:ci
+
+      - name: Publish benchmark results
+        uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
+        with:
+          name: collector ETL
+          tool: customSmallerIsBetter
+          output-file-path: apps/backend/collector/.bench/result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: bench
+          # main への push 時のみ baseline を gh-pages に push する。
+          # PR 時は比較とコメントだけ行い、履歴は汚さない。
+          auto-push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          comment-on-alert: true
+          summary-always: true
+          # ホスト型 runner のノイズが ±10% 程度乗るため初期閾値は緩めに置く。
+          # 数 PR 走らせて baseline が安定したら 130% 前後まで絞る想定。
+          alert-threshold: "150%"
+          fail-on-alert: ${{ github.event_name == 'pull_request' }}
+          alert-comment-cc-users: "@${{ github.repository_owner }}"
