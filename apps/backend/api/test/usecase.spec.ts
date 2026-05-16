@@ -290,8 +290,10 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
 
   it("正常系: addedSince / addedUntil で createdAt 範囲を絞れる", async () => {
     await runInsertJob(base);
-    // 今日のジョブは今日含む範囲ならヒット
-    const today = new Date().toISOString().slice(0, 10);
+    // queries.ts は `${date}T00:00:00+09:00` で JST 解釈するので today も JST 起点
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Tokyo",
+    }).format(new Date());
     const hit = await runFetchJobsPage({
       page: 1,
       filter: { addedSince: today, addedUntil: today },
