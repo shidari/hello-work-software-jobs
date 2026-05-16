@@ -61,56 +61,60 @@ if [[ ! -f /run/secrets/github-pat ]]; then
   echo "ERROR: /run/secrets/github-pat not mounted. Create ~/.sho-mcp-ops/github-pat first." >&2
   exit 1
 fi
-GITHUB_PERSONAL_ACCESS_TOKEN=$(< /run/secrets/github-pat)
-export GITHUB_PERSONAL_ACCESS_TOKEN
 
 # === spawn 3 servers under mcp-proxy (internal-only) ====================
+#
+# mcp-proxy の `-e KEY VAL` は値が proxy 自身の argv に乗り、/proc/<pid>/cmdline
+# から同コンテナ内の任意プロセス・host の `container exec` から読めてしまう。
+# 代わりに各 server を独立した subshell で囲み、必要な env だけ export してから
+# `--pass-environment` で child に継承させる。subshell が分離されているので
+# GITHUB_PAT は AWS subshell からは見えない (親 shell には PAT を露出させない)。
+#
+# LD_LIBRARY_PATH は initProcess env から既に export 済みで親 shell に継承されて
+# おり、subshell 経由で child まで自動で届く (flake.nix で libstdc++ の path を
+# 載せてある — numpy の dlopen に必要)。
+#
+# AWS server を `crawler-debug → debug-all-role` の assume チェーンに正しく
+# 乗せるため、AWS_PROFILE / AWS_REGION / AWS_CONFIG_FILE / AWS_SHARED_CREDENTIALS_FILE
+# を明示 export する (未指定だと別 identity で AWS を叩いて AccessDenied)。
+#
+# --host 127.0.0.1 で loopback のみ bind、外向きは nginx 経由のみ。
+
+AWS_PROFILE="${AWS_PROFILE:-crawler-debug}"
+AWS_REGION="${AWS_REGION:-ap-northeast-1}"
 
 echo "[start] github-mcp-server → mcp-proxy 127.0.0.1:7011"
-# mcp-proxy はデフォルト --no-pass-environment で子プロセスに env を継承しない。
-# token 1 つだけ -e で明示的に渡す（--pass-environment は他 env も漏れるので避ける）。
-# --host 127.0.0.1 で loopback のみ bind し、外には nginx 経由でしか到達できない。
-uvx mcp-proxy --port 7011 --host 127.0.0.1 \
-  -e GITHUB_PERSONAL_ACCESS_TOKEN "$GITHUB_PERSONAL_ACCESS_TOKEN" \
-  -- \
-  "$GH_BIN" stdio \
-    --toolsets=pull_requests,issues,actions,repos &
+(
+  GITHUB_PERSONAL_ACCESS_TOKEN=$(< /run/secrets/github-pat)
+  export GITHUB_PERSONAL_ACCESS_TOKEN
+  exec uvx mcp-proxy --port 7011 --host 127.0.0.1 --pass-environment \
+    -- \
+    "$GH_BIN" stdio --toolsets=pull_requests,issues,actions,repos
+) &
 GH_PID=$!
 
 echo "[start] cloudwatch-mcp-server → mcp-proxy 127.0.0.1:7012"
-# cloudwatch-mcp-server 内の numpy は libstdc++.so.6 を dlopen する。flake.nix で
-# image に libstdc++ を入れ、Env の LD_LIBRARY_PATH に path を載せたが、
-# mcp-proxy は子プロセスに env を継承しないので明示的に渡す必要がある。
-#
-# AWS 系も同様。mcp-proxy が env を strip するので、AWS_PROFILE / AWS_REGION /
-# 設定ファイル path を明示的に渡さないと、cloudwatch-mcp-server 側の boto3 が
-# crawler-debug → debug-all-role の assume チェーンに乗らず、別 identity で AWS
-# を叩いて AccessDenied になる。
-AWS_PROFILE="${AWS_PROFILE:-crawler-debug}"
-AWS_REGION="${AWS_REGION:-ap-northeast-1}"
-uvx mcp-proxy --port 7012 --host 127.0.0.1 \
-  -e LD_LIBRARY_PATH "$LD_LIBRARY_PATH" \
-  -e AWS_PROFILE "$AWS_PROFILE" \
-  -e AWS_REGION "$AWS_REGION" \
-  -e AWS_CONFIG_FILE /root/.aws/config \
-  -e AWS_SHARED_CREDENTIALS_FILE /root/.aws/credentials \
-  -- \
-  uvx awslabs.cloudwatch-mcp-server@latest &
+(
+  export AWS_PROFILE AWS_REGION
+  export AWS_CONFIG_FILE=/root/.aws/config
+  export AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials
+  exec uvx mcp-proxy --port 7012 --host 127.0.0.1 --pass-environment \
+    -- \
+    uvx awslabs.cloudwatch-mcp-server@latest
+) &
 AWS_PID=$!
 
 echo "[start] aws-api-mcp-server → mcp-proxy 127.0.0.1:7013 (read-only)"
 # READ_OPERATIONS_ONLY=true で書き込み系 AWS API を server 側で拒否する。
-# AWS_PROFILE / config file path 等は cloudwatch-mcp-server と同じ理由で
-# 明示的に渡す（mcp-proxy が env を strip するため）。
-uvx mcp-proxy --port 7013 --host 127.0.0.1 \
-  -e LD_LIBRARY_PATH "$LD_LIBRARY_PATH" \
-  -e AWS_PROFILE "$AWS_PROFILE" \
-  -e AWS_REGION "$AWS_REGION" \
-  -e AWS_CONFIG_FILE /root/.aws/config \
-  -e AWS_SHARED_CREDENTIALS_FILE /root/.aws/credentials \
-  -e READ_OPERATIONS_ONLY true \
-  -- \
-  uvx awslabs.aws-api-mcp-server@latest &
+(
+  export AWS_PROFILE AWS_REGION
+  export AWS_CONFIG_FILE=/root/.aws/config
+  export AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials
+  export READ_OPERATIONS_ONLY=true
+  exec uvx mcp-proxy --port 7013 --host 127.0.0.1 --pass-environment \
+    -- \
+    uvx awslabs.aws-api-mcp-server@latest
+) &
 AWS_API_PID=$!
 
 # === nginx (前段 reverse proxy + limit_req) =============================
