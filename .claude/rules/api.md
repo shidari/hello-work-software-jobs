@@ -20,6 +20,23 @@ Cloudflare Workers + Hono + D1。
 - **ミドルウェア**: `src/middleware/` に API キー検証、D1 Token Bucket レート制限、セキュリティヘッダー
 - **エラー**: `Data.TaggedError` + `Effect.match` で分岐
 
+## テスト方針
+
+**ユースケース単位でテストを書く**。新規機能・修正を入れる時、テストは原則として CQRS 層（`src/cqrs/commands.ts` / `src/cqrs/queries.ts`）の Effect.Service を直接 invoke するレベルで書く。HTTP 経由 (`workerFetch`) のテストは「ルーティング・バリデータ・ステータスコード」の確認に絞り、ビジネスロジックの正常系・異常系の網羅は usecase テストで担保する。
+
+| 対象 | 書く場所 | 役割 |
+|------|---------|------|
+| CQRS Command / Query 単体（正常系・異常系） | `test/usecase.spec.ts` | ユースケース本体の振る舞い網羅。`Effect.provide(X.Default)` + `Effect.provideService(JobStoreDB, JobStoreDB.main(env.DB))` で組み立てて `run` を直接呼ぶ |
+| HTTP ルーティング / バリデータ / ステータスコード | `test/unit.spec.ts` | エンドポイント単位で `workerFetch` 経由。query / param / body のスキーマ違反が 400 / 401 / 404 / 409 を返すか等 |
+| 攻撃ベクター | `test/pentest.spec.ts` | rate-limit race / api-key bypass / detail leak 等 |
+
+理由:
+- ビジネスロジックは HTTP 表面より深いところに居る。HTTP 層に張り付くと、フィルタ網羅やエッジケース検証のたびに URL / クエリパラメータ / レスポンス JSON の往復が挟まり、シグナルが薄まる
+- CQRS の `Effect.Service` は依存注入が型で閉じているので、`JobStoreDB` を本物の D1 で差し込んだまま単体テストとして走る
+- 失敗パス (`Data.TaggedError`) は `Effect.exit` で `Exit.isFailure` を見れば observable。HTTP 経由だと 500 にすり潰されて区別できない
+
+異常系を書くときは catch arm を実際に発火させる（例: `InsertJobCommand` を同じ jobNumber で 2 度呼んで UNIQUE 制約に当てる）。DB 障害シミュレーションが必要な分岐は、現状は coverage を諦めて `// catch arm: DB 障害時のみ` のコメントだけ残す。
+
 ## コマンド
 
 ```bash
