@@ -1,0 +1,12 @@
+-- レート制限テーブルのスキーマを刷新する。
+--
+-- 旧設計: `last_refill TEXT` を `datetime('now')` (秒精度) で持ち、
+--          refill 計算で `julianday('now')` (マイクロ秒精度) と差を取っていた。
+--          同一秒内で refill が消費を上回り、bucket が枯渇しない致命バグ。
+--
+-- 新設計: `last_refill_ms INTEGER` を `Date.now()` (Worker 側で取得) で持ち、
+--          INSERT + UPDATE を単一 UPSERT にまとめて per-row atomic で race を排除。
+--
+-- このマイグレーションは旧テーブルを破棄するだけ。新テーブルは middleware の
+-- `CREATE TABLE IF NOT EXISTS` で必要時に作成される。
+DROP TABLE IF EXISTS `_rate_limit`;

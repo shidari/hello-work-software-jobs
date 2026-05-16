@@ -489,10 +489,6 @@ const app = new Hono<{ Bindings: Env }>()
               switch (error._tag) {
                 case "InsertJobDuplicationError":
                   return c.json({ message: error.message }, 409);
-                case "InsertJobError":
-                  return c.json({ message: error.message }, 500);
-                case "FetchJobError":
-                  return c.json({ message: error.message }, 500);
                 default:
                   return c.json({ message: "internal server error" }, 500);
               }
