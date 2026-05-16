@@ -7,17 +7,10 @@ on:
       - "apps/backend/collector/**"
       - "packages/models/**"
       - ".github/workflows/bench.yml"
-  push:
-    branches: [main]
-    paths:
-      - "apps/backend/collector/**"
-      - "packages/models/**"
-      - ".github/workflows/bench.yml"
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  deployments: write
 
 jobs:
   collector-bench:
@@ -44,50 +37,8 @@ jobs:
         working-directory: apps/backend/collector
         run: pnpm bench:ci
 
-      # benchmark-action/github-action-benchmark は gh-pages branch に履歴を貯める。
-      # 初回 run 時は branch が存在しないので、main push のときに限って orphan branch
-      # を切って bootstrap する。PR 時は gh-pages の有無で publish を分岐する。
-      - name: Ensure gh-pages branch (main push only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          if ! git ls-remote --exit-code origin gh-pages > /dev/null 2>&1; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git switch --orphan gh-pages
-            printf '<!doctype html><html><body>Benchmark data — managed by .github/workflows/bench.yml</body></html>\n' > index.html
-            git add index.html
-            git commit -m "chore(bench): init gh-pages for benchmark history"
-            git push origin gh-pages
-          fi
-
-      - name: Check gh-pages branch (PR only)
-        id: ghpages
-        if: github.event_name == 'pull_request'
-        run: |
-          if git ls-remote --exit-code origin gh-pages > /dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::gh-pages branch not yet initialized — skipping benchmark publish. Merge this PR to main first to bootstrap the baseline."
-          fi
-
-      - name: Publish benchmark results
-        if: github.event_name == 'push' || steps.ghpages.outputs.exists == 'true'
-        uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
+      - name: Post benchmark results as PR comment
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         with:
-          name: collector ETL
-          tool: customSmallerIsBetter
-          output-file-path: apps/backend/collector/.bench/result.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          gh-pages-branch: gh-pages
-          benchmark-data-dir-path: bench
-          # main への push 時のみ baseline を gh-pages に push する。
-          # PR 時は比較とコメントだけ行い、履歴は汚さない。
-          auto-push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          comment-on-alert: true
-          summary-always: true
-          # ホスト型 runner のノイズが ±10% 程度乗るため初期閾値は緩めに置く。
-          # 数 PR 走らせて baseline が安定したら 130% 前後まで絞る想定。
-          alert-threshold: "150%"
-          fail-on-alert: ${{ github.event_name == 'pull_request' }}
-          alert-comment-cc-users: "@${{ github.repository_owner }}"
+          header: collector-bench
+          path: apps/backend/collector/.bench/comment.md

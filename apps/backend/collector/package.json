@@ -15,7 +15,7 @@
     "build": "pnpm exec tsdown",
     "test": "vitest",
     "bench": "vitest bench --run",
-    "bench:ci": "vitest bench --run && tsx scripts/bench-to-action-format.ts",
+    "bench:ci": "vitest bench --run && tsx scripts/format-bench-result.ts",
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
