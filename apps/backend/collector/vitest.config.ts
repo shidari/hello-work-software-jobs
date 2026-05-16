@@ -6,5 +6,9 @@ export default defineConfig({
     coverage: {
       include: ["lib/**", "app/**"],
     },
+    benchmark: {
+      include: ["lib/**/__bench__/**/*.bench.ts"],
+      outputJson: ".bench/raw.json",
+    },
   },
 });

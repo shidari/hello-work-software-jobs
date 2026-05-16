@@ -13,6 +13,7 @@ TODO.md
 .vercel
 .env*.local
 .debug/
+.bench/
 coverage/
 result
 result-*

@@ -1,0 +1,44 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/backend/collector/**"
+      - "packages/models/**"
+      - ".github/workflows/bench.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  collector-bench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build models package (collector ETL dependency)
+        run: pnpm --filter @sho/models build
+
+      - name: Run collector benchmarks
+        working-directory: apps/backend/collector
+        run: pnpm bench:ci
+
+      - name: Post benchmark results as PR comment
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: collector-bench
+          path: apps/backend/collector/.bench/comment.md

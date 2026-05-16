@@ -20,6 +20,7 @@
       "entry": [
         "lib/hellowork/scripts/*.ts",
         "lib/hellowork/**/__tests__/**/*.test.ts",
+        "lib/hellowork/**/__bench__/**/*.bench.ts",
         "lib/hellowork/__tests__/fixtures.ts",
         "vitest.config.ts"
       ],
