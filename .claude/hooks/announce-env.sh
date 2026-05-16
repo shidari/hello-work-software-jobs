@@ -26,10 +26,11 @@ case "$kernel" in
   - sandbox 内 CLI (gh / wrangler / vercel 等) を叩く時は 'container exec sho-sandbox ...' か中に入る"
     ;;
   Linux)
-    if [[ -d /work ]]; then
+    if [[ -L /work ]]; then
       msg="ENV: sandbox (sho-sandbox, Linux $(uname -r))
-  - gh / wrangler / vercel / claude 等の CLI は PATH 上にある (/work/node_modules/.bin)
-  - container CLI は無い (host にしかない)"
+  - claude / nodejs / pnpm / deno / jq / chromium のみ。gh / wrangler / vercel / awscli は host 専用 (cli.md 参照)
+  - Apple container CLI も host 専用
+  - GitHub / AWS の参照は ops sandbox (sho-mcp-ops) の MCP server 経由 (ops-github / ops-aws-cloudwatch / ops-aws-api)"
     elif [[ -d /home/user ]]; then
       msg="ENV: web (Claude Code on the web, Linux $(uname -r))
   - Anthropic-managed ephemeral cloud container (repo cloned under /home/user/<repo>)
