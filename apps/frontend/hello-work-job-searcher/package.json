@@ -26,8 +26,8 @@
     "hono": "catalog:",
     "jotai": "^2.13.1",
     "next": "16.2.6",
-    "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.2.19",
