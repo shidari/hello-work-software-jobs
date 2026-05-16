@@ -12,14 +12,37 @@ async function sha256Hex(input: string): Promise<string> {
     .slice(0, 32);
 }
 
+// 二つの文字列の constant-time 比較。SHA-256 で固定長化してから XOR 累積。
+// 入力長や共通プレフィックス長による分岐がないため timing 攻撃が成立しない。
+async function constantTimeEquals(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder();
+  const aHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", enc.encode(a)),
+  );
+  const bHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", enc.encode(b)),
+  );
+  let diff = 0;
+  for (let i = 0; i < aHash.length; i++) {
+    diff |= aHash[i] ^ bHash[i];
+  }
+  return diff === 0;
+}
+
 /**
  * クライアントごとの bucket id を決める。
- * 認証済み (x-api-key 提示) は key のハッシュで、それ以外は CF-Connecting-IP で識別する。
- * 単一クライアントの burst が他クライアントを枯渇させない設計。
+ * **有効な** API key 提示者のみ `key:<hash>` bucket を割り当てる。
+ * 無効 key / no key は `ip:<CF-Connecting-IP>` に集約され、攻撃者が key 値を
+ * 都度ローテして per-IP rate-limit を回避するのを防ぐ。
  */
 async function bucketIdFor(c: Context<{ Bindings: Env }>): Promise<string> {
   const apiKey = c.req.header("x-api-key");
-  if (apiKey) {
+  const validApiKey = c.env.API_KEY;
+  if (
+    apiKey &&
+    validApiKey &&
+    (await constantTimeEquals(apiKey, validApiKey))
+  ) {
     return `key:${await sha256Hex(apiKey)}`;
   }
   const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
@@ -28,39 +51,44 @@ async function bucketIdFor(c: Context<{ Bindings: Env }>): Promise<string> {
 
 /**
  * D1 Token Bucket によるレート制限。
- * bucket は client identity (API key hash or IP) で分離する。
- * D1 障害時は fail-closed で 503 を返す。
+ *
+ * 設計上の注意:
+ * - `last_refill_ms` は **INTEGER ミリ秒** (Date.now()) で持つ。SQLite の
+ *   `datetime('now')` は秒精度・`julianday('now')` はマイクロ秒精度で、両者
+ *   混用すると同秒内 R-M-W で refill が消費を必ず上回り、bucket が枯渇
+ *   しない致命バグになる。
+ * - INSERT + UPDATE を **単一の UPSERT 文** にまとめ、SQLite の per-row
+ *   atomic 性質に乗せて R-M-W race を排除する。複数の `.batch + UPDATE`
+ *   を発行する旧設計は、並列リクエストが全員 tokens=100 を読んでしまう
+ *   race を踏む。
+ * - D1 障害時は fail-closed (503)。
  */
 export async function rateLimit(c: Context<{ Bindings: Env }>, next: Next) {
   const db = c.env.DB;
   const id = await bucketIdFor(c);
+  const now = Date.now();
 
   try {
-    await db.batch([
-      db.prepare(
+    await db
+      .prepare(
         `CREATE TABLE IF NOT EXISTS _rate_limit (
           id TEXT PRIMARY KEY,
           tokens REAL NOT NULL,
-          last_refill TEXT NOT NULL
+          last_refill_ms INTEGER NOT NULL
         )`,
-      ),
-      db
-        .prepare(
-          `INSERT OR IGNORE INTO _rate_limit (id, tokens, last_refill)
-           VALUES (?, ?, datetime('now'))`,
-        )
-        .bind(id, MAX_TOKENS),
-    ]);
+      )
+      .run();
 
     const result = await db
       .prepare(
-        `UPDATE _rate_limit
-         SET tokens = MIN(?, tokens + (julianday('now') - julianday(last_refill)) * 86400 * ?) - 1,
-             last_refill = datetime('now')
-         WHERE id = ?
+        `INSERT INTO _rate_limit (id, tokens, last_refill_ms)
+         VALUES (?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           tokens = MIN(?, tokens + (excluded.last_refill_ms - last_refill_ms) / 1000.0 * ?) - 1,
+           last_refill_ms = excluded.last_refill_ms
          RETURNING tokens`,
       )
-      .bind(MAX_TOKENS, REFILL_RATE, id)
+      .bind(id, MAX_TOKENS - 1, now, MAX_TOKENS, REFILL_RATE)
       .first<{ tokens: number }>();
 
     if (result && result.tokens < 0) {

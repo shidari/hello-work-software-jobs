@@ -22,9 +22,24 @@ export const RawReceivedDate = Schema.String.pipe(Schema.pattern(ISO8601));
 export const RawExpiryDate = Schema.String.pipe(Schema.pattern(ISO8601));
 
 export const RawHomePageUrl = Schema.String.pipe(
-  Schema.filter((s) => URL.canParse(s), {
-    message: () => "有効なURLではありません",
-  }),
+  Schema.filter(
+    (s) => {
+      // URL.canParse は javascript: / data: / vbscript: 等も true を返すので
+      // scheme を http(s) のみに絞ってから parse 可能性を確認する。
+      if (!URL.canParse(s)) return false;
+      try {
+        const { protocol } = new URL(s);
+        return protocol === "http:" || protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: () => "有効な http(s) URL ではありません",
+    },
+  ),
+  // Arbitrary は filter が高選択率で reject するため、明示的に http(s) URL を生成する。
+  Schema.annotations({ arbitrary: () => (fc) => fc.webUrl() }),
 );
 
 export const RawEmploymentType = Schema.Union(

@@ -1,6 +1,7 @@
-import { Company } from "@sho/models";
+import { Company, EstablishmentNumber } from "@sho/models";
 import { Data, Effect, Schema } from "effect";
 import { Hono } from "hono";
+import { validator as effectValidator } from "hono-openapi";
 import { UpsertCompanyCommand } from "../cqrs/commands";
 import { FetchJobError, FindCompanyQuery } from "../cqrs/queries";
 import { JobStoreDB } from "../infra/db";
@@ -11,45 +12,62 @@ class InvalidJsonError extends Data.TaggedError("InvalidJsonError")<{
   readonly message: string;
 }> {}
 
-const app = new Hono<{ Bindings: Env }>()
-  .get("/:establishmentNumber", (c) => {
-    const establishmentNumber = c.req.param("establishmentNumber");
-    const db = JobStoreDB.main(c.env.DB);
+const companyParamSchema = Schema.Struct({
+  establishmentNumber: EstablishmentNumber,
+});
 
-    return Effect.runPromise(
-      Effect.gen(function* () {
-        const query = yield* FindCompanyQuery;
-        const company = yield* query.run(establishmentNumber);
-        if (company === null) {
-          return yield* new FetchJobError({
-            message: "Company not found",
-            errorType: "client",
-          });
+const app = new Hono<{ Bindings: Env }>()
+  .get(
+    "/:establishmentNumber",
+    effectValidator(
+      "param",
+      Schema.standardSchemaV1(companyParamSchema),
+      (result, c) => {
+        if (!result.success) {
+          return c.json({ message: "Invalid establishmentNumber" }, 400);
         }
-        return company;
-      }).pipe(
-        Effect.provide(FindCompanyQuery.Default),
-        Effect.provideService(JobStoreDB, db),
-        Effect.tapErrorCause((cause) =>
-          logErrorCause("fetch company failed", cause).pipe(
-            Effect.annotateLogs({ establishmentNumber }),
+        return undefined;
+      },
+    ),
+    (c) => {
+      const { establishmentNumber } = c.req.valid("param");
+      const db = JobStoreDB.main(c.env.DB);
+
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const query = yield* FindCompanyQuery;
+          const company = yield* query.run(establishmentNumber);
+          if (company === null) {
+            return yield* new FetchJobError({
+              message: "Company not found",
+              errorType: "client",
+            });
+          }
+          return company;
+        }).pipe(
+          Effect.provide(FindCompanyQuery.Default),
+          Effect.provideService(JobStoreDB, db),
+          Effect.tapErrorCause((cause) =>
+            logErrorCause("fetch company failed", cause).pipe(
+              Effect.annotateLogs({ establishmentNumber }),
+            ),
           ),
+          Effect.match({
+            onSuccess: (company) => c.json(company),
+            onFailure: (error) => {
+              switch (error._tag) {
+                case "FetchJobError":
+                  return c.json({ message: "Company not found" }, 404);
+                default:
+                  return c.json({ message: "internal server error" }, 500);
+              }
+            },
+          }),
+          Effect.provide(LoggerLayer),
         ),
-        Effect.match({
-          onSuccess: (company) => c.json(company),
-          onFailure: (error) => {
-            switch (error._tag) {
-              case "FetchJobError":
-                return c.json({ message: "Company not found" }, 404);
-              default:
-                return c.json({ message: "internal server error" }, 500);
-            }
-          },
-        }),
-        Effect.provide(LoggerLayer),
-      ),
-    );
-  })
+      );
+    },
+  )
   .post("/", verifyApiKey)
   .post("/", (c) => {
     const db = JobStoreDB.main(c.env.DB);
@@ -85,7 +103,7 @@ const app = new Hono<{ Bindings: Env }>()
             switch (error._tag) {
               case "ParseError":
               case "InvalidJsonError":
-                return c.json({ message: error.message }, 400);
+                return c.json({ message: "Invalid request body" }, 400);
               default:
                 return c.json({ message: "internal server error" }, 500);
             }

@@ -284,8 +284,9 @@ describe("セキュリティ", () => {
     const db = MOCK_ENV.DB;
     await db
       .prepare(
-        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'ip:unknown'",
+        "UPDATE _rate_limit SET tokens = -100, last_refill_ms = ? WHERE id = 'ip:unknown'",
       )
+      .bind(Date.now())
       .run();
     const response = await workerFetch("/jobs");
     expect(response.status).toBe(429);
@@ -297,8 +298,9 @@ describe("セキュリティ", () => {
     const db = MOCK_ENV.DB;
     await db
       .prepare(
-        "UPDATE _rate_limit SET tokens = -100, last_refill = datetime('now') WHERE id = 'ip:1.1.1.1'",
+        "UPDATE _rate_limit SET tokens = -100, last_refill_ms = ? WHERE id = 'ip:1.1.1.1'",
       )
+      .bind(Date.now())
       .run();
     // ip:1.1.1.1 は 429
     const blocked = await workerFetch("/jobs", {
