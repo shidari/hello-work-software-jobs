@@ -9,7 +9,7 @@
 #
 # Allowed environments:
 #   - sandbox (sho-sandbox): Linux + /work bind-mount symlink set by
-#     scripts/sandbox.sh at container start
+#     scripts/sandbox.ts at container start
 #   - web (Claude Code on the web): Linux + Anthropic-managed cloud
 #     container, repo cloned under /home/user/<repo>
 #
@@ -47,8 +47,8 @@ cat >&2 <<'EOF'
 
   Claude on this repo is sandbox-only on host (macOS). Run:
 
-    ./scripts/sandbox-image.sh   # build image (first time / flake.nix updates)
-    ./scripts/sandbox.sh         # enter the container
+    ./scripts/sandbox-image.ts   # build image (first time / flake.nix updates)
+    ./scripts/sandbox.ts         # enter the container
     claude                       # start Claude inside the sandbox
 
   All tools (file, shell, network, agent, MCP) are blocked on host. If you
