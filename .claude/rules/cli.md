@@ -11,11 +11,9 @@
 | `claude` | sandbox / host どちらでも | sandbox: `~/.sho-sandbox/claude/` / host: `~/.claude/` |
 | `nodejs` / `pnpm` / `deno` / `jq` / chromium | sandbox / host どちらでも | 認証なし |
 
-Claude Code 自体が sandbox 内で動いている場合、`gh` / `wrangler` / `vercel` は **PATH に無い**。これらが必要な操作 (PR の作成・マージ、Workers / Pages デプロイ等) は:
-1. ホスト側で叩いてもらうようユーザーに依頼する、または
-2. Claude Code がホストで動き直してから実行する
+Claude Code 自体が sandbox 内で動いている場合、`gh` / `wrangler` / `vercel` は **PATH に無い**。GitHub 操作（PR 作成・review・merge・CI 監視・Issue）は `ops-github` MCP 経由で完結する（PAT scope は後段「GitHub PAT の保存」節）。`git push` は sandbox 内 `git` から SSH agent forwarding 経由で行うので、origin が SSH (`git@github.com:owner/repo.git`) である必要がある（HTTPS origin だと credential helper が無くて push が通らない）。Workers / Pages デプロイ等の `wrangler` / `vercel` 系操作はホスト側で実行する。
 
-の二択。GitHub / AWS の参照は ops サンドボックス (`sho-mcp-ops`) 側に閉じた MCP server (`ops-github` / `ops-aws-cloudwatch` / `ops-aws-api`) 経由で行う。`ops-github` は PAT scope に従い write 系 tool (PR 作成 / Issue 作成 / コメント等) も使える。`ops-aws-cloudwatch` / `ops-aws-api` は read-only。詳細は後段の「MCP ops コンテナ」節を参照。
+GitHub / AWS の参照は ops サンドボックス (`sho-mcp-ops`) 側に閉じた MCP server (`ops-github` / `ops-aws-cloudwatch` / `ops-aws-api`) 経由で行う。`ops-github` は PAT scope に従い write 系 tool (PR 作成 / merge / Issue 作成 / コメント等) も使える。`ops-aws-cloudwatch` / `ops-aws-api` は read-only。詳細は後段の「MCP ops コンテナ」節を参照。
 
 Claude Code がホスト (macOS) 側で動いている場合は、ホストの `gh` / `wrangler` / `vercel` / `jq` を `./scripts/sandbox.ts` を経由せずに直接呼ぶ。判定は `uname` が `Darwin` ならホスト、`Linux` かつ `/work` symlink があればコンテナ内。
 
@@ -201,7 +199,7 @@ ops コンテナが expose する MCP server:
 
 ### GitHub PAT の保存（macOS Keychain）
 
-fine-grained PAT (`Contents:Read` / `Pull requests:RW` / `Issues:RW` / `Actions:R`) を発行して Keychain に保存する。`Contents` は read のみで、branch push / squash merge 等は host の `gh` CLI 側で行う方針:
+fine-grained PAT (`Contents:RW` / `Pull requests:RW` / `Issues:RW` / `Actions:R`) を発行して Keychain に保存する。`Contents:Write` は MCP 経由で merge を叩くのに必要（squash merge は branch を update するため）。**上記以外の scope は付けない**（PAT 漏洩時のブラスト半径を最小化するため）。なお実際の `git push` は MCP ではなく sandbox 内 `git` から SSH agent forwarding 経由で行うので、PAT が push 経路に乗ることはない:
 
 ```bash
 security add-generic-password -s sho-mcp-ops -a github-pat -T /usr/bin/security -w
