@@ -38,6 +38,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/browser": "3.2.4",
+    "@vitest/coverage-istanbul": "~3.2.4",
     "playwright": "^1.58.2",
     "storybook": "^10.2.19",
     "typescript": "catalog:",

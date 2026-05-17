@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    effect:
+      specifier: 3.21.2
+      version: 3.21.2
     hono:
       specifier: 4.12.18
       version: 4.12.18
@@ -228,6 +231,9 @@ importers:
       '@vitest/browser':
         specifier: 3.2.4
         version: 3.2.4(playwright@1.59.1)(vite@7.2.2(@types/node@24.12.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@3.2.4)
+      '@vitest/coverage-istanbul':
+        specifier: ~3.2.4
+        version: 3.2.4(vitest@3.2.4)
       playwright:
         specifier: ^1.58.2
         version: 1.59.1
@@ -5789,9 +5795,9 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@edge-runtime/vm@3.2.0)(@types/node@24.12.0)(@vitest/browser@3.2.4)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
+      vitest: 3.2.4(@edge-runtime/vm@3.2.0)(@types/node@22.19.15)(@vitest/browser@3.2.4)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
     optionalDependencies:
-      '@vitest/browser': 3.2.4(playwright@1.59.1)(vite@7.2.2(@types/node@24.12.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@3.2.4)
+      '@vitest/browser': 3.2.4(playwright@1.59.1)(vite@7.2.2(@types/node@22.19.15)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(vitest@3.2.4)
     transitivePeerDependencies:
       - supports-color
 
