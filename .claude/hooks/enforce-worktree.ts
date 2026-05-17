@@ -83,7 +83,8 @@ if (Deno.build.os === "linux") {
 
 const stdinText = await new Response(Deno.stdin.readable).text();
 const input: HookInput = stdinText ? JSON.parse(stdinText) : {};
-const filePath = input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? "";
+const filePath =
+  input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? "";
 const hookCwd = input.cwd ?? "";
 if (!filePath) Deno.exit(0);
 
@@ -97,7 +98,7 @@ const leafLstat = await lstatOrNull(absPath);
 if (leafLstat?.isSymlink) {
   const target = await Deno.realPath(absPath).catch(() => "<unresolved>");
   deny(
-`[enforce-worktree] Refusing to edit symlink "${filePath}" (-> ${target}).
+    `[enforce-worktree] Refusing to edit symlink "${filePath}" (-> ${target}).
 
 Symlink targets can bypass the extension allowlist (e.g. evil.md -> code.ts).
 Edit the resolved target directly, or use the sentinel if you really mean to
@@ -123,10 +124,14 @@ const gitProc = await new Deno.Command("git", {
   // seeing them.
   clearEnv: true,
   env: {},
-}).output().catch((err: unknown) => {
-  console.error(`[enforce-worktree] failed to spawn git: ${(err as Error).message}`);
-  Deno.exit(2);
-});
+})
+  .output()
+  .catch((err: unknown) => {
+    console.error(
+      `[enforce-worktree] failed to spawn git: ${(err as Error).message}`,
+    );
+    Deno.exit(2);
+  });
 
 let repoRoot = "";
 if (gitProc.code === 0) {
@@ -136,7 +141,9 @@ if (gitProc.code === 0) {
   Deno.exit(0);
 } else {
   const stderr = new TextDecoder().decode(gitProc.stderr).trim();
-  console.error(`[enforce-worktree] git exited ${gitProc.code} unexpectedly: ${stderr}`);
+  console.error(
+    `[enforce-worktree] git exited ${gitProc.code} unexpectedly: ${stderr}`,
+  );
   Deno.exit(2);
 }
 
@@ -154,12 +161,14 @@ if (ext && MAIN_EDIT_ALLOWED_EXTS.has(ext)) Deno.exit(0);
 try {
   await Deno.remove(SENTINEL);
   Deno.exit(0);
-} catch { /* sentinel not present */ }
+} catch {
+  /* sentinel not present */
+}
 
 // ---- block ------------------------------------------------------------------
 
 deny(
-`[enforce-worktree] About to edit "${filePath}" on the main worktree (${repoRoot}).
+  `[enforce-worktree] About to edit "${filePath}" on the main worktree (${repoRoot}).
 
 Per .claude/rules/general.md, application / test code edits must happen in a separate worktree. Use EnterWorktree before editing.
 
