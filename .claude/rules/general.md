@@ -25,15 +25,22 @@ Claude Code on the web ではこれらの CLI も入っていない。GitHub 操
 
 ## 作業単位 = worktree
 
-**1 機能 = 1 worktree**。新しい機能追加・バグ修正・リファクタなど「ブランチを切るに値する作業」を始める時は、メイン作業ツリーで直接編集せず `EnterWorktree` で新しい worktree に入ってから着手する。
+**application code / test code を触るときは必ず worktree を切る**。具体的には以下を編集する場合は `EnterWorktree` で新しい worktree に入ってから着手する:
 
-理由: 並行作業の差分が混ざると `git status` が複数文脈の混合になり、コミット粒度ルール（1 セッション = 1 コミット）も守れなくなる。worktree を分ければブランチ単位でコンテキストが物理的に隔離され、CI が走っている間に別作業に着手するのも安全になる。
+- 実装・テストコード (`.ts` / `.tsx` / `.js` / `.jsx` / `.css` / `.sh` / `.py` / `.sql` 等)
+- ビルド / 依存関係に影響する設定 (`package.json` の deps 変更、`vitest.config.*` / `tsdown.config.*` / `wrangler.jsonc` 等)
+- 自動化されるコードに準ずるもの (`.claude/hooks/*.sh`、`flake.nix`、CI workflow 等)
 
-例外: typo 修正・コメント追記・ドキュメントの 1 行直しなど「コミット 1 個で完結し、即マージ前提の trivial な変更」は worktree なしでメインから直接でよい。判断に迷ったら worktree を切る側に倒す。
+**それ以外（ドキュメント・タスクメモ・rule 定義）は main 直書きでよい**:
 
-実装: 着手前に `EnterWorktree` を使い、終わったら `ExitWorktree` で戻る。worktree の中では通常通り編集・コミット・PR 作成を行う。
+- `.md` 全般（[CLAUDE.md](../../CLAUDE.md) / [.claude/rules/](.) / [.claude/skills/](../skills/) / [tasks/](../../tasks/) / [docs/](../../docs/) 配下）
+- ビルドに影響しない `.json` / `.toml` / `.yml`（`.vscode/settings.json` 等）
 
-強制: `.claude/hooks/enforce-worktree.sh`（PreToolUse hook）が main worktree 上での `Edit` / `Write` / `NotebookEdit` を block する。例外（trivial 修正）に該当する場合は、ユーザーに確認を取った上で `touch /tmp/.claude-allow-main-edit` を実行してから編集を再試行する。センチネルは 1 回限りで次の編集時に自動消費される。
+理由: 隔離が効くのは「build / test state が混ざると壊れる」コード差分に対してであって、ドキュメントは隔離コストが効果に見合わない。タスクメモ 1 ファイル追加のたびに worktree を切ると却ってオーバーヘッドが大きい。判断に迷ったら worktree を切る側に倒す。
+
+実装: コード変更を始める時は `EnterWorktree`、終わったら `ExitWorktree`。worktree の中では通常通り編集・コミット・PR 作成を行う。docs 変更は main で編集 → コミット → PR を 1 セッションで完結。
+
+強制: `.claude/hooks/enforce-worktree.sh`（PreToolUse hook）が main worktree 上での `Edit` / `Write` / `NotebookEdit` を block する。現状の hook は拡張子を見ずに全 Edit を block するため、docs を main で編集する場合も sentinel が必要: ユーザーに確認を取った上で `touch /tmp/.claude-allow-main-edit` を実行してから編集を再試行する。センチネルは 1 回限りで次の編集時に自動消費される。（将来 hook 側で extension allowlist 化する余地あり）
 
 Claude Code on the web では各 session が独立した cloud container で動いており、session = branch の isolation が container 境界で担保されているため、`enforce-worktree.sh` は web では skip される（fresh clone なので `.git` が directory のまま → main worktree 扱いになるのを避けるため）。web 側では普通に branch を切って編集してよい。
 
