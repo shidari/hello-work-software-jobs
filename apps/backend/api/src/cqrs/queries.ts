@@ -1,4 +1,4 @@
-import { selectDailyStats } from "@sho/db";
+import { selectDailyStats, sql, type SqlBool } from "@sho/db";
 import { Data, Effect, Schema } from "effect";
 import { PAGE_SIZE } from "../constant";
 import {
@@ -10,9 +10,33 @@ import {
 } from "../infra/db";
 import type { SearchFilter } from "./schema";
 
-/** LIKE クエリ用: % と _ をエスケープしてワイルドカードインジェクションを防止 */
+/**
+ * LIKE クエリ用: `\` で escape する pattern に整形する。
+ * SQLite は default で LIKE に escape character を持たないため、必ず
+ * 呼び出し側で `ESCAPE '\\'` clause を付けること (`likeRaw` / `notLikeRaw`)。
+ * 単に `\%` / `\_` に置換するだけだと SQLite は `\` を literal として扱い、
+ * 「`\` + wildcard」と解釈して escape が機能しない。
+ * `\` 自体も `\\` にエスケープしないとユーザ入力に含まれる `\` が escape
+ * character として暴発する。
+ */
 function escapeLike(value: string): string {
-  return value.replace(/%/g, "\\%").replace(/_/g, "\\_");
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
+}
+
+/**
+ * `col LIKE '%pattern%' ESCAPE '\\'` を発行する。
+ * Kysely の `.where(col, 'like', ...)` は ESCAPE clause を付けないため、
+ * raw SQL で escape character を明示する。
+ */
+function likeRaw(column: string, pattern: string) {
+  return sql<SqlBool>`${sql.ref(column)} LIKE ${`%${escapeLike(pattern)}%`} ESCAPE '\\'`;
+}
+
+function notLikeRaw(column: string, pattern: string) {
+  return sql<SqlBool>`${sql.ref(column)} NOT LIKE ${`%${escapeLike(pattern)}%`} ESCAPE '\\'`;
 }
 
 // --- エラー ---
@@ -122,11 +146,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
               let query = db.selectFrom("jobs");
 
               if (filter.companyName) {
-                query = query.where(
-                  "companyName",
-                  "like",
-                  `%${escapeLike(filter.companyName)}%`,
-                );
+                query = query.where(likeRaw("companyName", filter.companyName));
               }
               if (filter.employeeCountGt !== undefined) {
                 query = query.where(
@@ -144,16 +164,12 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
               }
               if (filter.jobDescription) {
                 query = query.where(
-                  "jobDescription",
-                  "like",
-                  `%${escapeLike(filter.jobDescription)}%`,
+                  likeRaw("jobDescription", filter.jobDescription),
                 );
               }
               if (filter.jobDescriptionExclude) {
                 query = query.where(
-                  "jobDescription",
-                  "not like",
-                  `%${escapeLike(filter.jobDescriptionExclude)}%`,
+                  notLikeRaw("jobDescription", filter.jobDescriptionExclude),
                 );
               }
               if (filter.onlyNotExpired) {
@@ -176,11 +192,7 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 }
               }
               if (filter.occupation) {
-                query = query.where(
-                  "occupation",
-                  "like",
-                  `%${escapeLike(filter.occupation)}%`,
-                );
+                query = query.where(likeRaw("occupation", filter.occupation));
               }
               if (filter.employmentType) {
                 query = query.where(
@@ -196,17 +208,11 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where("wageMax", "<=", filter.wageMax);
               }
               if (filter.workPlace) {
-                query = query.where(
-                  "workPlace",
-                  "like",
-                  `%${escapeLike(filter.workPlace)}%`,
-                );
+                query = query.where(likeRaw("workPlace", filter.workPlace));
               }
               if (filter.qualifications) {
                 query = query.where(
-                  "qualifications",
-                  "like",
-                  `%${escapeLike(filter.qualifications)}%`,
+                  likeRaw("qualifications", filter.qualifications),
                 );
               }
               if (filter.jobCategory) {
@@ -216,17 +222,14 @@ export class FetchJobsPageQuery extends Effect.Service<FetchJobsPageQuery>()(
                 query = query.where("wageType", "=", filter.wageType);
               }
               if (filter.education) {
-                query = query.where(
-                  "education",
-                  "like",
-                  `%${escapeLike(filter.education)}%`,
-                );
+                query = query.where(likeRaw("education", filter.education));
               }
               if (filter.industryClassification) {
                 query = query.where(
-                  "industryClassification",
-                  "like",
-                  `%${escapeLike(filter.industryClassification)}%`,
+                  likeRaw(
+                    "industryClassification",
+                    filter.industryClassification,
+                  ),
                 );
               }
               if (filter.establishmentNumber) {

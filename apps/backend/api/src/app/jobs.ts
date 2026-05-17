@@ -70,7 +70,12 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
   }),
   {
     strict: true,
-    decode: (raw) => {
+    // 内側で `Schema.decodeUnknownSync` を呼ぶため、不正値 (?employeeCountLt=abc
+    // / ?wageMin=-1 / ?companyName=<over maxLength>) でも sync throw が
+    // ParseResult として返るよう try/catch で包む。包まないと throw が
+    // Hono の default onError まで貫通し、text/plain "Internal Server Error"
+    // を返してしまう (validator の 400 経路や route の logger も走らない)。
+    decode: (raw, _opts, ast) => {
       const EmployeeCountFromString = Schema.compose(
         Schema.NumberFromString,
         RawEmployeeCount,
@@ -81,43 +86,49 @@ const SearchFilterQuerySchema = Schema.transformOrFail(
       const page = Number.isNaN(parsedPage)
         ? 1
         : Math.min(MAX_PAGE, Math.max(1, Math.floor(parsedPage)));
-      return ParseResult.succeed({
-        filter: Schema.decodeUnknownSync(SearchFilterSchema)({
-          companyName: raw.companyName,
-          employeeCountLt: raw.employeeCountLt
-            ? Schema.decodeUnknownSync(EmployeeCountFromString)(
-                raw.employeeCountLt,
-              )
-            : undefined,
-          employeeCountGt: raw.employeeCountGt
-            ? Schema.decodeUnknownSync(EmployeeCountFromString)(
-                raw.employeeCountGt,
-              )
-            : undefined,
-          jobDescription: raw.jobDescription,
-          jobDescriptionExclude: raw.jobDescriptionExclude,
-          onlyNotExpired: raw.onlyNotExpired === "true" ? true : undefined,
-          orderByReceiveDate: raw.orderByReceiveDate,
-          addedSince: raw.addedSince,
-          addedUntil: raw.addedUntil,
-          occupation: raw.occupation,
-          employmentType: raw.employmentType,
-          wageMin: raw.wageMin
-            ? Schema.decodeUnknownSync(WageFromString)(raw.wageMin)
-            : undefined,
-          wageMax: raw.wageMax
-            ? Schema.decodeUnknownSync(WageFromString)(raw.wageMax)
-            : undefined,
-          workPlace: raw.workPlace,
-          qualifications: raw.qualifications,
-          jobCategory: raw.jobCategory,
-          wageType: raw.wageType,
-          education: raw.education,
-          industryClassification: raw.industryClassification,
-          establishmentNumber: raw.establishmentNumber,
-        }),
-        page,
-      });
+      try {
+        return ParseResult.succeed({
+          filter: Schema.decodeUnknownSync(SearchFilterSchema)({
+            companyName: raw.companyName,
+            employeeCountLt: raw.employeeCountLt
+              ? Schema.decodeUnknownSync(EmployeeCountFromString)(
+                  raw.employeeCountLt,
+                )
+              : undefined,
+            employeeCountGt: raw.employeeCountGt
+              ? Schema.decodeUnknownSync(EmployeeCountFromString)(
+                  raw.employeeCountGt,
+                )
+              : undefined,
+            jobDescription: raw.jobDescription,
+            jobDescriptionExclude: raw.jobDescriptionExclude,
+            onlyNotExpired: raw.onlyNotExpired === "true" ? true : undefined,
+            orderByReceiveDate: raw.orderByReceiveDate,
+            addedSince: raw.addedSince,
+            addedUntil: raw.addedUntil,
+            occupation: raw.occupation,
+            employmentType: raw.employmentType,
+            wageMin: raw.wageMin
+              ? Schema.decodeUnknownSync(WageFromString)(raw.wageMin)
+              : undefined,
+            wageMax: raw.wageMax
+              ? Schema.decodeUnknownSync(WageFromString)(raw.wageMax)
+              : undefined,
+            workPlace: raw.workPlace,
+            qualifications: raw.qualifications,
+            jobCategory: raw.jobCategory,
+            wageType: raw.wageType,
+            education: raw.education,
+            industryClassification: raw.industryClassification,
+            establishmentNumber: raw.establishmentNumber,
+          }),
+          page,
+        });
+      } catch {
+        return ParseResult.fail(
+          new ParseResult.Type(ast, raw, "invalid query parameters"),
+        );
+      }
     },
     encode: (val, _, ast) =>
       ParseResult.fail(new ParseResult.Type(ast, val, "encode not supported")),
@@ -406,7 +417,16 @@ const app = new Hono<{ Bindings: Env }>()
   .get(
     "/",
     jobListRoute,
-    effectValidator("query", Schema.standardSchemaV1(SearchFilterQuerySchema)),
+    effectValidator(
+      "query",
+      Schema.standardSchemaV1(SearchFilterQuerySchema),
+      (result, c) => {
+        if (!result.success) {
+          return c.json({ message: "Invalid query parameters" }, 400);
+        }
+        return undefined;
+      },
+    ),
     (c) => {
       const { filter, page } = c.req.valid("query");
       const db = JobStoreDB.main(c.env.DB);
@@ -548,7 +568,16 @@ const app = new Hono<{ Bindings: Env }>()
   .get(
     "/:jobNumber",
     jobFetchRoute,
-    effectValidator("param", Schema.standardSchemaV1(jobFetchParamSchema)),
+    effectValidator(
+      "param",
+      Schema.standardSchemaV1(jobFetchParamSchema),
+      (result, c) => {
+        if (!result.success) {
+          return c.json({ message: "Invalid jobNumber" }, 400);
+        }
+        return undefined;
+      },
+    ),
     (c) => {
       const { jobNumber } = c.req.valid("param");
       const db = JobStoreDB.main(c.env.DB);
