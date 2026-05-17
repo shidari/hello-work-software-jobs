@@ -62,30 +62,45 @@ staging されたファイルに対して、security-review コマンドの Chec
   - `git checkout -b <branch>` でブランチ作成（コミットは自動的に含まれる）
 - 既に feature ブランチ上ならそのまま
 - `git push -u origin <branch>` で push
+  - **sandbox から push する場合は origin が SSH (`git@github.com:owner/repo.git`) である必要がある**。HTTPS origin だと credential helper が要って sandbox からは通らない。host で `git config --global url."git@github.com:".insteadOf "https://github.com/"` を 1 度入れておくと既存 clone も含めて全部 SSH 経由になる。SSH 認証は [.claude/rules/cli.md](../../rules/cli.md) の SSH-agent forwarding 経由で host の鍵が使われる
 
 ### 5. PR 作成
 
-- そのブランチの PR が未作成なら `gh pr create` で作成（host で動いている場合は host の `gh` を直接、sandbox の場合は `ops-github` MCP 経由）
-  - タイトル: コミットメッセージの1行目
+そのブランチの PR が未作成なら作成する。既に PR があるなら push のみで OK（PR は自動更新される）。
+
+- **host**: `gh pr create --title <T> --body-file <F>`
+  - body にバッククォート等の特殊文字を含むので `--body-file` 必須
+- **sandbox**: `mcp__ops-github__create_pull_request` を呼ぶ
+  - 引数: `owner` / `repo` / `title` / `body` / `head` (= 現ブランチ) / `base` (= main) / `draft`
+  - body は文字列で直接渡せる（gh の特殊文字問題は無い）
+- 共通:
+  - タイトル: コミットメッセージの 1 行目
   - body: `docs/references/conventions.md` の PR テンプレートに従って作成する（Summary, Background & Motivation, Design Decisions, Changes, Test Plan）
-  - body にバッククォート等の特殊文字を含む場合は `--body-file` を使う
-- 既に PR があるなら push のみ（PR は自動更新される）
 
 ### 6. CI/CD 監視
 
 push 後、PR の全 check が green になるまで監視する。
 
-- `gh pr checks <pr> --watch --fail-fast` を **`run_in_background: true`** で投げて完了通知を待つ（[.claude/rules/general.md](../../rules/general.md) の方針に従う）。`sleep` ループでの polling は禁止
-- PR 番号は `gh pr view --json number -q .number` で取得
-- 通知が来たら exit code で判定:
-  - **success (exit 0)** → Step 7 へ
-  - **failure (non-zero)** → 失敗 job のログを取りに行く:
-    1. `gh pr checks <pr> --json name,conclusion,link --jq '.[] | select(.conclusion=="FAILURE")'` で失敗 check を特定
-    2. `gh run view <run-id> --log-failed` で失敗ジョブのログを取得（`gh pr checks` の link から run-id を抽出）
+- **host**: `gh pr checks <pr> --watch --fail-fast` を **`run_in_background: true`** で投げて完了通知を待つ（[.claude/rules/general.md](../../rules/general.md) の方針に従う）。`sleep` ループでの polling は禁止
+- **sandbox**: `gh` が無いので watch primitive も無い。代わりに `mcp__ops-github__get_pull_request_status` を 30 秒間隔で polling する（Claude が直接 tool call を繰り返す形）。これは general.md の sleep ループ禁止ルールの **明示的な例外** — gh pr checks --watch 等価が ops-github MCP 側に無いため。同じ理由で `Monitor` ツールは使えない（Monitor の bash script からは MCP tool を呼べない）
+- PR 番号:
+  - host: `gh pr view --json number -q .number`
+  - sandbox: `mcp__ops-github__list_pull_requests` で `head` filter
+- 全 check が conclusion 持った時の判定:
+  - **success** (全 check の `conclusion` が `success` or `skipped`) → Step 7 へ
+  - **failure** (どれかが `failure` / `cancelled` / `timed_out`) → 失敗 job のログを取りに行く:
+    1. 失敗 check の特定:
+       - host: `gh pr checks <pr> --json name,conclusion,link --jq '.[] | select(.conclusion=="FAILURE")'`
+       - sandbox: `mcp__ops-github__get_pull_request_status` の戻り値から `conclusion != success` の check を抽出
+    2. 失敗ジョブのログ取得:
+       - host: `gh run view <run-id> --log-failed`（`gh pr checks` の link から run-id を抽出）
+       - sandbox: `mcp__ops-github__get_workflow_run_logs`（`run_id` を渡す。`mcp__ops-github__list_workflow_runs` で先に run-id を解決）
     3. 原因に応じて修正:
        - 型エラー / lint / format → 該当ファイルを直接修正
        - 単体テスト失敗 → 該当テストとプロダクションコードを読んで修正
-       - 依存・環境起因（chromium のセットアップ失敗、network flake 等） → 一度だけ `gh run rerun <run-id> --failed` で再実行を試みる
+       - 依存・環境起因（chromium のセットアップ失敗、network flake 等） → 一度だけ再実行を試みる
+         - host: `gh run rerun <run-id> --failed`
+         - sandbox: `mcp__ops-github__rerun_failed_jobs`
     4. 修正したら **Step 1 (Pre-commit チェック)** に戻ってやり直す。コミットは新規作成（`--amend` 禁止）、push 後また Step 6 に来る
 - 同じ check が 3 周以上連続で落ちたら hard stop。**自動修正ループを止めて、ユーザーに状況を報告し判断を仰ぐ**（誤修正リスクを避けるため）
 
@@ -93,7 +108,10 @@ push 後、PR の全 check が green になるまで監視する。
 
 全 check が green になったら squash merge する。
 
-- `gh pr merge <pr> --squash --delete-branch` を実行
+- **host**: `gh pr merge <pr> --squash --delete-branch`
+- **sandbox**: `mcp__ops-github__merge_pull_request` を呼ぶ（`pull_number` / `merge_method: "squash"`）
+  - branch 削除は別 tool: `mcp__ops-github__delete_branch`（`branch` パラメータに head ブランチ名）
+  - PAT に `Contents:Write` が無いと 403 で落ちる。落ちたら PAT scope を確認して [.claude/rules/cli.md](../../rules/cli.md) に記載の通り Keychain を更新する
 - マージ後にローカルの状態を整える:
   - `git checkout main && git pull` でローカル main を最新化
   - 削除済みのリモートブランチをローカルでも掃除（worktree 内なら `ExitWorktree` で抜けてから）
@@ -112,4 +130,4 @@ push 後、PR の全 check が green になるまで監視する。
 
 - 変更がない場合は何もしない
 - secrets を含むファイル (.env, credentials.json 等) はコミットしない
-- `gh` はホスト (macOS) 側で直接実行する。sandbox には `gh` は入っていないので、sandbox-Claude は `ops-github` MCP 経由で同等の操作を行う（書き込み系は ops-github の `--read-only` を外す必要あり。今回のスコープ外）
+- `gh` はホスト (macOS) 側で直接実行する。sandbox には `gh` は入っていないので、sandbox-Claude は `ops-github` MCP 経由で同等の操作を行う。PR 作成・review・merge は PAT の `Pull requests:RW` + `Contents:RW` で MCP から実行可能（[.claude/rules/cli.md](../../rules/cli.md) 参照）。`git push` は MCP では扱えないので sandbox 内 `git` で SSH agent 経由で行う（origin が SSH である前提、Step 4 参照）
