@@ -2,13 +2,13 @@
 # PostToolUse hook for EnterWorktree.
 # Points each worktree's .claude/settings.local.json at the main repo's
 # .claude/settings.local.json (absolute symlink). main itself is a symlink to
-# permissions/settings.local.json after scripts/sandbox.sh's migration, so the
+# permissions/settings.local.json after scripts/sandbox.ts's migration, so the
 # resolution chain is:
 #   worktree settings → main settings → permissions/settings.local.json (real)
 #                                       └─ host: regular file
 #                                          container: dir-overlay-mounted empty {}
 # Pointing at main (not permissions/ directly) keeps the hook safe to run
-# **before** the sandbox.sh migration has happened; sandbox.sh is allowed to
+# **before** the sandbox.ts migration has happened; sandbox.ts is allowed to
 # do destructive bootstrap, the hook is not.
 #
 # Idempotent:
@@ -31,8 +31,8 @@ TARGET="$REPO/.claude/settings.local.json"
 WORKTREES_DIR="$REPO/.claude/worktrees"
 [[ -d "$WORKTREES_DIR" ]] || exit 0
 
-# Don't bootstrap anything here — sandbox.sh owns the migration. If TARGET is
-# missing, the user hasn't run sandbox.sh yet; worktree symlinks will still be
+# Don't bootstrap anything here — sandbox.ts owns the migration. If TARGET is
+# missing, the user hasn't run sandbox.ts yet; worktree symlinks will still be
 # created and become valid as soon as TARGET appears.
 
 for wt in "$WORKTREES_DIR"/*/; do

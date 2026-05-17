@@ -1,0 +1,20 @@
+{
+  "lock": false,
+  "fmt": {
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true,
+    "useTabs": false
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "tasks": {
+    "check": "check sandbox.ts sandbox-stop.ts sandbox-image.ts ops-sandbox.ts ops-sandbox-image.ts",
+    "fmt": "fmt sandbox.ts sandbox-stop.ts sandbox-image.ts ops-sandbox.ts ops-sandbox-image.ts lib/"
+  }
+}

@@ -5,7 +5,7 @@ import { env } from "cloudflare:test";
 import type { Company, Job } from "@sho/models";
 import type { RawJob } from "@sho/models/raw";
 import { Effect } from "effect";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InsertJobCommand, UpsertCompanyCommand } from "../src/cqrs/commands";
 import {
   FetchDailyStatsQuery,
@@ -289,22 +289,28 @@ describe("求人検索", () => {
   });
 
   it("登録日の範囲で絞り込める", async () => {
-    await runInsertJob(base);
-    // 今日のジョブは今日含む範囲ならヒット
-    const today = new Date().toISOString().slice(0, 10);
-    const hit = await runFetchJobsPage({
-      page: 1,
-      filter: { addedSince: today, addedUntil: today },
-    });
-    expect(hit.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(true);
+    // 時刻を固定して INSERT 時の createdAt とフィルタ境界を確定させる。
+    // queries.ts が `${date}T00:00:00+09:00` で JST 解釈するので、JST 12:00 に固定すれば
+    // フィルタの "2026-06-15" 範囲に確実に収まる。
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-15T12:00:00+09:00"));
+    try {
+      await runInsertJob(base);
+      const hit = await runFetchJobsPage({
+        page: 1,
+        filter: { addedSince: "2026-06-15", addedUntil: "2026-06-15" },
+      });
+      expect(hit.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(true);
 
-    // 未来日の since では除外
-    const future = "2099-01-01";
-    const miss = await runFetchJobsPage({
-      page: 1,
-      filter: { addedSince: future },
-    });
-    expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
+      // 未来日の since では除外
+      const miss = await runFetchJobsPage({
+        page: 1,
+        filter: { addedSince: "2099-01-01" },
+      });
+      expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("職種・勤務地・資格・学歴・業種で絞り込める", async () => {
