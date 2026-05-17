@@ -1,5 +1,5 @@
 {
-  "_comment": "ops container (sho-mcp-ops) で動く MCP server に sho-mcp-net 越しに SSE で繋ぐ。hostname sho-mcp-ops は同一 network 上で DNS resolve される。ops 起動・停止は scripts/ops-sandbox.sh / scripts/ops-sandbox-image.sh を参照。",
+  "_comment": "ops container (sho-mcp-ops) で動く MCP server に sho-mcp-net 越しに SSE で繋ぐ。hostname sho-mcp-ops は同一 network 上で DNS resolve される。ops 起動・停止は scripts/ops-sandbox.ts / scripts/ops-sandbox-image.ts を参照。",
   "mcpServers": {
     "ops-github": {
       "type": "sse",
