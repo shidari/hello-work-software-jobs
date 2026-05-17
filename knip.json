@@ -5,7 +5,7 @@
     ".": {
       "entry": [".github/workflows/*.{yml,yaml}"],
       "ignoreDependencies": ["@anthropic-ai/claude-code"],
-      "ignore": ["scripts/**"]
+      "ignore": ["scripts/**", ".claude/hooks/**"]
     },
     "apps/backend/api": {
       "entry": [
