@@ -4,7 +4,8 @@
   "workspaces": {
     ".": {
       "entry": [".github/workflows/*.{yml,yaml}"],
-      "ignoreDependencies": ["@anthropic-ai/claude-code"]
+      "ignoreDependencies": ["@anthropic-ai/claude-code"],
+      "ignore": ["scripts/**"]
     },
     "apps/backend/api": {
       "entry": [

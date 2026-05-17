@@ -28,7 +28,7 @@ if [[ "${SHO_SANDBOX:-}" != "1" ]]; then
   cat >&2 <<'EOF'
 ERROR: codex-review-loop は --dangerously-skip-permissions を使うため sandbox 内でのみ実行可。
 
-  ./scripts/sandbox.sh で sandbox に入り直してから再実行してください。
+  ./scripts/sandbox.ts で sandbox に入り直してから再実行してください。
 EOF
   exit 1
 fi

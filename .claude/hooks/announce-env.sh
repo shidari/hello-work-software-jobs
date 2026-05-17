@@ -7,7 +7,7 @@
 # (deny-host.sh) でも使ってるが、env は容易に spoof / 取り違えが起こるので
 # 自己判定には使わない。Apple container は Linux でしか動かさず、host は
 # macOS (Darwin) 固定なので `uname -s` だけでほぼ確定する。/work bind mount
-# は sandbox 起動時に固定 (scripts/sandbox.sh) なので sandbox の冗長確認に使う。
+# は sandbox 起動時に固定 (scripts/sandbox.ts) なので sandbox の冗長確認に使う。
 # Claude Code on the web は /home/user/<repo> に repo を clone するので、
 # sandbox image (/root が $HOME、/home/user 不在) との切り分けに使える。
 #

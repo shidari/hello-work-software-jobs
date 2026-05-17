@@ -39,9 +39,9 @@ A monorepo application for collecting, managing, and searching Hello Work (Japan
 
 ```bash
 # Sandbox (Apple container) — Claude Code と汎用 dev tools のみ。gh / wrangler / vercel / awscli は host 専用
-./scripts/sandbox-image.sh    # image build + smoke test + container 再作成を 1 本で（初回 or flake.nix 更新時）
-./scripts/sandbox.sh          # コンテナ起動 + bash で入る（direnv で自動 up も可）
-./scripts/sandbox-stop.sh     # 停止・破棄（ad-hoc cleanup 用）
+./scripts/sandbox-image.ts    # image build + smoke test + container 再作成を 1 本で（初回 or flake.nix 更新時）
+./scripts/sandbox.ts          # コンテナ起動 + bash で入る（direnv で自動 up も可）
+./scripts/sandbox-stop.ts     # 停止・破棄（ad-hoc cleanup 用）
 # direnv 入れていれば repo に cd するだけで container は自動 up される
 
 # Root
