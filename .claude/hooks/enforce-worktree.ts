@@ -28,19 +28,34 @@ type HookInput = {
 // ---- helpers ----------------------------------------------------------------
 
 async function statOrNull(path: string): Promise<Deno.FileInfo | null> {
-  try { return await Deno.stat(path); } catch { return null; }
+  try {
+    return await Deno.stat(path);
+  } catch {
+    return null;
+  }
 }
 
 async function lstatOrNull(path: string): Promise<Deno.FileInfo | null> {
-  try { return await Deno.lstat(path); } catch { return null; }
+  try {
+    return await Deno.lstat(path);
+  } catch {
+    return null;
+  }
 }
 
 // `realpath -m` equivalent: tolerate missing target (Write tool may be creating
 // the file), but follow symlinks in any existing ancestor directory.
 async function realPathMissingOk(path: string): Promise<string> {
-  try { return await Deno.realPath(path); } catch { /* leaf missing */ }
-  try { return `${await Deno.realPath(dirname(path))}/${basename(path)}`; }
-  catch { return resolve(path); }
+  try {
+    return await Deno.realPath(path);
+  } catch {
+    /* leaf missing */
+  }
+  try {
+    return `${await Deno.realPath(dirname(path))}/${basename(path)}`;
+  } catch {
+    return resolve(path);
+  }
 }
 
 function extLower(filename: string): string {
