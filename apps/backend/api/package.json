@@ -20,7 +20,7 @@
 		"migrate:local": "pnpm exec wrangler d1 migrations apply job-store"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "~0.12.21",
+		"@cloudflare/vitest-pool-workers": "~0.16.0",
 		"@types/node": "^24.0.15",
 		"tsdown": "^0.22.0",
 		"tsx": "^4.20.3",
