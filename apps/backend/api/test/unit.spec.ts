@@ -106,9 +106,11 @@ describe("求人一覧", () => {
   });
 
   describe("ページネーション", () => {
-    // 追加で PAGE_SIZE(20) 件登録 → 累計 40 件以上で 2 ページ以上になる
+    // pool-workers v0.13+ で afterEach 毎にユーザーテーブルを掃除しているため、
+    // 親 describe の beforeAll 由来データには依存できない。2 ページ分の 40 件を
+    // この describe の beforeAll で自前で seed する。
     beforeAll(async () => {
-      for (const job of sampleJobs({ num: 20 })) {
+      for (const job of sampleJobs({ num: 40 })) {
         await insertJob(job);
       }
     });
