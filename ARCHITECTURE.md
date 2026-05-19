@@ -14,10 +14,10 @@ hello-work-software-jobs/
 ├── packages/
 │   ├── db/                          # Kysely DB factory & DB行スキーマ（Dialect 非依存）
 │   ├── logger/                      # 3 サービス横断の構造化ログライブラリ（@sho/logger）
-│   ├── mcp-ops/                     # ops MCP コンテナ image 定義（GitHub / CloudWatch / AWS API）
+│   ├── mcp-ops/                     # ops MCP コンテナ image 定義 + 起動スクリプト（GitHub / CloudWatch / AWS API）
 │   └── models/                      # ドメインモデル定義
 ├── docs/                            # プロジェクトドキュメント
-├── scripts/                         # dev / ops Apple container サンドボックス管理
+├── scripts/                         # dev Apple container サンドボックス管理
 └── tasks/                           # タスク / 設計メモ
 ```
 

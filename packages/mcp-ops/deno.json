@@ -14,7 +14,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "tasks": {
-    "check": "deno check sandbox.ts sandbox-stop.ts sandbox-image.ts",
-    "fmt": "deno fmt sandbox.ts sandbox-stop.ts sandbox-image.ts lib/"
+    "check": "deno check ops-sandbox.ts ops-sandbox-image.ts",
+    "fmt": "deno fmt ops-sandbox.ts ops-sandbox-image.ts"
   }
 }

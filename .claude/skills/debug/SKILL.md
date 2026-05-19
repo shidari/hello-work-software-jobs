@@ -67,11 +67,11 @@ fields @timestamp, @message
 
 | 基盤 | 必要な認証 |
 |------|----------|
-| Crawler (MCP) | ops container が起動済み (`./scripts/ops-sandbox.ts`)、host `~/.aws` に `crawler-debug` profile があり認証が生きていること |
+| Crawler (MCP) | ops container が起動済み (`./packages/mcp-ops/ops-sandbox.ts`)、host `~/.aws` に `crawler-debug` profile があり認証が生きていること |
 | API | `wrangler login` 済み |
 | Frontend | `vercel login` 済み + `apps/frontend/hello-work-job-searcher` が Vercel プロジェクトにリンク済み |
 
-認証が切れている場合、wrangler / vercel スクリプトはエラーで停止し再ログイン手順を案内する。MCP 側の AWS 認証エラーは host で `aws sso login --profile crawler-debug` → `./scripts/ops-sandbox.ts --stop && ./scripts/ops-sandbox.ts` で snapshot を取り直す。
+認証が切れている場合、wrangler / vercel スクリプトはエラーで停止し再ログイン手順を案内する。MCP 側の AWS 認証エラーは host で `aws sso login --profile crawler-debug` → `./packages/mcp-ops/ops-sandbox.ts --stop && ./packages/mcp-ops/ops-sandbox.ts` で snapshot を取り直す。
 
 ## 個別スクリプト
 

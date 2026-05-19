@@ -1,13 +1,12 @@
 #!/usr/bin/env -S deno run --allow-run=container,security --allow-read --allow-write --allow-env
 // Start / stop / shell / logs for sho-mcp-ops container on the sho-mcp-net private network.
-// scripts/ops-sandbox.sh の TS リライト。
 //
 // 認証情報: GitHub PAT は macOS Keychain (service=sho-mcp-ops, account=github-pat)、
 // AWS は host の ~/.aws を snapshot して /root/.aws に mount する。dev sandbox には
 // これらは渡らない設計。
 
-import * as cmd from "./lib/cmd.ts";
-import * as container from "./lib/container.ts";
+import * as cmd from "../../scripts/lib/cmd.ts";
+import * as container from "../../scripts/lib/container.ts";
 
 const NAME = "sho-mcp-ops";
 const DEV_SANDBOX_NAME = "sho-sandbox";
@@ -26,7 +25,7 @@ async function main(): Promise<void> {
   const state = `${home}/.sho-mcp-ops`;
   const repo = resolveRepo();
 
-  if (!await cmd.ok("container", ["--help"])) {
+  if (!(await cmd.ok("container", ["--help"]))) {
     abort("Apple container CLI not found (https://github.com/apple/container)");
   }
 
@@ -40,12 +39,14 @@ async function main(): Promise<void> {
 
   // Apple container CLI 0.11.0 の `container image ls` は NAME と TAG を別カラムで
   // 出すため、IMAGE ("name:tag") と直接比較すると false negative になる。tag を落として比較する。
-  if (!await container.imageExists(IMAGE.split(":")[0])) {
-    abort(`${IMAGE} not loaded.\n       Build & load with: ./scripts/ops-sandbox-image.ts`);
+  if (!(await container.imageExists(IMAGE.split(":")[0]))) {
+    abort(
+      `${IMAGE} not loaded.\n       Build & load with: ./packages/mcp-ops/ops-sandbox-image.ts`,
+    );
   }
 
   // dev sandbox と共有する private network。先に boot した方が作成する race-free 設計
-  if (!await container.networkExists(NETWORK)) {
+  if (!(await container.networkExists(NETWORK))) {
     console.error(`[ops-sandbox] creating network ${NETWORK}`);
     await container.createNetwork(NETWORK);
   }
@@ -59,7 +60,7 @@ async function main(): Promise<void> {
   }
   await syncAwsSnapshot({ home, state });
 
-  if (!await container.containerExists(NAME, true)) {
+  if (!(await container.containerExists(NAME, true))) {
     console.error(`[ops-sandbox] creating ${NAME} on network ${NETWORK}`);
     await container.createAndStart({
       name: NAME,
@@ -80,7 +81,7 @@ async function main(): Promise<void> {
     });
   }
 
-  if (!await container.containerExists(NAME)) {
+  if (!(await container.containerExists(NAME))) {
     await container.start(NAME);
   }
 
@@ -133,11 +134,11 @@ async function loadGithubPat(state: string): Promise<void> {
     KEYCHAIN_ACCOUNT,
     "-w",
   ];
-  if (!await cmd.ok("security", lookup)) {
+  if (!(await cmd.ok("security", lookup))) {
     abort(
       `github-pat が Keychain に見つかりません (service=${KEYCHAIN_SERVICE}, account=${KEYCHAIN_ACCOUNT}).\n` +
-        `       fine-grained PAT を https://github.com/settings/personal-access-tokens で発行し、\n` +
-        `       次のコマンドで Keychain に保存してください (token はプロンプトに貼り付け; argv にも履歴にも残らない):\n` +
+        "       fine-grained PAT を https://github.com/settings/personal-access-tokens で発行し、\n" +
+        "       次のコマンドで Keychain に保存してください (token はプロンプトに貼り付け; argv にも履歴にも残らない):\n" +
         `         security add-generic-password -s ${KEYCHAIN_SERVICE} -a ${KEYCHAIN_ACCOUNT} -T /usr/bin/security -w`,
     );
   }
@@ -146,11 +147,17 @@ async function loadGithubPat(state: string): Promise<void> {
   await Deno.writeTextFile(`${state}/pat/github-pat`, token, { mode: 0o600 });
 }
 
-async function syncAwsSnapshot(paths: { home: string; state: string }): Promise<void> {
+async function syncAwsSnapshot(paths: {
+  home: string;
+  state: string;
+}): Promise<void> {
   const awsDir = `${paths.home}/.aws`;
-  if (!await dirExists(awsDir)) return;
+  if (!(await dirExists(awsDir))) return;
   for (const name of ["config", "credentials"]) {
-    await Deno.copyFile(`${awsDir}/${name}`, `${paths.state}/aws/${name}`).catch(() => {});
+    await Deno.copyFile(
+      `${awsDir}/${name}`,
+      `${paths.state}/aws/${name}`,
+    ).catch(() => {});
   }
   // SSO profile を使う場合、boto3 は ~/.aws/sso/cache/<hash>.json から token を読む。
   // ドキュメントの回復手順 (aws sso login → ops 再起動) を成立させるために
@@ -201,7 +208,7 @@ async function dirExists(path: string): Promise<boolean> {
 
 function resolveRepo(): string {
   const scriptDir = new URL(".", import.meta.url).pathname.replace(/\/$/, "");
-  return scriptDir.replace(/\/scripts$/, "");
+  return scriptDir.replace(/\/packages\/mcp-ops$/, "");
 }
 
 function mustEnv(key: string): string {
