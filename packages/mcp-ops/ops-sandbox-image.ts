@@ -1,12 +1,10 @@
 #!/usr/bin/env -S deno run --allow-run --allow-read --allow-write --allow-env
 // Build sho-mcp-ops OCI image via packages/mcp-ops/flake.nix, load into Apple
-// container, smoke-test, recreate the ops container. Counterpart to sandbox-image.ts
+// container, smoke-test, recreate the ops container. Counterpart to scripts/sandbox-image.ts
 // (dev sandbox); two flakes are intentionally separate for independent bump cycles.
-//
-// scripts/ops-sandbox-image.sh の TS リライト。
 
-import * as cmd from "./lib/cmd.ts";
-import * as container from "./lib/container.ts";
+import * as cmd from "../../scripts/lib/cmd.ts";
+import * as container from "../../scripts/lib/container.ts";
 
 const NAME = "sho-mcp-ops";
 const TAG = `${NAME}:latest`;
@@ -18,10 +16,10 @@ async function main(): Promise<void> {
   const flakeDir = `${repo}/packages/mcp-ops`;
   const ociArchive = `${repo}/.mcp-ops.oci`;
 
-  if (!await cmd.ok("nix", ["--version"])) {
+  if (!(await cmd.ok("nix", ["--version"]))) {
     abort("nix not found on PATH. Install via Determinate Systems installer.");
   }
-  if (!await cmd.ok("container", ["--help"])) {
+  if (!(await cmd.ok("container", ["--help"]))) {
     abort("Apple container CLI not found (https://github.com/apple/container)");
   }
 
@@ -35,7 +33,7 @@ async function main(): Promise<void> {
     abort(
       `${startShPath} missing or not executable.\n` +
         `       This is the ops container's Cmd (flake.nix) and must exist before\n` +
-        `       running ops-sandbox.ts. chmod +x it after creation.`,
+        "       running ops-sandbox.ts. chmod +x it after creation.",
     );
   }
 
@@ -44,7 +42,9 @@ async function main(): Promise<void> {
   console.error(`[ops-sandbox-image] nix build ${flakeDir}#opsImage`);
   await cmd.run("nix", ["build", `${flakeDir}#opsImage`, "--print-build-logs"]);
 
-  console.error("[ops-sandbox-image] converting docker-archive -> oci-archive via skopeo");
+  console.error(
+    "[ops-sandbox-image] converting docker-archive -> oci-archive via skopeo",
+  );
   await cmd.run("nix", [
     "run",
     "nixpkgs#skopeo",
@@ -99,18 +99,22 @@ python3 -c "import ctypes; ctypes.CDLL(\\"libstdc++.so.6\\")"
   console.error("[ops-sandbox-image] loaded:");
   const list = await cmd.output("container", ["image", "ls"]).catch(() => "");
   const lines = list.split("\n");
-  const filtered = lines.filter((l, i) => i === 0 || l.split(/\s+/)[0] === NAME);
+  const filtered = lines.filter(
+    (l, i) => i === 0 || l.split(/\s+/)[0] === NAME,
+  );
   console.log(filtered.join("\n"));
 
-  console.error(`[ops-sandbox-image] recreating ${NAME} container from new image`);
-  await cmd.ok(`${repo}/scripts/ops-sandbox.ts`, ["--stop"]);
-  await cmd.run(`${repo}/scripts/ops-sandbox.ts`, ["--ensure-up"]);
+  console.error(
+    `[ops-sandbox-image] recreating ${NAME} container from new image`,
+  );
+  await cmd.ok(`${repo}/packages/mcp-ops/ops-sandbox.ts`, ["--stop"]);
+  await cmd.run(`${repo}/packages/mcp-ops/ops-sandbox.ts`, ["--ensure-up"]);
   console.error("[ops-sandbox-image] done.");
 }
 
 function resolveRepo(): string {
   const scriptDir = new URL(".", import.meta.url).pathname.replace(/\/$/, "");
-  return scriptDir.replace(/\/scripts$/, "");
+  return scriptDir.replace(/\/packages\/mcp-ops$/, "");
 }
 
 function abort(msg: string): never {
