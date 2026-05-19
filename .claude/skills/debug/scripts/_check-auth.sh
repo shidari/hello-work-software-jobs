@@ -8,7 +8,7 @@ set -euo pipefail
 
 check_wrangler_auth() {
   if ! command -v wrangler >/dev/null 2>&1; then
-    echo "ERROR: wrangler not found. Enter sandbox: './scripts/sandbox.sh'" >&2
+    echo "ERROR: wrangler not found. Enter sandbox: './scripts/sandbox.ts'" >&2
     return 1
   fi
   if ! wrangler whoami >/dev/null 2>&1; then
@@ -20,7 +20,7 @@ check_wrangler_auth() {
 
 check_vercel_auth() {
   if ! command -v vercel >/dev/null 2>&1; then
-    echo "ERROR: vercel CLI not found. Enter sandbox: './scripts/sandbox.sh'" >&2
+    echo "ERROR: vercel CLI not found. Enter sandbox: './scripts/sandbox.ts'" >&2
     return 1
   fi
   if ! vercel whoami >/dev/null 2>&1; then

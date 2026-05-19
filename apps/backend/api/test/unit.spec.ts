@@ -57,7 +57,7 @@ const workerFetch = async (path: string, init?: RequestInit) => {
 // --- リダイレクト ---
 
 describe("リダイレクト", () => {
-  it("/ → /doc に 302 リダイレクト", async () => {
+  it("/ は /doc にリダイレクトされる", async () => {
     const response = await workerFetch("/");
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/doc");
@@ -100,33 +100,17 @@ describe("求人一覧", () => {
     expect(data.jobs[0].establishmentNumber).toBe(establishmentNumber);
   });
 
-  it("不正な形式の事業所番号では 400 を返す", async () => {
+  it("不正な形式の事業所番号は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs?establishmentNumber=invalid");
     expect(response.status).toBe(400);
   });
 
-  it("雇用形態で絞り込める", async () => {
-    // フィルタなしの全件数を取得
-    const allResponse = await workerFetch("/jobs");
-    const allData = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
-      await allResponse.json(),
-    );
-
-    // 正社員でフィルタリングし、結果が全て正社員であること・全件より少ないことを確認
-    const response = await workerFetch("/jobs?employmentType=正社員");
-    expect(response.status).toBe(200);
-    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
-      await response.json(),
-    );
-    expect(data.jobs.every((j) => j.employmentType === "正社員")).toBe(true);
-    expect(data.meta.totalCount).toBeGreaterThanOrEqual(1);
-    expect(data.meta.totalCount).toBeLessThan(allData.meta.totalCount);
-  });
-
   describe("ページネーション", () => {
-    // 追加で PAGE_SIZE(20) 件登録 → 累計 40 件以上で 2 ページ以上になる
+    // pool-workers v0.13+ で afterEach 毎にユーザーテーブルを掃除しているため、
+    // 親 describe の beforeAll 由来データには依存できない。2 ページ分の 40 件を
+    // この describe の beforeAll で自前で seed する。
     beforeAll(async () => {
-      for (const job of sampleJobs({ num: 20 })) {
+      for (const job of sampleJobs({ num: 40 })) {
         await insertJob(job);
       }
     });
@@ -146,7 +130,7 @@ describe("求人一覧", () => {
 // --- 求人登録 ---
 
 describe("求人登録", () => {
-  it("データを挿入できる", async () => {
+  it("新規求人を登録できる", async () => {
     const [job] = sampleJobs({ num: 1 });
     const response = await workerFetch("/jobs", {
       method: "POST",
@@ -159,7 +143,7 @@ describe("求人登録", () => {
     expect(response.status).toBe(200);
   });
 
-  it("重複するデータは登録できない", async () => {
+  it("重複した求人番号は 409 で拒否される", async () => {
     const [job] = sampleJobs({ num: 1 });
     await insertJob(job);
     const response = await workerFetch("/jobs", {
@@ -173,7 +157,7 @@ describe("求人登録", () => {
     expect(response.status).toBe(409);
   });
 
-  it("不正な API key では登録できない", async () => {
+  it("不正な API キーは 401 で拒否される", async () => {
     const response = await workerFetch("/jobs", {
       method: "POST",
       headers: {
@@ -185,7 +169,7 @@ describe("求人登録", () => {
     expect(response.status).toBe(401);
   });
 
-  it("不正なリクエストボディでは登録できない", async () => {
+  it("不正なリクエストボディは 400 で拒否される", async () => {
     const response = await workerFetch("/jobs", {
       method: "POST",
       headers: {
@@ -201,7 +185,7 @@ describe("求人登録", () => {
 // --- 求人番号の存在確認 ---
 
 describe("求人番号の存在確認", () => {
-  it("登録済みの求人番号のみが existing に含まれる", async () => {
+  it("登録済みの求人番号だけが返る", async () => {
     const [registered, unregistered] = sampleJobs({ num: 2 });
     await insertJob(registered);
 
@@ -221,21 +205,7 @@ describe("求人番号の存在確認", () => {
     expect(data.existing).not.toContain(unregistered.jobNumber);
   });
 
-  it("全件未登録なら existing は空配列", async () => {
-    const [job] = sampleJobs({ num: 1 });
-    const response = await workerFetch("/jobs/exists", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jobNumbers: [job.jobNumber] }),
-    });
-    expect(response.status).toBe(200);
-    const data = Schema.decodeUnknownSync(jobsExistsSuccessResponseSchema)(
-      await response.json(),
-    );
-    expect(data.existing).toEqual([]);
-  });
-
-  it("空配列は 400 を返す", async () => {
+  it("空配列は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs/exists", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -244,7 +214,7 @@ describe("求人番号の存在確認", () => {
     expect(response.status).toBe(400);
   });
 
-  it("不正な形式の求人番号を含むと 400 を返す", async () => {
+  it("不正な形式の求人番号は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs/exists", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -277,7 +247,7 @@ describe("セキュリティ", () => {
     );
   });
 
-  it("レート制限を超えると 429 を返す", async () => {
+  it("レート制限を超えると 429 で拒否される", async () => {
     // まず1回リクエストしてテーブルと bucket を確実に作成
     await workerFetch("/jobs");
     // CF-Connecting-IP が無い request の bucket id は 'ip:unknown'
@@ -292,7 +262,7 @@ describe("セキュリティ", () => {
     expect(response.status).toBe(429);
   });
 
-  it("レート制限の bucket は CF-Connecting-IP ごとに分離される", async () => {
+  it("レート制限はクライアント IP ごとに分離される", async () => {
     // ip:1.1.1.1 の bucket を枯渇させる
     await workerFetch("/jobs", { headers: { "CF-Connecting-IP": "1.1.1.1" } });
     const db = MOCK_ENV.DB;
@@ -314,7 +284,7 @@ describe("セキュリティ", () => {
     expect(ok.status).toBe(200);
   });
 
-  it("LIKE ワイルドカードがエスケープされる", async () => {
+  it("検索条件のワイルドカードはエスケープされる", async () => {
     const response = await workerFetch("/jobs?companyName=%25%25%25");
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -322,7 +292,7 @@ describe("セキュリティ", () => {
     expect(data.meta.totalCount).toBe(0);
   });
 
-  it("Companies POST に不正な JSON を送ると 400 を返す", async () => {
+  it("事業所登録に不正な JSON を送ると 400 で拒否される", async () => {
     const response = await workerFetch("/companies", {
       method: "POST",
       headers: {
@@ -338,7 +308,7 @@ describe("セキュリティ", () => {
 // --- 事業所 ---
 
 describe("事業所", () => {
-  it("POST /companies で UPSERT できる", async () => {
+  it("事業所を登録できる", async () => {
     const [company] = sampleCompanies({ num: 1 });
     const response = await workerFetch("/companies", {
       method: "POST",
@@ -353,7 +323,7 @@ describe("事業所", () => {
     expect(data.establishmentNumber).toBe(company.establishmentNumber);
   });
 
-  it("POST /companies は同じキーで二度送ると更新になる（重複エラーにならない）", async () => {
+  it("同じ事業所を二度登録しても更新として通る", async () => {
     const [company] = sampleCompanies({ num: 1 });
     const post = () =>
       workerFetch("/companies", {
@@ -370,7 +340,7 @@ describe("事業所", () => {
     expect(r2.status).toBe(200);
   });
 
-  it("POST /companies は API key なしでは 401", async () => {
+  it("API キーなしの事業所登録は 401 で拒否される", async () => {
     const [company] = sampleCompanies({ num: 1 });
     const response = await workerFetch("/companies", {
       method: "POST",
@@ -380,7 +350,7 @@ describe("事業所", () => {
     expect(response.status).toBe(401);
   });
 
-  it("POST /companies は不正な事業所番号で 400", async () => {
+  it("不正な事業所番号での登録は 400 で拒否される", async () => {
     const response = await workerFetch("/companies", {
       method: "POST",
       headers: {
@@ -402,7 +372,7 @@ describe("事業所", () => {
     expect(response.status).toBe(400);
   });
 
-  it("GET /companies/:establishmentNumber で取得できる", async () => {
+  it("事業所番号で事業所を取得できる", async () => {
     const [company] = sampleCompanies({ num: 1 });
     await upsertCompany(company);
     const response = await workerFetch(
@@ -413,16 +383,16 @@ describe("事業所", () => {
     expect(data.establishmentNumber).toBe(company.establishmentNumber);
   });
 
-  it("GET /companies/:establishmentNumber は未登録なら 404", async () => {
+  it("未登録の事業所では 404 が返る", async () => {
     const response = await workerFetch("/companies/9999-999999-9");
     expect(response.status).toBe(404);
   });
 });
 
-// --- 日次サマリー ---
+// --- 日次集計 ---
 
-describe("日次サマリー", () => {
-  it("GET /stats/daily で日ごとの集計を返す", async () => {
+describe("日次集計", () => {
+  it("日ごとの集計を取得できる", async () => {
     const [job] = sampleJobs({ num: 1 });
     await insertJob(job);
     const response = await workerFetch("/stats/daily");
@@ -440,41 +410,11 @@ describe("日次サマリー", () => {
   });
 });
 
-// --- 求人検索フィルター ---
+// --- 求人検索 ---
 
-describe("求人検索フィルター", () => {
-  it("会社名（部分一致）で絞り込める", async () => {
-    const [job] = sampleJobs({ num: 1 });
-    const fixed: Job = { ...job, companyName: "ユニーク絞込テスト株式会社" };
-    await insertJob(fixed);
-    const response = await workerFetch(
-      `/jobs?companyName=${encodeURIComponent("ユニーク絞込テスト")}`,
-    );
-    expect(response.status).toBe(200);
-    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
-      await response.json(),
-    );
-    expect(data.meta.totalCount).toBeGreaterThanOrEqual(1);
-    expect(
-      data.jobs.every((j) => j.companyName?.includes("ユニーク絞込テスト")),
-    ).toBe(true);
-  });
-
-  it("不正な雇用形態リテラルでは 400 を返す", async () => {
+describe("求人検索", () => {
+  it("不正な雇用形態は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs?employmentType=役員");
     expect(response.status).toBe(400);
-  });
-
-  it("受信日昇順でソートできる", async () => {
-    const response = await workerFetch("/jobs?orderByReceiveDate=asc");
-    expect(response.status).toBe(200);
-    const data = Schema.decodeUnknownSync(jobListSuccessResponseSchema)(
-      await response.json(),
-    );
-    if (data.jobs.length >= 2) {
-      const dates = data.jobs.map((j) => j.receivedDate);
-      const sorted = [...dates].sort();
-      expect(dates).toEqual(sorted);
-    }
   });
 });

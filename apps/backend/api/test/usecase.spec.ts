@@ -5,7 +5,7 @@ import { env } from "cloudflare:test";
 import type { Company, Job } from "@sho/models";
 import type { RawJob } from "@sho/models/raw";
 import { Effect } from "effect";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InsertJobCommand, UpsertCompanyCommand } from "../src/cqrs/commands";
 import {
   FetchDailyStatsQuery,
@@ -114,16 +114,16 @@ const runFetchDailyStats = () =>
     ),
   );
 
-// --- InsertJobCommand ---
+// --- 求人登録 ---
 
-describe("[usecase] InsertJobCommand", () => {
-  it("正常系: 新規 jobNumber を insert すると jobNumber を返す", async () => {
+describe("求人登録", () => {
+  it("新規求人を登録すると求人番号が返る", async () => {
     const [job] = sampleJobs({ num: 1 });
     const result = await runInsertJob(job);
     expect(result.jobNumber).toBe(job.jobNumber);
   });
 
-  it("異常系: 同じ jobNumber を 2 度 insert すると UNIQUE 制約違反で fail する", async () => {
+  it("同じ求人番号を 2 度登録すると失敗する", async () => {
     const [job] = sampleJobs({ num: 1 });
     await runInsertJob(job);
 
@@ -133,10 +133,10 @@ describe("[usecase] InsertJobCommand", () => {
   });
 });
 
-// --- UpsertCompanyCommand ---
+// --- 事業所登録 ---
 
-describe("[usecase] UpsertCompanyCommand", () => {
-  it("正常系: 新規 establishmentNumber を insert できる", async () => {
+describe("事業所登録", () => {
+  it("新規事業所を登録できる", async () => {
     const [company] = sampleCompanies({ num: 1 });
     const result = await runUpsertCompany(company);
     expect(result.establishmentNumber).toBe(company.establishmentNumber);
@@ -145,7 +145,7 @@ describe("[usecase] UpsertCompanyCommand", () => {
     expect(found?.establishmentNumber).toBe(company.establishmentNumber);
   });
 
-  it("正常系: 同じ establishmentNumber を 2 度送ると update 経路で値が上書きされる", async () => {
+  it("同じ事業所を再登録すると値が上書きされる", async () => {
     const [base] = sampleCompanies({ num: 1 });
     await runUpsertCompany({ ...base, companyName: "初回登録株式会社" });
     const second = await runUpsertCompany({
@@ -159,31 +159,31 @@ describe("[usecase] UpsertCompanyCommand", () => {
   });
 });
 
-// --- FindJobByNumberQuery ---
+// --- 求人取得 ---
 
-describe("[usecase] FindJobByNumberQuery", () => {
-  it("正常系: 登録済みの jobNumber で job を返す", async () => {
+describe("求人取得", () => {
+  it("登録済みの求人番号で求人を取得できる", async () => {
     const [job] = sampleJobs({ num: 1 });
     await runInsertJob(job);
     const found = await runFindJobByNumber(job.jobNumber);
     expect(found?.jobNumber).toBe(job.jobNumber);
   });
 
-  it("異常系: 未登録の jobNumber では null を返す", async () => {
+  it("未登録の求人番号では見つからない", async () => {
     const found = await runFindJobByNumber("99999-99999999");
     expect(found).toBeNull();
   });
 });
 
-// --- FindExistingJobNumbersQuery ---
+// --- 登録済み求人番号の絞り込み ---
 
-describe("[usecase] FindExistingJobNumbersQuery", () => {
-  it("正常系: 空配列を渡すと DB 問い合わせなしで空配列を返す", async () => {
+describe("登録済み求人番号の絞り込み", () => {
+  it("問い合わせが空なら結果も空になる", async () => {
     const existing = await runFindExistingJobNumbers([]);
     expect(existing).toEqual([]);
   });
 
-  it("正常系: 全件未登録なら空配列を返す", async () => {
+  it("すべて未登録なら結果が空になる", async () => {
     const existing = await runFindExistingJobNumbers([
       "99991-00000001",
       "99991-00000002",
@@ -191,7 +191,7 @@ describe("[usecase] FindExistingJobNumbersQuery", () => {
     expect(existing).toEqual([]);
   });
 
-  it("正常系: 一部のみ登録されているとき、登録されている jobNumber だけ返す", async () => {
+  it("登録済みの求人番号だけが返る", async () => {
     const [registered, unregistered] = sampleJobs({ num: 2 });
     await runInsertJob(registered);
 
@@ -203,7 +203,7 @@ describe("[usecase] FindExistingJobNumbersQuery", () => {
     expect(existing).not.toContain(unregistered.jobNumber);
   });
 
-  it("正常系: CHUNK_SIZE(100) を跨ぐ件数でも全件正しく拾える", async () => {
+  it("100 件を超える問い合わせでも全件返る", async () => {
     // 150 件登録 → 150 件問い合わせ
     const jobs = sampleJobs({ num: 150 });
     for (const job of jobs) {
@@ -216,9 +216,9 @@ describe("[usecase] FindExistingJobNumbersQuery", () => {
   });
 });
 
-// --- FetchJobsPageQuery: フィルター網羅 ---
+// --- 求人検索 ---
 
-describe("[usecase] FetchJobsPageQuery: フィルター", () => {
+describe("求人検索", () => {
   // 既知のシード値を 1 件作って、各フィルターでそれだけが残ることを確認する。
   // sampleJobs で得た base に対し fixture フィールドだけ上書きする。
   let base: Job;
@@ -226,7 +226,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     [base] = sampleJobs({ num: 1 });
   });
 
-  it("正常系: companyName 部分一致でヒット", async () => {
+  it("会社名で部分一致検索できる", async () => {
     await runInsertJob({ ...base, companyName: "ユニーク絞込会社" });
     const { jobs, meta } = await runFetchJobsPage({
       page: 1,
@@ -236,7 +236,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     expect(jobs[0].jobNumber).toBe(base.jobNumber);
   });
 
-  it("正常系: employeeCountGt / employeeCountLt の範囲フィルタ", async () => {
+  it("従業員数の範囲で絞り込める", async () => {
     await runInsertJob({ ...base, employeeCount: 50 });
 
     const hit = await runFetchJobsPage({
@@ -252,7 +252,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
   });
 
-  it("正常系: jobDescription / jobDescriptionExclude が反転して効く", async () => {
+  it("仕事内容のキーワード含む/除外で絞り込める", async () => {
     await runInsertJob({
       ...base,
       jobDescription: "TypeScript / React / Next.js でのフロント開発",
@@ -275,7 +275,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     );
   });
 
-  it("正常系: onlyNotExpired = true で expired job を除外", async () => {
+  it("期限切れの求人を除外できる", async () => {
     // 期限切れ
     await runInsertJob({
       ...base,
@@ -288,26 +288,32 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     expect(jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
   });
 
-  it("正常系: addedSince / addedUntil で createdAt 範囲を絞れる", async () => {
-    await runInsertJob(base);
-    // 今日のジョブは今日含む範囲ならヒット
-    const today = new Date().toISOString().slice(0, 10);
-    const hit = await runFetchJobsPage({
-      page: 1,
-      filter: { addedSince: today, addedUntil: today },
-    });
-    expect(hit.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(true);
+  it("登録日の範囲で絞り込める", async () => {
+    // 時刻を固定して INSERT 時の createdAt とフィルタ境界を確定させる。
+    // queries.ts が `${date}T00:00:00+09:00` で JST 解釈するので、JST 12:00 に固定すれば
+    // フィルタの "2026-06-15" 範囲に確実に収まる。
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-15T12:00:00+09:00"));
+    try {
+      await runInsertJob(base);
+      const hit = await runFetchJobsPage({
+        page: 1,
+        filter: { addedSince: "2026-06-15", addedUntil: "2026-06-15" },
+      });
+      expect(hit.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(true);
 
-    // 未来日の since では除外
-    const future = "2099-01-01";
-    const miss = await runFetchJobsPage({
-      page: 1,
-      filter: { addedSince: future },
-    });
-    expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
+      // 未来日の since では除外
+      const miss = await runFetchJobsPage({
+        page: 1,
+        filter: { addedSince: "2099-01-01" },
+      });
+      expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("正常系: occupation / workPlace / qualifications / education / industryClassification の LIKE 系", async () => {
+  it("職種・勤務地・資格・学歴・業種で絞り込める", async () => {
     await runInsertJob({
       ...base,
       occupation: "Webエンジニアa1b2",
@@ -329,7 +335,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     }
   });
 
-  it("正常系: employmentType / jobCategory / wageType の完全一致", async () => {
+  it("雇用形態・職種区分・賃金形態で絞り込める", async () => {
     await runInsertJob({
       ...base,
       employmentType: "正社員" as Job["employmentType"],
@@ -347,7 +353,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     expect(jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(true);
   });
 
-  it("正常系: wageMin / wageMax で賃金範囲を絞れる", async () => {
+  it("賃金の範囲で絞り込める", async () => {
     await runInsertJob({ ...base, wage: { min: 250000, max: 350000 } });
 
     const hit = await runFetchJobsPage({
@@ -363,7 +369,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     expect(miss.jobs.some((j) => j.jobNumber === base.jobNumber)).toBe(false);
   });
 
-  it("正常系: orderByReceiveDate=desc で receivedDate 降順に並ぶ", async () => {
+  it("受理日の降順で並べ替えられる", async () => {
     // 5 件挿入してソート確認
     for (const job of sampleJobs({ num: 5 })) {
       await runInsertJob(job);
@@ -379,7 +385,7 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
     }
   });
 
-  it("正常系: フィルタなしで全件取得し meta.totalCount / page を返す", async () => {
+  it("条件指定なしで全件取得し総件数とページ番号が返る", async () => {
     for (const job of sampleJobs({ num: 3 })) {
       await runInsertJob(job);
     }
@@ -389,32 +395,32 @@ describe("[usecase] FetchJobsPageQuery: フィルター", () => {
   });
 });
 
-// --- FindCompanyQuery ---
+// --- 事業所取得 ---
 
-describe("[usecase] FindCompanyQuery", () => {
-  it("正常系: 登録済み事業所を取得できる", async () => {
+describe("事業所取得", () => {
+  it("登録済み事業所を取得できる", async () => {
     const [company] = sampleCompanies({ num: 1 });
     await runUpsertCompany(company);
     const found = await runFindCompany(company.establishmentNumber);
     expect(found?.establishmentNumber).toBe(company.establishmentNumber);
   });
 
-  it("異常系: 未登録の事業所では null を返す", async () => {
+  it("未登録の事業所では見つからない", async () => {
     const found = await runFindCompany("9999-999999-9");
     expect(found).toBeNull();
   });
 });
 
-// --- FetchDailyStatsQuery ---
+// --- 日次集計 ---
 
-describe("[usecase] FetchDailyStatsQuery", () => {
-  it("正常系: jobs が空なら空配列を返す", async () => {
+describe("日次集計", () => {
+  it("求人がなければ集計結果は空になる", async () => {
     const stats = await runFetchDailyStats();
     expect(Array.isArray(stats)).toBe(true);
     expect(stats.length).toBe(0);
   });
 
-  it("正常系: 同日に N 件 insert すると addedDate ごとに count / jobNumbers が集計される", async () => {
+  it("登録日ごとに件数と求人番号一覧が集計される", async () => {
     const jobs = sampleJobs({ num: 3 });
     for (const job of jobs) {
       await runInsertJob(job);

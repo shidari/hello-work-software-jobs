@@ -16,7 +16,7 @@
 - **Validation**: Runtime validation with Effect Schema (`import { Schema } from "effect"`)
 - **Package Manager**: pnpm 10.24.0
 - **CLI実行**: `npx` ではなく `pnpm exec` を使うこと
-- **コマンドが見つからない場合**: sandbox 内 (`nodejs` / `pnpm` / `deno` / `jq` / chromium / `claude`) なら `./scripts/sandbox.sh` で sandbox に入る。host 専用 CLI (`gh` / `wrangler` / `vercel` / `awscli`) なら host で `brew install` 等。住み分けは [.claude/rules/cli.md](../../.claude/rules/cli.md) 参照
+- **コマンドが見つからない場合**: sandbox 内 (`nodejs` / `pnpm` / `deno` / `jq` / chromium / `claude`) なら `./scripts/sandbox.ts` で sandbox に入る。host 専用 CLI (`gh` / `wrangler` / `vercel` / `awscli`) なら host で `brew install` 等。住み分けは [.claude/rules/cli.md](../../.claude/rules/cli.md) 参照
 - **修正作業の開始前**: コードの修正・追加を始める前に、まず `git pull --rebase` で最新の状態にすること
 - **コミット前チェック**: ユーザーが「コミット」を依頼したら、`/commit-and-pr` コマンドの手順に従うこと
 - **コミット後の自動PR**: コミット完了後、以下を自動実行する

@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-worktree.sh\""
+            "command": "deno run --allow-read --allow-write=/tmp --allow-run=git --allow-net=jsr.io \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-worktree.ts\""
           }
         ]
       }

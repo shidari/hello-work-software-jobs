@@ -50,7 +50,7 @@ jobs:
 
       - name: Frontend Storybook tests
         working-directory: ./apps/frontend/hello-work-job-searcher
-        run: pnpm test:storybook
+        run: pnpm test:storybook --coverage --coverage.reporter=json --coverage.reporter=json-summary
 
       - name: Coverage report - api
         if: always()
@@ -72,6 +72,13 @@ jobs:
         with:
           name: collector-infra
           working-directory: apps/backend/collector/infra
+
+      - name: Coverage report - frontend
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        with:
+          name: frontend
+          working-directory: apps/frontend/hello-work-job-searcher
 
       - name: CDK synth (dry-run)
         working-directory: ./apps/backend/collector/infra
