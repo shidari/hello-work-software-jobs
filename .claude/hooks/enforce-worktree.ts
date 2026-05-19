@@ -151,6 +151,24 @@ if (gitProc.code === 0) {
 const gitMarker = await statOrNull(`${repoRoot}/.git`);
 if (gitMarker?.isFile) Deno.exit(0);
 
+// ---- host carve-out: sandbox-management surface ----------------------------
+// On macOS host, allow edits to sandbox plumbing on main worktree. Required to
+// repair the sandbox when scripts/sandbox.ts (or flake.nix, or a hook) itself
+// is broken — chicken-and-egg: without a working sandbox we can't EnterWorktree,
+// and without a worktree this hook would block the fix. Mirrors deny-host.sh's
+// Edit allowlist so the two layers stay in sync.
+
+if (Deno.build.os === "darwin") {
+  const rel = resolvedPath.startsWith(`${repoRoot}/`)
+    ? resolvedPath.slice(repoRoot.length + 1)
+    : resolvedPath;
+  const allowPrefix = ["scripts/", ".claude/hooks/", "packages/mcp-ops/"];
+  const allowExact = new Set(["flake.nix", "flake.lock"]);
+  if (allowPrefix.some((p) => rel.startsWith(p)) || allowExact.has(rel)) {
+    Deno.exit(0);
+  }
+}
+
 // ---- extension allowlist ----------------------------------------------------
 
 const ext = extLower(basename(resolvedPath));
