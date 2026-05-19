@@ -17,6 +17,12 @@
 # spoofed and (more commonly) get lost on image rebuilds, leaving SHO_SANDBOX
 # unset inside a valid container. See .claude/rules/general.md "実行環境の判定".
 #
+# Host carve-outs (narrow allowlist so Claude can repair the sandbox itself):
+#   - read-only tools: Read / Grep / Glob / NotebookRead
+#   - Edit / Write restricted to the sandbox-management surface:
+#       scripts/ , .claude/hooks/ , flake.nix , flake.lock , packages/mcp-ops/
+#   Anything else on host is still denied.
+#
 # Soft guard, not a security boundary (the user can unset the hook by editing
 # settings.json). Goal is "host で Claude が誤って動かない" にする運用境界。
 
@@ -42,6 +48,28 @@ if [[ "${SHO_SANDBOX:-}" == "1" ]]; then
   exit 0
 fi
 
+# ---- host carve-outs ----
+# We're on host (macOS). Allow a narrow set of tools so Claude can still
+# inspect the tree and repair the sandbox plumbing (scripts/sandbox.ts bugs,
+# flake.nix updates, hook tweaks) without dropping into the container.
+payload=$(cat)
+tool_name=$(printf '%s' "$payload" | jq -r '.tool_name // empty' 2>/dev/null || true)
+
+case "$tool_name" in
+  Read|Grep|Glob|NotebookRead)
+    exit 0
+    ;;
+  Edit|Write|MultiEdit|NotebookEdit)
+    file_path=$(printf '%s' "$payload" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
+    rel="${file_path#${CLAUDE_PROJECT_DIR:-}/}"
+    case "$rel" in
+      scripts/*|.claude/hooks/*|flake.nix|flake.lock|packages/mcp-ops/*)
+        exit 0
+        ;;
+    esac
+    ;;
+esac
+
 cat >&2 <<'EOF'
 [deny-host] Refusing tool use outside the dev sandbox / Claude Code on the web.
 
@@ -51,7 +79,13 @@ cat >&2 <<'EOF'
     ./scripts/sandbox.ts         # enter the container
     claude                       # start Claude inside the sandbox
 
-  All tools (file, shell, network, agent, MCP) are blocked on host. If you
-  genuinely need to bypass for an unusual environment, set SHO_SANDBOX=1.
+  Host carve-outs (allowed without entering the sandbox):
+    - Read-only tools: Read / Grep / Glob / NotebookRead
+    - Edit / Write under: scripts/ , .claude/hooks/ , flake.nix ,
+      flake.lock , packages/mcp-ops/
+
+  Everything else (Bash, network, agent spawn, MCP, edits outside the
+  allowlist) is blocked. If you genuinely need to bypass for an unusual
+  environment, set SHO_SANDBOX=1.
 EOF
 exit 2
