@@ -1,6 +1,6 @@
 # CLI ツール
 
-開発用 CLI のうち **認証 token を抱える**もの (`gh` / `wrangler` / `vercel` / `awscli`) は dev サンドボックスには入れない。ブラスト半径を最小化するため、これらはすべて **ホスト (macOS) 側で直接実行する**。sandbox は Claude Code 本体と汎用 dev tools (`nodejs` / `pnpm` / `deno` / `jq` / chromium) だけを抱える Apple container ベースの最小実行環境 (`sho-sandbox`) で、OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。
+開発用 CLI のうち **認証 token を抱える**もの (`gh` / `wrangler` / `vercel` / `awscli`) は dev サンドボックスには入れない。ブラスト半径を最小化するため、これらはすべて **ホスト (macOS) 側で直接実行する**。sandbox は Claude Code 本体 / codex CLI / 汎用 dev tools (`nodejs` / `pnpm` / `deno` / `jq` / chromium) を抱える Apple container ベースの最小実行環境 (`sho-sandbox`) で、OCI image は **nix の `dockerTools.buildLayeredImage`** で組み立てる（[flake.nix](../../flake.nix) / [scripts/sandbox.sh](../../scripts/sandbox.sh)）。
 
 | CLI | どこで動かすか | 認証の置き場所 |
 |-----|---------------|-----------|
@@ -9,6 +9,7 @@
 | `vercel` | **host のみ** | `~/.config/com.vercel.cli/`, `~/.local/share/com.vercel.cli/` (host) |
 | `awscli` | **入れない**。ops container 経由の MCP のみ | — |
 | `claude` | sandbox / host どちらでも | sandbox: `~/.sho-sandbox/claude/` / host: `~/.claude/` |
+| `codex` | sandbox / host どちらでも | sandbox: container 内 `/root/.codex/`（**永続化なし** — recreate で消える。OAuth login を再実行する） / host: `~/.codex/` |
 | `nodejs` / `pnpm` / `deno` / `jq` / chromium | sandbox / host どちらでも | 認証なし |
 
 Claude Code 自体が sandbox 内で動いている場合、`gh` / `wrangler` / `vercel` は **PATH に無い**。これらが必要な操作 (PR の作成・マージ、Workers / Pages デプロイ等) は:
@@ -23,7 +24,7 @@ Claude Code がホスト (macOS) 側で動いている場合は、ホストの `
 
 | 層 | 何をするか |
 |------|-----------|
-| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / deno / jq / openssh / cacert 等を contents に列挙（gh / wrangler / vercel / awscli は意図的に除外） |
+| `flake.nix` | aarch64-linux 用の OCI image 定義。chromium / nodejs / pnpm / deno / jq / openssh / cacert / codex 等を contents に列挙（gh / wrangler / vercel / awscli は意図的に除外） |
 | `package.json` (root devDependencies) | `@anthropic-ai/claude-code` のみ npm 配布物として pnpm 管理。container 内で `pnpm install` すると `/work/node_modules/.bin/claude` に展開され、image の PATH に組み込まれる |
 | `scripts/sandbox-image.sh` | nix build → skopeo で OCI archive 化 → `container image load` → smoke test → 旧 container 破棄 → 新 image で container 再作成までを 1 本で実行 |
 | `scripts/sandbox.sh` | container を作成・起動して `/bin/bash` を投げる。`--ensure-up` で起動だけして抜ける（direnv 用）。**main repo の host 絶対 path で self-mount** するので worktree から呼んでも main を mount し、worktree の `.git` ファイル参照（host 絶対 path）が container 内でも resolve する。`/work` は `$REPO` への symlink として提供（image の PATH=/work/node_modules/.bin 互換用） |
@@ -153,6 +154,7 @@ worktree 固有の状態は持たない。main を経由するのは sandbox.sh 
 | `deno` | nix | 使い捨てワンショットスクリプト用（`node -e` の代替）。permission 制御で最小権限を明示。詳細は [.claude/rules/general.md](./general.md) |
 | `jq` | nix | JSON 整形 |
 | `claude` | pnpm (`@anthropic-ai/claude-code`) | Claude Code |
+| `codex` | nix | 別 LLM のセカンドオピニオン。`/codex-review-loop` skill が `codex review --uncommitted` をループで叩く。認証は sandbox 内で `codex login` (OAuth) を初回 1 回。container を recreate (sandbox-image.sh / sandbox-stop.sh) すると `/root/.codex/` は消えるので再 login が要る |
 | chromium | nix (`playwright-driver.browsers-chromium`) | Crawler の Playwright が呼び出す。`PLAYWRIGHT_BROWSERS_PATH` で image 内 path に固定済み |
 
 ### host のみ

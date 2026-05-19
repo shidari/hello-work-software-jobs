@@ -38,6 +38,14 @@
           pnpm
           deno
 
+          # 別 LLM のセカンドオピニオン用 CLI。/codex-review-loop skill が
+          # `codex review --uncommitted` をループで叩く前提なので sandbox に
+          # 入れる。認証は sandbox 内で `codex login` (OAuth) を初回 1 回だけ
+          # 叩く運用 — host 認証情報の bind mount はしない。container を
+          # recreate (sandbox-image.sh 等) するたびに /root/.codex/ は消える
+          # ので再 login が要る点だけ留意。
+          codex
+
           # 認証情報を抱える CLI（gh / wrangler / vercel / awscli 等）は dev
           # sandbox には入れない方針。ブラスト半径を最小化するため、認証 token を
           # コンテナ内部に持たせないように切る。
