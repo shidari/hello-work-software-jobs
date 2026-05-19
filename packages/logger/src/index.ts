@@ -121,10 +121,7 @@ export type MakeLoggerOptions = {
   redact?: RedactOptions | false;
 };
 
-export const makeLogger = (
-  service: Service,
-  options?: MakeLoggerOptions,
-) => {
+export const makeLogger = (service: Service, options?: MakeLoggerOptions) => {
   const redactor =
     options?.redact === false
       ? (value: unknown) => value
