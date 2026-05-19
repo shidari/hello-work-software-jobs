@@ -10,6 +10,7 @@ import * as cmd from "./lib/cmd.ts";
 import * as container from "./lib/container.ts";
 
 const NAME = "sho-mcp-ops";
+const DEV_SANDBOX_NAME = "sho-sandbox";
 const IMAGE = "sho-mcp-ops:latest";
 const NETWORK = "sho-mcp-net";
 const KEYCHAIN_SERVICE = "sho-mcp-ops";
@@ -83,6 +84,10 @@ async function main(): Promise<void> {
     await container.start(NAME);
   }
 
+  if (action !== "logs") {
+    await syncDevSandboxHostsEntry();
+  }
+
   switch (action) {
     case "ensure_up":
       console.error(`[ops-sandbox] up (${NAME} on ${NETWORK})`);
@@ -95,6 +100,28 @@ async function main(): Promise<void> {
       await container.execIn(NAME, ["/bin/bash"], { tty: true });
       break;
   }
+}
+
+/**
+ * Apple container builtin DNS が sho-mcp-net 上の hostname を解決しない (CLI 0.11.0)。
+ * ops 再作成で IP が変わると dev sandbox 側の /etc/hosts が stale になるため、
+ * ops 起動フローでも現在 IP を反映する。
+ */
+async function syncDevSandboxHostsEntry(): Promise<void> {
+  if (!await container.containerExists(DEV_SANDBOX_NAME)) return;
+  const { parsed } = await container.inspect(NAME);
+  const opsNetwork = parsed?.networks?.find((n) => n.network === NETWORK);
+  if (!opsNetwork) return;
+  const opsIp = opsNetwork.ipv4Address.split("/")[0];
+
+  const script = `
+    grep -v '[[:space:]]sho-mcp-ops$' /etc/hosts > /tmp/.hosts.new 2>/dev/null || true
+    echo "$1 sho-mcp-ops" >> /tmp/.hosts.new
+    cat /tmp/.hosts.new > /etc/hosts
+    rm -f /tmp/.hosts.new
+  `;
+  await container.execIn(DEV_SANDBOX_NAME, ["bash", "-c", script, "_", opsIp], { quiet: true });
+  console.error(`[ops-sandbox] ${DEV_SANDBOX_NAME} /etc/hosts: ${NAME} -> ${opsIp}`);
 }
 
 async function loadGithubPat(state: string): Promise<void> {
