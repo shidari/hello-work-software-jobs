@@ -32,12 +32,14 @@ async function main(): Promise<void> {
   if (action === "stop") {
     await container.stop(NAME);
     await container.deleteContainer(NAME);
-    await Deno.remove(`${state}/github-pat`).catch(() => {});
+    await Deno.remove(`${state}/pat/github-pat`).catch(() => {});
     console.error("[ops-sandbox] stopped.");
     return;
   }
 
-  if (!await container.imageExists(IMAGE)) {
+  // Apple container CLI 0.11.0 の `container image ls` は NAME と TAG を別カラムで
+  // 出すため、IMAGE ("name:tag") と直接比較すると false negative になる。tag を落として比較する。
+  if (!await container.imageExists(IMAGE.split(":")[0])) {
     abort(`${IMAGE} not loaded.\n       Build & load with: ./scripts/ops-sandbox-image.ts`);
   }
 
@@ -49,6 +51,7 @@ async function main(): Promise<void> {
 
   await Deno.mkdir(`${state}/aws`, { recursive: true });
   await Deno.mkdir(`${state}/cache`, { recursive: true });
+  await Deno.mkdir(`${state}/pat`, { recursive: true });
 
   if (action !== "logs") {
     await loadGithubPat(state);
@@ -66,7 +69,10 @@ async function main(): Promise<void> {
         { source: repo, target: "/work" },
         { source: `${state}/aws`, target: "/root/.aws" },
         { source: `${state}/cache`, target: "/root/.cache" },
-        { source: `${state}/github-pat`, target: "/run/secrets/github-pat", readonly: true },
+        // Apple container CLI 0.11.0 の virtiofs は file-level bind mount が壊れるため、
+        // host 側は ${state}/pat/ ディレクトリごと container の /run/secrets/ に mount し、
+        // start.sh からは /run/secrets/github-pat (file) として読む構造にする
+        { source: `${state}/pat`, target: "/run/secrets", readonly: true },
       ],
       env: {},
       cmd: [],
@@ -110,7 +116,7 @@ async function loadGithubPat(state: string): Promise<void> {
   }
   const token = (await cmd.output("security", lookup)).replace(/\n/g, "");
   // bash 版の `umask 077` 相当。自分しか読めない権限で書き出す
-  await Deno.writeTextFile(`${state}/github-pat`, token, { mode: 0o600 });
+  await Deno.writeTextFile(`${state}/pat/github-pat`, token, { mode: 0o600 });
 }
 
 async function syncAwsSnapshot(paths: { home: string; state: string }): Promise<void> {
