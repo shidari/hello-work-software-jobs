@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run --allow-read --allow-write --allow-env
+#!/usr/bin/env -S deno run --allow-run=nix,container,./scripts/sandbox-stop.ts,./scripts/sandbox.ts --allow-read --allow-write
 // Build sho-sandbox OCI image via nix, load into Apple container, smoke-test,
 // then recreate the persistent container so the new image is picked up.
 // scripts/sandbox-image.sh の TS リライト。
@@ -20,6 +20,16 @@ await main();
 async function main(): Promise<void> {
   const repo = resolveRepo();
   const ociArchive = `${repo}/.sandbox.oci`;
+
+  // shebang の `--allow-run="./scripts/..."` は process 起動時の cwd を基準に
+  // 絶対 path へ解決される (`Deno.chdir` 後ではなく)。launch cwd が repo と
+  // 異なると recreate 段階で run permission denial になるため、ここで guard する。
+  if (Deno.cwd() !== repo) {
+    abort(
+      `must be invoked from repo root (launch cwd: ${Deno.cwd()}, repo: ${repo}).\n` +
+        `       Try: cd ${repo} && ./scripts/sandbox-image.ts`,
+    );
+  }
 
   if (!await cmd.ok("nix", ["--version"])) {
     abort("nix not found on PATH. Install via Determinate Systems installer.");
@@ -91,10 +101,12 @@ ls $(echo "$LD_LIBRARY_PATH" | cut -d: -f2)/libstdc++.so.6 >/dev/null
   const filtered = lines.filter((l, i) => i === 0 || l.split(/\s+/)[0] === NAME);
   console.log(filtered.join("\n"));
 
-  // image rebuild は "fresh container から走り直す" が前提。running tasks は survive させない
+  // image rebuild は "fresh container から走り直す" が前提。running tasks は survive させない。
+  // sub-script は相対 path で起動する (--allow-run="./scripts/foo.ts" にマッチさせるため。
+  // Deno.chdir(repo) 済みなので resolve は repo 起点)。
   console.error(`[sandbox-image] recreating ${NAME} container from new image`);
-  await cmd.ok(`${repo}/scripts/sandbox-stop.ts`, []);
-  await cmd.run(`${repo}/scripts/sandbox.ts`, ["--ensure-up"]);
+  await cmd.ok("./scripts/sandbox-stop.ts", []);
+  await cmd.run("./scripts/sandbox.ts", ["--ensure-up"]);
   console.error("[sandbox-image] done.");
 }
 

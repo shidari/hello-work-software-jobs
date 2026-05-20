@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run --allow-read --allow-write --allow-env
+#!/usr/bin/env -S deno run --allow-run=nix,container,./packages/mcp-ops/ops-sandbox.ts --allow-read --allow-write
 // Build sho-mcp-ops OCI image via packages/mcp-ops/flake.nix, load into Apple
 // container, smoke-test, recreate the ops container. Counterpart to scripts/sandbox-image.ts
 // (dev sandbox); two flakes are intentionally separate for independent bump cycles.
@@ -15,6 +15,16 @@ async function main(): Promise<void> {
   const repo = resolveRepo();
   const flakeDir = `${repo}/packages/mcp-ops`;
   const ociArchive = `${repo}/.mcp-ops.oci`;
+
+  // shebang の `--allow-run="./packages/..."` は process 起動時の cwd を基準に
+  // 絶対 path へ解決される (`Deno.chdir` 後ではなく)。launch cwd が repo と
+  // 異なると recreate 段階で run permission denial になるため、ここで guard する。
+  if (Deno.cwd() !== repo) {
+    abort(
+      `must be invoked from repo root (launch cwd: ${Deno.cwd()}, repo: ${repo}).\n` +
+        `       Try: cd ${repo} && ./packages/mcp-ops/ops-sandbox-image.ts`,
+    );
+  }
 
   if (!(await cmd.ok("nix", ["--version"]))) {
     abort("nix not found on PATH. Install via Determinate Systems installer.");
@@ -104,11 +114,13 @@ python3 -c "import ctypes; ctypes.CDLL(\\"libstdc++.so.6\\")"
   );
   console.log(filtered.join("\n"));
 
+  // sub-script は相対 path で起動する (--allow-run="./packages/mcp-ops/ops-sandbox.ts"
+  // にマッチさせるため。Deno.chdir(repo) 済みなので resolve は repo 起点)。
   console.error(
     `[ops-sandbox-image] recreating ${NAME} container from new image`,
   );
-  await cmd.ok(`${repo}/packages/mcp-ops/ops-sandbox.ts`, ["--stop"]);
-  await cmd.run(`${repo}/packages/mcp-ops/ops-sandbox.ts`, ["--ensure-up"]);
+  await cmd.ok("./packages/mcp-ops/ops-sandbox.ts", ["--stop"]);
+  await cmd.run("./packages/mcp-ops/ops-sandbox.ts", ["--ensure-up"]);
   console.error("[ops-sandbox-image] done.");
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write=/tmp --allow-run=git --allow-net=jsr.io
+#!/usr/bin/env -S deno run --allow-read --allow-write=/tmp --allow-run=git
 // Block Edit/Write/NotebookEdit on the main worktree to enforce "1 feature = 1 worktree".
 // See .claude/rules/general.md for rationale.
 //
@@ -12,10 +12,41 @@
 // cloud container on its own branch (a fresh clone, not a worktree setup), so
 // the worktree-isolation goal is met by the session boundary itself.
 //
-// First-run: `--allow-net=jsr.io` is only needed for Deno to fetch @std/path on
-// the first invocation. After the module is cached, the hook runs offline.
+// POSIX path helpers are inlined below to keep this hook dependency-free
+// (no @std/path import → no `--allow-net` required even on first run).
 
-import { basename, dirname, isAbsolute, resolve } from "jsr:@std/path@1";
+function isAbsolute(p: string): boolean {
+  return p.startsWith("/");
+}
+
+function basename(p: string): string {
+  if (p === "/" || p === "") return "";
+  const trimmed = p.endsWith("/") ? p.slice(0, -1) : p;
+  const i = trimmed.lastIndexOf("/");
+  return i === -1 ? trimmed : trimmed.slice(i + 1);
+}
+
+function dirname(p: string): string {
+  if (p === "/" || p === "") return p === "/" ? "/" : ".";
+  const trimmed = p.endsWith("/") ? p.slice(0, -1) : p;
+  const i = trimmed.lastIndexOf("/");
+  if (i === -1) return ".";
+  if (i === 0) return "/";
+  return trimmed.slice(0, i);
+}
+
+// 右から左に走査し、絶対 path を見つけたらそれを root として結合を打ち切る。
+// hookCwd は Claude harness が常に絶対 path で渡してくるので、cwd 参照は不要。
+function resolve(...parts: string[]): string {
+  let acc = "";
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (!p) continue;
+    acc = acc ? `${p.replace(/\/+$/, "")}/${acc}` : p;
+    if (isAbsolute(p)) return acc;
+  }
+  return acc;
+}
 
 const MAIN_EDIT_ALLOWED_EXTS = new Set(["md"]);
 const SENTINEL = "/tmp/.claude-allow-main-edit";
