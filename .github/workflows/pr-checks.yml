@@ -41,6 +41,12 @@ jobs:
         run: pnpm exec knip
         continue-on-error: false
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-1.59.1
+
       - name: Install Playwright chromium (collector fixture tests + frontend Storybook)
         run: pnpm dlx playwright@1.59.1 install --with-deps chromium
 
