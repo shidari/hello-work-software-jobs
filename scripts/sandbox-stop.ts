@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run=container --allow-read --allow-write --allow-env
+#!/usr/bin/env -S deno run --allow-run=container
 // Stop and remove the sho-sandbox container (idempotent).
 // scripts/sandbox-stop.sh の TS リライト。
 

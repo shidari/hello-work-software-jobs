@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run=container,security --allow-read --allow-write --allow-env
+#!/usr/bin/env -S deno run --allow-run=container,security --allow-read --allow-write --allow-env=HOME
 // Start / stop / shell / logs for sho-mcp-ops container on the sho-mcp-net private network.
 //
 // 認証情報: GitHub PAT は macOS Keychain (service=sho-mcp-ops, account=github-pat)、

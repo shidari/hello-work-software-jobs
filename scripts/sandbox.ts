@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run=container,git,ssh-add --allow-read --allow-write --allow-env
+#!/usr/bin/env -S deno run --allow-run=container,git,ssh-add --allow-read --allow-write --allow-env=HOME,SSH_AUTH_SOCK
 // Ensure the sho-sandbox container is up; drop into a shell unless --ensure-up.
 // scripts/sandbox.sh の TS リライト。
 //
