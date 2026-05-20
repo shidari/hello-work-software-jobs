@@ -131,6 +131,7 @@ Cloudflare Workers + Hono。
 |---------|------|------|------|
 | GET | `/jobs` | - | 一覧取得（フィルター + ページネーション） |
 | POST | `/jobs` | x-api-key | 登録 |
+| POST | `/jobs/exists` | x-api-key | 登録済み求人番号の判定（collector の重複抑制用、内部 API） |
 | GET | `/jobs/:jobNumber` | - | 個別取得 |
 | GET | `/companies/:establishmentNumber` | - | 事業所取得 |
 | POST | `/companies` | x-api-key | 事業所 UPSERT |
