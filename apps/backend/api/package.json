@@ -27,7 +27,7 @@
 		"tsx": "^4.20.3",
 		"typescript": "catalog:",
 		"vitest": "~4.1.6",
-		"wrangler": "4.90.0"
+		"wrangler": "4.90.1"
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "^0.6.0",
