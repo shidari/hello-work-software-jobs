@@ -21,6 +21,19 @@
 #   - read-only tools: Read / Grep / Glob / NotebookRead
 #   - Edit / Write restricted to the sandbox-management surface:
 #       scripts/ , .claude/hooks/ , flake.nix , flake.lock , packages/mcp-ops/
+#   - Bash:
+#       閲覧系コマンド ls / grep / rg / find / wc / file / stat / tree のみ allow。
+#       cat / head / tail / awk / sed 等は host では出さない — argv 経由で
+#       .env の中身を漏らすベクターを作らないため。
+#       find は -exec / -execdir / -delete / -ok* / -fprint* / -fls を含む
+#       場合のみ block — 副作用・任意コマンド実行ベクターを潰す。
+#       vercel は閲覧系 subcommand (`vercel logs` / `inspect` / `ls`) のみ
+#       allow。`vercel deploy` / `env add` 等の書き込み系は host で明示的に
+#       叩く運用にして、自動許可レーンから外す。
+#       シェルメタ文字 `|` `>` `<` `&&` `||` `;` `` ` `` `$(...)` を含む
+#       command は一律 block — allowlist 先頭の裏で第二コマンドや副作用を
+#       走らせるバイパス経路 (`ls | sh`、`ls > .env`、`find -exec sh` 等)
+#       を塞ぐため。
 #   Anything else on host is still denied.
 #
 # Soft guard, not a security boundary (the user can unset the hook by editing
@@ -68,6 +81,67 @@ case "$tool_name" in
         ;;
     esac
     ;;
+  Bash)
+    # 先頭 word が allowlist と完全一致した時だけ通す。cat / head / tail を
+    # 入れないのは、argv 経由で .env の中身を吐くベクターを断つため。grep
+    # 等は残してあるので閲覧目的では足りる（`grep . .env` のような濫用は
+    # 信用ベース。Read tool 側は permissions.deny で `.env` をブロックする）。
+    #
+    # vercel は **閲覧系 subcommand のみ** allow (`vercel logs` / `inspect` /
+    # `ls`)。`vercel deploy` / `env add` / `link` 等の書き込み系は block —
+    # 本番への副作用は host での明示的なオペレーションに留めたいので、
+    # Claude の自動許可レーンには載せない。
+    #
+    # シェルメタ文字 guard: `ls | cat .env` `ls > .env` `ls && cat .env`
+    # のように allowlist 先頭の後ろに第二コマンドや副作用をぶら下げる経路を
+    # 一網打尽に block する。pipe `|` も deny — `ls | sh` 等で任意コマンドが
+    # 動かせてしまうため (`ls | grep foo` 程度は `grep foo` 単体や Read tool
+    # で代替できる)。redirect (`>` `<` `>>`) も同様に副作用ベクターなので
+    # block。`grep foo file` のような pure inspection だけが通る運用にする。
+    # env-prefix (`FOO=1 vercel ...`) は awk の先頭 token が `FOO=1` になり
+    # allowlist 外で自然に block。
+    command=$(printf '%s' "$payload" | jq -r '.tool_input.command // empty' 2>/dev/null || true)
+    case "$command" in
+      *"&&"*|*"||"*|*";"*|*"|"*|*">"*|*"<"*|*'`'*|*'$('*)
+        ;;
+      *)
+        first_word=$(printf '%s' "$command" | awk '{print $1}')
+        case "$first_word" in
+          ls|grep|rg|wc|file|stat|tree)
+            # cat / head / tail を含めないのは、argv 経由で .env の中身を
+            # 吐くベクターを断つため。grep 等は残してあるので閲覧目的では
+            # 足りる (`grep . .env` のような濫用は信用ベース。Read tool 側は
+            # permissions.deny で `.env` をブロックする)。
+            exit 0
+            ;;
+          find)
+            # find は -exec / -execdir で任意コマンド実行、-delete で破壊、
+            # -fprint* / -fls / -ok* で書き込み副作用が起こせる。引数に
+            # これらを含むなら block。素の `find . -name '*.ts'` だけ通す。
+            case " $command " in
+              *" -exec "*|*" -execdir "*|*" -ok "*|*" -okdir "*|*" -delete "*|*" -fprint "*|*" -fprintf "*|*" -fprint0 "*|*" -fls "*)
+                ;;
+              *)
+                exit 0
+                ;;
+            esac
+            ;;
+          vercel)
+            # vercel は **閲覧系 subcommand のみ** allow。`vercel deploy` /
+            # `env add` / `link` 等の書き込み系は block — 本番への副作用は
+            # host での明示的なオペレーションに留め、Claude の自動許可
+            # レーンには載せない。
+            second_word=$(printf '%s' "$command" | awk '{print $2}')
+            case "$second_word" in
+              logs|inspect|ls|list)
+                exit 0
+                ;;
+            esac
+            ;;
+        esac
+        ;;
+    esac
+    ;;
 esac
 
 cat >&2 <<'EOF'
@@ -83,9 +157,17 @@ cat >&2 <<'EOF'
     - Read-only tools: Read / Grep / Glob / NotebookRead
     - Edit / Write under: scripts/ , .claude/hooks/ , flake.nix ,
       flake.lock , packages/mcp-ops/
+    - Bash: inspection commands
+      (ls / grep / rg / find / wc / file / stat / tree),
+      plus read-only vercel subcommands (vercel logs / inspect / ls).
+      Commands with shell metacharacters (| > < && || ; ` $(...)) are
+      blocked regardless of the leading word. find with -exec/-delete/
+      -fprint*/-fls/-ok* is also blocked. cat / head / tail / awk / sed
+      and write vercel subcommands (vercel deploy / env add / link / …)
+      are intentionally NOT allowed.
 
-  Everything else (Bash, network, agent spawn, MCP, edits outside the
-  allowlist) is blocked. If you genuinely need to bypass for an unusual
-  environment, set SHO_SANDBOX=1.
+  Everything else (network, agent spawn, MCP, edits outside the allowlist,
+  Bash commands not in the host allowlist) is blocked. If you genuinely
+  need to bypass for an unusual environment, set SHO_SANDBOX=1.
 EOF
 exit 2
