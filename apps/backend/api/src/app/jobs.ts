@@ -502,6 +502,7 @@ const app = new Hono<{ Bindings: Env }>()
   .post(
     "/exists",
     jobsExistsRoute,
+    verifyApiKey,
     effectValidator(
       "json",
       Schema.standardSchemaV1(jobsExistsRequestBodySchema),

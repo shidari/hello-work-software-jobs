@@ -191,7 +191,10 @@ describe("求人番号の存在確認", () => {
 
     const response = await workerFetch("/jobs/exists", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
       body: JSON.stringify({
         jobNumbers: [registered.jobNumber, unregistered.jobNumber],
       }),
@@ -208,7 +211,10 @@ describe("求人番号の存在確認", () => {
   it("空配列は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs/exists", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
       body: JSON.stringify({ jobNumbers: [] }),
     });
     expect(response.status).toBe(400);
@@ -217,10 +223,34 @@ describe("求人番号の存在確認", () => {
   it("不正な形式の求人番号は 400 で拒否される", async () => {
     const response = await workerFetch("/jobs/exists", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "test-api-key",
+      },
       body: JSON.stringify({ jobNumbers: ["invalid"] }),
     });
     expect(response.status).toBe(400);
+  });
+
+  it("API キーが無いと 401 で拒否される", async () => {
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobNumbers: ["13010-12345678"] }),
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it("不正な API キーは 401 で拒否される", async () => {
+    const response = await workerFetch("/jobs/exists", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "invalid-key",
+      },
+      body: JSON.stringify({ jobNumbers: ["13010-12345678"] }),
+    });
+    expect(response.status).toBe(401);
   });
 });
 
