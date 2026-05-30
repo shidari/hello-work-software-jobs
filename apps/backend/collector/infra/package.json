@@ -22,7 +22,7 @@
     "@aws-sdk/client-sqs": "^3.800.0",
     "@sho/logger": "workspace:*",
     "@sho/models": "workspace:*",
-    "aws-cdk-lib": "2.243.0",
+    "aws-cdk-lib": "2.257.0",
     "constructs": "^10.0.0",
     "effect": "^3.16.5"
   }
