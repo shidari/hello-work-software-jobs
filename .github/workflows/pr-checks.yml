@@ -60,28 +60,28 @@ jobs:
 
       - name: Coverage report - api
         if: always()
-        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2
         with:
           name: api
           working-directory: apps/backend/api
 
       - name: Coverage report - collector
         if: always()
-        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2
         with:
           name: collector
           working-directory: apps/backend/collector
 
       - name: Coverage report - collector-infra
         if: always()
-        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2
         with:
           name: collector-infra
           working-directory: apps/backend/collector/infra
 
       - name: Coverage report - frontend
         if: always()
-        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2
         with:
           name: frontend
           working-directory: apps/frontend/hello-work-job-searcher
