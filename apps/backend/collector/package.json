@@ -19,7 +19,7 @@
     "type-check": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "22.19.15",
+    "@types/node": "22.20.1",
     "@vitest/coverage-v8": "~4.1.6",
     "tsdown": "^0.22.0",
     "tsx": "^4.20.3",
